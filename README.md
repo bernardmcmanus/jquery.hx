@@ -68,6 +68,63 @@ $('selector').hx( 'fadeOut' , {
 ```
 =====
 
+### Easing Options
+
+The following easing functions are available:
+
+<table>
+    <tr>
+        <td>linear</td>
+        <td>ease</td>
+        <td>ease-in</td>
+        <td>ease-out</td>
+    </tr>
+    <tr>
+        <td>ease-in-out</td>
+        <td>easeInQuad</td>
+        <td>easeInCubic</td>
+        <td>easeInQuart</td>
+    </tr>
+    <tr>
+        <td>easeInQuint</td>
+        <td>easeInSine</td>
+        <td>easeInExpo</td>
+        <td>easeInCirc</td>
+    </tr>
+    <tr>
+        <td>easeInBack</td>
+        <td>easeOutQuad</td>
+        <td>easeOutCubic</td>
+        <td>easeOutQuart</td>
+    </tr>
+    <tr>
+        <td>easeOutQuint</td>
+        <td>easeOutSine</td>
+        <td>easeOutExpo</td>
+        <td>easeOutCirc</td>
+    </tr>
+    <tr>
+        <td>easeOutBack</td>
+        <td>easeInOutQuad</td>
+        <td>easeInOutCubic</td>
+        <td>easeInOutQuart</td>
+    </tr>
+    <tr>
+        <td>easeInOutQuint</td>
+        <td>easeInOutSine</td>
+        <td>easeInOutExpo</td>
+        <td>easeInOutCirc</td>
+    </tr>
+    <tr>
+        <td>easeInOutBack</td>
+        <td>easeOutBackMod1</td>
+        <td>easeMod1</td>
+        <td>custom</td>
+    </tr>
+</table>
+
+=====
+
 ### Examples
 
 Translate the element(s) 300 pixels along the x axis and 150 along the y.
