@@ -68,7 +68,7 @@ $('selector').hx( 'fadeOut' , {
 ```
 =====
 
-### Easing Options
+### Easing
 
 The following easing functions are available:
 
