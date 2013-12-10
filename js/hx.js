@@ -1,5 +1,5 @@
 /* ------------------------------------- */
-/*         jQuery.hx v0.2 (beta)         */
+/*         jQuery.hx v0.3 (beta)         */
 /* ------------------------------------- */
 
 
@@ -12,16 +12,18 @@
 
     // ---------------------------------- hxManager ----------------------------------
         var hxManager = function( element ) {
+            
             this.element = element;
-            this.props = {};
-            this.transform = [];
-            this.queue = [];
+            this.queue = {};
+            this.components = {};
             this.listening = false;
             this._callback = function() {};
 
-            this.configKeys = [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' ];
-            this.calculatedKeys = [ 'width' , 'height' ];
-            this.nonTransformKeys = [ 'opacity' ];
+            this.keys = {
+                config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' ],
+                calculated: [ 'width' , 'height' ],
+                nonXform: [ 'opacity' ]
+            };
 
             var self = $(this.element);
             self.hxManager = 1;
@@ -29,18 +31,19 @@
             return self;
         };
         hxManager.prototype = {
-            _get: function() {
+            _getComputedStyle: function() {
                 var style = window.getComputedStyle(this.element).webkitTransform;
                 if (style !== 'none') {
-                    this.transform.push( style );
+                    this.components['-webkit-transform'] = this.components['-webkit-transform'] || {};
+                    this.components['-webkit-transform'].computed = this._parse( style );
                 }
             },
             _getTransformType: function( options ) {
                 var raw = [];
                 var calc = [];
                 for (var key in options) {
-                    if (this.configKeys.indexOf( key ) < 0) {
-                        if (this.calculatedKeys.indexOf( key ) >= 0) {
+                    if (this.keys.config.indexOf( key ) < 0) {
+                        if (this.keys.calculated.indexOf( key ) >= 0) {
                             calc.push( key );
                         } else {
                             raw.push( key );
@@ -88,35 +91,39 @@
                 return [ dx , dy ];
             },
             apply: function( property , options ) {
-                this._get();
-                return this.set( property , options );
+                this._getComputedStyle();
+                return this.set( property , options , true );
             },
-            set: function( property , options ) {
+            set: function( property , options , setComputed ) {
 
                 var self = this;
-                if (this.queue.indexOf( property ) < 0) this.queue.push( property );
-                if (config.debug) console.log(this.queue);
 
-                var components = {};
+                this.components[property] = this.components[property] || {};
+
+                // prevent computed matrix transform from being applied if it exists and the set method is called directly
+                setComputed = typeof setComputed !== 'undefined' ? setComputed : false;
+                if (!setComputed && typeof this.components[property].computed !== 'undefined')
+                    delete this.components[property].computed;
+
                 
                 if (this._getTransformType( options ) === 'raw') {
-                    components = this._getRawComponents( options );
+                    this.components[property] = $.extend( this.components[property] , this._getRawComponents( options ));
                 } else {
-                    components = this._getCalculatedComponents( options );
+                    this.components[property] = $.extend( this.components[property] , this._getCalculatedComponents( options ));
                 }
                 
-                if (config.debug) console.log(components);
+                if (config.debug) console.log(this.components);
 
                 var styleObject = {
-                    value       : this.nonTransformKeys.indexOf( property ) < 0 ? this._buildTransformString( components ) : components[property][0],
+                    value       : this.keys.nonXform.indexOf( property ) < 0 ? this._buildTransformString( this.components[property] ) : this.components[property][property][0],
                     duration    : options.duration ? options.duration + 'ms' : '400ms',
-                    easing      : options.easing || 'cubic-bezier(0.25,0.1,0.25,1)',
+                    easing      : this._easing( options.easing ),
                     delay       : options.delay || 1,
                     done        : options.done || []
                 };
 
-                this.props[ property ] = styleObject;
-                if (config.debug) console.log(this.props);
+                this.queue[ property ] = styleObject;
+                if (config.debug) console.log(this.queue);
 
                 var tString = this._buildTransitionString();
                 if (config.debug) console.log(tString);
@@ -129,7 +136,7 @@
 
                 setTimeout(function() {
                     $(self.element).css( property , styleObject.value );
-                }, this.props[ property ].delay);
+                }, this.queue[ property ].delay);
 
                 return this;
 
@@ -138,9 +145,13 @@
                 var defaults = [];
                 var components = {};
                 for (var key in options) {
-                    if (this.configKeys.indexOf( key ) >= 0) continue;
+                    if (this.keys.config.indexOf( key ) >= 0) continue;
                     var values = Array.isArray(options[key]) ? options[key] : [ options[key] ];
                     switch (key) {
+                        case 'matrix3d':
+                            defaults = [ 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ];
+                        case 'matrix':
+                            defaults = [ 0 , 0 , 0 , 0 , 0 , 0 ];
                         case 'translate3d':
                             defaults = [ 0 , 0 , 0 ];
                             break;
@@ -153,6 +164,9 @@
                         case 'rotateX':
                         case 'rotateY':
                         case 'rotateZ':
+                        case 'scaleX':
+                        case 'scaleY':
+                        case 'scaleZ':
                         case 'opacity':
                             defaults = [ 0 ];
                             break;
@@ -166,7 +180,7 @@
                 var defaults = [];
                 var components = {};
                 for (var key in options) {
-                    if (this.configKeys.indexOf( key ) >= 0) continue;
+                    if (this.keys.config.indexOf( key ) >= 0) continue;
                     switch (key) {
                         case 'width':
                             var scaleX = this._calcWidthScale( options[key] );
@@ -190,10 +204,18 @@
                 var joinWith = '';
                 var appendWith = '';
                 switch (component) {
+                    case 'computed':
+                        component = values.type;
+                        values = values.transform;
+                        joinWith = ', ';
+                        appendWith = '';
+                        break;
                     case 'translate3d':
                         joinWith = 'px, ';
                         appendWith = 'px';
                         break;
+                    case 'matrix3d':
+                    case 'matrix':
                     case 'scale3d':
                         joinWith = ', ';
                         appendWith = '';
@@ -208,31 +230,38 @@
                         joinWith = '';
                         appendWith = 'deg';
                         break;
+                    case 'scaleX':
+                    case 'scaleY':
+                    case 'scaleZ':
+                        joinWith = '';
+                        appendWith = '';
+                        break;
                 }
                 return component + '(' + values.join( joinWith ) + appendWith + ')';
             },
             _buildTransformString: function( options ) {
+                var xform = [];
                 for (var key in options) {
-                    if (this.configKeys.indexOf( key ) < 0) {
+                    if (this.keys.config.indexOf( key ) < 0) {
                         var compString = this._buildComponentString( key , options[key] );
-                        this.transform.push( compString );
+                        xform.push( compString );
                     }
                 }
-                return this.transform.join(' ');
+                return xform.join(' ');
             },
             _buildTransitionString: function() {
                 var arr = [];
-                for (var key in this.props) {
-                    var component = key + ' ' + this.props[key].easing + ' ' + this.props[key].duration;
+                for (var key in this.queue) {
+                    var component = key + ' ' + this.queue[key].easing + ' ' + this.queue[key].duration;
                     if (arr.indexOf( component ) < 0) arr.push( component );
                 }
                 return arr.join(', ');
             },
-            /*_isHXTransform: function( str ) {
+            _isHXTransform: function( str ) {
                 var types = [ 'translate3d' , 'scale3d' , 'rotate3d' , 'matrix' , 'matrix3d' ];
                 var response = false;
                 for (var i = 0; i < types.length; i++) {
-                    if (str.match( types[i] !== 'matrix' ? types[i] : types[i] + '\\(' )) {
+                    if (str.match( types[i] === 'matrix' ? types[i] + '\\(' : types[i] )) {
                         response = types[i];
                         break;
                     }
@@ -249,26 +278,25 @@
                     type: type,
                     transform: str
                 };
-            },*/
-            _transend: function( e ) {
+            },
+            _transend: function( event ) {
 
-                var name = e.propertyName;
+                var name = event.propertyName;
                 
                 // fire callbacks for individual properties
-                for (var key in this.props) {
-                    if (name === key && typeof this.props[key].done[0] === 'function') {
-                        for (var i = 0; i < this.props[key].done.length; i++) {
-                            this.props[key].done[i].call( this , e );
-                        }
-                        delete this.props[key].done;
+                if (typeof this.queue[name] !== 'undefined' && typeof this.queue[name].done[0] === 'function') {
+                    for (var i = 0; i < this.queue[name].done.length; i++) {
+                        this.queue[name].done[i].call( this , event );
                     }
                 }
 
-                // check the animation queue
-                var index = this.queue.indexOf( name );
-                this.queue.splice(index, 1);
-                if (this.queue.length < 1) {
-                    if (this._callback) this._callback.call( this , e );
+                // remove the style object from the queue
+                delete this.queue[name];
+
+                // check the remaining queue elements
+                if (hxManager.objSize( this.queue ) < 1) {
+                    if (typeof this._callback === 'function')
+                        this._callback.call( this , event );
                     this.element.removeEventListener( 'webkitTransitionEnd' , this );
                     this.listening = false;
                 }
@@ -276,7 +304,220 @@
             },
             done: function( callback ) {
                 this._callback = callback || function() {};
+            },
+            _easing: function( name ) {
+                /* AliceJS */
+                var type = {
+                    linear: {
+                        p1: .25,
+                        p2: .25,
+                        p3: .75,
+                        p4: .75
+                    },
+                    ease: {
+                        p1: .25,
+                        p2: .1,
+                        p3: .25,
+                        p4: 1
+                    },
+                    'ease-in': {
+                        p1: .42,
+                        p2: 0,
+                        p3: 1,
+                        p4: 1
+                    },
+                    'ease-out': {
+                        p1: 0,
+                        p2: 0,
+                        p3: .58,
+                        p4: 1
+                    },
+                    'ease-in-out': {
+                        p1: .42,
+                        p2: 0,
+                        p3: .58,
+                        p4: 1
+                    },
+                    easeInQuad: {
+                        p1: .55,
+                        p2: .085,
+                        p3: .68,
+                        p4: .53
+                    },
+                    easeInCubic: {
+                        p1: .55,
+                        p2: .055,
+                        p3: .675,
+                        p4: .19
+                    },
+                    easeInQuart: {
+                        p1: .895,
+                        p2: .03,
+                        p3: .685,
+                        p4: .22
+                    },
+                    easeInQuint: {
+                        p1: .755,
+                        p2: .05,
+                        p3: .855,
+                        p4: .06
+                    },
+                    easeInSine: {
+                        p1: .47,
+                        p2: 0,
+                        p3: .745,
+                        p4: .715
+                    },
+                    easeInExpo: {
+                        p1: .95,
+                        p2: .05,
+                        p3: .795,
+                        p4: .035
+                    },
+                    easeInCirc: {
+                        p1: .6,
+                        p2: .04,
+                        p3: .98,
+                        p4: .335
+                    },
+                    easeInBack: {
+                        p1: .6,
+                        p2: -0.28,
+                        p3: .735,
+                        p4: .045
+                    },
+                    easeOutQuad: {
+                        p1: .25,
+                        p2: .46,
+                        p3: .45,
+                        p4: .94
+                    },
+                    easeOutCubic: {
+                        p1: .215,
+                        p2: .61,
+                        p3: .355,
+                        p4: 1
+                    },
+                    easeOutQuart: {
+                        p1: .165,
+                        p2: .84,
+                        p3: .44,
+                        p4: 1
+                    },
+                    easeOutQuint: {
+                        p1: .23,
+                        p2: 1,
+                        p3: .32,
+                        p4: 1
+                    },
+                    easeOutSine: {
+                        p1: .39,
+                        p2: .575,
+                        p3: .565,
+                        p4: 1
+                    },
+                    easeOutExpo: {
+                        p1: .19,
+                        p2: 1,
+                        p3: .22,
+                        p4: 1
+                    },
+                    easeOutCirc: {
+                        p1: .075,
+                        p2: .82,
+                        p3: .165,
+                        p4: 1
+                    },
+                    easeOutBack: {
+                        p1: .175,
+                        p2: .885,
+                        p3: .32,
+                        p4: 1.275
+                    },
+                    easeInOutQuad: {
+                        p1: .455,
+                        p2: .03,
+                        p3: .515,
+                        p4: .955
+                    },
+                    easeInOutCubic: {
+                        p1: .645,
+                        p2: .045,
+                        p3: .355,
+                        p4: 1
+                    },
+                    easeInOutQuart: {
+                        p1: .77,
+                        p2: 0,
+                        p3: .175,
+                        p4: 1
+                    },
+                    easeInOutQuint: {
+                        p1: .86,
+                        p2: 0,
+                        p3: .07,
+                        p4: 1
+                    },
+                    easeInOutSine: {
+                        p1: .445,
+                        p2: .05,
+                        p3: .55,
+                        p4: .95
+                    },
+                    easeInOutExpo: {
+                        p1: 1,
+                        p2: 0,
+                        p3: 0,
+                        p4: 1
+                    },
+                    easeInOutCirc: {
+                        p1: .785,
+                        p2: .135,
+                        p3: .15,
+                        p4: .86
+                    },
+                    easeInOutBack: {
+                        p1: .68,
+                        p2: -0.55,
+                        p3: .265,
+                        p4: 1.55
+                    },
+                    custom: {
+                        p1: 0,
+                        p2: .35,
+                        p3: .5,
+                        p4: 1.3
+                    },
+                    random: {
+                        p1: Math.random().toPrecision(3),
+                        p2: Math.random().toPrecision(3),
+                        p3: Math.random().toPrecision(3),
+                        p4: Math.random().toPrecision(3)
+                    },
+                    easeOutBackMod1: {
+                        p1: .7,
+                        p2: -1,
+                        p3: .5,
+                        p4: 2
+                    },
+                    easeMod1: {
+                        p1: .25,
+                        p2: .2,
+                        p3: .25,
+                        p4: 1
+                    },
+                };
+                var b = type[name] ? type[name] : type.ease;
+                return 'cubic-bezier(' + b.p1 + ', ' + b.p2 + ', ' + b.p3 + ', ' + b.p4 + ')';
             }
+        };
+        hxManager.objSize = function( obj ) {
+            if (typeof obj !== 'object') return 0;
+            var size = 0, key;
+            for (key in obj) {
+                if (key in obj) size++;
+            }
+            return size;
         };
     // -------------------------------------------------------------------------------
  
@@ -514,24 +755,3 @@
 
  
 }( jQuery ));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
