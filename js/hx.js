@@ -1,5 +1,5 @@
 /* ------------------------------------- */
-/*        jQuery.hx v0.3.1 (beta)        */
+/*        jQuery.hx v0.3.2 (beta)        */
 /* ------------------------------------- */
 
 
@@ -281,7 +281,15 @@
             },
             _transend: function( event ) {
 
+                // get the key corresponding to the event property name
                 var name = event.propertyName;
+                var re = new RegExp( name , 'i' );
+                for (var key in this.queue) {
+                    if (re.test(key)) {
+                        name = key;
+                        break;
+                    }
+                }
                 
                 // fire callbacks for individual properties
                 if (typeof this.queue[name] !== 'undefined' && typeof this.queue[name].done[0] === 'function') {
