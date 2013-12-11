@@ -155,8 +155,8 @@ $('selector')
     vector: {x: 1.5, y: 1.5}
 })
 .hx( 'fadeOut' , {
-    duration: 200,
-    delay: 300
+    duration: 300,
+    delay: 200
 });
 ```
 
@@ -170,7 +170,7 @@ $('selector')
     vector: {x: 1.5, y: 1.5}
 })
 .hx( 'fadeOut' , {
-    duration: 200,
+    duration: 300,
     delay: 200
 })
 .done(function() {
