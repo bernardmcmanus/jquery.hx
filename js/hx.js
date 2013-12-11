@@ -1,5 +1,5 @@
 /* ------------------------------------- */
-/*         jQuery.hx v0.3 (beta)         */
+/*        jQuery.hx v0.3.1 (beta)        */
 /* ------------------------------------- */
 
 
@@ -732,6 +732,7 @@
                 duration: 300
             })
             .hx( 'translate' , {
+                vector: {y: this.Height},
                 duration: 300
             })
             .done(function( e ) {
