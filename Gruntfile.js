@@ -1,14 +1,16 @@
 module.exports = function(grunt) {
 
-    var libs = [ 'js/hx.js' , 'js/animator.js' ];
+    var libs = [ 'js/hxManager.js' , 'js/easing.js' , 'js/animator.js' , 'js/hx.js' ];
 
     grunt.initConfig({
 
             pkg: grunt.file.readJSON('package.json'),
 
+            clean : ["hx.min.js"],
+
             uglify : {
                 options : {
-                    banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= grunt.config.get("git-version") %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                    banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
                 },
                 release : {
                     files : {
@@ -17,11 +19,11 @@ module.exports = function(grunt) {
                 }
             },
 
-            /*"git-describe" : {
+            "git-describe" : {
                 "options" : {
                     prop : "git-version"
                 }
-            },*/
+            },
 
             jshint : {
                 all : [ 'Gruntfile.js', 'js/*.js']
@@ -30,10 +32,9 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-nodeunit');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    //grunt.loadNpmTasks('grunt-git-describe');
+    grunt.loadNpmTasks('grunt-git-describe');
 
     grunt.registerTask('default', ['jshint','git-describe', 'clean', 'uglify']);
 
