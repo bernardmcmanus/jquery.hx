@@ -177,3 +177,12 @@ $('selector')
     $(this).hx( 'fadeIn' );
 });
 ```
+
+=====
+
+### Build Instructions
+
+You need NPM installed. Navigate to the git directory and run the following commands:
+
+    npm install
+    grunt
