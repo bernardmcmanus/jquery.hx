@@ -1,0 +1,13 @@
+{
+    "name": "jQuery.hx",
+    "description": "Hardware-Accelerated Webkit Animation Library",
+    "version": "0.3.2",
+    "author": "Bernard McManus",
+    "devDependencies": {
+        "grunt": "~0.4.2",
+        "grunt-contrib-jshint": "~0.6.3",
+        "grunt-contrib-uglify": ">=0.2.2",
+        "grunt-git-describe": "~2.0.2",
+        "grunt-contrib-clean": ">=0.4.1"
+    }
+}
