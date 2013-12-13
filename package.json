@@ -1,8 +1,12 @@
 {
     "name": "jQuery.hx",
     "description": "Hardware-Accelerated Webkit Animation Library",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "author": "Bernard McManus",
+    "repository": {
+        "type": "git",
+        "url": "https://github.corp.millennialmedia.com/bmcmanus/jQuery.hx.git"
+    },
     "devDependencies": {
         "grunt": "~0.4.2",
         "grunt-contrib-jshint": "~0.6.3",

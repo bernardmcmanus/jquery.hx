@@ -2,14 +2,17 @@
 
     var config = {
         debug: {
+            oncreate: false,
             queue: false,
             components: false,
             tString: false,
-            transitionEndEvent: true
+            transitionEndEvent: false
         }
     };
 
     window.hxManager = function( element ) {
+
+        if (config.debug.oncreate) hxManager.log('new hxManager');
         
         this.element = element;
         this.queue = {};
@@ -44,6 +47,7 @@
                     left: offset + 'px',
                     top: offset + 'px',
                     '-webkit-transition': 'none',
+                    'transition': 'none',
                     opacity : 0,
                     display : 'block'
                 });
@@ -51,35 +55,20 @@
                 style = $.extend( {} , window.getComputedStyle(this.element) );
                 
                 $(this.element).css({
-                    position: temp.position,
-                    left: temp.left,
-                    top: temp.top,
-                    '-webkit-transition': temp.webkitTransition,
+                    position: temp.position || '',
+                    left: temp.left || '',
+                    top: temp.top || '',
+                    '-webkit-transition': temp.webkitTransition || '',
+                    'transition': temp.transition || '',
                     opacity : '',
                     display : 'none'
                 });
             }
 
-            if (typeof style.webkitTransform !== 'undefined' && style.webkitTransform !== 'none' && style.webkitTransform !== '') {
+            if (this._isHXTransform( style.webkitTransform ) !== false) {
                 this.components['-webkit-transform'] = this.components['-webkit-transform'] || {};
                 this.components['-webkit-transform'].computed = this._parse( style.webkitTransform );
             }
-        },
-        _getTransformType: function( options ) {
-            var raw = [];
-            var calc = [];
-            for (var key in options) {
-                if (this.keys.config.indexOf( key ) < 0) {
-                    if (this.keys.calculated.indexOf( key ) >= 0) {
-                        calc.push( key );
-                    } else {
-                        raw.push( key );
-                    }
-                }
-                if (raw.length > 0 && calc.length > 0)
-                    throw 'Error: Incompatible transform properties.';
-            }
-            return calc.length > 0 ? 'calc' : 'raw';
         },
         handleEvent: function( e ) {
             this._transend( e );
@@ -94,28 +83,6 @@
                 x: x,
                 y: y
             };
-        },
-        _calcWidthScale: function( width ) {
-            return width / this.element.getBoundingClientRect().width;
-        },
-        _calcHeightScale: function( height ) {
-            return height / this.element.getBoundingClientRect().height;
-        },
-        _getFixedOrigin: function( scale ) {
-
-            var defined = $.extend({}, window.getComputedStyle( this.element ));
-            var computed = this.element.getBoundingClientRect();
-
-            defined.width = parseInt(defined.width, 10);
-            defined.height = parseInt(defined.height, 10);
-
-            var sx = ((computed.width - defined.width) * scale[0]) / 2;
-            var sy = ((computed.height - defined.height) * scale[1]) / 2;
-
-            var dx = ((computed.width * scale[0] - defined.width) / 2) - sx;
-            var dy = ((computed.height * scale[1] - defined.height) / 2) - sy;
-            
-            return [ dx , dy ];
         },
         apply: function( property , options ) {
             this._getComputedStyle();
@@ -133,14 +100,10 @@
                 delete this.components[property].computed;
 
             // build the component array
-            if (this._getTransformType( options ) === 'raw') {
-                this.components[property] = $.extend( this.components[property] , this._getRawComponents( options ));
-            } else {
-                this.components[property] = $.extend( this.components[property] , this._getCalculatedComponents( options ));
-            }
+            this.components[property] = $.extend( this.components[property] , this._getRawComponents( options ));
             
             // components debugging
-            if (config.debug.components) console.log(this.components);
+            if (config.debug.components) hxManager.log(this.components);
 
 
             // add the animation instance to the queue
@@ -155,14 +118,14 @@
             });
 
             // queue debugging
-            if (config.debug.queue) console.log($.extend( {} , this.queue ));
+            if (config.debug.queue) hxManager.log($.extend( {} , this.queue ));
 
             // build and apply the transition string
             var tString = this._buildTransitionString();
             $(this.element).css('-webkit-transition', tString);
 
             // transition string debugging
-            if (config.debug.tString) console.log(tString);
+            if (config.debug.tString) hxManager.log(tString);
 
             // add the event listener if it has not already been added
             if (!this.listening) {
@@ -172,25 +135,56 @@
 
             // apply the style string
             setTimeout(function() {
-                self.queue[ property ].start();
-                $(self.element).css( property , self.queue[ property ].value );
+                if (self.queue[ property ]) {
+                    self.queue[ property ].start();
+                    $(self.element).css( property , self.queue[ property ].value );
+                } else {
+                    // remove the event listener if the hxManager instance it belonged to was destroyed before it could be fired
+                    self.element.addEventListener( 'webkitTransitionEnd' , this );
+                }
             }, this.queue[ property ].delay);
 
             return this;
 
+        },
+        _mapVectorToArray: function( vector , name ) {
+
+            if (hxManager.objSize( vector ) < 1 && !Array.isArray( vector ))
+                return [ vector ];
+
+            if (Array.isArray( vector ))
+                return vector;
+            
+            var v = vector;
+            var arr = [];
+            var i = 0;
+
+            var map = {
+                x: 0,
+                y: 1,
+                z: 2,
+                a: 3
+            };
+            
+            for (var key in v) {
+                i = map[key];
+                arr[i] = v[key];
+            }
+
+            return arr;
         },
         _getRawComponents: function( options ) {
             var defaults = [];
             var components = {};
             for (var key in options) {
                 if (this.keys.config.indexOf( key ) >= 0) continue;
-                var values = Array.isArray(options[key]) ? options[key] : [ options[key] ];
+                var values = this._mapVectorToArray( options[key] );
                 switch (key) {
                     case 'matrix3d':
-                        defaults = [ 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ];
+                        defaults = [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ];
                         break;
                     case 'matrix':
-                        defaults = [ 0 , 0 , 0 , 0 , 0 , 0 ];
+                        defaults = [ 1 , 0 , 0 , 1 , 0 , 0 ];
                         break;
                     case 'translate3d':
                         defaults = [ 0 , 0 , 0 ];
@@ -201,42 +195,12 @@
                     case 'rotate3d':
                         defaults = [ 0 , 0 , 0 , 0 ];
                         break;
-                    case 'rotateX':
-                    case 'rotateY':
-                    case 'rotateZ':
-                    case 'scaleX':
-                    case 'scaleY':
-                    case 'scaleZ':
                     case 'opacity':
                         defaults = [ 0 ];
                         break;
                 }
                 values = $.extend( defaults , values );
                 components[key] = values;
-            }
-            return components;
-        },
-        _getCalculatedComponents: function( options ) {
-            var defaults = [];
-            var components = {};
-            for (var key in options) {
-                if (this.keys.config.indexOf( key ) >= 0) continue;
-                switch (key) {
-                    case 'width':
-                        var scaleX = this._calcWidthScale( options[key] );
-                        components.translate3d = components.translate3d || [ 0 , 0 , 0 ];
-                        components.scale3d = components.scale3d || [ 1 , 1 , 1 ];
-                        components.translate3d[0] = components.translate3d[0] + this._getFixedOrigin( [scaleX, 1] )[0];
-                        components.scale3d[0] = components.scale3d[0] * scaleX;
-                        break;
-                    case 'height':
-                        var scaleY = this._calcHeightScale( options[key] );
-                        components.translate3d = components.translate3d || [ 0 , 0 , 0 ];
-                        components.scale3d = components.scale3d || [ 1 , 1 , 1 ];
-                        components.translate3d[1] = components.translate3d[1] + this._getFixedOrigin( [1, scaleY] )[1];
-                        components.scale3d[1] = components.scale3d[1] * scaleY;
-                        break;
-                }
             }
             return components;
         },
@@ -264,18 +228,6 @@
                     joinWith = ', ';
                     appendWith = 'deg';
                     break;
-                case 'rotateX':
-                case 'rotateY':
-                case 'rotateZ':
-                    joinWith = '';
-                    appendWith = 'deg';
-                    break;
-                case 'scaleX':
-                case 'scaleY':
-                case 'scaleZ':
-                    joinWith = '';
-                    appendWith = '';
-                    break;
             }
             return component + '(' + values.join( joinWith ) + appendWith + ')';
         },
@@ -298,7 +250,8 @@
             return arr.join(', ');
         },
         _isHXTransform: function( str ) {
-            var types = [ 'translate3d' , 'scale3d' , 'rotate3d' , 'matrix' , 'matrix3d' ];
+            if (!str) return false;
+            var types = [ 'matrix' , 'matrix3d' ];
             var response = false;
             for (var i = 0; i < types.length; i++) {
                 if (str.match( types[i] === 'matrix' ? types[i] + '\\(' : types[i] )) {
@@ -321,7 +274,7 @@
         },
         _transend: function( event ) {
 
-            if (config.debug.transitionEndEvent) console.log(event);
+            if (config.debug.transitionEndEvent) hxManager.log(event);
 
             // get the key corresponding to the event property name
             var name = event.propertyName || event.detail.propertyName;
@@ -342,7 +295,7 @@
             }
 
             // remove the style object from the queue
-            this.queue[name].destroy();
+            try{ this.queue[name].destroy(); }catch(err){}
             delete this.queue[name];
 
             // check the remaining queue elements
@@ -351,12 +304,30 @@
                     this._callback.call( this , event );
                 this.element.removeEventListener( 'webkitTransitionEnd' , this );
                 this.listening = false;
+                this.hxManager = 0;
             }
 
         },
         done: function( callback ) {
             this._callback = callback || function() {};
+        },
+        destroy: function() {
+            // remove event listeners and clear timeouts
         }
+    };
+
+    hxManager.pseudoHide = function( element ) {
+        $(element)
+            .addClass('hx_pseudoHide')
+            .css('pointer-events', 'none');
+    };
+
+    hxManager.pseudoShow = function( element ) {
+        if (!$(element).hasClass('hx_pseudoHide'))
+            return;
+        $(element)
+            .removeClass('hx_pseudoHide')
+            .css('pointer-events', 'auto');
     };
 
     hxManager.objSize = function( obj ) {
@@ -366,6 +337,13 @@
             if (key in obj) size++;
         }
         return size;
+    };
+
+    hxManager.log = function( msg , type ) {
+        type = type || 'log';
+        try {
+            console[type](msg);
+        } catch (err) {}
     };
     
 }());

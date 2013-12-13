@@ -1,7 +1,3 @@
-/* ------------------------------------- */
-/*        jQuery.hx v0.3.2 (beta)        */
-/* ------------------------------------- */
-
 (function( $ ) {
 
     
@@ -10,6 +6,21 @@
         if (!self.hxManager) self = new hxManager( $(this).get(0) );
         if (action) $.fn.hx[action].call(self,options);
         return self;
+    };
+
+
+    var mapComponentKeys = function( obj ) {
+        var map = {
+            translate: 'translate3d',
+            scale: 'scale3d',
+            rotate: 'rotate3d'
+        };
+        for (var key in obj) {
+            if (!map[key]) continue;
+            obj[map[key]] = obj[key];
+            delete obj[key];
+        }
+        return obj;
     };
 
 
@@ -29,9 +40,9 @@
             options.done = function() {};
         // -------------------------------------------------------------- //
 
-        var xForm = $.extend( {} , options , {
+        var xForm = mapComponentKeys($.extend( {} , options , {
             done: [ options.done ]
-        });
+        }));
 
         delete xForm.relative;
 
@@ -49,7 +60,8 @@
             duration: 400,
             easing: 'ease',
             delay: 1,
-            done: function() {}
+            done: function() {},
+            pseudoHide: true
         }, options);
 
         // -------------------------------------------------------------- //
@@ -65,17 +77,23 @@
         });
 
         var complete = function() {
-            $(this).css({
-                '-webkit-transition': '',
-                'opacity': 1,
-                'display': 'none'
-            });
+            if (options.pseudoHide) {
+                hxManager.pseudoHide( this.element );
+            } else {
+                $(this).css({
+                    '-webkit-transition': '',
+                    'opacity': 1,
+                    'display': 'none'
+                });
+            }
         };
 
         var xForm = $.extend( {} , options , {
             opacity: 0,
             done: [ complete , options.done ]
         });
+
+        delete xForm.pseudoHide;
 
         this.set( 'opacity' , xForm );
     };
@@ -96,15 +114,21 @@
             options.done = function() {};
         // -------------------------------------------------------------- //
 
-        $(this).css({
-            '-webkit-transition': '',
-            'opacity': 0,
-            'display': 'block'
-        });
+        if (!$(this).hasClass('hx_pseudoHide')) {
+            $(this).css({
+                '-webkit-transition': '',
+                'opacity': 0,
+                'display': 'block'
+            });
+        }
+
+        var complete = function() {
+            hxManager.pseudoShow( this.element );
+        };
 
         var xForm = $.extend( {} , options , {
             opacity: 1,
-            done: [ options.done ]
+            done: [ complete , options.done ]
         });
 
         this.set( 'opacity' , xForm );
