@@ -90,8 +90,6 @@
         },
         set: function( property , options , setComputed ) {
 
-            var self = this;
-
             this.components[property] = this.components[property] || {};
 
             // prevent computed matrix transform from being applied if it exists and the set method is called directly
@@ -111,9 +109,9 @@
                 element     : this.element,
                 property    : property,
                 value       : this.keys.nonXform.indexOf( property ) < 0 ? this._buildTransformString( this.components[property] ) : this.components[property][property][0],
-                duration    : options.duration ? options.duration : 400,
+                duration    : options.duration || 0,
                 easing      : hxManager._easing( options.easing ),
-                delay       : options.delay || 1,
+                delay       : options.delay || 0,
                 done        : options.done || [],
             });
 
@@ -133,16 +131,14 @@
                 this.listening = true;
             }
 
-            // apply the style string
-            setTimeout(function() {
-                if (self.queue[ property ]) {
-                    self.queue[ property ].start();
-                    $(self.element).css( property , self.queue[ property ].value );
-                } else {
-                    // remove the event listener if the hxManager instance it belonged to was destroyed before it could be fired
-                    self.element.addEventListener( 'webkitTransitionEnd' , this );
-                }
-            }, this.queue[ property ].delay);
+            if (this.queue[ property ]) {
+                // apply the style string and start the fallback timeout
+                $(this.element).css( property , this.queue[ property ].value );
+                this.queue[ property ].start();
+            } else {
+                // remove the event listener if the hxManager instance it belonged to was destroyed before it could be fired
+                this.element.addEventListener( 'webkitTransitionEnd' , this );
+            }
 
             return this;
 
@@ -244,7 +240,7 @@
         _buildTransitionString: function() {
             var arr = [];
             for (var key in this.queue) {
-                var component = key + ' ' + this.queue[key].easing + ' ' + this.queue[key].duration + 'ms';
+                var component = key + ' ' + this.queue[key].duration + 'ms ' + this.queue[key].easing + ' ' + this.queue[key].delay + 'ms';
                 if (arr.indexOf( component ) < 0) arr.push( component );
             }
             return arr.join(', ');

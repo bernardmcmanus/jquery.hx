@@ -11,7 +11,7 @@ var animator = function( config ) {
 animator.prototype = {
     start: function() {
         var self = this;
-        var t = this.duration + this.buffer;
+        var t = this.duration + this.delay + this.buffer;
         this.element.addEventListener( 'webkitTransitionEnd' , this );
         this.timeout = setTimeout(function() {
             self._dispatchEvent.call( self );

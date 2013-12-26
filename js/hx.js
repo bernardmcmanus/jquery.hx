@@ -29,7 +29,7 @@
         options = $.extend({
             duration: 400,
             easing: 'ease',
-            delay: 1,
+            delay: 0,
             done: function() {},
             relative: true
         }, options);
@@ -59,7 +59,7 @@
         options = $.extend({
             duration: 400,
             easing: 'ease',
-            delay: 1,
+            delay: 0,
             done: function() {},
             pseudoHide: true
         }, options);
@@ -104,7 +104,7 @@
         options = $.extend({
             duration: 400,
             easing: 'ease',
-            delay: 1,
+            delay: 0,
             done: function() {}
         }, options);
 

@@ -1,9 +1,10 @@
+/*
+**  Derived from AliceJS easing definitions
+**  http://blackberry.github.io/Alice/
+*/
+
 (function( hx ) {
     var _easing = function( name ) {
-        /**
-        * Derived from AliceJS easing definitions
-        * http://blackberry.github.io/Alice/
-        */
         var type = {
             linear: {
                 p1: 0.25,
