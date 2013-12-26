@@ -151,13 +151,12 @@
         }, (options || {}));
 
         this.dims       = $(this).get(0).getBoundingClientRect();
-        this.Top        = Math.round(this.dims.height * 0.4);
-        this.Left       = Math.round(this.dims.width * 0.1);
-        this.Width      = this.dims.width - (this.Left * 2);
+        this.Left       = this.dims.left + Math.round(this.dims.width * 0.1);
+        this.Width      = this.dims.width - ((this.Left - this.dims.left) * 2);
         this.Height     = Math.round(this.Width * 0.15);
         this.fontSize   = Math.round(this.Height * 0.3);
         this.radius     = Math.round(this.fontSize * 0.8);
-        this.padding    = Math.round(this.Height / 3);
+        this.padding    = Math.round(this.Height * 0.3);
 
         this.Width -= this.padding * 2;
 
@@ -165,16 +164,16 @@
             'text-align'            : 'center',
             'font-size'             : this.fontSize + 'px',
             'color'                 : 'white',
-            'position'              : 'absolute',
+            'position'              : 'fixed',
             'left'                  : this.Left + 'px',
-            'top'                   : this.Top + 'px',
+            'top'                   : 0,
             'width'                 : this.Width + 'px',
             'line-height'           : 1.5,
             'padding'               : this.padding + 'px',
             'background-color'      : 'rgba(0,0,0,0.8)',
             '-webkit-border-radius' : this.radius + 'px',
             'z-index'               : 10000,
-            'display'               : 'none'
+            'opacity'               : 0
         }, this.options.css);
 
         var overlay = document.createElement('div');
@@ -184,6 +183,12 @@
             .html( this.options.message )
             .appendTo( $(this) );
 
+        // set the top position
+        var h = overlay.getBoundingClientRect().height;
+        var t = Math.round(($(window).height() - h) / 2);
+        this.Top = this.options.css.top || t >= h ? t : h;
+        $(overlay).css( 'top' , this.Top + 'px' );
+        
         
         this.overlay = $(overlay);
         
@@ -218,7 +223,7 @@
 
         // open the notification
         this.open();
-        
+
 
         // set the timeout to close the notification
         if (this.options.timeout > 0) {
