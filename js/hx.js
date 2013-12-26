@@ -157,6 +157,9 @@
         this.Height     = Math.round(this.Width * 0.15);
         this.fontSize   = Math.round(this.Height * 0.3);
         this.radius     = Math.round(this.fontSize * 0.8);
+        this.padding    = Math.round(this.Height / 3);
+
+        this.Width -= this.padding * 2;
 
         this.options.css = $.extend({
             'text-align'            : 'center',
@@ -166,8 +169,8 @@
             'left'                  : this.Left + 'px',
             'top'                   : this.Top + 'px',
             'width'                 : this.Width + 'px',
-            'height'                : this.Height + 'px',
-            'line-height'           : this.Height + 'px',
+            'line-height'           : 1.5,
+            'padding'               : this.padding + 'px',
             'background-color'      : 'rgba(0,0,0,0.8)',
             '-webkit-border-radius' : this.radius + 'px',
             'z-index'               : 10000,
@@ -183,7 +186,7 @@
 
         
         this.overlay = $(overlay);
-
+        
         
         this.open = function() {
             this.overlay
@@ -215,6 +218,7 @@
 
         // open the notification
         this.open();
+        
 
         // set the timeout to close the notification
         if (this.options.timeout > 0) {
