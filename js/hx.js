@@ -114,24 +114,44 @@
             options.done = function() {};
         // -------------------------------------------------------------- //
 
-        if (!$(this).hasClass('hx_pseudoHide')) {
-            $(this).css({
-                '-webkit-transition': '',
-                'opacity': 0,
-                'display': 'block'
-            });
+        var flow = new hxManager.workflow();
+
+        function task1() {
+            if ($(this).hasClass('hx_pseudoHide'))
+                return;
+            this.element.style.webkitTransition = '';
+            this.element.style.opacity = 0;
+            flow.progress();
         }
 
-        var complete = function() {
+        function task2() {
+            if ($(this).hasClass('hx_pseudoHide'))
+                return;
+            this.element.style.display = 'block';
+            flow.progress();
+        }
+
+        function task3() {
+            this.set( 'opacity' , xForm );
+            flow.progress();
+        }
+
+        function complete() {
             hxManager.pseudoShow( this.element );
-        };
+        }
+
+        // build the workflow queue
+        flow.add( task1 , this );
+        flow.add( task2 , this );
+        flow.add( task3 , this );
 
         var xForm = $.extend( {} , options , {
             opacity: 1,
             done: [ complete , options.done ]
         });
 
-        this.set( 'opacity' , xForm );
+        flow.run();
+
     };
 
 
