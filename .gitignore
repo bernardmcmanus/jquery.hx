@@ -1,3 +1,8 @@
+# npm & grunt #
+###############
+node_modules
+hx.min.js
+
 # OS generated files #
 ######################
 .DS_Store
