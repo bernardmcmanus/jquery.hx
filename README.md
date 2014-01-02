@@ -2,11 +2,7 @@
 
 #### A hardware accelerated animation library for webkit mobile devices.
 
-=====
-
-### Documentation
-
-The latest documentation can be found [here](http://bmcmanus.cs.sandbox.millennialmedia.com/jquery.hx/#docs).
+The latest build along with documentation and examples can be found [here](http://bmcmanus.cs.sandbox.millennialmedia.com/jquery.hx/).
 
 =====
 
