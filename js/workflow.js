@@ -20,7 +20,7 @@
         },
         _valid: function( task ) {
             if (typeof task !== 'function')
-                throw 'only functions can be queued in the workflow.';
+                throw 'Error: Only functions can be queued in the workflow.';
         },
         add: function( task , context ) {
             

@@ -6,7 +6,7 @@
             queue: false,
             components: false,
             tString: false,
-            transitionEndEvent: false
+            transitionEndEvent: true
         }
     };
 
@@ -14,11 +14,12 @@
 
         if (config.debug.oncreate) hxManager.log('new hxManager');
         
-        this.element = element;
-        this.queue = {};
-        this.components = {};
-        this.listening = false;
-        this._callback = function() {};
+        $.extend( this , {
+            element: element,
+            queue: {},
+            components: {},
+            _callback: function() {}
+        });
 
         this.keys = {
             config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' ],
@@ -26,66 +27,33 @@
             nonXform: [ 'opacity' ]
         };
 
-        var self = $(this.element);
-        self.hxManager = 1;
-        $.extend(self, this);
-        return self;
+        return this._init();
     };
 
     hxManager.prototype = {
-        _getComputedStyle: function() {
-            
-            var style = window.getComputedStyle(this.element);
-            
-            if (style.display === 'none') {
-                
-                var temp = $.extend( {} , this.element.style );
-                var offset = -1000;
-                
-                $(this.element).css({
-                    position: 'fixed',
-                    left: offset + 'px',
-                    top: offset + 'px',
-                    '-webkit-transition': 'none',
-                    'transition': 'none',
-                    opacity : 0,
-                    display : 'block'
-                });
+        _init: function() {
 
-                style = $.extend( {} , window.getComputedStyle(this.element) );
-                
-                $(this.element).css({
-                    position: temp.position || '',
-                    left: temp.left || '',
-                    top: temp.top || '',
-                    '-webkit-transition': temp.webkitTransition || '',
-                    'transition': temp.transition || '',
-                    opacity : '',
-                    display : 'none'
-                });
-            }
+            this.vendorPatch = new hxManager.vendorPatch();
+            
+            var self = $(this.element);
+            self.hxManager = 1;
+            $.extend(self, this);
+            return self;
+        },
+        _getComputedStyle: function( property ) {
 
-            if (this._isHXTransform( style.webkitTransform ) !== false) {
-                this.components['-webkit-transform'] = this.components['-webkit-transform'] || {};
-                this.components['-webkit-transform'].computed = this._parse( style.webkitTransform );
+            if (this.keys.nonXform.indexOf( property ) >= 0)
+                return;
+            
+            var matrix = this.vendorPatch.getComputedMatrix( this.element );
+
+            if (this._isHXTransform( matrix ) !== false) {
+                this.components['transform'] = this.components['transform'] || {};
+                this.components['transform'].computed = this._parse( matrix );
             }
-        },
-        handleEvent: function( e ) {
-            this._transend( e );
-        },
-        setOrigin: function( x , y ) {
-            x = (x && typeof x !== 'undefined') ? x : 50;
-            y = (y && typeof y !== 'undefined') ? y : 50;
-            $(this.element).css({
-                '-webkit-transform-origin': x + '% ' + y + '%'
-            });
-            this.transformOrigin = {
-                x: x,
-                y: y
-            };
         },
         apply: function( property , options ) {
-            this._getComputedStyle();
+            this._getComputedStyle( property );
             return this.set( property , options , true );
         },
         set: function( property , options , setComputed ) {
@@ -106,7 +74,7 @@
 
             // add the animation instance to the queue
             this.queue[ property ] = new animator({
-                element     : this.element,
+                manager     : this,
                 property    : property,
                 value       : this.keys.nonXform.indexOf( property ) < 0 ? this._buildTransformString( this.components[property] ) : this.components[property][property][0],
                 duration    : options.duration || 0,
@@ -120,24 +88,23 @@
 
             // build and apply the transition string
             var tString = this._buildTransitionString();
-            $(this.element).css('-webkit-transition', tString);
+            var transition = {
+                property: this.vendorPatch.getPrefixed( 'transition' ),
+                value: this.vendorPatch.getPrefixed( tString )
+            };
+            $(this.element).css( transition.property , transition.value );
 
             // transition string debugging
             if (config.debug.tString) hxManager.log(tString);
 
-            // add the event listener if it has not already been added
-            if (!this.listening) {
-                this.element.addEventListener( 'webkitTransitionEnd' , this );
-                this.listening = true;
-            }
-
             if (this.queue[ property ]) {
                 // apply the style string and start the fallback timeout
-                $(this.element).css( property , this.queue[ property ].value );
+                var transform = {
+                    property: this.vendorPatch.getPrefixed( property ),
+                    value: this.vendorPatch.getPrefixed( this.queue[ property ].value )
+                };
+                $(this.element).css( transform.property , transform.value );
                 this.queue[ property ].start();
-            } else {
-                // remove the event listener if the hxManager instance it belonged to was destroyed before it could be fired
-                this.element.addEventListener( 'webkitTransitionEnd' , this );
             }
 
             return this;
@@ -250,7 +217,8 @@
             var types = [ 'matrix' , 'matrix3d' ];
             var response = false;
             for (var i = 0; i < types.length; i++) {
-                if (str.match( types[i] === 'matrix' ? types[i] + '\\(' : types[i] )) {
+                var re = new RegExp( types[i] + '\\(' , 'gi' );
+                if (re.test( str )) {
                     response = types[i];
                     break;
                 }
@@ -268,21 +236,10 @@
                 transform: str
             };
         },
-        _transend: function( event ) {
+        _transitionEnd: function( event , name ) {
 
-            if (config.debug.transitionEndEvent) hxManager.log(event);
+            if (config.debug.transitionEndEvent) hxManager.log(name);
 
-            // get the key corresponding to the event property name
-            var name = event.propertyName || event.detail.propertyName;
-
-            var re = new RegExp( name , 'i' );
-            for (var key in this.queue) {
-                if (re.test(key)) {
-                    name = key;
-                    break;
-                }
-            }
-            
             // fire callbacks for individual properties
             if (typeof this.queue[name] !== 'undefined' && typeof this.queue[name].done[0] === 'function') {
                 for (var i = 0; i < this.queue[name].done.length; i++) {
@@ -290,25 +247,23 @@
                 }
             }
 
-            // remove the style object from the queue
-            try{ this.queue[name].destroy(); }catch(err){}
+            // remove the animator object from the queue
             delete this.queue[name];
 
             // check the remaining queue elements
             if (hxManager.objSize( this.queue ) < 1) {
                 if (typeof this._callback === 'function')
                     this._callback.call( this , event );
-                this.element.removeEventListener( 'webkitTransitionEnd' , this );
-                this.listening = false;
                 this.hxManager = 0;
             }
-
         },
         done: function( callback ) {
             this._callback = callback || function() {};
         },
         destroy: function() {
-            // remove event listeners and clear timeouts
+            for (var key in this.queue) {
+                this.queue[key].destroy();
+            }
         }
     };
 

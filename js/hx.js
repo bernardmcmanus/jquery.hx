@@ -47,9 +47,9 @@
         delete xForm.relative;
 
         if (options.relative) {
-            this.apply( '-webkit-transform' , xForm );
+            this.apply( 'transform' , xForm );
         } else {
-            this.set( '-webkit-transform' , xForm );
+            this.set( 'transform' , xForm );
         }
     };
 

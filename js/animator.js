@@ -12,26 +12,23 @@ animator.prototype = {
     start: function() {
         var self = this;
         var t = this.duration + this.delay + this.buffer;
-        this.element.addEventListener( 'webkitTransitionEnd' , this );
+        this.manager.vendorPatch.addEventListener( this.manager.element , this );
         this.timeout = setTimeout(function() {
             self._dispatchEvent.call( self );
         } , t );
     },
     handleEvent: function( event ) {
-        
         var name = event.propertyName || event.detail.propertyName;
-
-        var re = new RegExp( name , 'i' );
-        if (re.test(this.property))
-            name = this.property;
-
-        if (event.type === 'webkitTransitionEnd' && name === this.property)
+        var re = new RegExp( this.property , 'i' );
+        if (re.test( name )) {
             this.destroy();
+            this.manager._transitionEnd.call( this.manager , event , this.property );
+        }
     },
     _createEvent: function() {
         var evt = {};
         try {
-            evt = new CustomEvent( 'webkitTransitionEnd' , {
+            evt = new CustomEvent( 'transitionend' , {
                 bubbles: true,
                 cancelable: true,
                 detail: {
@@ -40,7 +37,7 @@ animator.prototype = {
             });
         } catch( err ) {
             evt = document.createEvent('Event');
-            evt.initEvent( 'webkitTransitionEnd' , true , true );
+            evt.initEvent( 'transitionend' , true , true );
             evt.detail = {
                 propertyName: this.property
             };
@@ -49,11 +46,11 @@ animator.prototype = {
     },
     _dispatchEvent: function() {
         var evt = this._createEvent();
-        this.element.dispatchEvent( evt );
+        this.manager.element.dispatchEvent( evt );
     },
     destroy: function() {
         clearTimeout( this.timeout );
-        this.element.removeEventListener( 'webkitTransitionEnd' , this );
+        this.manager.vendorPatch.removeEventListener( this.manager.element , this );
     }
 };
 
