@@ -12,8 +12,10 @@ animator.prototype = {
     start: function() {
         var self = this;
         var t = this.duration + this.delay + this.buffer;
-        this.manager.vendorPatch.addEventListener( this.manager.element , this );
+        this.vendorPatch.addEventListener( this.element , this );
         this.timeout = setTimeout(function() {
+            if (self.debug.fallback)
+                hxManager.log(self.property + ' fallback triggered');
             self._dispatchEvent.call( self );
         } , t );
     },
@@ -28,7 +30,7 @@ animator.prototype = {
     _createEvent: function() {
         var evt = {};
         try {
-            evt = new CustomEvent( 'transitionend' , {
+            evt = new CustomEvent( this.vendorPatch.getEventName() , {
                 bubbles: true,
                 cancelable: true,
                 detail: {
@@ -37,7 +39,7 @@ animator.prototype = {
             });
         } catch( err ) {
             evt = document.createEvent('Event');
-            evt.initEvent( 'transitionend' , true , true );
+            evt.initEvent( this.vendorPatch.getEventName() , true , true );
             evt.detail = {
                 propertyName: this.property
             };
@@ -46,11 +48,11 @@ animator.prototype = {
     },
     _dispatchEvent: function() {
         var evt = this._createEvent();
-        this.manager.element.dispatchEvent( evt );
+        this.element.dispatchEvent( evt );
     },
     destroy: function() {
         clearTimeout( this.timeout );
-        this.manager.vendorPatch.removeEventListener( this.manager.element , this );
+        this.vendorPatch.removeEventListener( this.element , this );
     }
 };
 

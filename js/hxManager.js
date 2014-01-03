@@ -6,13 +6,42 @@
             queue: false,
             components: false,
             tString: false,
-            transitionEndEvent: true
-        }
+            transitionEndEvent: false,
+            fallback: false,
+            onComplete: false
+        },
+        loggerPath: 'http://bmcmanus.cs.sandbox.millennialmedia.com/jquery.hx/code/logger.js'
     };
+
+    // load the debugging console if needed
+    (function() {
+
+        function loadLogger() {
+
+            function timestamp() {
+                return Math.floor(new Date().getTime() / 1000);
+            };
+
+            var script = document.createElement('script');
+            script.src = config.loggerPath + '?r=' + timestamp();
+
+            var head = document.querySelector('head');
+            head.appendChild( script );
+        }
+
+        for (var key in config.debug) {
+            if (config.debug[key]) {
+                loadLogger();
+                break;
+            }
+        }
+
+    }());
 
     window.hxManager = function( element ) {
 
-        if (config.debug.oncreate) hxManager.log('new hxManager');
+        if (config.debug.oncreate)
+            hxManager.log( 'new hxManager instance' );
         
         $.extend( this , {
             element: element,
@@ -45,11 +74,11 @@
             if (this.keys.nonXform.indexOf( property ) >= 0)
                 return;
             
-            var matrix = this.vendorPatch.getComputedMatrix( this.element );
+            var matrix = this.vendorPatch.getComputedMatrix( this );
 
             if (this._isHXTransform( matrix ) !== false) {
-                this.components['transform'] = this.components['transform'] || {};
-                this.components['transform'].computed = this._parse( matrix );
+                this.components.transform = this.components.transform || {};
+                this.components.transform.computed = this._parse( matrix );
             }
         },
         apply: function( property , options ) {
@@ -69,33 +98,30 @@
             this.components[property] = $.extend( this.components[property] , this._getRawComponents( options ));
             
             // components debugging
-            if (config.debug.components) hxManager.log(this.components);
+            if (config.debug.components)
+                hxManager.log( this.components );
 
 
             // add the animation instance to the queue
             this.queue[ property ] = new animator({
                 manager     : this,
+                element     : this.element,
+                vendorPatch : this.vendorPatch,
                 property    : property,
                 value       : this.keys.nonXform.indexOf( property ) < 0 ? this._buildTransformString( this.components[property] ) : this.components[property][property][0],
                 duration    : options.duration || 0,
                 easing      : hxManager._easing( options.easing ),
                 delay       : options.delay || 0,
                 done        : options.done || [],
+                debug       : config.debug
             });
 
             // queue debugging
-            if (config.debug.queue) hxManager.log($.extend( {} , this.queue ));
+            if (config.debug.queue)
+                hxManager.log($.extend( {} , this.queue ));
 
             // build and apply the transition string
-            var tString = this._buildTransitionString();
-            var transition = {
-                property: this.vendorPatch.getPrefixed( 'transition' ),
-                value: this.vendorPatch.getPrefixed( tString )
-            };
-            $(this.element).css( transition.property , transition.value );
-
-            // transition string debugging
-            if (config.debug.tString) hxManager.log(tString);
+            this.setTransition( property );
 
             if (this.queue[ property ]) {
                 // apply the style string and start the fallback timeout
@@ -109,6 +135,33 @@
 
             return this;
 
+        },
+        setTransition: function( property , options ) {
+            
+            if (!property) return;
+            options = options || {};
+
+            this.queue[ property ] = this.queue[ property ] || {
+                easing: 'ease',
+                duration: 0,
+                delay: 0
+            };
+
+            this.queue[ property ] = $.extend( this.queue[ property ] , options );
+
+            if (typeof options.easing !== 'undefined')
+                this.queue[ property ].easing = hxManager._easing( options.easing );
+
+            var tString = this._buildTransitionString();
+            tString = this.vendorPatch.getPrefixed( tString );
+
+            var tProp = this.vendorPatch.getPrefixed( 'transition' );
+
+            $(this.element).css( tProp , tString );
+
+            // transition string debugging
+            if (config.debug.tString)
+                hxManager.log( tProp + ': ' + tString );
         },
         _mapVectorToArray: function( vector , name ) {
 
@@ -238,7 +291,8 @@
         },
         _transitionEnd: function( event , name ) {
 
-            if (config.debug.transitionEndEvent) hxManager.log(name);
+            if (config.debug.transitionEndEvent)
+                hxManager.log( name );
 
             // fire callbacks for individual properties
             if (typeof this.queue[name] !== 'undefined' && typeof this.queue[name].done[0] === 'function') {
@@ -254,6 +308,8 @@
             if (hxManager.objSize( this.queue ) < 1) {
                 if (typeof this._callback === 'function')
                     this._callback.call( this , event );
+                if (config.debug.onComplete)
+                    hxManager.log('done');
                 this.hxManager = 0;
             }
         },
@@ -293,7 +349,11 @@
     hxManager.log = function( msg , type ) {
         type = type || 'log';
         try {
-            console[type](msg);
+            if (window.logger) {
+                window.logger.log( msg );
+            } else {
+                console[type](msg);
+            }
         } catch (err) {}
     };
     

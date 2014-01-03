@@ -70,21 +70,34 @@
             options.done = function() {};
         // -------------------------------------------------------------- //
 
-        $(this).css({
-            '-webkit-transition': '',
-            'opacity': 1,
-            'display': 'block'
-        });
-
-        var complete = function() {
+        function complete() {
+            
             if (options.pseudoHide) {
+                
                 hxManager.pseudoHide( this.element );
+                
             } else {
-                $(this).css({
-                    '-webkit-transition': '',
-                    'opacity': 1,
-                    'display': 'none'
-                });
+
+                var flow = new hxManager.workflow();
+
+                function task1() {
+                    this.setTransition( 'opacity' , {
+                        duration: 0,
+                        delay: 0
+                    });
+                    flow.progress();
+                }
+
+                function task2() {
+                    this.element.style.display = 'none';
+                    this.element.style.opacity = 1;
+                    flow.progress();
+                }
+
+                flow.add( task1 , this );
+                flow.add( task2 , this );
+
+                flow.run();
             }
         };
 
@@ -117,17 +130,21 @@
         var flow = new hxManager.workflow();
 
         function task1() {
-            if ($(this).hasClass('hx_pseudoHide'))
-                return;
-            this.element.style.webkitTransition = '';
-            this.element.style.opacity = 0;
-            flow.progress();
+            var isHidden = window.getComputedStyle( this.element ).display === 'none';
+            if (isHidden) {
+                this.setTransition( 'opacity' , {
+                    duration: 0,
+                    delay: 0
+                });
+            }
+            flow.progress( isHidden );
         }
 
-        function task2() {
-            if ($(this).hasClass('hx_pseudoHide'))
-                return;
-            this.element.style.display = 'block';
+        function task2( isHidden ) {
+            if (isHidden) {
+                this.element.style.opacity = 0;
+                this.element.style.display = 'block';
+            }
             flow.progress();
         }
 
@@ -140,15 +157,14 @@
             hxManager.pseudoShow( this.element );
         }
 
-        // build the workflow queue
-        flow.add( task1 , this );
-        flow.add( task2 , this );
-        flow.add( task3 , this );
-
         var xForm = $.extend( {} , options , {
             opacity: 1,
             done: [ complete , options.done ]
         });
+
+        flow.add( task1 , this );
+        flow.add( task2 , this );
+        flow.add( task3 , this );
 
         flow.run();
 

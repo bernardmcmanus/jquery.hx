@@ -15,7 +15,7 @@
                 o: 'oTransitionEnd',
                 ms: 'transitionend'
             },
-            properties: [ 'transition' , 'transform' ]
+            prefixProps: [ 'transition' , 'transform' ]
         }, (options || {}));
 
         $.extend( this , options );
@@ -37,60 +37,79 @@
                 }
             }
         },
+        getEventName: function() {
+            return this.events[ this.ua ];
+        },
         getPrefixed: function( str ) {
-            for (var i = 0; i < this.properties.length; i++) {
-                var re = new RegExp( '(?!-)' + this.properties[i] + '(?!-)' , 'g' );
-                var match = null;
-                if (match = re.exec( str ))
+            for (var i = 0; i < this.prefixProps.length; i++) {
+                var re = new RegExp( '(?!-)' + this.prefixProps[i] + '(?!-)' , 'g' );
+                var match = re.exec( str );
+                if (match)
                     str = str.replace( re , ('-' + this.ua + '-' + match[0]) );
             }
             return str;
         },
         addEventListener: function( target , listener ) {
-            var evt = this.events[ this.ua ];
+            var evt = this.getEventName();
             target.addEventListener( evt , listener );
         },
         removeEventListener: function( target , listener ) {
-            var evt = this.events[ this.ua ];
+            var evt = this.getEventName();
             target.removeEventListener( evt , listener );
         },
-        getComputedMatrix: function( element ) {
+        getComputedMatrix: function( manager ) {
             
+            var element = manager.element;
             var style = window.getComputedStyle( element );
             var transform = this.ua + 'Transform';
             
             if (style.display === 'none') {
                 
                 var temp = $.extend( {} , element.style );
-                var offset = -1000;
-                var css = null;
                 var transition = this.ua + 'Transition';
+                var flow = new hxManager.workflow();
 
-                css = {
-                    position: 'fixed',
-                    left: offset + 'px',
-                    top: offset + 'px',
-                    opacity : 0,
-                    display : 'block'
-                };
-                css[transition] = 'none';
-                $(this.element).css( css );
+                function task1() {
+                    manager.setTransition( 'opacity' , {
+                        duration: 0,
+                        delay: 0
+                    });
+                    flow.progress();
+                }
 
-                style = $.extend( {} , window.getComputedStyle(this.element) );
+                function task2() {
+                    $(element).css({
+                        position: 'fixed',
+                        opacity : 0,
+                        display : 'block'
+                    });
+                    flow.progress();
+                }
 
-                css = {
-                    position: temp.position || '',
-                    left: temp.left || '',
-                    top: temp.top || '',
-                    opacity : '',
-                    display : 'none'
-                };
-                css[transition] = temp[transition] || '';
-                $(this.element).css( css );
+                function task3() {
+                    style = $.extend( {} , window.getComputedStyle( element ));
+                    flow.progress();
+                }
+
+                function task4() {
+                    $(element).css({
+                        position: temp.position || '',
+                        opacity : '',
+                        display : 'none'
+                    });
+                    flow.progress();
+                }
+
+                flow.add( task1 , this );
+                flow.add( task2 , this );
+                flow.add( task3 , this );
+                flow.add( task4 , this );
+
+                flow.run();
             }
 
             return style[transform] || style.transform;
-        },
+        }
     };
 
     $.extend( hx , {vendorPatch: vendorPatch} );
