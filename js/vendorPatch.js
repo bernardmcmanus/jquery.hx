@@ -63,7 +63,10 @@
             var style = window.getComputedStyle( element );
             var transform = this.ua + 'Transform';
             
-            if (style.display === 'none') {
+            // this block should no longer be necessary
+            // since elements are being prepped at init
+            
+            /*if (style.display === 'none') {
                 
                 var temp = $.extend( {} , element.style );
                 var transition = this.ua + 'Transition';
@@ -106,7 +109,7 @@
                 flow.add( task4 , this );
 
                 flow.run();
-            }
+            }*/
 
             return style[transform] || style.transform;
         }

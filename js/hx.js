@@ -2,9 +2,15 @@
 
     
     $.fn.hx = function( action , options ) {
+        
         var self = this;
-        if (!self.hxManager) self = new hxManager( $(this).get(0) );
-        if (action) $.fn.hx[action].call(self,options);
+        
+        if (!self.hxManager)
+            self = new hxManager( $(this).get(0) );
+        
+        if (action)
+            $.fn.hx[action].call(self,options);
+
         return self;
     };
 
@@ -70,6 +76,30 @@
             options.done = function() {};
         // -------------------------------------------------------------- //
 
+        function trueHide() {
+
+            var flow = new hxManager.workflow();
+
+            function task1() {
+                this.setTransition( 'opacity' , {
+                    duration: 0,
+                    delay: 0
+                });
+                flow.progress();
+            }
+
+            function task2() {
+                this.element.style.display = 'none';
+                this.element.style.opacity = 1;
+                flow.progress();
+            }
+
+            flow.add( task1 , this );
+            flow.add( task2 , this );
+
+            flow.run();
+        }
+
         function complete() {
             
             if (options.pseudoHide) {
@@ -78,28 +108,9 @@
                 
             } else {
 
-                var flow = new hxManager.workflow();
-
-                function task1() {
-                    this.setTransition( 'opacity' , {
-                        duration: 0,
-                        delay: 0
-                    });
-                    flow.progress();
-                }
-
-                function task2() {
-                    this.element.style.display = 'none';
-                    this.element.style.opacity = 1;
-                    flow.progress();
-                }
-
-                flow.add( task1 , this );
-                flow.add( task2 , this );
-
-                flow.run();
+                trueHide.call( this );
             }
-        };
+        }
 
         var xForm = $.extend( {} , options , {
             opacity: 0,

@@ -20,7 +20,7 @@
 
             function timestamp() {
                 return Math.floor(new Date().getTime() / 1000);
-            };
+            }
 
             var script = document.createElement('script');
             script.src = config.loggerPath + '?r=' + timestamp();
@@ -63,11 +63,40 @@
         _init: function() {
 
             this.vendorPatch = new hxManager.vendorPatch();
+
+            if (this._checkHiddenState( this.element ))
+                this._prepHiddenElement();
             
             var self = $(this.element);
             self.hxManager = 1;
             $.extend(self, this);
             return self;
+        },
+        _checkHiddenState: function( element ) {
+            return window.getComputedStyle( element ).display === 'none';
+        },
+        _prepHiddenElement: function() {
+
+            var flow = new hxManager.workflow();
+
+            function task1() {
+                this.setTransition( 'opacity' , {
+                    duration: 0,
+                    delay: 0
+                });
+                flow.progress();
+            }
+
+            function task2() {
+                this.element.style.opacity = 0;
+                this.element.style.display = 'block';
+                flow.progress();
+            }
+
+            flow.add( task1 , this );
+            flow.add( task2 , this );
+
+            flow.run();
         },
         _getComputedStyle: function( property ) {
 
@@ -103,7 +132,7 @@
 
 
             // add the animation instance to the queue
-            this.queue[ property ] = new animator({
+            this.queue[ property ] = new hxManager.animator({
                 manager     : this,
                 element     : this.element,
                 vendorPatch : this.vendorPatch,
