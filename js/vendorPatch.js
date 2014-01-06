@@ -58,59 +58,8 @@
             target.removeEventListener( evt , listener );
         },
         getComputedMatrix: function( manager ) {
-            
-            var element = manager.element;
-            var style = window.getComputedStyle( element );
+            var style = window.getComputedStyle( manager.element );
             var transform = this.ua + 'Transform';
-            
-            // this block should no longer be necessary
-            // since elements are being prepped at init
-            
-            /*if (style.display === 'none') {
-                
-                var temp = $.extend( {} , element.style );
-                var transition = this.ua + 'Transition';
-                var flow = new hxManager.workflow();
-
-                function task1() {
-                    manager.setTransition( 'opacity' , {
-                        duration: 0,
-                        delay: 0
-                    });
-                    flow.progress();
-                }
-
-                function task2() {
-                    $(element).css({
-                        position: 'fixed',
-                        opacity : 0,
-                        display : 'block'
-                    });
-                    flow.progress();
-                }
-
-                function task3() {
-                    style = $.extend( {} , window.getComputedStyle( element ));
-                    flow.progress();
-                }
-
-                function task4() {
-                    $(element).css({
-                        position: temp.position || '',
-                        opacity : '',
-                        display : 'none'
-                    });
-                    flow.progress();
-                }
-
-                flow.add( task1 , this );
-                flow.add( task2 , this );
-                flow.add( task3 , this );
-                flow.add( task4 , this );
-
-                flow.run();
-            }*/
-
             return style[transform] || style.transform;
         }
     };
