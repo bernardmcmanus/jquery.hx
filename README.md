@@ -1,6 +1,6 @@
 # jQuery.hx
 
-#### A hardware-accelerated animation library for webkit mobile devices.
+#### A hardware-accelerated animation library for mobile and desktop.
 =====
 
 ### Overview
