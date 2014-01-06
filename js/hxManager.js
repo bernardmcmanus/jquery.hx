@@ -10,33 +10,9 @@
             fallback: false,
             onComplete: false
         },
+        loadLogger: false,
         loggerPath: 'http://bmcmanus.cs.sandbox.millennialmedia.com/jquery.hx/code/logger.js'
     };
-
-    // load the debugging console if needed
-    (function() {
-
-        function loadLogger() {
-
-            function timestamp() {
-                return Math.floor(new Date().getTime() / 1000);
-            }
-
-            var script = document.createElement('script');
-            script.src = config.loggerPath + '?r=' + timestamp();
-
-            var head = document.querySelector('head');
-            head.appendChild( script );
-        }
-
-        for (var key in config.debug) {
-            if (config.debug[key]) {
-                loadLogger();
-                break;
-            }
-        }
-
-    }());
 
     window.hxManager = function( element ) {
 
@@ -385,6 +361,25 @@
             }
         } catch (err) {}
     };
+
+    hxManager.setDebugFlag = function( flag ) {
+        _loadLogger();
+        if (typeof config.debug[flag] !== 'undefined')
+            config.debug[flag] = true;
+    };
+
+    function _loadLogger() {
+
+        if (config.loadLogger)
+            return;
+
+        config.loadLogger = true;
+
+        var logger = document.createElement('script');
+        logger.src = config.loggerPath;
+
+        document.querySelector('head').appendChild( logger );
+    }
     
 }());
 
