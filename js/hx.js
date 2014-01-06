@@ -119,7 +119,7 @@
 
         delete xForm.pseudoHide;
 
-        this.set( 'opacity' , xForm );
+        this.apply( 'opacity' , xForm );
     };
 
 
@@ -160,7 +160,7 @@
         }
 
         function task3() {
-            this.set( 'opacity' , xForm );
+            this.apply( 'opacity' , xForm );
             flow.progress();
         }
 
