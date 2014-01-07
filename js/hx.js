@@ -9,7 +9,7 @@
             self = new hxManager( $(this).get(0) );
         
         if (action)
-            $.fn.hx[action].call(self,options);
+            $.fn.hx[action].call( self , options );
 
         return self;
     };
@@ -91,6 +91,7 @@
             function task2() {
                 this.element.style.display = 'none';
                 this.element.style.opacity = 1;
+                this._setHXDisplay( this.element , 'none' );
                 flow.progress();
             }
 
@@ -119,7 +120,7 @@
 
         delete xForm.pseudoHide;
 
-        this.apply( 'opacity' , xForm );
+        this.set( 'opacity' , xForm );
     };
 
 
@@ -138,32 +139,6 @@
             options.done = function() {};
         // -------------------------------------------------------------- //
 
-        var flow = new hxManager.workflow();
-
-        function task1() {
-            var isHidden = window.getComputedStyle( this.element ).display === 'none';
-            if (isHidden) {
-                this.setTransition( 'opacity' , {
-                    duration: 0,
-                    delay: 0
-                });
-            }
-            flow.progress( isHidden );
-        }
-
-        function task2( isHidden ) {
-            if (isHidden) {
-                this.element.style.opacity = 0;
-                this.element.style.display = 'block';
-            }
-            flow.progress();
-        }
-
-        function task3() {
-            this.apply( 'opacity' , xForm );
-            flow.progress();
-        }
-
         function complete() {
             hxManager.pseudoShow( this.element );
         }
@@ -173,12 +148,7 @@
             done: [ complete , options.done ]
         });
 
-        flow.add( task1 , this );
-        flow.add( task2 , this );
-        flow.add( task3 , this );
-
-        flow.run();
-
+        this.set( 'opacity' , xForm );
     };
 
 

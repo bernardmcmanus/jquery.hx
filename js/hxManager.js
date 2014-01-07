@@ -40,7 +40,7 @@
 
             this.vendorPatch = new hxManager.vendorPatch();
 
-            if (this._checkHiddenState( this.element ))
+            if (!this._checkDisplayState( this.element ))
                 this._prepHiddenElement();
             
             var self = $(this.element);
@@ -48,8 +48,32 @@
             $.extend(self, this);
             return self;
         },
-        _checkHiddenState: function( element ) {
-            return window.getComputedStyle( element ).display === 'none';
+        _checkDisplayState: function( element ) {
+            
+            var hx_display = this._getHXDisplay( element );
+            var style = element.style.display;
+            
+            if (hx_display === null || hx_display === undefined) {
+                
+                var computed = window.getComputedStyle( element ).display;
+                element.style.display = computed;
+                hx_display = computed;
+                this._setHXDisplay( this.element , hx_display );
+
+            } else if (hx_display !== style) {
+                
+                hx_display = style;
+                this._setHXDisplay( this.element , hx_display );
+
+            }
+
+            return hx_display !== 'none';
+        },
+        _getHXDisplay: function( element ) {
+            return element.getAttribute( 'hx_display' );
+        },
+        _setHXDisplay: function( element , value ) {
+            element.setAttribute( 'hx_display' , value );
         },
         _prepHiddenElement: function() {
 
@@ -69,8 +93,15 @@
                 flow.progress();
             }
 
+            function task3() {
+                this.element.getBoundingClientRect();
+                this._setHXDisplay( this.element , 'block' );
+                flow.progress();
+            }
+
             flow.add( task1 , this );
             flow.add( task2 , this );
+            flow.add( task3 , this );
 
             flow.run();
         },
@@ -311,10 +342,10 @@
 
             // check the remaining queue elements
             if (hxManager.objSize( this.queue ) < 1) {
-                if (typeof this._callback === 'function')
-                    this._callback.call( this , event );
                 if (config.debug.onComplete)
                     hxManager.log('done');
+                if (typeof this._callback === 'function')
+                    this._callback.call( this , event );
                 this.hxManager = 0;
             }
         },
