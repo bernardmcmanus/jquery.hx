@@ -34,20 +34,6 @@
             this.queue.push( wfTask );
             this.count++;
         },
-        wait: function( t ) {
-                        
-            var wfTask = function( args ) {
-                var a = new Date().getTime();
-                var b = 0;
-                while (b - a < t) {
-                    b = new Date().getTime();
-                }
-                this.progress.apply( this , args );
-            };
-            
-            this.queue.push( wfTask );
-            this.count++;
-        },
         run: function() {
             this._doWork( this.index , this.count , arguments );
         },
