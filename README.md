@@ -59,6 +59,12 @@ $('selector').hx( 'fadeOut' , {
     pseudoHide: true
 });
 ```
+
+#### cancel
+Triggering the cancel action will allow an element to finish its current animation frame, but will prevent callbacks from being fired upon completion. Any subsequent frames will not be executed.
+```javascript
+$('selector').hx( 'cancel' );
+```
 =====
 
 ### Options

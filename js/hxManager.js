@@ -8,7 +8,8 @@
             tString: false,
             transitionEndEvent: false,
             fallback: false,
-            onComplete: false
+            onComplete: false,
+            onCancel: false
         },
         loadLogger: false,
         loggerPath: 'http://bmcmanus.cs.sandbox.millennialmedia.com/jquery.hx/code/logger.js'
@@ -39,6 +40,9 @@
         _init: function() {
 
             this.vendorPatch = new hxManager.vendorPatch();
+
+            var evt = this.vendorPatch.createEvent( 'hxManagerInit' );
+            this.element.dispatchEvent( evt );
 
             if (!this._checkDisplayState( this.element ))
                 this._prepHiddenElement();
@@ -352,7 +356,7 @@
         done: function( callback ) {
             this._callback = callback || function() {};
         },
-        destroy: function() {
+        cancel: function() {
             for (var key in this.queue) {
                 this.queue[key].destroy();
             }

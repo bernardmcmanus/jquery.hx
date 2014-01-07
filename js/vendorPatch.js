@@ -37,7 +37,7 @@
                 }
             }
         },
-        getEventName: function() {
+        getEventType: function() {
             return this.events[ this.ua ];
         },
         getPrefixed: function( str ) {
@@ -49,14 +49,37 @@
             }
             return str;
         },
-        addEventListener: function( target , listener ) {
-            var evt = this.getEventName();
+        createEvent: function( type , detail ) {
+
+            if (!type)
+                return;
+
+            detail = detail || {};
+
+            var evt = {};
+
+            try {
+                evt = new CustomEvent( type , {
+                    bubbles: true,
+                    cancelable: true,
+                    detail: detail
+                });
+            } catch( err ) {
+                evt = document.createEvent('Event');
+                evt.initEvent( type , true , true );
+                evt.detail = detail;
+            }
+            
+            return evt;
+        },
+        /*addEventListener: function( target , listener ) {
+            var evt = this.getEventType();
             target.addEventListener( evt , listener );
         },
         removeEventListener: function( target , listener ) {
-            var evt = this.getEventName();
+            var evt = this.getEventType();
             target.removeEventListener( evt , listener );
-        },
+        },*/
         getComputedMatrix: function( manager ) {
             var style = window.getComputedStyle( manager.element );
             var transform = this.ua + 'Transform';

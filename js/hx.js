@@ -152,6 +152,11 @@
     };
 
 
+    $.fn.hx.cancel = function() {
+        return;
+    };
+
+
     $.fn.hx.notify = function( options ) {
 
         // prevent duplicate notifications

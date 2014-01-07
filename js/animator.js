@@ -12,9 +12,13 @@
 
     animator.prototype = {
         start: function() {
+            
             var self = this;
             var t = this.duration + this.delay + this.buffer;
-            this.vendorPatch.addEventListener( this.element , this );
+            
+            this.element.addEventListener( this.vendorPatch.getEventType() , this );
+            this.element.addEventListener( 'hxManagerInit' , this );
+            
             this.timeout = setTimeout(function() {
                 if (self.debug.fallback)
                     hxManager.log(self.property + ' fallback triggered');
@@ -22,39 +26,38 @@
             } , t );
         },
         handleEvent: function( event ) {
-            var name = event.propertyName || event.detail.propertyName;
-            var re = new RegExp( this.property , 'i' );
-            if (re.test( name )) {
-                this.destroy();
-                this.manager._transitionEnd.call( this.manager , event , this.property );
-            }
-        },
-        _createEvent: function() {
-            var evt = {};
-            try {
-                evt = new CustomEvent( this.vendorPatch.getEventName() , {
-                    bubbles: true,
-                    cancelable: true,
-                    detail: {
-                        propertyName: this.property
+            switch (event.type) {
+                case 'webkitTransitionEnd':
+                case 'transitionend':
+                case 'oTransitionEnd':
+                    var name = event.propertyName || event.detail.propertyName;
+                    var re = new RegExp( this.property , 'i' );
+                    if (re.test( name )) {
+                        this.destroy();
+                        this.manager._transitionEnd.call( this.manager , event , this.property );
                     }
-                });
-            } catch( err ) {
-                evt = document.createEvent('Event');
-                evt.initEvent( this.vendorPatch.getEventName() , true , true );
-                evt.detail = {
-                    propertyName: this.property
-                };
+                    break;
+                case 'hxManagerInit':
+                    this.manager.cancel();
+                    if (this.debug.onCancel)
+                        hxManager.log('hxManager instance canceled');
+                    break;
             }
-            return evt;
         },
         _dispatchEvent: function() {
-            var evt = this._createEvent();
+            
+            var type = this.vendorPatch.getEventType();
+            
+            var evt = this.vendorPatch.createEvent( type , {
+                propertyName: this.property
+            });
+
             this.element.dispatchEvent( evt );
         },
         destroy: function() {
             clearTimeout( this.timeout );
-            this.vendorPatch.removeEventListener( this.element , this );
+            this.element.removeEventListener( this.vendorPatch.getEventType() , this );
+            this.element.removeEventListener( 'hxManagerInit' , this );
         }
     };
 
