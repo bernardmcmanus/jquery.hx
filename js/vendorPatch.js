@@ -69,17 +69,9 @@
                 evt.initEvent( type , true , true );
                 evt.detail = detail;
             }
-            
+
             return evt;
         },
-        /*addEventListener: function( target , listener ) {
-            var evt = this.getEventType();
-            target.addEventListener( evt , listener );
-        },
-        removeEventListener: function( target , listener ) {
-            var evt = this.getEventType();
-            target.removeEventListener( evt , listener );
-        },*/
         getComputedMatrix: function( manager ) {
             var style = window.getComputedStyle( manager.element );
             var transform = this.ua + 'Transform';
