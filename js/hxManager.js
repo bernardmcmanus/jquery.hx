@@ -10,12 +10,13 @@
             fallback: false,
             onComplete: false,
             onCancel: false
-        },
-        loadLogger: false,
-        loggerPath: 'http://bmcmanus.cs.sandbox.millennialmedia.com/jquery.hx/code/logger.js'
+        }
     };
 
     window.hxManager = function( element ) {
+
+        if (!element)
+            throw "Error: You must pass an element to the hxManager constructor.";
 
         if (config.debug.oncreate)
             hxManager.log( 'new hxManager instance' );
@@ -98,6 +99,7 @@
             }
 
             function task3() {
+                // getBoundingClientRect forces a DOM reflow
                 this.element.getBoundingClientRect();
                 this._setHXDisplay( this.element , 'block' );
                 flow.progress();
@@ -318,10 +320,10 @@
             }
             return response;
         },
-        _parse: function( str ) {
+        _parse: function( str ) {            
             var type = this._isHXTransform( str );
             if (!str || !type) return {};
-            str = str.replace(/px/g, '').replace(/ /g, '').replace(/\)/g, '').split('(')[1].split(',');
+            str = str.replace(/(px|\s|\))/gi, '').split('(')[1].split(',');
             var map = Array.prototype.map;
             str = map.call( str , function(i) {return parseFloat(i, 10);} );
             return {
@@ -332,7 +334,7 @@
         _transitionEnd: function( event , name ) {
 
             if (config.debug.transitionEndEvent)
-                hxManager.log( name );
+                hxManager.log( name + ' complete' );
 
             // fire callbacks for individual properties
             if (typeof this.queue[name] !== 'undefined' && typeof this.queue[name].done[0] === 'function') {
@@ -398,23 +400,10 @@
     };
 
     hxManager.setDebugFlag = function( flag ) {
-        _loadLogger();
+        this.cdn.load( 'logger' );
         if (typeof config.debug[flag] !== 'undefined')
             config.debug[flag] = true;
     };
-
-    function _loadLogger() {
-
-        if (config.loadLogger)
-            return;
-
-        config.loadLogger = true;
-
-        var logger = document.createElement('script');
-        logger.src = config.loggerPath;
-
-        document.querySelector('head').appendChild( logger );
-    }
     
 }());
 
