@@ -21,7 +21,7 @@
             
             this.timeout = setTimeout(function() {
                 if (self.debug.fallback)
-                    hxManager.log(self.property + ' fallback triggered');
+                    hx.log(self.property + ' fallback triggered');
                 self._dispatchEvent.call( self );
             } , t );
         },
@@ -40,7 +40,7 @@
                 case 'hxManagerInit':
                     this.manager.cancel();
                     if (this.debug.onCancel)
-                        hxManager.log('hxManager instance canceled');
+                        hx.log('hxManager instance canceled');
                     break;
             }
         },
