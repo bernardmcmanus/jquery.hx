@@ -4,7 +4,7 @@
 =====
 
 ### Overview
-The hx plugin allows you to use the hardware-accelerated transformations baked into CSS3 without any additional code. The plugin is called as follows:
+hx is a jQuery plugin which enables you to use the hardware-accelerated transformations baked into CSS3 without any additional code. The plugin is called as follows:
 ```javascript
 $('selector').hx( 'action' , options );
 ```
@@ -141,7 +141,7 @@ $('selector').hx( 'transform' , {
 
 #### pseudoHide
 
-The pseudoHide option is necessary for full compatibility within the native browser on certain Android devices. When pseudoHide is true, elements that are faded out will be hidden using the opacity and pointer-events properties. In most cases the result is functionaly equivalent to setting display equal to none, but allows for retrieval of the element's computed style.
+The pseudoHide option is necessary for full compatibility in Firefox and the native browser on certain Android devices. When pseudoHide is true, elements that are faded out will be hidden using the opacity and pointer-events properties. In most cases the result is functionaly equivalent to setting display equal to none, but allows for retrieval of the element's computed style.
 
 =====
 
@@ -196,6 +196,12 @@ $('selector')
     });
 });
 ```
+
+=====
+
+### Compatibility
+
+jQuery.hx is supported in both mobile and desktop versions of all major browsers including Chrome, Safari, Firefox, Opera, and Internet Explorer 9+.
 
 =====
 
