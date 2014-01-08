@@ -39,7 +39,7 @@
         },
         progress: function() {
             if (this.debug)
-                hxManager.log('completed task ' + this.index);
+                hx.log('completed task ' + this.index);
             this.index++;
             this._doWork( this.index , this.count , arguments );
         },
@@ -48,7 +48,7 @@
                 this.queue[ i ].call( this , args );
             } else {
                 if (this.debug)
-                    hxManager.log('workflow complete');
+                    hx.log('workflow complete');
             }
         }
     };
