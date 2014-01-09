@@ -129,7 +129,6 @@
             function task3() {
                 // getBoundingClientRect forces a DOM reflow
                 this.element.getBoundingClientRect();
-                //this._setHXDisplay( this.element , 'block' );
                 flow.progress();
             }
 
