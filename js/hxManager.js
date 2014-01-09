@@ -85,14 +85,12 @@
             // determine the boolean response
             switch (hx_display) {
                 case 0:
+                case 3:
                     response = (style !== 'none');
                     break;
                 case 1:
                 case 2:
                     response = (style !== 'none' && style !== '');
-                    break;
-                case 3:
-                    response = (style !== 'none');
                     break;
             }
 
