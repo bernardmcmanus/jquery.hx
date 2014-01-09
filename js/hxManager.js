@@ -57,25 +57,53 @@
             
             var hx_display = this._getHXDisplay( element );
             var style = element.style.display;
-            
+            var response = null;
+
             if (hx_display === null || hx_display === undefined) {
                 
                 var computed = window.getComputedStyle( element ).display;
-                element.style.display = computed;
-                hx_display = computed;
-                this._setHXDisplay( this.element , hx_display );
 
-            } else if (hx_display !== style) {
-                
-                hx_display = style;
+                // determine the hx_display code
+                if (computed !== 'none' && style === '') {
+                    // visible, not styled inline
+                    hx_display = 0;
+                } else if (computed !== 'none' && computed === style) {
+                    // visible, styled inline
+                    hx_display = 1;
+                } else if (computed === 'none' && style === '') {
+                    // hidden, not styled inline
+                    hx_display = 2;
+                } else if (computed === 'none' && computed === style) {
+                    // hidden, styled inline
+                    hx_display = 3;
+                }
+
                 this._setHXDisplay( this.element , hx_display );
 
             }
 
-            return hx_display !== 'none';
+            // determine the boolean response
+            switch (hx_display) {
+                case 0:
+                    response = (style !== 'none');
+                    break;
+                case 1:
+                case 2:
+                    response = (style !== 'none' && style !== '');
+                    break;
+                case 3:
+                    response = (style !== 'none');
+                    break;
+            }
+
+            return response;
+
         },
         _getHXDisplay: function( element ) {
-            return element.getAttribute( 'hx_display' );
+            var hx_display = element.getAttribute( 'hx_display' );
+            if (hx_display !== null)
+                hx_display = parseInt( hx_display , 10 );
+            return hx_display;
         },
         _setHXDisplay: function( element , value ) {
             element.setAttribute( 'hx_display' , value );
@@ -101,7 +129,7 @@
             function task3() {
                 // getBoundingClientRect forces a DOM reflow
                 this.element.getBoundingClientRect();
-                this._setHXDisplay( this.element , 'block' );
+                //this._setHXDisplay( this.element , 'block' );
                 flow.progress();
             }
 

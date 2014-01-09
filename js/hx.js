@@ -91,7 +91,6 @@
             function task2() {
                 this.element.style.display = 'none';
                 this.element.style.opacity = 1;
-                this._setHXDisplay( this.element , 'none' );
                 flow.progress();
             }
 
