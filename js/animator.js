@@ -12,7 +12,10 @@
 
     animator.prototype = {
         start: function() {
-            
+
+            if (this.fallback === false)
+                return;
+
             var self = this;
             var t = this.duration + this.delay + this.buffer;
             

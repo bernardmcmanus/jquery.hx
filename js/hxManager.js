@@ -29,7 +29,7 @@
         });
 
         this.keys = {
-            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' ],
+            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' ],
             calculated: [ 'width' , 'height' ],
             nonXform: [ 'opacity' ]
         };
@@ -179,6 +179,7 @@
                 duration    : options.duration || 0,
                 easing      : hxManager._easing( options.easing ),
                 delay       : options.delay || 0,
+                fallback    : options.fallback,
                 done        : options.done || [],
                 debug       : config.debug
             });
@@ -223,6 +224,10 @@
             tString = this.vendorPatch.getPrefixed( tString );
 
             var tProp = this.vendorPatch.getPrefixed( 'transition' );
+
+            // if the element's style is already equal to the new transition string, don't apply it
+            if (this.element.style.transition === tString)
+                return;
 
             $(this.element).css( tProp , tString );
 

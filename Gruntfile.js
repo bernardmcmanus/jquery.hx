@@ -1,6 +1,15 @@
 module.exports = function(grunt) {
 
-    var libs = [ 'js/hxManager.js' , 'js/workflow.js' , 'js/vendorPatch.js' , 'js/easing.js' , 'js/animator.js' , 'js/hx.js' , 'js/cdn.js' ];
+    var libs = [
+        'js/hxManager.js',
+        'js/workflow.js',
+        'js/vendorPatch.js',
+        'js/easing.js',
+        'js/animator.js',
+        'js/hx.js',
+        'js/extensions.js',
+        'js/cdn.js'
+    ];
 
     grunt.initConfig({
 
