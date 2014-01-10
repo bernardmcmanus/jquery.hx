@@ -38,7 +38,7 @@
             delay: 0,
             done: function() {},
             relative: true
-        }, options);
+        }, (options || {}));
 
         // -------------------------------------------------------------- //
             // prevent individual callbacks from being added
@@ -68,7 +68,7 @@
             delay: 0,
             done: function() {},
             pseudoHide: true
-        }, options);
+        }, (options || {}));
 
         // -------------------------------------------------------------- //
             // prevent individual callbacks from being added
@@ -130,7 +130,7 @@
             easing: 'ease',
             delay: 0,
             done: function() {}
-        }, options);
+        }, (options || {}));
 
         // -------------------------------------------------------------- //
             // prevent individual callbacks from being added
