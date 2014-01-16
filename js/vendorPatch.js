@@ -1,48 +1,32 @@
 (function( hx ) {
 
-    var vendorPatch = function( options ) {
-        
-        options = $.extend({
-            vendors: {
-                webkit: 'webkit',
-                moz: 'firefox',
-                o: 'opera',
-                ms: 'msie'
-            },
-            events: {
-                webkit: 'webkitTransitionEnd',
-                moz: 'transitionend',
-                o: 'oTransitionEnd',
-                ms: 'transitionend'
-            },
-            prefixProps: [ 'transition' , 'transform' ]
-        }, (options || {}));
+    var config = {
+        vendors: {
+            webkit: 'webkit',
+            moz: 'firefox',
+            o: 'opera',
+            ms: 'msie'
+        },
+        events: {
+            webkit: 'webkitTransitionEnd',
+            moz: 'transitionend',
+            o: 'oTransitionEnd',
+            ms: 'transitionend'
+        },
+        prefixProps: [ 'transition' , 'transform' ]
+    };
 
-        $.extend( this , options );
-
-        this._init();
+    var vendorPatch = function() {
+        this.ua = _getUserAgent();
     };
 
     vendorPatch.prototype = {
-        _init: function() {
-            this._getUserAgent();
-        },
-        _getUserAgent: function() {
-            var uaString = navigator.userAgent;
-            for (var key in this.vendors) {
-                var re = new RegExp( this.vendors[key] , 'i' );
-                if (re.test( uaString )) {
-                    this.ua = key;
-                    break;
-                }
-            }
-        },
         getEventType: function() {
-            return this.events[ this.ua ];
+            return config.events[ this.ua ];
         },
         getPrefixed: function( str ) {
-            for (var i = 0; i < this.prefixProps.length; i++) {
-                var re = new RegExp( '(?!-)' + this.prefixProps[i] + '(?!-)' , 'g' );
+            for (var i = 0; i < config.prefixProps.length; i++) {
+                var re = new RegExp( '(?!-)' + config.prefixProps[i] + '(?!-)' , 'g' );
                 var match = re.exec( str );
                 if (match)
                     str = str.replace( re , ('-' + this.ua + '-' + match[0]) );
@@ -78,6 +62,15 @@
             return style[transform] || style.transform;
         }
     };
+
+    function _getUserAgent() {
+        var uaString = navigator.userAgent;
+        for (var key in config.vendors) {
+            var re = new RegExp( config.vendors[key] , 'i' );
+            if (re.test( uaString ))
+                return key;
+        }
+    }
 
     $.extend( hx , {vendorPatch: vendorPatch} );
     
