@@ -34,6 +34,10 @@ The following code blocks show the available actions called with their respectiv
 $('selector').hx( 'transform' , {
     translate: {x: 0, y: 0, z: 0},
     scale: {x: 1, y: 1, z: 1},
+    rotate: {x: 0, y: 0, z: 0, a: 0},
+    rotateX: 0,
+    rotateY: 0,
+    rotateZ: 0,
     duration: 400,
     easing: 'ease',
     delay: 0,
@@ -162,12 +166,22 @@ $('selector').hx( 'transform' , {
 });
 ```
 
+Next, add a 360-degree rotation about the z axis.
+```javascript
+$('selector').hx( 'transform' , {
+    translate: {x: 300, y: 150},
+    scale: {x: 1.5, y: 1.5},
+    rotate: {z: 1, a: 360}
+});
+```
+
 Now, fade the element out part way through the animation.
 ```javascript
 $('selector')
 .hx( 'transform' , {
     translate: {x: 300, y: 150},
-    scale: {x: 1.5, y: 1.5}
+    scale: {x: 1.5, y: 1.5},
+    rotate: {z: 1, a: 360}
 })
 .hx( 'fadeOut' , {
     duration: 300,
@@ -180,7 +194,8 @@ Finally, use the __done__ method to fade the element back in and return it to it
 $('selector')
 .hx( 'transform' , {
     translate: {x: 300, y: 150},
-    scale: {x: 1.5, y: 1.5}
+    scale: {x: 1.5, y: 1.5},
+    rotate: {z: 1, a: 360}
 })
 .hx( 'fadeOut' , {
     duration: 300,
@@ -194,6 +209,52 @@ $('selector')
         scale: {x: 1, y: 1},
         relative: false
     });
+});
+```
+
+=====
+
+### Order Matters!
+
+#### Hidden Elements
+
+In general, you should not apply a transformation to a hidden element without first taking steps to make it visible. For example, if you are chaining transform and fadeIn actions, make sure the fadeIn call is placed _before_ the transform call.
+
+```javascript
+$('selector')
+.hx( 'fadeIn' )
+.hx( 'transform' , {
+    ...
+});
+```
+
+Inversely, if you are chaining transform and fadeOut actions, make sure the fadeOut call is placed _after_ the transform call.
+
+```javascript
+$('selector')
+.hx( 'transform' , {
+    ...
+})
+.hx( 'fadeOut' );
+```
+
+#### Transformations
+
+The order in which you apply transformations will affect the final outcome. For instance, the following snippet will translate an element 100 pixels to the right and scale it by a factor of 2 along the x axis.
+
+```javascript
+$('selector').hx( 'transform' , {
+    translate: {x: 100},
+    scale: {x: 2}
+});
+```
+
+However if scale is applied first, the element will be translated 200 pixels.
+
+```javascript
+$('selector').hx( 'transform' , {
+    scale: {x: 2},
+    translate: {x: 100}
 });
 ```
 
