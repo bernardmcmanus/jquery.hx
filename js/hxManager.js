@@ -3,13 +3,16 @@
     var config = {
         debug: {
             oncreate: false,
-            queue: false,
-            components: false,
             tString: false,
             transitionEndEvent: false,
             fallback: false,
             onComplete: false,
             onCancel: false
+        },
+        keys: {
+            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' ],
+            calculated: [ 'width' , 'height' ],
+            nonXform: [ 'opacity' ]
         }
     };
 
@@ -28,12 +31,6 @@
             _callback: function() {}
         });
 
-        this.keys = {
-            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' ],
-            calculated: [ 'width' , 'height' ],
-            nonXform: [ 'opacity' ]
-        };
-
         return this._init();
     };
 
@@ -45,66 +42,13 @@
             var evt = this.vendorPatch.createEvent( 'hxManagerInit' );
             this.element.dispatchEvent( evt );
 
-            if (!this._checkDisplayState( this.element ))
+            if (!_checkDisplayState( this.element ))
                 this._prepHiddenElement();
             
             var self = $(this.element);
             self.hxManager = 1;
             $.extend(self, this);
             return self;
-        },
-        _checkDisplayState: function( element ) {
-            
-            var hx_display = this._getHXDisplay( element );
-            var style = element.style.display;
-            var response = null;
-
-            if (hx_display === null || hx_display === undefined) {
-                
-                var computed = window.getComputedStyle( element ).display;
-
-                // determine the hx_display code
-                if (computed !== 'none' && style === '') {
-                    // visible, not styled inline
-                    hx_display = 0;
-                } else if (computed !== 'none' && computed === style) {
-                    // visible, styled inline
-                    hx_display = 1;
-                } else if (computed === 'none' && style === '') {
-                    // hidden, not styled inline
-                    hx_display = 2;
-                } else if (computed === 'none' && computed === style) {
-                    // hidden, styled inline
-                    hx_display = 3;
-                }
-
-                this._setHXDisplay( this.element , hx_display );
-
-            }
-
-            // determine the boolean response
-            switch (hx_display) {
-                case 0:
-                case 3:
-                    response = (style !== 'none');
-                    break;
-                case 1:
-                case 2:
-                    response = (style !== 'none' && style !== '');
-                    break;
-            }
-
-            return response;
-
-        },
-        _getHXDisplay: function( element ) {
-            var hx_display = element.getAttribute( 'hx_display' );
-            if (hx_display !== null)
-                hx_display = parseInt( hx_display , 10 );
-            return hx_display;
-        },
-        _setHXDisplay: function( element , value ) {
-            element.setAttribute( 'hx_display' , value );
         },
         _prepHiddenElement: function() {
 
@@ -138,14 +82,14 @@
         },
         _getComputedStyle: function( property ) {
 
-            if (this.keys.nonXform.indexOf( property ) >= 0)
+            if (config.keys.nonXform.indexOf( property ) >= 0)
                 return;
             
             var matrix = this.vendorPatch.getComputedMatrix( this );
 
-            if (this._isHXTransform( matrix ) !== false) {
+            if (_isHXTransform( matrix ) !== false) {
                 this.components.transform = this.components.transform || {};
-                this.components.transform.computed = this._parse( matrix );
+                this.components.transform.computed = _parse( matrix );
             }
         },
         apply: function( property , options ) {
@@ -162,12 +106,7 @@
                 delete this.components[property].computed;
 
             // build the component array
-            this.components[property] = $.extend( this.components[property] , this._getRawComponents( options ));
-            
-            // components debugging
-            if (config.debug.components)
-                hxManager.log( this.components );
-
+            this.components[property] = $.extend( this.components[property] , _getRawComponents( options ));
 
             // add the animation instance to the queue
             this.queue[ property ] = new hxManager.animator({
@@ -175,7 +114,7 @@
                 element     : this.element,
                 vendorPatch : this.vendorPatch,
                 property    : property,
-                value       : this.keys.nonXform.indexOf( property ) < 0 ? this._buildTransformString( this.components[property] ) : this.components[property][property][0],
+                value       : config.keys.nonXform.indexOf( property ) < 0 ? _buildTransformString( this.components[property] ) : this.components[property][property][0],
                 duration    : options.duration || 0,
                 easing      : hxManager._easing( options.easing ),
                 delay       : options.delay || 0,
@@ -183,10 +122,6 @@
                 done        : options.done || [],
                 debug       : config.debug
             });
-
-            // queue debugging
-            if (config.debug.queue)
-                hxManager.log($.extend( {} , this.queue ));
 
             // build and apply the transition string
             this.setTransition( property );
@@ -220,7 +155,7 @@
             if (typeof options.easing !== 'undefined')
                 this.queue[ property ].easing = hxManager._easing( options.easing );
 
-            var tString = this._buildTransitionString();
+            var tString = _buildTransitionString( this.queue );
             tString = this.vendorPatch.getPrefixed( tString );
 
             var tProp = this.vendorPatch.getPrefixed( 'transition' );
@@ -234,132 +169,6 @@
             // transition string debugging
             if (config.debug.tString)
                 hxManager.log( tProp + ': ' + tString );
-        },
-        _mapVectorToArray: function( vector , name ) {
-
-            if (hxManager.objSize( vector ) < 1 && !Array.isArray( vector ))
-                return [ vector ];
-
-            if (Array.isArray( vector ))
-                return vector;
-            
-            var v = vector;
-            var arr = [];
-            var i = 0;
-
-            var map = {
-                x: 0,
-                y: 1,
-                z: 2,
-                a: 3
-            };
-            
-            for (var key in v) {
-                i = map[key];
-                arr[i] = v[key];
-            }
-
-            return arr;
-        },
-        _getRawComponents: function( options ) {
-            var defaults = [];
-            var components = {};
-            for (var key in options) {
-                if (this.keys.config.indexOf( key ) >= 0) continue;
-                var values = this._mapVectorToArray( options[key] );
-                switch (key) {
-                    case 'matrix3d':
-                        defaults = [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ];
-                        break;
-                    case 'matrix':
-                        defaults = [ 1 , 0 , 0 , 1 , 0 , 0 ];
-                        break;
-                    case 'translate3d':
-                        defaults = [ 0 , 0 , 0 ];
-                        break;
-                    case 'scale3d':
-                        defaults = [ 1 , 1 , 1 ];
-                        break;
-                    case 'rotate3d':
-                        defaults = [ 0 , 0 , 0 , 0 ];
-                        break;
-                    case 'opacity':
-                        defaults = [ 0 ];
-                        break;
-                }
-                values = $.extend( defaults , values );
-                components[key] = values;
-            }
-            return components;
-        },
-        _buildComponentString: function( component , values ) {
-            var joinWith = '';
-            var appendWith = '';
-            switch (component) {
-                case 'computed':
-                    component = values.type;
-                    values = values.transform;
-                    joinWith = ', ';
-                    appendWith = '';
-                    break;
-                case 'translate3d':
-                    joinWith = 'px, ';
-                    appendWith = 'px';
-                    break;
-                case 'matrix3d':
-                case 'matrix':
-                case 'scale3d':
-                    joinWith = ', ';
-                    appendWith = '';
-                    break;
-                case 'rotate3d':
-                    joinWith = ', ';
-                    appendWith = 'deg';
-                    break;
-            }
-            return component + '(' + values.join( joinWith ) + appendWith + ')';
-        },
-        _buildTransformString: function( options ) {
-            var xform = [];
-            for (var key in options) {
-                if (this.keys.config.indexOf( key ) < 0) {
-                    var compString = this._buildComponentString( key , options[key] );
-                    xform.push( compString );
-                }
-            }
-            return xform.join(' ');
-        },
-        _buildTransitionString: function() {
-            var arr = [];
-            for (var key in this.queue) {
-                var component = key + ' ' + this.queue[key].duration + 'ms ' + this.queue[key].easing + ' ' + this.queue[key].delay + 'ms';
-                if (arr.indexOf( component ) < 0) arr.push( component );
-            }
-            return arr.join(', ');
-        },
-        _isHXTransform: function( str ) {
-            if (!str) return false;
-            var types = [ 'matrix' , 'matrix3d' ];
-            var response = false;
-            for (var i = 0; i < types.length; i++) {
-                var re = new RegExp( types[i] + '\\(' , 'gi' );
-                if (re.test( str )) {
-                    response = types[i];
-                    break;
-                }
-            }
-            return response;
-        },
-        _parse: function( str ) {            
-            var type = this._isHXTransform( str );
-            if (!str || !type) return {};
-            str = str.replace(/(px|\s|\))/gi, '').split('(')[1].split(',');
-            var map = Array.prototype.map;
-            str = map.call( str , function(i) {return parseFloat(i, 10);} );
-            return {
-                type: type,
-                transform: str
-            };
         },
         _transitionEnd: function( event , name ) {
 
@@ -395,45 +204,261 @@
         }
     };
 
-    hxManager.pseudoHide = function( element ) {
-        $(element)
-            .addClass('hx_pseudoHide')
-            .css('pointer-events', 'none');
-    };
 
-    hxManager.pseudoShow = function( element ) {
-        if (!$(element).hasClass('hx_pseudoHide'))
-            return;
-        $(element)
-            .removeClass('hx_pseudoHide')
-            .css('pointer-events', 'auto');
-    };
 
-    hxManager.objSize = function( obj ) {
-        if (typeof obj !== 'object') return 0;
-        var size = 0, key;
-        for (key in obj) {
-            if (key in obj) size++;
-        }
-        return size;
-    };
 
-    hxManager.log = function( msg , type ) {
-        type = type || 'log';
-        try {
-            if (window.logger) {
-                window.logger.log( msg );
-            } else {
-                console[type](msg);
+
+    // ------------------------- public methods ------------------------- //
+
+        hxManager.pseudoHide = function( element ) {
+            $(element)
+                .addClass('hx_pseudoHide')
+                .css('pointer-events', 'none');
+        };
+
+        hxManager.pseudoShow = function( element ) {
+            if (!$(element).hasClass('hx_pseudoHide'))
+                return;
+            $(element)
+                .removeClass('hx_pseudoHide')
+                .css('pointer-events', 'auto');
+        };
+
+        hxManager.objSize = function( obj ) {
+            if (typeof obj !== 'object') return 0;
+            var size = 0, key;
+            for (key in obj) {
+                if (key in obj) size++;
             }
-        } catch (err) {}
-    };
+            return size;
+        };
 
-    hxManager.setDebugFlag = function( flag ) {
-        this.cdn.load( 'logger' );
-        if (typeof config.debug[flag] !== 'undefined')
-            config.debug[flag] = true;
-    };
+        hxManager.log = function( msg , type ) {
+            type = type || 'log';
+            try {
+                if (window.logger) {
+                    window.logger.log( msg );
+                } else {
+                    console[type](msg);
+                }
+            } catch (err) {}
+        };
+
+        hxManager.setDebugFlag = function( flag ) {
+            this.cdn.load( 'logger' );
+            if (typeof config.debug[flag] !== 'undefined')
+                config.debug[flag] = true;
+        };
+
+    // ------------------------------------------------------------------ //
+    
+
+
+
+
+    // ------------------------- private methods ------------------------- //
+
+        function _checkDisplayState( element ) {
+            
+            var hx_display = _getHXDisplay( element );
+            var style = element.style.display;
+            var response = null;
+
+            if (hx_display === null || hx_display === undefined) {
+                
+                var computed = window.getComputedStyle( element ).display;
+
+                // determine the hx_display code
+                if (computed !== 'none' && style === '') {
+                    // visible, not styled inline
+                    hx_display = 0;
+                } else if (computed !== 'none' && computed === style) {
+                    // visible, styled inline
+                    hx_display = 1;
+                } else if (computed === 'none' && style === '') {
+                    // hidden, not styled inline
+                    hx_display = 2;
+                } else if (computed === 'none' && computed === style) {
+                    // hidden, styled inline
+                    hx_display = 3;
+                }
+
+                _setHXDisplay( element , hx_display );
+
+            }
+
+            // determine the boolean response
+            switch (hx_display) {
+                case 0:
+                case 3:
+                    response = (style !== 'none');
+                    break;
+                case 1:
+                case 2:
+                    response = (style !== 'none' && style !== '');
+                    break;
+            }
+
+            return response;
+
+        }
+
+        function _getHXDisplay( element ) {
+            var hx_display = element.getAttribute( 'hx_display' );
+            if (hx_display !== null)
+                hx_display = parseInt( hx_display , 10 );
+            return hx_display;
+        }
+
+        function _setHXDisplay( element , value ) {
+            element.setAttribute( 'hx_display' , value );
+        }
+
+        function _mapVectorToArray( vector , name ) {
+
+            if (hxManager.objSize( vector ) < 1 && !Array.isArray( vector ))
+                return [ vector ];
+
+            if (Array.isArray( vector ))
+                return vector;
+            
+            var v = vector;
+            var arr = [];
+            var i = 0;
+
+            var map = {
+                x: 0,
+                y: 1,
+                z: 2,
+                a: 3
+            };
+            
+            for (var key in v) {
+                i = map[key];
+                arr[i] = v[key];
+            }
+
+            return arr;
+        }
+
+        function _getRawComponents( options ) {
+            var defaults = [];
+            var components = {};
+            for (var key in options) {
+                if (config.keys.config.indexOf( key ) >= 0)
+                    continue;
+                var values = _mapVectorToArray( options[key] );
+                switch (key) {
+                    case 'matrix3d':
+                        defaults = [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ];
+                        break;
+                    case 'matrix':
+                        defaults = [ 1 , 0 , 0 , 1 , 0 , 0 ];
+                        break;
+                    case 'translate3d':
+                        defaults = [ 0 , 0 , 0 ];
+                        break;
+                    case 'scale3d':
+                        defaults = [ 1 , 1 , 1 ];
+                        break;
+                    case 'rotate3d':
+                        defaults = [ 0 , 0 , 0 , 0 ];
+                        break;
+                    case 'rotateX':
+                    case 'rotateY':
+                    case 'rotateZ':
+                    case 'opacity':
+                        defaults = [ 0 ];
+                        break;
+                }
+                values = $.extend( defaults , values );
+                components[key] = values;
+            }
+            return components;
+        }
+
+        function _buildComponentString( component , values ) {
+            var joinWith = '';
+            var appendWith = '';
+            switch (component) {
+                case 'computed':
+                    component = values.type;
+                    values = values.transform;
+                    joinWith = ', ';
+                    appendWith = '';
+                    break;
+                case 'translate3d':
+                    joinWith = 'px, ';
+                    appendWith = 'px';
+                    break;
+                case 'matrix3d':
+                case 'matrix':
+                case 'scale3d':
+                    joinWith = ', ';
+                    appendWith = '';
+                    break;
+                case 'rotate3d':
+                    joinWith = ', ';
+                    appendWith = 'deg';
+                    break;
+                case 'rotateX':
+                case 'rotateY':
+                case 'rotateZ':
+                    joinWith = '';
+                    appendWith = 'deg';
+                    break;
+            }
+            return component + '(' + values.join( joinWith ) + appendWith + ')';
+        }
+
+        function _buildTransformString( options ) {
+            var xform = [];
+            for (var key in options) {
+                if (config.keys.config.indexOf( key ) < 0) {
+                    var compString = _buildComponentString( key , options[key] );
+                    xform.push( compString );
+                }
+            }
+            return xform.join(' ');
+        }
+
+        function _buildTransitionString( queue ) {
+            var arr = [];
+            for (var key in queue) {
+                var component = key + ' ' + queue[key].duration + 'ms ' + queue[key].easing + ' ' + queue[key].delay + 'ms';
+                if (arr.indexOf( component ) < 0)
+                    arr.push( component );
+            }
+            return arr.join(', ');
+        }
+
+        function _isHXTransform( str ) {
+            if (!str)
+                return false;
+            var types = [ 'matrix' , 'matrix3d' ];
+            var response = false;
+            for (var i = 0; i < types.length; i++) {
+                var re = new RegExp( types[i] + '\\(' , 'gi' );
+                if (re.test( str )) {
+                    response = types[i];
+                    break;
+                }
+            }
+            return response;
+        }
+
+        function _parse( str ) {            
+            var type = _isHXTransform( str );
+            if (!str || !type) return {};
+            var arr = str.replace(/(px|\s|\))/gi, '').split('(')[1].split(',');
+            arr.map(function(i) {return parseFloat( i , 10 );});
+            return {
+                type: type,
+                transform: arr
+            };
+        }
+
+    // ------------------------------------------------------------------- //
     
 }());
 
