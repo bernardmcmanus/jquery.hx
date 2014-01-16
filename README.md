@@ -207,6 +207,7 @@ $('selector')
     .hx( 'transform' , {
         translate: {x: 0, y: 0},
         scale: {x: 1, y: 1},
+        rotate: {z: 1, a: 0}
         relative: false
     });
 });
