@@ -7,7 +7,6 @@ module.exports = function(grunt) {
         'js/easing.js',
         'js/animator.js',
         'js/hx.js',
-        'js/extensions.js',
         'js/cdn.js'
     ];
 
