@@ -88,8 +88,11 @@
             var matrix = this.vendorPatch.getComputedMatrix( this );
 
             if (_isHXTransform( matrix ) !== false) {
+                matrix = _parse( matrix );
+                if (matrix.transform.length < 1)
+                    return;
                 this.components.transform = this.components.transform || {};
-                this.components.transform.computed = _parse( matrix );
+                this.components.transform.computed = matrix;
             }
         },
         apply: function( property , options ) {
@@ -132,6 +135,7 @@
                     property: this.vendorPatch.getPrefixed( property ),
                     value: this.vendorPatch.getPrefixed( this.queue[ property ].value )
                 };
+                hxManager.log(transform.value);
                 $(this.element).css( transform.property , transform.value );
                 this.queue[ property ].start();
             }
@@ -208,6 +212,39 @@
 
 
 
+    // ------------------------- global methods ------------------------- //
+        
+        Array.prototype.compare = function ( array ) {
+            
+            // if the other array is a falsy value, return
+            if (!array)
+                return false;
+
+            // compare lengths - can save a lot of time
+            if (this.length != array.length)
+                return false;
+
+            for (var i = 0, l=this.length; i < l; i++) {
+                // Check if we have nested arrays
+                if (this[i] instanceof Array && array[i] instanceof Array) {
+                    // recurse into the nested arrays
+                    if (!this[i].compare(array[i]))
+                        return false;
+                }
+                else if (this[i] != array[i]) {
+                    // Warning - two different object instances will never be equal: {x:20} != {x:20}
+                    return false;
+                }
+            }
+            return true;
+        };
+
+    // ------------------------------------------------------------------ //
+
+
+
+
+
     // ------------------------- public methods ------------------------- //
 
         hxManager.pseudoHide = function( element ) {
@@ -225,7 +262,8 @@
         };
 
         hxManager.objSize = function( obj ) {
-            if (typeof obj !== 'object') return 0;
+            if (typeof obj !== 'object')
+                return 0;
             var size = 0, key;
             for (key in obj) {
                 if (key in obj) size++;
@@ -314,9 +352,9 @@
             element.setAttribute( 'hx_display' , value );
         }
 
-        function _mapVectorToArray( vector , name ) {
+        function _mapVectorToArray( vector ) {
 
-            if (hxManager.objSize( vector ) < 1 && !Array.isArray( vector ))
+            if (hxManager.objSize( vector ) < 1 && typeof vector !== 'object')
                 return [ vector ];
 
             if (Array.isArray( vector ))
@@ -342,42 +380,58 @@
         }
 
         function _getRawComponents( options ) {
-            var defaults = [];
             var components = {};
             for (var key in options) {
                 if (config.keys.config.indexOf( key ) >= 0)
                     continue;
                 var values = _mapVectorToArray( options[key] );
-                switch (key) {
-                    case 'matrix3d':
-                        defaults = [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ];
-                        break;
-                    case 'matrix':
-                        defaults = [ 1 , 0 , 0 , 1 , 0 , 0 ];
-                        break;
-                    case 'translate3d':
-                        defaults = [ 0 , 0 , 0 ];
-                        break;
-                    case 'scale3d':
-                        defaults = [ 1 , 1 , 1 ];
-                        break;
-                    case 'rotate3d':
-                        defaults = [ 0 , 0 , 0 , 0 ];
-                        break;
-                    case 'rotateX':
-                    case 'rotateY':
-                    case 'rotateZ':
-                    case 'opacity':
-                        defaults = [ 0 ];
-                        break;
-                }
-                values = $.extend( defaults , values );
-                components[key] = values;
+                var defaults = _getComponentDefaults( key );
+                components[key] = _checkComponentDefaults( key , values , defaults );
             }
             return components;
         }
 
+        function _getComponentDefaults( component ) {
+            var defaults = [];
+            switch (component) {
+                case 'matrix3d':
+                    defaults = [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ];
+                    break;
+                case 'matrix':
+                    defaults = [ 1 , 0 , 0 , 1 , 0 , 0 ];
+                    break;
+                case 'translate3d':
+                    defaults = [ 0 , 0 , 0 ];
+                    break;
+                case 'scale3d':
+                    defaults = [ 1 , 1 , 1 ];
+                    break;
+                case 'rotate3d':
+                    defaults = [ 0 , 0 , 0 , 0 ];
+                    break;
+                case 'rotateX':
+                case 'rotateY':
+                case 'rotateZ':
+                case 'opacity':
+                    defaults = [ 0 ];
+                    break;
+            }
+            return defaults;
+        }
+
+        function _checkComponentDefaults( component , values , defaults ) {
+            var defs = $.extend( [] , defaults );
+            var newVals = $.extend( defs , values );
+            if (defaults.compare( newVals ) && config.keys.nonXform.indexOf( component ) < 0)
+                newVals = [];
+            return newVals;
+        }
+
         function _buildComponentString( component , values ) {
+
+            if (values.length < 1)
+                return '';
+
             var joinWith = '';
             var appendWith = '';
             switch (component) {
@@ -416,7 +470,8 @@
             for (var key in options) {
                 if (config.keys.config.indexOf( key ) < 0) {
                     var compString = _buildComponentString( key , options[key] );
-                    xform.push( compString );
+                    if (compString !== '')
+                        xform.push( compString );
                 }
             }
             return xform.join(' ');
@@ -447,11 +502,16 @@
             return response;
         }
 
-        function _parse( str ) {            
+        function _parse( str ) {
             var type = _isHXTransform( str );
             if (!str || !type) return {};
             var arr = str.replace(/(px|\s|\))/gi, '').split('(')[1].split(',');
             arr.map(function(i) {return parseFloat( i , 10 );});
+
+            // compare the computed values with default values
+            var defaults = _getComponentDefaults( type );
+            arr = _checkComponentDefaults( type , arr , defaults );
+
             return {
                 type: type,
                 transform: arr
