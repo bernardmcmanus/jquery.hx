@@ -135,7 +135,7 @@
                     property: this.vendorPatch.getPrefixed( property ),
                     value: this.vendorPatch.getPrefixed( this.queue[ property ].value )
                 };
-                hxManager.log(transform.value);
+                
                 $(this.element).css( transform.property , transform.value );
                 this.queue[ property ].start();
             }
