@@ -35,7 +35,7 @@
             done: [ options.done ]
         }));
 
-        delete xForm.relative;
+        //delete xForm.relative;
 
         if (options.relative) {
             this.apply( 'transform' , xForm );

@@ -10,7 +10,7 @@
             onCancel: false
         },
         keys: {
-            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' ],
+            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'relative' , 'done' , 'fallback' ],
             calculated: [ 'width' , 'height' ],
             nonXform: [ 'opacity' ]
         }
@@ -386,7 +386,7 @@
                     continue;
                 var values = _mapVectorToArray( options[key] );
                 var defaults = _getComponentDefaults( key );
-                components[key] = _checkComponentDefaults( key , values , defaults );
+                components[key] = _checkComponentDefaults( key , values , defaults , options.relative );
             }
             return components;
         }
@@ -419,9 +419,11 @@
             return defaults;
         }
 
-        function _checkComponentDefaults( component , values , defaults ) {
+        function _checkComponentDefaults( component , values , defaults , relative ) {
             var defs = $.extend( [] , defaults );
             var newVals = $.extend( defs , values );
+            if (relative === false)
+                return newVals;
             if (defaults.compare( newVals ) && config.keys.nonXform.indexOf( component ) < 0)
                 newVals = [];
             return newVals;
