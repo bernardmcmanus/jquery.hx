@@ -1,6 +1,7 @@
-module.exports = function(grunt) {
+module.exports = function( grunt ) {
 
     var libs = [
+        'js/native.js',
         'js/hxManager.js',
         'js/workflow.js',
         'js/vendorPatch.js',

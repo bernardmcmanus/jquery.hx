@@ -102,8 +102,6 @@
             done: [ complete , options.done ]
         });
 
-        delete xForm.pseudoHide;
-
         this.set( 'opacity' , xForm );
     };
 
