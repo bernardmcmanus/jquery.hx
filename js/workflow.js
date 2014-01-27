@@ -1,15 +1,15 @@
 (function( hx ) {
 
-    var workflow = function( options ) {
+    var workflow = function() {
 
-        options = $.extend({
+        var config = {
             queue: [],
             count: 0,
             index: 0,
-            debug: false
-        }, (options || {}));
+            done: function() {}
+        };
 
-        $.extend( this , options );
+        $.extend( this , config );
 
         this._init();
     };
@@ -34,12 +34,16 @@
             this.queue.push( wfTask );
             this.count++;
         },
-        run: function() {
+        run: function(/* arguments , callback */) {
+            this._setCallback( arguments );
             this._doWork( this.index , this.count , arguments );
         },
+        _setCallback: function( args ) {
+            var done = Array.prototype.last.call( args );
+            if (typeof done === 'function')
+                this.done = done;
+        },
         progress: function() {
-            if (this.debug)
-                hx.log('completed task ' + this.index);
             this.index++;
             this._doWork( this.index , this.count , arguments );
         },
@@ -47,8 +51,7 @@
             if (i < c) {
                 this.queue[ i ].call( this , args );
             } else {
-                if (this.debug)
-                    hx.log('workflow complete');
+                this.done.apply( this , args );
             }
         }
     };
