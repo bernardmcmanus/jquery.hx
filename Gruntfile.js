@@ -7,8 +7,7 @@ module.exports = function( grunt ) {
         'js/vendorPatch.js',
         'js/easing.js',
         'js/animator.js',
-        'js/hx.js',
-        'js/cdn.js'
+        'js/hx.js'
     ];
 
     grunt.initConfig({
