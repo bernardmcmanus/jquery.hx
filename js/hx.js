@@ -124,7 +124,7 @@
     $.fn.hx.debug = function( options ) {
 
         var events = (Array.isArray( options.events) ? options.events : [options.events]) || [];
-        var log = options.log || function() {};
+        var log = options.log || function(msg) {console.log(msg);};
         var self = this;
 
         var listen = function( evt ) {
