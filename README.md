@@ -88,56 +88,66 @@ $('selector').hx( 'debug' , {
 
 <table>
     <tr>
-        <td>linear</td>
-        <td>ease</td>
-        <td>ease-in</td>
-        <td>ease-out</td>
+        <td><a href="http://cubic-bezier.com/#.25,.25,.75,.75" target="_blank">linear</a></td>
+        <td><a href="http://cubic-bezier.com/#.25,.1,.25,1" target="_blank">ease</a></td>
+        <td><a href="http://cubic-bezier.com/#.42,0,1,1" target="_blank">ease-in</a></td>
+        <td><a href="http://cubic-bezier.com/#0,0,.58,1" target="_blank">ease-out</a></td>
     </tr>
     <tr>
-        <td>ease-in-out</td>
-        <td>easeInQuad</td>
-        <td>easeInCubic</td>
-        <td>easeInQuart</td>
+        <td><a href="http://cubic-bezier.com/#.42,0,.58,1" target="_blank">ease-in-out</a></td>
+        <td><a href="http://cubic-bezier.com/#.55,.085,.68,.53" target="_blank">easeInQuad</a></td>
+        <td><a href="http://cubic-bezier.com/#.55,.055,.675,.19" target="_blank">easeInCubic</a></td>
+        <td><a href="http://cubic-bezier.com/#.895,.03,.685,.22" target="_blank">easeInQuart</a></td>
     </tr>
     <tr>
-        <td>easeInQuint</td>
-        <td>easeInSine</td>
-        <td>easeInExpo</td>
-        <td>easeInCirc</td>
+        <td><a href="http://cubic-bezier.com/#.755,.05,.855,.06" target="_blank">easeInQuint</a></td>
+        <td><a href="http://cubic-bezier.com/#.47,0,.745,.715" target="_blank">easeInSine</a></td>
+        <td><a href="http://cubic-bezier.com/#.95,.05,.795,.035" target="_blank">easeInExpo</a></td>
+        <td><a href="http://cubic-bezier.com/#.6,.04,.98,.335" target="_blank">easeInCirc</a></td>
     </tr>
     <tr>
-        <td>easeInBack*</td>
-        <td>easeOutQuad</td>
-        <td>easeOutCubic</td>
-        <td>easeOutQuart</td>
+        <td><a href="http://cubic-bezier.com/#.6,-0.28,.735,.045" target="_blank">easeInBack</a>*</td>
+        <td><a href="http://cubic-bezier.com/#.25,.46,.45,.94" target="_blank">easeOutQuad</a></td>
+        <td><a href="http://cubic-bezier.com/#.215,.61,.355,1" target="_blank">easeOutCubic</a></td>
+        <td><a href="http://cubic-bezier.com/#.165,.84,.44,1" target="_blank">easeOutQuart</a></td>
     </tr>
     <tr>
-        <td>easeOutQuint</td>
-        <td>easeOutSine</td>
-        <td>easeOutExpo</td>
-        <td>easeOutCirc</td>
+        <td><a href="http://cubic-bezier.com/#.23,1,.32,1" target="_blank">easeOutQuint</a></td>
+        <td><a href="http://cubic-bezier.com/#.39,.575,.565,1" target="_blank">easeOutSine</a></td>
+        <td><a href="http://cubic-bezier.com/#.19,1,.22,1" target="_blank">easeOutExpo</a></td>
+        <td><a href="http://cubic-bezier.com/#.075,.82,.165,1" target="_blank">easeOutCirc</a></td>
     </tr>
     <tr>
-        <td>easeOutBack*</td>
-        <td>easeInOutQuad</td>
-        <td>easeInOutCubic</td>
-        <td>easeInOutQuart</td>
+        <td><a href="http://cubic-bezier.com/#.175,.885,.32,1.275" target="_blank">easeOutBack</a>*</td>
+        <td><a href="http://cubic-bezier.com/#.455,.03,.515,.955" target="_blank">easeInOutQuad</a></td>
+        <td><a href="http://cubic-bezier.com/#.645,.045,.355,1" target="_blank">easeInOutCubic</a></td>
+        <td><a href="http://cubic-bezier.com/#.77,0,.175,1" target="_blank">easeInOutQuart</a></td>
     </tr>
     <tr>
-        <td>easeInOutQuint</td>
-        <td>easeInOutSine</td>
-        <td>easeInOutExpo</td>
-        <td>easeInOutCirc</td>
+        <td><a href="http://cubic-bezier.com/#.86,0,.07,1" target="_blank">easeInOutQuint</a></td>
+        <td><a href="http://cubic-bezier.com/#.445,.05,.55,.95" target="_blank">easeInOutSine</a></td>
+        <td><a href="http://cubic-bezier.com/#1,0,0,1" target="_blank">easeInOutExpo</a></td>
+        <td><a href="http://cubic-bezier.com/#.785,.135,.15,.86" target="_blank">easeInOutCirc</a></td>
     </tr>
     <tr>
-        <td>easeInOutBack*</td>
-        <td>easeOutBackMod1*</td>
-        <td>easeMod1</td>
+        <td><a href="http://cubic-bezier.com/#.68,-0.55,.265,1.55" target="_blank">easeInOutBack</a>*</td>
+        <td><a href="http://cubic-bezier.com/#.7,-1,.5,2" target="_blank">easeOutBackMod1</a>*</td>
+        <td><a href="http://cubic-bezier.com/#.25,.2,.25,1" target="_blank">easeMod1</a></td>
         <td>custom</td>
     </tr>
 </table>
 
-*Bezier curves with values above 1 or below 0 are not compatible on all devices. See [WebKit Bug 45761](https://bugs.webkit.org/show_bug.cgi?id=45761).
+<sup>*Bezier curves with values above 1 or below 0 are not compatible on all devices. See <a href="https://bugs.webkit.org/show_bug.cgi?id=45761" target="_blank">WebKit Bug 45761</a>.</sup>
+
+Custom easing is passed as an object with four points, p<sub>n</sub>:
+
+```javascript
+$('selector').hx( 'transform' , {
+    ...
+    easing: {p1: 0.17, p2: 0.67, p3: 0.38, p4: 0.67},
+    ...
+});
+```
 
 #### relative
 
