@@ -69,6 +69,17 @@ Triggering the cancel action will allow an element to finish its current animati
 ```javascript
 $('selector').hx( 'cancel' );
 ```
+
+#### debug
+Turns on debugging output for specified events.
+```javascript
+$('selector').hx( 'debug' , {
+    events: [],
+    log: function( msg ) {
+        console.log( msg );
+    }
+});
+```
 =====
 
 ### Options
@@ -126,7 +137,7 @@ $('selector').hx( 'cancel' );
     </tr>
 </table>
 
-*Cubic beziers with values above 1 or below 0 are not compatible on all devices. See [WebKit Bug 45761](https://bugs.webkit.org/show_bug.cgi?id=45761).
+*Bezier curves with values above 1 or below 0 are not compatible on all devices. See [WebKit Bug 45761](https://bugs.webkit.org/show_bug.cgi?id=45761).
 
 #### relative
 
@@ -151,6 +162,77 @@ The pseudoHide option is necessary for full compatibility in Firefox and the nat
 
 =====
 
+### Events
+
+#### hx_init
+
+Fires when a new hxManager instance is created.
+
+```javascript
+event.detail: {}
+```
+
+#### hx_setTransition
+
+Fires when transition duration, delay, or easing are updated.
+
+```javascript
+event.detail: {
+    propertyName: String,
+    string: String
+}
+```
+
+#### hx_applyXform
+
+Fires when a new transformation is applied.
+
+```javascript
+event.detail: {
+    propertyName: String,
+    string: String,
+    xform: Object
+}
+```
+
+#### hx_transitionEnd
+
+Fires upon completion of individual transitions.
+
+```javascript
+event.detail: {
+    propertyName: String
+}
+```
+
+#### hx_fallback
+
+Fires when the fallback timeout is triggered.
+
+```javascript
+event.detail: {
+    propertyName: String
+}
+```
+
+#### hx_cancel
+
+Fires when an hxManager instance is canceled.
+
+```javascript
+event.detail: {}
+```
+
+#### hx_done
+
+Fires upon completion of all chained transitions.
+
+```javascript
+event.detail: {}
+```
+
+=====
+
 ### Examples
 
 Translate the element 300 pixels along the x axis and 150 along the y.
@@ -168,12 +250,12 @@ $('selector').hx( 'transform' , {
 });
 ```
 
-Next, add a 360-degree rotation about the z axis.
+Next, add a 180-degree rotation about the z axis.
 ```javascript
 $('selector').hx( 'transform' , {
     translate: {x: 300, y: 150},
     scale: {x: 1.5, y: 1.5},
-    rotate: {z: 1, a: 360}
+    rotate: {z: 1, a: 180}
 });
 ```
 
@@ -183,7 +265,7 @@ $('selector')
 .hx( 'transform' , {
     translate: {x: 300, y: 150},
     scale: {x: 1.5, y: 1.5},
-    rotate: {z: 1, a: 360}
+    rotate: {z: 1, a: 180}
 })
 .hx( 'fadeOut' , {
     duration: 300,
@@ -197,7 +279,7 @@ $('selector')
 .hx( 'transform' , {
     translate: {x: 300, y: 150},
     scale: {x: 1.5, y: 1.5},
-    rotate: {z: 1, a: 360}
+    rotate: {z: 1, a: 180}
 })
 .hx( 'fadeOut' , {
     duration: 300,
