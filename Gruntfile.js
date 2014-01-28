@@ -14,7 +14,7 @@ module.exports = function( grunt ) {
 
             pkg: grunt.file.readJSON('package.json'),
 
-            clean : ["hx.min.js"],
+            clean : ["hx-v*"],
 
             uglify : {
                 options : {
@@ -22,7 +22,7 @@ module.exports = function( grunt ) {
                 },
                 release : {
                     files : {
-                        'hx.min.js' : libs
+                        'hx-v<%= pkg.version %>.min.js' : libs
                     }
                 }
             },

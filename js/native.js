@@ -7,7 +7,7 @@
 (function() {
 
     Array.prototype.compare = function ( array ) {
-            
+        
         if (!array)
             return false;
 

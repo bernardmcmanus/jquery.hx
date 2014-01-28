@@ -49,15 +49,15 @@
                     detail: detail
                 });
             } catch( err ) {
-                evt = document.createEvent('Event');
+                evt = document.createEvent( 'Event' );
                 evt.initEvent( type , true , true );
                 evt.detail = detail;
             }
 
             return evt;
         },
-        getComputedMatrix: function( manager ) {
-            var style = window.getComputedStyle( manager.element );
+        getComputedMatrix: function( element ) {
+            var style = window.getComputedStyle( element );
             var transform = this.ua + 'Transform';
             return style[transform] || style.transform;
         }

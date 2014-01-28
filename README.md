@@ -95,7 +95,7 @@ $('selector').hx( 'cancel' );
         <td>easeInCirc</td>
     </tr>
     <tr>
-        <td>easeInBack</td>
+        <td>easeInBack*</td>
         <td>easeOutQuad</td>
         <td>easeOutCubic</td>
         <td>easeOutQuart</td>
@@ -107,7 +107,7 @@ $('selector').hx( 'cancel' );
         <td>easeOutCirc</td>
     </tr>
     <tr>
-        <td>easeOutBack</td>
+        <td>easeOutBack*</td>
         <td>easeInOutQuad</td>
         <td>easeInOutCubic</td>
         <td>easeInOutQuart</td>
@@ -119,12 +119,14 @@ $('selector').hx( 'cancel' );
         <td>easeInOutCirc</td>
     </tr>
     <tr>
-        <td>easeInOutBack</td>
-        <td>easeOutBackMod1</td>
+        <td>easeInOutBack*</td>
+        <td>easeOutBackMod1*</td>
         <td>easeMod1</td>
         <td>custom</td>
     </tr>
 </table>
+
+*Cubic beziers with values above 1 or below 0 are not compatible on all devices. See [WebKit Bug 45761](https://bugs.webkit.org/show_bug.cgi?id=45761).
 
 #### relative
 

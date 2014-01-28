@@ -21,26 +21,15 @@
             duration: 400,
             easing: 'ease',
             delay: 0,
-            done: function() {},
             relative: true
         }, (options || {}));
 
-        // -------------------------------------------------------------- //
-            // prevent individual callbacks from being added
-            // there is a bug that may cause the animation to break
-            options.done = function() {};
-        // -------------------------------------------------------------- //
-
-        var xForm = mapComponentKeys($.extend( {} , options , {
-            done: [ options.done ]
-        }));
-
-        //delete xForm.relative;
+        var xform = mapComponentKeys( options );
 
         if (options.relative) {
-            this.apply( 'transform' , xForm );
+            this.apply( 'transform' , xform );
         } else {
-            this.set( 'transform' , xForm );
+            this.set( 'transform' , xform );
         }
     };
 
@@ -51,19 +40,10 @@
             duration: 400,
             easing: 'ease',
             delay: 0,
-            done: function() {},
             pseudoHide: true
         }, (options || {}));
 
-        // -------------------------------------------------------------- //
-            // prevent individual callbacks from being added
-            // there is a bug that may cause the animation to break
-            options.done = function() {};
-        // -------------------------------------------------------------- //
-
         function trueHide() {
-
-            var flow = new hxManager.workflow();
 
             function task1() {
                 this.setTransition( 'opacity' , {
@@ -79,30 +59,36 @@
                 flow.progress();
             }
 
+            var flow = new hxManager.workflow();
+            
             flow.add( task1 , this );
             flow.add( task2 , this );
 
             flow.run();
         }
 
-        function complete() {
+        var complete = function( e ) {
+            
+            if (e.originalEvent.detail.propertyName !== 'opacity')
+                return;
+
+            $(this).off( 'hx_transitionEnd' , complete );
             
             if (options.pseudoHide) {
-                
                 hxManager.pseudoHide( this.element );
-                
             } else {
-
                 trueHide.call( this );
             }
-        }
 
-        var xForm = $.extend( {} , options , {
-            opacity: 0,
-            done: [ complete , options.done ]
+        }.bind( this );
+
+        $(this).on( 'hx_transitionEnd' , complete );
+
+        var xform = $.extend( {} , options , {
+            opacity: 0
         });
 
-        this.set( 'opacity' , xForm );
+        this.set( 'opacity' , xform );
     };
 
 
@@ -112,30 +98,70 @@
             duration: 400,
             easing: 'ease',
             delay: 0,
-            done: function() {}
         }, (options || {}));
 
-        // -------------------------------------------------------------- //
-            // prevent individual callbacks from being added
-            // there is a bug that may cause the animation to break
-            options.done = function() {};
-        // -------------------------------------------------------------- //
-
-        function complete() {
+        var complete = function( e ) {
+            if (e.originalEvent.detail.propertyName !== 'opacity')
+                return;
+            $(this).off( 'hx_transitionEnd' , complete );
             hxManager.pseudoShow( this.element );
-        }
+        }.bind( this );
 
-        var xForm = $.extend( {} , options , {
-            opacity: 1,
-            done: [ complete , options.done ]
+        $(this).on( 'hx_transitionEnd' , complete );
+
+        var xform = $.extend( {} , options , {
+            opacity: 1
         });
 
-        this.set( 'opacity' , xForm );
+        this.set( 'opacity' , xform );
     };
 
 
     $.fn.hx.cancel = function() {
         return;
+    };
+
+    $.fn.hx.debug = function( options ) {
+
+        var events = (Array.isArray( options.events) ? options.events : [options.events]) || [];
+        var log = options.log || function() {};
+        var self = this;
+
+        var listen = function( evt ) {
+
+            $(this.element).on( evt , function( e ) {
+                    
+                switch (evt) {
+                    case 'hx_init':
+                        log('new hxManager instance');
+                        break;
+                    case 'hx_setTransition':
+                        log('updated ' + e.originalEvent.detail.propertyName + ' transition ' + e.originalEvent.detail.string);
+                        break;
+                    case 'hx_applyXform':
+                        log('applied ' + e.originalEvent.detail.propertyName + ' ' + e.originalEvent.detail.string);
+                        break;
+                    case 'hx_transitionEnd':
+                        log(e.originalEvent.detail.propertyName + ' complete');
+                        break;
+                    case 'hx_fallback':
+                        log(e.originalEvent.detail.propertyName + ' fallback triggered');
+                        break;
+                    case 'hx_cancel':
+                        log('hxManager instance canceled');
+                        break;
+                    case 'hx_done':
+                        log('done');
+                        break;
+                }
+            });
+
+        }.bind( this );
+
+        for (var i = 0; i < events.length; i++) {
+            listen( events[i] );
+        }
+        
     };
 
 
@@ -146,7 +172,8 @@
             rotate: 'rotate3d'
         };
         for (var key in obj) {
-            if (!map[key]) continue;
+            if (!map[key])
+                continue;
             obj[map[key]] = obj[key];
             delete obj[key];
         }
