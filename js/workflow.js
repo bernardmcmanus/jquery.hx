@@ -40,7 +40,6 @@
         },
         _setCallback: function( args ) {
             var done = hx.helper.array.last.call( args );
-            console.log(done);
             if (typeof done === 'function')
                 this.done = done;
         },
