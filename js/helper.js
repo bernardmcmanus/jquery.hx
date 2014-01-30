@@ -25,9 +25,10 @@
     };
 
     helper.array.last = function() {
+        var L = this.length > 0 ? this.length - 1 : 0;
         if (arguments.length > 0)
-            this[this.length - 1] = arguments[0];
-        return this[this.length - 1];
+            this[L] = arguments[0];
+        return this[L];
     };
 
     $.extend( hx , {helper: helper} );
