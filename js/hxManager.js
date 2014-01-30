@@ -463,7 +463,7 @@
             if (relative === false)
                 return newVals;
             
-            if (defaults.compare( newVals ) && config.keys.nonXform.indexOf( component ) < 0)
+            if (hxManager.helper.array.compare.call( defaults , newVals ) && config.keys.nonXform.indexOf( component ) < 0)
                 newVals = [];
             
             return newVals;

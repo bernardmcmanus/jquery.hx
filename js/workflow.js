@@ -39,7 +39,8 @@
             this._doWork( this.index , this.count , arguments );
         },
         _setCallback: function( args ) {
-            var done = Array.prototype.last.call( args );
+            var done = hx.helper.array.last.call( args );
+            console.log(done);
             if (typeof done === 'function')
                 this.done = done;
         },

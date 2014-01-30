@@ -1,12 +1,10 @@
-/*
-**
-**  These helper methods extend the prototypes of native JS objects
-**
-*/
+(function( hx ) {
 
-(function() {
+    var helper = {
+        array: {}
+    };
 
-    Array.prototype.compare = function ( array ) {
+    helper.array.compare = function ( array ) {
         
         if (!array)
             return false;
@@ -26,10 +24,12 @@
         return true;
     };
 
-    Array.prototype.last = function() {
+    helper.array.last = function() {
         if (arguments.length > 0)
             this[this.length - 1] = arguments[0];
         return this[this.length - 1];
     };
 
-}());
+    $.extend( hx , {helper: helper} );
+
+}( hxManager ));
