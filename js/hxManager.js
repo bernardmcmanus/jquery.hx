@@ -197,7 +197,7 @@
             if (typeof _constructEvent[type] === 'function') {
                 evt = _constructEvent[type].apply( this , args );
             } else {
-                evt = this.vendorPatch.createEvent( type , args );
+                evt = this.vendorPatch.createEvent( type , args[0] );
             }
 
             this.element.dispatchEvent( evt );
