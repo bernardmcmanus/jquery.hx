@@ -163,20 +163,32 @@
 
             options = options || {};
 
-            this.queue[ property ] = this.queue[ property ] || {
-                easing: 'ease',
-                duration: 0,
-                delay: 0
-            };
+            // if easing was passed in the options object, get the corresponding bezier
+            if (options.easing)
+                options.easing = hxManager._easing( options.easing );
 
-            this.queue[ property ] = $.extend( this.queue[ property ] , options );
+            var tempQueue = {};
 
-            if (typeof options.easing !== 'undefined')
-                this.queue[ property ].easing = hxManager._easing( options.easing );
+            if (this.queue[ property ]) {
+                // if the property already exists in the queue, extend it with the new options
+                this.queue[ property ] = $.extend( this.queue[ property ] , options );
+            } else {
+                // otherwise, populate tempQueue with defaults
+                tempQueue[ property ] = {
+                    easing: typeof options.easing !== 'undefined' ? options.easing : 'ease',
+                    duration: options.duration || 0,
+                    delay: options.delay || 0
+                };
+            }
 
-            var tString = _buildTransitionString( this.queue );
+            // extend tempQueue with the instance queue
+            tempQueue = $.extend( {} , this.queue , tempQueue );
+
+            // construct the transition string
+            var tString = _buildTransitionString( tempQueue );
             tString = this.vendorPatch.getPrefixed( tString );
 
+            // add vendor prefixes
             var tProp = this.vendorPatch.getPrefixed( 'transition' );
 
             // if the element's style is already equal to the new transition string, don't apply it
@@ -229,7 +241,11 @@
         cancel: function() {
             
             for (var key in this.queue) {
-                this.queue[key].destroy();
+                try {
+                    this.queue[key].destroy();
+                } catch( err ) {
+                    delete this.queue[key];
+                }
             }
 
             // trigger the hx_cancel event
