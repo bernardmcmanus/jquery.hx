@@ -7,6 +7,12 @@
             o: 'opera',
             ms: 'msie'
         },
+        os: {
+            android: 'android',
+            ios: 'ios',
+            macos: 'mac os',
+            windows: 'windows'
+        },
         events: {
             webkit: 'webkitTransitionEnd',
             moz: 'transitionend',
@@ -18,6 +24,8 @@
 
     var vendorPatch = function() {
         this.ua = _getUserAgent();
+        this.os = _getOS();
+        this.isMobile = _isMobile();
     };
 
     vendorPatch.prototype = {
@@ -60,6 +68,14 @@
             var style = window.getComputedStyle( element );
             var transform = this.ua + 'Transform';
             return style[transform] || style.transform;
+        },
+        getBezierSupport: function() {
+            if (this.os === 'android' && _isAndroidNative()) {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
     };
 
@@ -70,6 +86,24 @@
             if (re.test( uaString ))
                 return key;
         }
+    }
+
+    function _getOS() {
+        var uaString = navigator.userAgent;
+        for (var key in config.os) {
+            var re = new RegExp( config.os[key] , 'i' );
+            if (re.test( uaString ))
+                return key;
+        }
+    }
+
+    function _isMobile() {
+        return (/mobile/i).test( navigator.userAgent );
+    }
+
+    function _isAndroidNative() {
+        var uaString = navigator.userAgent;
+        return (!(/chrome/i).test( uaString ) && !(/firefox/i).test( uaString ));
     }
 
     $.extend( hx , {vendorPatch: vendorPatch} );

@@ -127,7 +127,7 @@
                 eventType   : this.vendorPatch.getEventType(),
                 value       : config.keys.nonXform.indexOf( property ) < 0 ? _buildTransformString( this.components[property] ) : this.components[property][property][0],
                 duration    : options.duration,
-                easing      : hxManager._easing( options.easing ),
+                easing      : hxManager._easing.call( this , options.easing ),
                 delay       : options.delay,
                 fallback    : options.fallback,
                 trigger     : this.trigger.bind( this ),
@@ -165,7 +165,7 @@
 
             // if easing was passed in the options object, get the corresponding bezier
             if (options.easing)
-                options.easing = hxManager._easing( options.easing );
+                options.easing = hxManager._easing.call( this , options.easing );
 
             var tempQueue = {};
 
