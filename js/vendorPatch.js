@@ -2,24 +2,28 @@
 
     var config = {
         vendors: {
-            webkit: 'webkit',
-            moz: 'firefox',
-            o: 'opera',
-            ms: 'msie'
+            webkit  : (/webkit/i),
+            moz     : (/firefox/i),
+            o       : (/opera/i),
+            ms      : (/msie/i)
         },
         os: {
-            android: 'android',
-            ios: 'ios',
-            macos: 'mac os',
-            windows: 'windows'
+            android : (/android/i),
+            ios     : (/(ios|iphone)/i),
+            macos   : (/mac os/i),
+            windows : (/windows/i)
         },
         events: {
-            webkit: 'webkitTransitionEnd',
-            moz: 'transitionend',
-            o: 'oTransitionEnd',
-            ms: 'transitionend'
+            webkit  : 'webkitTransitionEnd',
+            moz     : 'transitionend',
+            o       : 'oTransitionEnd',
+            ms      : 'transitionend',
+            other   : 'transitionend'
         },
-        prefixProps: [ 'transition' , 'transform' ]
+        prefixProps: [
+            (/(?!-)transition(?!-)/g),
+            (/(?!-)transform(?!-)/g)
+        ]
     };
 
     var vendorPatch = function() {
@@ -33,32 +37,39 @@
             return config.events[ this.ua ];
         },
         getPrefixed: function( str ) {
+
+            if (this.ua === 'other')
+                return str;
+
             for (var i = 0; i < config.prefixProps.length; i++) {
-                var re = new RegExp( '(?!-)' + config.prefixProps[i] + '(?!-)' , 'g' );
+                //var re = new RegExp( '(?!-)' + config.prefixProps[i] + '(?!-)' , 'g' );
+                var re = config.prefixProps[i];
                 var match = re.exec( str );
                 if (match)
                     str = str.replace( re , ('-' + this.ua + '-' + match[0]) );
             }
             return str;
         },
-        createEvent: function( type , detail ) {
+        createEvent: function( type , detail , bubbles , cancelable ) {
 
             if (!type)
                 return;
 
             detail = detail || {};
+            bubbles = typeof bubbles !== 'undefined' ? bubbles : true;
+            cancelable = typeof cancelable !== 'undefined' ? cancelable : true;
 
             var evt = {};
 
             try {
                 evt = new CustomEvent( type , {
-                    bubbles: true,
-                    cancelable: true,
+                    bubbles: bubbles,
+                    cancelable: cancelable,
                     detail: detail
                 });
             } catch( err ) {
                 evt = document.createEvent( 'Event' );
-                evt.initEvent( type , true , true );
+                evt.initEvent( type , bubbles , cancelable );
                 evt.detail = detail;
             }
 
@@ -66,11 +77,11 @@
         },
         getComputedMatrix: function( element ) {
             var style = window.getComputedStyle( element );
-            var transform = this.ua + 'Transform';
+            var transform = this.ua !== 'other' ? (this.ua + 'Transform') : 'transform';
             return style[transform] || style.transform;
         },
         getBezierSupport: function() {
-            if (this.os === 'android' && _isAndroidNative()) {
+            if (_isAndroidNative( this.os )) {
                 return false;
             }
             else {
@@ -82,31 +93,31 @@
     function _getUserAgent() {
         var uaString = navigator.userAgent;
         for (var key in config.vendors) {
-            var re = new RegExp( config.vendors[key] , 'i' );
-            if (re.test( uaString ))
+            if (config.vendors[key].test( uaString ))
                 return key;
         }
+        return 'other';
     }
 
     function _getOS() {
         var uaString = navigator.userAgent;
         for (var key in config.os) {
-            var re = new RegExp( config.os[key] , 'i' );
-            if (re.test( uaString ))
+            if (config.os[key].test( uaString ))
                 return key;
         }
+        return 'other';
     }
 
     function _isMobile() {
         return (/mobile/i).test( navigator.userAgent );
     }
 
-    function _isAndroidNative() {
+    function _isAndroidNative( os ) {
         var uaString = navigator.userAgent;
-        return (!(/chrome/i).test( uaString ) && !(/firefox/i).test( uaString ));
+        return (os === 'android' && !(/(chrome|firefox)/i).test( uaString ));
     }
 
-    $.extend( hx , {vendorPatch: vendorPatch} );
+    $.extend( hx , {vendorPatch: new vendorPatch()} );
     
 }( hxManager ));
 
