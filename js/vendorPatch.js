@@ -80,12 +80,9 @@
             return style[transform] || style.transform;
         },
         getBezierSupport: function() {
-            if (_isAndroidNative( this.os )) {
+            if (_isAndroidNative( this.os ))
                 return false;
-            }
-            else {
-                return true;
-            }
+            return true;
         }
     };
 
@@ -112,8 +109,7 @@
     }
 
     function _isAndroidNative( os ) {
-        var uaString = navigator.userAgent;
-        return (os === 'android' && !(/(chrome|firefox)/i).test( uaString ));
+        return (os === 'android' && !(/(chrome|firefox)/i).test( navigator.userAgent ));
     }
 
     $.extend( hx , {vendorPatch: new vendorPatch()} );
