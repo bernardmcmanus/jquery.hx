@@ -25,9 +25,6 @@
     hxManager.prototype = {
         _init: function() {
 
-            // instantiate the vendorPatch
-            this.vendorPatch = new hxManager.vendorPatch();
-
             // trigger the hx_init event
             this.trigger( 'hx_init' );
 
@@ -75,7 +72,7 @@
             if (config.keys.nonXform.indexOf( property ) >= 0)
                 return null;
             
-            var matrix = this.vendorPatch.getComputedMatrix( this.element );
+            var matrix = hxManager.vendorPatch.getComputedMatrix( this.element );
 
             if (_isHXTransform( matrix ) !== false) {
                 
@@ -124,10 +121,10 @@
             this.queue[ property ] = new hxManager.animator({
                 element     : this.element,
                 property    : property,
-                eventType   : this.vendorPatch.getEventType(),
+                eventType   : hxManager.vendorPatch.getEventType(),
                 value       : config.keys.nonXform.indexOf( property ) < 0 ? _buildTransformString( this.components[property] ) : this.components[property][property][0],
                 duration    : options.duration,
-                easing      : hxManager._easing.call( this , options.easing ),
+                easing      : hxManager._easing( options.easing ),
                 delay       : options.delay,
                 fallback    : options.fallback,
                 trigger     : this.trigger.bind( this ),
@@ -142,8 +139,8 @@
                 
                 // apply the style string and start the fallback timeout
                 var transform = {
-                    property: this.vendorPatch.getPrefixed( property ),
-                    value: this.vendorPatch.getPrefixed( this.queue[ property ].value )
+                    property: hxManager.vendorPatch.getPrefixed( property ),
+                    value: hxManager.vendorPatch.getPrefixed( this.queue[ property ].value )
                 };
                 
                 $(this.element).css( transform.property , transform.value );
@@ -165,7 +162,7 @@
 
             // if easing was passed in the options object, get the corresponding bezier
             if (options.easing)
-                options.easing = hxManager._easing.call( this , options.easing );
+                options.easing = hxManager._easing( options.easing );
 
             var tempQueue = {};
 
@@ -186,10 +183,10 @@
 
             // construct the transition string
             var tString = _buildTransitionString( tempQueue );
-            tString = this.vendorPatch.getPrefixed( tString );
+            tString = hxManager.vendorPatch.getPrefixed( tString );
 
             // add vendor prefixes
-            var tProp = this.vendorPatch.getPrefixed( 'transition' );
+            var tProp = hxManager.vendorPatch.getPrefixed( 'transition' );
 
             // if the element's style is already equal to the new transition string, don't apply it
             if (this.element.style.transition === tString)
@@ -209,7 +206,7 @@
             if (typeof _constructEvent[type] === 'function') {
                 evt = _constructEvent[type].apply( this , args );
             } else {
-                evt = this.vendorPatch.createEvent( type , args[0] );
+                evt = hxManager.vendorPatch.createEvent( type , args[0] );
             }
 
             this.element.dispatchEvent( evt );
@@ -262,42 +259,42 @@
         var _constructEvent = {
 
             hx_init: function() {
-                return this.vendorPatch.createEvent( 'hx_init' );
+                return hxManager.vendorPatch.createEvent( 'hx_init' , {} , false , true );
             },
 
             hx_setTransition: function( property , string ) {
-                return this.vendorPatch.createEvent( 'hx_setTransition' , {
+                return hxManager.vendorPatch.createEvent( 'hx_setTransition' , {
                     propertyName: property,
                     string: string
-                });
+                } , false , true );
             },
 
             hx_applyXform: function( property , string , xform ) {
-                return this.vendorPatch.createEvent( 'hx_applyXform' , {
+                return hxManager.vendorPatch.createEvent( 'hx_applyXform' , {
                     propertyName: property,
                     string: string,
                     xform: xform
-                });
+                } , false , true );
             },
 
             hx_transitionEnd: function( property ) {
-                return this.vendorPatch.createEvent( 'hx_transitionEnd' , {
+                return hxManager.vendorPatch.createEvent( 'hx_transitionEnd' , {
                     propertyName: property
-                });
+                } , false , true );
             },
 
             hx_fallback: function( property ) {
-                return this.vendorPatch.createEvent( 'hx_fallback' , {
+                return hxManager.vendorPatch.createEvent( 'hx_fallback' , {
                     propertyName: property
-                });
+                } , false , true );
             },
 
             hx_cancel: function() {
-                return this.vendorPatch.createEvent( 'hx_cancel' );
+                return hxManager.vendorPatch.createEvent( 'hx_cancel' , {} , false , true );
             },
 
             hx_done: function() {
-                return this.vendorPatch.createEvent( 'hx_done' );
+                return hxManager.vendorPatch.createEvent( 'hx_done' , {} , false , true );
             }
 
         };
