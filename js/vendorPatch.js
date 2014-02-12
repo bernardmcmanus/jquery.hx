@@ -42,7 +42,6 @@
                 return str;
 
             for (var i = 0; i < config.prefixProps.length; i++) {
-                //var re = new RegExp( '(?!-)' + config.prefixProps[i] + '(?!-)' , 'g' );
                 var re = config.prefixProps[i];
                 var match = re.exec( str );
                 if (match)
