@@ -231,7 +231,7 @@
         else {
 
             // check support for beziers with points outside 0 - 1
-            if (fallback[name] && !this.vendorPatch.getBezierSupport()) {
+            if (fallback[name] && !hx.vendorPatch.getBezierSupport()) {
                 b = fallback[name];
             }
             else {
