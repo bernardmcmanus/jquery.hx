@@ -27,7 +27,7 @@ $('selector')
 
 ### Actions
 
-The following code blocks show the available actions called with their respective default option values.
+The following code blocks show the available actions called with their default option values.
 
 #### transform
 ```javascript
@@ -65,7 +65,7 @@ $('selector').hx( 'fadeOut' , {
 ```
 
 #### cancel
-Triggering the cancel action will allow an element to finish its current animation frame, but will prevent callbacks from being fired upon completion. Any subsequent frames will not be executed.
+Triggering the cancel action will allow an element to finish any transitions already in progress, but will prevent the done method from firing upon completion.
 ```javascript
 $('selector').hx( 'cancel' );
 ```
@@ -151,7 +151,7 @@ $('selector').hx( 'transform' , {
 
 #### relative
 
-The relative option controls whether a transformation is applied relative to previous transformations. For example, the following snippet will translate an element 50 pixels to the left every time it is applied:
+The relative option controls whether previous transformations are taken into account when applying a new transformation. For example, the following snippet will translate an element 50 pixels to the left every time it is applied:
 ```javascript
 $('selector').hx( 'transform' , {
     translate: {x: 50}
@@ -168,7 +168,7 @@ $('selector').hx( 'transform' , {
 
 #### pseudoHide
 
-The pseudoHide option is necessary for full compatibility in Firefox and the native browser on certain Android devices. When pseudoHide is true, elements that are faded out will be hidden using the opacity and pointer-events properties. In most cases the result is functionaly equivalent to setting display equal to none, but allows for retrieval of the element's computed style.
+The pseudoHide option is necessary for full compatibility in Firefox and the native browser on certain Android devices. When pseudoHide is true, elements that are faded out will be hidden by setting the element's visibility, rather than display. Among other things, this allows for retrieval of the hidden element's computed style.
 
 =====
 
@@ -307,30 +307,6 @@ $('selector')
 =====
 
 ### Order Matters!
-
-#### Hidden Elements
-
-In general, you should not apply a transformation to a hidden element without first taking steps to make it visible. For example, if you are chaining transform and fadeIn actions, make sure the fadeIn call is placed _before_ the transform call.
-
-```javascript
-$('selector')
-.hx( 'fadeIn' )
-.hx( 'transform' , {
-    ...
-});
-```
-
-Inversely, if you are chaining transform and fadeOut actions, make sure the fadeOut call is placed _after_ the transform call.
-
-```javascript
-$('selector')
-.hx( 'transform' , {
-    ...
-})
-.hx( 'fadeOut' );
-```
-
-#### Transformations
 
 The order in which you apply transformations will affect the final outcome. For instance, the following snippet will translate an element 100 pixels to the right and scale it by a factor of 2 along the x axis.
 
