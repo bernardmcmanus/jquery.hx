@@ -7,36 +7,13 @@
         }
     };
 
-    window.hxManager = function( element ) {
+    window.hxManager = function( nodeList ) {
 
-        if (!element)
-            throw "Error: You must pass an element to the hxManager constructor.";
-        
-        $.extend( this , {
-            element: element,
-            queue: {},
-            components: {},
-            _callback: function() {}
-        });
-
-        return this._init();
+        this._callback = function() {};
+        return $.extend( nodeList , this );
     };
 
     hxManager.prototype = {
-        _init: function() {
-
-            // trigger the hx_init event
-            this.trigger( 'hx_init' );
-
-            // check the element's display state
-            if (!_checkDisplayState( this.element ))
-                _prepHiddenElement( this.element );
-            
-            var self = $(this.element);
-            self.hxManager = 1;
-            $.extend( self , this );
-            return self;
-        },
         getComputedMatrix: function( property ) {
 
             if (config.keys.nonXform.indexOf( property ) >= 0)
@@ -169,7 +146,11 @@
         },
         trigger: function() {
 
-            var type = arguments[0];
+            this.forEach(function( node ) {
+                node._hx.trigger.apply( node , arguments );
+            });
+
+            /*var type = arguments[0];
             var args = Array.prototype.slice.call( arguments , 1 );
             var evt = {};
 
@@ -179,7 +160,7 @@
                 evt = hxManager.vendorPatch.createEvent( type , args[0] );
             }
 
-            this.element.dispatchEvent( evt );
+            this.element.dispatchEvent( evt );*/
 
         },
         _transitionEnd: function( event , name ) {
@@ -222,113 +203,6 @@
 
 
 
-
-    var _constructEvent = {
-
-        hx_init: function() {
-            return hxManager.vendorPatch.createEvent( 'hx_init' , {} , false , true );
-        },
-
-        hx_setTransition: function( property , string ) {
-            return hxManager.vendorPatch.createEvent( 'hx_setTransition' , {
-                propertyName: property,
-                string: string
-            } , false , true );
-        },
-
-        hx_applyXform: function( property , string , xform ) {
-            return hxManager.vendorPatch.createEvent( 'hx_applyXform' , {
-                propertyName: property,
-                string: string,
-                xform: xform
-            } , false , true );
-        },
-
-        hx_transitionEnd: function( property ) {
-            return hxManager.vendorPatch.createEvent( 'hx_transitionEnd' , {
-                propertyName: property
-            } , false , true );
-        },
-
-        hx_fallback: function( property ) {
-            return hxManager.vendorPatch.createEvent( 'hx_fallback' , {
-                propertyName: property
-            } , false , true );
-        },
-
-        hx_cancel: function() {
-            return hxManager.vendorPatch.createEvent( 'hx_cancel' , {} , false , true );
-        },
-
-        hx_done: function() {
-            return hxManager.vendorPatch.createEvent( 'hx_done' , {} , false , true );
-        }
-
-    };
-
-
-
-
-    function _checkDisplayState( element ) {
-        
-        var hx_display = _getHXDisplay( element );
-        var style = element.style.display;
-        var response = null;
-
-        if (hx_display === null || hx_display === undefined) {
-            
-            var computed = window.getComputedStyle( element ).display;
-
-            // determine the hx_display code
-            if (computed !== 'none' && style === '') {
-                // visible, not styled inline
-                hx_display = 0;
-            } else if (computed !== 'none' && computed === style) {
-                // visible, styled inline
-                hx_display = 1;
-            } else if (computed === 'none' && style === '') {
-                // hidden, not styled inline
-                hx_display = 2;
-            } else if (computed === 'none' && computed === style) {
-                // hidden, styled inline
-                hx_display = 3;
-            }
-
-            _setHXDisplay( element , hx_display );
-
-        }
-
-        // determine the boolean response
-        switch (hx_display) {
-            case 0:
-            case 3:
-                response = (style !== 'none');
-                break;
-            case 1:
-            case 2:
-                response = (style !== 'none' && style !== '');
-                break;
-        }
-
-        return response;
-
-    }
-
-    function _getHXDisplay( element ) {
-        var hx_display = element.getAttribute( 'hx_display' );
-        if (hx_display !== null)
-            hx_display = parseInt( hx_display , 10 );
-        return hx_display;
-    }
-
-    function _setHXDisplay( element , value ) {
-        element.setAttribute( 'hx_display' , value );
-    }
-
-    function _prepHiddenElement( element ) {
-        element.style.visibility = 'hidden';
-        element.style.display = 'block';
-    }
 
     function _mapVectorToArray( vector ) {
         if (hxManager.helper.object.size.call( vector ) < 1 && typeof vector !== 'object')

@@ -49,31 +49,6 @@
             }
             return str;
         },
-        createEvent: function( type , detail , bubbles , cancelable ) {
-
-            if (!type)
-                return;
-
-            detail = detail || {};
-            bubbles = typeof bubbles !== 'undefined' ? bubbles : true;
-            cancelable = typeof cancelable !== 'undefined' ? cancelable : true;
-
-            var evt = {};
-
-            try {
-                evt = new CustomEvent( type , {
-                    bubbles: bubbles,
-                    cancelable: cancelable,
-                    detail: detail
-                });
-            } catch( err ) {
-                evt = document.createEvent( 'Event' );
-                evt.initEvent( type , bubbles , cancelable );
-                evt.detail = detail;
-            }
-
-            return evt;
-        },
         getComputedMatrix: function( element ) {
             var style = window.getComputedStyle( element );
             var transform = this.ua !== 'other' ? (this.ua + 'Transform') : 'transform';
