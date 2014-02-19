@@ -75,14 +75,21 @@
             $(this).off( 'hx_transitionEnd' , complete );
             
             if (options.pseudoHide) {
-                hxManager.pseudoHide( this.element );
+                this.element.style.visibility = 'hidden';
             } else {
                 trueHide.call( this );
             }
 
         }.bind( this );
 
+        hxManager.helper.hxInst.prepForFade.call( this , 'out' );
+
         $(this).on( 'hx_transitionEnd' , complete );
+
+        $(this).on( 'hx_cancel' , function cancel() {
+            $(this).off( 'hx_cancel' , cancel );
+            $(this).off( 'hx_transitionEnd' , complete );
+        });
 
         var xform = $.extend( {} , options , {
             opacity: 0
@@ -100,14 +107,7 @@
             delay: 0,
         }, (options || {}));
 
-        var complete = function( e ) {
-            if (e.originalEvent.detail.propertyName !== 'opacity')
-                return;
-            $(this).off( 'hx_transitionEnd' , complete );
-            hxManager.pseudoShow( this.element );
-        }.bind( this );
-
-        $(this).on( 'hx_transitionEnd' , complete );
+        hxManager.helper.hxInst.prepForFade.call( this , 'in' );
 
         var xform = $.extend( {} , options , {
             opacity: 1

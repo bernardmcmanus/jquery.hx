@@ -2,6 +2,7 @@
 
     var helper = {
         array: {},
+        hxInst: {},
         object: {}
     };
 
@@ -32,6 +33,21 @@
             this[L] = arguments[0];
         return this[L];
     };
+
+
+    helper.hxInst.prepForFade = function( action ) {
+
+        this.setTransition( 'opacity' , {
+            duration: 0,
+            delay: 0
+        });
+
+        this.element.style.opacity = (action === 'in' ? 0 : 1);
+        this.element.style.visibility = 'visible';
+
+        // getBoundingClientRect forces a DOM reflow
+        this.element.getBoundingClientRect();
+    }
 
 
     helper.object.size = function() {
