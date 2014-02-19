@@ -1,9 +1,11 @@
 (function( hx ) {
 
     var helper = {
-        array: {}
+        array: {},
+        object: {}
     };
 
+    
     helper.array.compare = function ( array ) {
         
         if (!array)
@@ -31,6 +33,41 @@
         return this[L];
     };
 
+
+    helper.object.size = function() {
+        if (typeof this !== 'object')
+            return 0;
+        var size = 0;
+        for (var key in this) {
+            size++;
+        }
+        return size;
+    }
+
+    
     $.extend( hx , {helper: helper} );
 
 }( hxManager ));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

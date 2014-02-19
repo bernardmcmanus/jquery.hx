@@ -221,7 +221,7 @@
             delete this.queue[name];
 
             // check the remaining queue elements
-            if (hxManager.objSize( this.queue ) > 0)
+            if (hxManager.helper.object.size.call( this.queue ) > 0)
                 return;
                 
             // trigger the hx_done event
@@ -321,17 +321,6 @@
                 .css('pointer-events', 'auto');
         };
 
-        hxManager.objSize = function( obj ) {
-            if (typeof obj !== 'object')
-                return 0;
-            var size = 0, key;
-            for (key in obj) {
-                if (key in obj)
-                    size++;
-            }
-            return size;
-        };
-
     // ------------------------------------------------------------------ //
     
 
@@ -397,8 +386,7 @@
         }
 
         function _mapVectorToArray( vector ) {
-
-            if (hxManager.objSize( vector ) < 1 && typeof vector !== 'object')
+            if (hxManager.helper.object.size.call( vector ) < 1 && typeof vector !== 'object')
                 return [ vector ];
 
             if (Array.isArray( vector ))
