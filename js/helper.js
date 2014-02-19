@@ -47,7 +47,7 @@
 
         // getBoundingClientRect forces a DOM reflow
         this.element.getBoundingClientRect();
-    }
+    };
 
 
     helper.object.size = function() {
@@ -58,7 +58,7 @@
             size++;
         }
         return size;
-    }
+    };
 
     
     $.extend( hx , {helper: helper} );
