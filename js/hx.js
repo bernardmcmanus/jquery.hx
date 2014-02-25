@@ -2,6 +2,8 @@
 
     
     $.fn.hx = function( action , options ) {
+
+        options.order = hxManager.helper.object.getOrder.call( options );
         
         var nodes = [];
 
@@ -14,6 +16,10 @@
         if (typeof $.fn.hx[action] === 'function')
             $.fn.hx[action].call( hxm , options );
 
+        /*nodes.forEach(function( node ) {
+            node.cleanup();
+        });*/
+
         return hxm;
     };
 
@@ -24,33 +30,12 @@
             duration: 400,
             easing: 'ease',
             delay: 0,
-            relative: true
+            relative: true,
+            fallback: true
         }, (options || {}));
 
-        var xform = mapComponentKeys( options );
-
-        if (options.relative) {
-            this.apply( 'transform' , xform );
-        } else {
-            this.set( 'transform' , xform );
-        }
+        this.set( 'transform' , options );
     };
-
-
-    function mapComponentKeys( obj ) {
-        var map = {
-            translate: 'translate3d',
-            scale: 'scale3d',
-            rotate: 'rotate3d'
-        };
-        for (var key in obj) {
-            if (!map[key])
-                continue;
-            obj[map[key]] = obj[key];
-            delete obj[key];
-        }
-        return obj;
-    }
 
  
 }( jQuery ));

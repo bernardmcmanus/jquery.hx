@@ -33,9 +33,11 @@
     };
 
     vendorPatch.prototype = {
+
         getEventType: function() {
             return config.events[ this.ua ];
         },
+
         getPrefixed: function( str ) {
 
             if (this.ua === 'other')
@@ -49,16 +51,19 @@
             }
             return str;
         },
+
         getComputedMatrix: function( element ) {
             var style = window.getComputedStyle( element );
             var transform = this.ua !== 'other' ? (this.ua + 'Transform') : 'transform';
             return style[transform] || style.transform;
         },
+
         getBezierSupport: function() {
             if (_isAndroidNative( this.os ))
                 return false;
             return true;
         }
+        
     };
 
     function _getUserAgent() {

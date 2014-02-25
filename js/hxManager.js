@@ -1,11 +1,19 @@
 (function() {
 
+
     var config = {
         keys: {
-            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'relative' , 'pseudoHide' , 'done' , 'fallback' ],
+            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'relative' , 'pseudoHide' , 'done' , 'fallback' , 'order' ],
+            xform: [ 'translate3d' , 'scale3d' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ],
             nonXform: [ 'opacity' ]
+        },
+        componentMap: {
+            translate: 'translate3d',
+            scale: 'scale3d',
+            rotate: 'rotate3d'
         }
     };
+
 
     window.hxManager = function( nodeList ) {
 
@@ -13,13 +21,15 @@
         return $.extend( nodeList , this );
     };
 
+
     hxManager.prototype = {
+        
         getComputedMatrix: function( property ) {
 
             if (config.keys.nonXform.indexOf( property ) >= 0)
                 return null;
             
-            var matrix = hxManager.vendorPatch.getComputedMatrix( this.element );
+            /*var matrix = hxManager.vendorPatch.getComputedMatrix( this.element );
 
             if (_isHXTransform( matrix ) !== false) {
                 
@@ -32,9 +42,10 @@
 
             } else {
                 return null;
-            }
+            }*/
         },
-        apply: function( property , options ) {
+
+        /*apply: function( property , options ) {
             
             var matrix = this.getComputedMatrix( property );
 
@@ -44,10 +55,26 @@
             }
 
             return this.set( property , options , true );
-        },
-        set: function( property , options , setComputed ) {
+        },*/
 
-            this.components[property] = this.components[property] || {};
+        set: function( property , options ) {
+
+            options = mapComponentKeys( options );
+
+            this.forEach(function( node ) {
+                
+                var raw = $.extend( {} , _getRawComponents( options ));
+                var opt = $.extend( {} , _getXformOptions( options ));
+                node._hx.setXformData( property , raw , opt );
+
+                var xformString = _buildTransformString( property , node._hx.components[property] , options.order );
+                node._hx.applyXform( property , xformString , opt );
+
+            }.bind( this ));
+
+            return this;
+
+            /*this.components[property] = this.components[property] || {};
 
             // prevent computed matrix transform from being applied if it exists and the set method is called directly
             if (setComputed === false && typeof this.components[property].computed !== 'undefined')
@@ -97,53 +124,10 @@
                 this.trigger( 'hx_applyXform' , property , transform.value , options );
             }
 
-            return this;
+            return this;*/
 
         },
-        setTransition: function( property , options ) {
-            
-            if (!property)
-                return;
 
-            options = options || {};
-
-            // if easing was passed in the options object, get the corresponding bezier
-            if (options.easing)
-                options.easing = hxManager._easing( options.easing );
-
-            var tempQueue = {};
-
-            if (this.queue[ property ]) {
-                // if the property already exists in the queue, extend it with the new options
-                this.queue[ property ] = $.extend( this.queue[ property ] , options );
-            } else {
-                // otherwise, populate tempQueue with defaults
-                tempQueue[ property ] = {
-                    easing: typeof options.easing !== 'undefined' ? options.easing : 'ease',
-                    duration: options.duration || 0,
-                    delay: options.delay || 0
-                };
-            }
-
-            // extend tempQueue with the instance queue
-            tempQueue = $.extend( {} , this.queue , tempQueue );
-
-            // construct the transition string
-            var tString = _buildTransitionString( tempQueue );
-            tString = hxManager.vendorPatch.getPrefixed( tString );
-
-            // add vendor prefixes
-            var tProp = hxManager.vendorPatch.getPrefixed( 'transition' );
-
-            // if the element's style is already equal to the new transition string, don't apply it
-            if (this.element.style.transition === tString)
-                return;
-
-            $(this.element).css( tProp , tString );
-
-            // trigger the hx_setTransition event
-            this.trigger( 'hx_setTransition' , property , tString );
-        },
         trigger: function() {
 
             this.forEach(function( node ) {
@@ -163,6 +147,7 @@
             this.element.dispatchEvent( evt );*/
 
         },
+
         _transitionEnd: function( event , name ) {
 
             // trigger the hx_transitionEnd event
@@ -183,9 +168,11 @@
 
             this.hxManager = 0;
         },
+
         done: function( callback ) {
             this._callback = callback || function() {};
         },
+
         cancel: function() {
             
             for (var key in this.queue) {
@@ -199,52 +186,155 @@
             // trigger the hx_cancel event
             this.trigger( 'hx_cancel' );
         }
+
     };
 
 
 
 
-    function _mapVectorToArray( vector ) {
-        if (hxManager.helper.object.size.call( vector ) < 1 && typeof vector !== 'object')
-            return [ vector ];
-
-        if (Array.isArray( vector ))
-            return vector;
+    function mapComponentKeys( obj ) {
         
-        var v = vector;
-        var arr = [];
-        var i = 0;
-
-        var map = {
-            x: 0,
-            y: 1,
-            z: 2,
-            a: 3
-        };
+        var map = config.componentMap;
+        obj.order = obj.order || [];
         
-        for (var key in v) {
-            i = map[key];
-            arr[i] = v[key];
+        for (var key in obj) {
+            
+            if (!map[key])
+                continue;
+            obj[map[key]] = obj[key];
+            
+            var i = obj.order.indexOf( key );
+            if (i >= 0) {
+                obj.order[i] = map[key];
+            }
+
+            delete obj[key];
         }
 
-        return arr;
+        return obj;
+    }
+
+    function _getXformOptions( options ) {
+
+        var _options = {};
+        
+        for (var key in options) {
+            if (config.keys.config.indexOf( key ) >= 0)
+                _options[key] = options[key];
+        }
+
+        return _options;
     }
 
     function _getRawComponents( options ) {
-        
-        var components = {};
-        
-        for (var key in options) {
-            
-            if (config.keys.config.indexOf( key ) >= 0)
-                continue;
 
-            var values = _mapVectorToArray( options[key] );
-            var defaults = _getComponentDefaults( key );
-            components[key] = _checkComponentDefaults( key , values , defaults , options.relative );
+        function _mapVectorToArray( vector ) {
+            
+            if (hxManager.helper.object.size.call( vector ) < 1 && typeof vector !== 'object')
+                return [ vector ];
+
+            if (Array.isArray( vector ))
+                return vector;
+            
+            var v = vector;
+            var arr = [];
+            var i = 0;
+
+            var map = {
+                x: 0,
+                y: 1,
+                z: 2,
+                a: 3
+            };
+            
+            for (var key in v) {
+                i = map[key];
+                arr[i] = v[key];
+            }
+
+            return arr;
         }
 
-        return components;
+        function exec() {
+
+            var components = {};
+        
+            for (var key in options) {
+                
+                if (config.keys.config.indexOf( key ) >= 0)
+                    continue;
+
+                var values = _mapVectorToArray( options[key] );
+                var defaults = _getComponentDefaults( key );
+                components[key] = _checkComponentDefaults( key , values , defaults , options.relative );
+            }
+
+            return components;
+        }
+
+        return exec();
+    }
+
+    function _buildTransformString( property , component , order ) {
+
+        function _buildComponentString( component , values ) {
+
+            if (values.length < 1)
+                return '';
+
+            var joinWith = '';
+            var appendWith = '';
+            switch (component) {
+                case 'computed':
+                    component = values.type;
+                    values = values.transform;
+                    joinWith = ', ';
+                    appendWith = '';
+                    break;
+                case 'translate3d':
+                    joinWith = 'px, ';
+                    appendWith = 'px';
+                    break;
+                case 'matrix3d':
+                case 'matrix':
+                case 'scale3d':
+                    joinWith = ', ';
+                    appendWith = '';
+                    break;
+                case 'rotate3d':
+                    joinWith = ', ';
+                    appendWith = 'deg';
+                    break;
+                case 'rotateX':
+                case 'rotateY':
+                case 'rotateZ':
+                    joinWith = '';
+                    appendWith = 'deg';
+                    break;
+            }
+            return component + '(' + values.join( joinWith ) + appendWith + ')';
+        }
+
+        function exec() {
+
+            //if (config.keys.nonXform.indexOf( property ) < 0)
+            if (property !== 'transform')
+                return component[property][0];
+            
+            var xform = [];
+
+            order.forEach(function( key ) {
+                if (config.keys.config.indexOf( key ) < 0) {
+                    var compString = _buildComponentString( key , component[key] );
+                    if (compString !== '')
+                        xform.push( compString );
+                }
+            });
+
+            return xform.join(' ');
+        }
+
+        return exec();
     }
 
     function _getComponentDefaults( component ) {
@@ -289,84 +379,21 @@
         return newVals;
     }
 
-    function _buildComponentString( component , values ) {
-
-        if (values.length < 1)
-            return '';
-
-        var joinWith = '';
-        var appendWith = '';
-        switch (component) {
-            case 'computed':
-                component = values.type;
-                values = values.transform;
-                joinWith = ', ';
-                appendWith = '';
-                break;
-            case 'translate3d':
-                joinWith = 'px, ';
-                appendWith = 'px';
-                break;
-            case 'matrix3d':
-            case 'matrix':
-            case 'scale3d':
-                joinWith = ', ';
-                appendWith = '';
-                break;
-            case 'rotate3d':
-                joinWith = ', ';
-                appendWith = 'deg';
-                break;
-            case 'rotateX':
-            case 'rotateY':
-            case 'rotateZ':
-                joinWith = '';
-                appendWith = 'deg';
-                break;
-        }
-        return component + '(' + values.join( joinWith ) + appendWith + ')';
-    }
-
-    function _buildTransformString( options ) {
-        
-        var xform = [];
-        
-        for (var key in options) {
-            if (config.keys.config.indexOf( key ) < 0) {
-                var compString = _buildComponentString( key , options[key] );
-                if (compString !== '')
-                    xform.push( compString );
-            }
-        }
-
-        return xform.join(' ');
-    }
-
-    function _buildTransitionString( queue ) {
-        
-        var arr = [];
-        
-        for (var key in queue) {
-            var component = key + ' ' + queue[key].duration + 'ms ' + queue[key].easing + ' ' + queue[key].delay + 'ms';
-            if (arr.indexOf( component ) < 0)
-                arr.push( component );
-        }
-
-        return arr.join(', ');
-    }
-
     function _isHXTransform( str ) {
         
         if (!str)
             return false;
 
-        var types = [ 'matrix' , 'matrix3d' ];
+        var types = {
+            matrix3d: (/matrix3d\(/i),
+            matrix: (/matrix\(/i)
+        };
+
         var response = false;
 
-        for (var i = 0; i < types.length; i++) {
-            var re = new RegExp( types[i] + '\\(' , 'i' );
-            if (re.test( str )) {
-                response = types[i];
+        for (var key in types) {
+            if (types[key].test( str )) {
+                response = key;
                 break;
             }
         }

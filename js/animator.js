@@ -1,35 +1,41 @@
 (function( hx ) {
 
-    var animator = function( config ) {
+    var animator = function( options ) {
 
-        config = $.extend({
+        options = $.extend({
             timeout: null,
             buffer: 50
-        }, config);
+        }, options);
 
-        $.extend( this , config );
+        $.extend( this , options );
+
+        console.log(this);
     };
 
     animator.prototype = {
+        
         start: function() {
 
             if (this.fallback === false)
                 return;
 
+            this.running = true;
+
             var t = this.duration + this.delay + this.buffer;
             
-            this.element.addEventListener( this.eventType , this );
-            this.element.addEventListener( 'hx_init' , this );
+            this.node.addEventListener( this.eventType , this );
+            this.node.addEventListener( 'hx_init' , this );
 
             var fallback = function() {
-                this.trigger( 'hx_fallback' , this.property );
-                this.trigger( this.eventType , {
+                this.node._hx.trigger( 'fallback' , this.property );
+                this.node._hx.trigger( this.eventType , {
                     propertyName: this.property
                 });
             }.bind( this );
 
             this.timeout = setTimeout( fallback , t );
         },
+
         handleEvent: function( e ) {
             switch (e.type) {
                 case this.eventType:
@@ -45,10 +51,12 @@
                     break;
             }
         },
+
         destroy: function() {
             clearTimeout( this.timeout );
-            this.element.removeEventListener( this.eventType , this );
-            this.element.removeEventListener( 'hx_init' , this );
+            this.running = false;
+            this.node.removeEventListener( this.eventType , this );
+            this.node.removeEventListener( 'hx_init' , this );
         }
     };
 

@@ -50,6 +50,14 @@
     };
 
 
+    helper.object.getOrder = function() {
+        var a = [];
+        for (var key in this) {
+            a.push( key );
+        }
+        return a;
+    };
+
     helper.object.size = function() {
         if (typeof this !== 'object')
             return 0;

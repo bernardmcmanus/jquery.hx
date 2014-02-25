@@ -26,6 +26,13 @@
 
     domNode.prototype = {
 
+        once: function( event , callback ) {
+            this.addEventListener( event , function temp() {
+                this.removeEventListener( event , temp );
+                callback.apply( this , arguments );
+            }.bind( this ));
+        },
+
         cleanup: function() {
             config.removeOnClean.forEach(function( key ) {
                 delete this[key];
@@ -37,10 +44,114 @@
 
     var _hxProto = {
 
+        /*getComputedMatrix: function() {
+            
+            var matrix = hx.vendorPatch.getComputedMatrix( this );
+
+            if (_isHXTransform( matrix ) !== false) {
+                
+                matrix = _parse( matrix );
+                
+                if (matrix.transform.length < 1)
+                    return null;
+
+                return matrix;
+
+            } else {
+                return null;
+            }
+        },*/
+
+        setXformData: function( property , raw , options ) {
+
+            this._hx.components[property] = this._hx.components[property] || {};
+
+            // delete computed matrix if this is not a relative transformation
+            /*if (options.relative === false && property === 'transform')
+                delete this._hx.components[property].computed;*/
+
+            // build the component array
+            this._hx.components[property] = $.extend( this._hx.components[property] , raw );
+            
+            //console.log(this);
+        },
+
+        applyXform: function( property , xformString , options ) {
+
+            this._hx.queue[property] = this._hx.queue[property] || [];
+
+            //console.log(xformString);
+
+            var animatorConfig = $.extend({
+                node: this,
+                property: property,
+                value: xformString,
+                eventType: hx.vendorPatch.getEventType(),
+                complete: function() {}
+            } , options );
+
+            // add the new animation instance to the queue
+            this._hx.queue[property].push(new hx.animator( animatorConfig ));
+
+            if (this._hx.queue[property].length > 1) {
+                console.log('queue length is ' + this._hx.queue[property].length);
+                return;
+            }
+
+            // build and apply the transition string
+            this._hx.setTransition( property , options );
+
+            // start the animation instance
+            _applyXform( this , property , xformString );
+        },
+
+        setTransition: function( property , options ) {
+            
+            options = options || {};
+
+            // if easing was passed in the options object, get the corresponding bezier
+            if (options.easing)
+                options.easing = hx._easing( options.easing );
+
+            var tempQueue = {};
+            tempQueue[ property ] = [];
+
+            if (this._hx.queue[ property ][0]) {
+                // if the property already exists in the queue, extend it with the new options
+                this._hx.queue[ property ][0] = $.extend( this._hx.queue[ property ][0] , options );
+            } else {
+                // otherwise, populate tempQueue with defaults
+                tempQueue[ property ][0] = {
+                    easing: typeof options.easing !== 'undefined' ? options.easing : 'ease',
+                    duration: options.duration || 0,
+                    delay: options.delay || 0
+                };
+            }
+
+            // extend tempQueue with the instance queue
+            $.extend( tempQueue , this._hx.queue );
+
+            // construct the transition string
+            var tString = _buildTransitionString( tempQueue );
+            tString = hx.vendorPatch.getPrefixed( tString );
+
+            // add vendor prefixes
+            var tProp = hx.vendorPatch.getPrefixed( 'transition' );
+
+            // if the element's style is already equal to the new transition string, don't apply it
+            if (this.style.transition === tString)
+                return;
+
+            $(this).css( tProp , tString );
+
+            // trigger the hx_setTransition event
+            this._hx.trigger( 'setTransition' , property , tString );
+        },
+
         trigger: function() {
             var event = new hx.event( arguments );
             this.dispatchEvent( event );
-        }
+        },
 
     };
 
@@ -129,6 +240,34 @@
     function _prepHidden( element ) {
         element.style.visibility = 'hidden';
         element.style.display = 'block';
+    }
+
+    function _buildTransitionString( queue ) {
+        
+        var arr = [];
+        
+        for (var key in queue) {
+            var component = key + ' ' + queue[key][0].duration + 'ms ' + queue[key][0].easing + ' ' + queue[key][0].delay + 'ms';
+            if (arr.indexOf( component ) < 0)
+                arr.push( component );
+        }
+
+        return arr.join(', ');
+    }
+
+    function _applyXform( node , property , value ) {
+
+        // apply the style string and start the fallback timeout
+        var transform = {
+            property: hx.vendorPatch.getPrefixed( property ),
+            value: hx.vendorPatch.getPrefixed( value )
+        };
+        
+        $(node).css( transform.property , transform.value );
+        node._hx.queue[ property ][0].start();
+
+        // trigger the hx_applyXform event
+        //node._hx.trigger( 'applyXform' , property , transform.value , options );
     }
 
 
