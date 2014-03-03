@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
+		<!-- ============================================= -->
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
@@ -18,10 +19,9 @@
 		<script src="../js/event.js"></script>
 		<script src="../js/animator.js"></script>
 		<script src="../js/hx.js"></script>
+		<!-- ============================================= -->
 	</head>
 	<body>
-
-
 
 		<div id="target"></div>
 
@@ -31,58 +31,10 @@
 			<div class="tgt"></div> -->
 		</div>
 
-		<script>
-
-			$('.tgt').on( 'hx_init' , function(e) {
-				//console.log(e.originalEvent.detail);
-			});
-
-			$('.tgt').on( 'hx_setTransition' , function(e) {
-				//console.log(e.originalEvent.detail);
-			});
-
-			$('.tgt').on( 'hx_applyXform' , function(e) {
-				//console.log(e.originalEvent.detail);
-			});
-
-			$('.tgt').on( 'hx_transitionEnd' , function(e) {
-				console.log(e.originalEvent.detail);
-			});
-
-			$('#target').on('click', function() {
-
-				$('.tgt').hx( 'transform' , {
-					translate: {x: 200},
-					//rotateZ: '+=360',
-					rotate: {x: 1, y: 1, z: 1, a: '+=360'},
-					scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
-					duration: 800,
-					easing: 'easeOutBack'
-				});
-
-				$('.tgt').hx( 'transform' , {
-					translate: {x: '+=200'},
-					//rotateZ: '+=360',
-					rotate: {x: 1, y: 1, z: 1, a: '-=180'},
-					scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
-					duration: 800,
-					easing: 'easeOutBack'
-				});
-
-				$('.tgt').hx( 'transform' , {
-					translate: {x: '-=200'},
-					//rotateZ: '+=360',
-					rotate: {x: 1, y: 1, z: 1, a: '+=180'},
-					scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
-					duration: 800,
-					easing: 'easeOutBack'
-				});
-
-			});
-
-		</script>
-
 	</body>
+
+	<script src="custom.js"></script>
+
 </html>
 
 
