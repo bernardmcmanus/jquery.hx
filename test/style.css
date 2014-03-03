@@ -1,0 +1,52 @@
+body {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    background-color: rgb(78,86,88);
+}
+
+#target {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 80px;
+    height: 80px;
+    background-color: navy;
+    z-index: 2;
+    overflow: hidden;
+    -webkit-tap-highlight-color: rgba(255,255,255,0);
+    -webkit-perspective: 1000px;
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    -o-transform-style: preserve-3d;
+    -ms-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+}
+
+.tgt {
+    text-align: center;
+    position: absolute;
+    top: 100px;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    background-color: magenta;
+    -webkit-perspective: 1000px;
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    -o-transform-style: preserve-3d;
+    -ms-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+}
+
+.tgt-container .tgt:nth-child(1) {
+    left: 10px;
+}
+
+.tgt-container .tgt:nth-child(2) {
+    left: 100px;
+}
+
+.tgt-container .tgt:nth-child(3) {
+    left: 190px;
+}
