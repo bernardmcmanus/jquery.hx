@@ -1,44 +1,29 @@
-(function( $ ) {
+(function( $ , hx , Defaults , Helper ) {
 
     
     $.fn.hx = function( action , options ) {
 
-        options.order = hxManager.helper.object.getOrder.call( options );
-        
-        var nodes = [];
+        options = options || {};
+        options.order = Helper.object.getOrder.call( options );
 
-        $(this).each(function() {
-            nodes.push(new hxManager.domNode( this ));
-        });
+        var hxm = new hx( this );
 
-        var hxm = new hxManager( nodes );
-
-        if (typeof $.fn.hx[action] === 'function')
-            $.fn.hx[action].call( hxm , options );
-
-        /*nodes.forEach(function( node ) {
-            node.cleanup();
-        });*/
-
-        return hxm;
+        if (typeof $.fn.hx[action] === 'function') {
+            return $.fn.hx[action]( hxm , options );
+        }
+        else {
+            return hxm;
+        }
     };
 
 
-    $.fn.hx.transform = function( options ) {
-
-        options = $.extend({
-            duration: 400,
-            easing: 'ease',
-            delay: 0,
-            relative: true,
-            fallback: true
-        }, (options || {}));
-
-        this.set( 'transform' , options );
+    $.fn.hx.transform = function( hxm , options ) {
+        options = $.extend( Defaults.transform , options );
+        return hxm._set( 'transform' , options );
     };
 
  
-}( jQuery ));
+}( jQuery , hxManager , hxManager.config.$hx , hxManager.helper ));
 
 
 

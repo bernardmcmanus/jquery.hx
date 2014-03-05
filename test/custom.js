@@ -17,7 +17,7 @@
 
 
     $('.tgt').on( 'hx_transitionEnd' , function( e ) {
-        console.log(e.originalEvent.detail);
+        //console.log(e.originalEvent.detail);
     });
 
 
@@ -38,7 +38,7 @@
             translate: {x: '+=100'},
             rotate: {x: 1, y: 1, z: 1, a: '-=180'},
             scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
-            duration: 800,
+            duration: 900,
             easing: 'easeOutBack'
         });
 
@@ -46,10 +46,11 @@
             translate: {x: '-=200'},
             rotate: {x: 1, y: 1, z: 1, a: '+=180'},
             scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
-            duration: 800,
+            duration: 1000,
             easing: 'easeOutBack'
         });
     }
+
 
 }());
 

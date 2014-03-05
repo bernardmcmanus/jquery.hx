@@ -1,5 +1,6 @@
 (function( hx ) {
 
+
     var event = function( args ) {
 
         var type = args[0];
@@ -59,6 +60,7 @@
 
     };
 
+
     function _create( type , detail , bubbles , cancelable ) {
 
         if (!type)
@@ -86,9 +88,8 @@
     }
 
 
-
-
     $.extend( hx , {event: event} );
+    
     
 }( hxManager ));
 

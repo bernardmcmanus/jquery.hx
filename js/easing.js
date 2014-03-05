@@ -3,7 +3,7 @@
 **  http://blackberry.github.io/Alice/
 */
 
-(function( hx ) {
+(function( hx , VendorPatch ) {
 
     var type = {
         linear: {
@@ -221,7 +221,7 @@
         }
     };
     
-    var _easing = function( name ) {
+    var easing = function( name ) {
 
         var b = {};
 
@@ -231,7 +231,7 @@
         else {
 
             // check support for beziers with points outside 0 - 1
-            if (fallback[name] && !hx.vendorPatch.getBezierSupport()) {
+            if (fallback[name] && !VendorPatch.getBezierSupport()) {
                 b = fallback[name];
             }
             else {
@@ -242,9 +242,9 @@
         return 'cubic-bezier(' + b.p1 + ', ' + b.p2 + ', ' + b.p3 + ', ' + b.p4 + ')';
     };
 
-    $.extend( hx , {_easing: _easing} );
+    $.extend( hx , {easing: easing} );
 
-}( hxManager ));
+}( hxManager , hxManager.vendorPatch ));
 
 
 

@@ -2,7 +2,7 @@
 
     var helper = {
         array: {},
-        hxInst: {},
+        node: {},
         object: {}
     };
 
@@ -35,7 +35,7 @@
     };
 
 
-    helper.hxInst.prepForFade = function( action ) {
+    /*helper.node.prepForFade = function( action ) {
 
         this.setTransition( 'opacity' , {
             duration: 0,
@@ -47,7 +47,7 @@
 
         // getBoundingClientRect forces a DOM reflow
         this.element.getBoundingClientRect();
-    };
+    };*/
 
 
     helper.object.getOrder = function() {
@@ -59,8 +59,17 @@
     };
 
     helper.object.size = function() {
+
         if (typeof this !== 'object')
             return 0;
+
+        var dataTypes = [ Boolean , Number , String ];
+
+        for (var i = 0; i < dataTypes.length; i++) {
+            if (this instanceof dataTypes[i])
+                return 0;
+        }
+
         var size = 0;
         for (var key in this) {
             size++;

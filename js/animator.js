@@ -4,50 +4,55 @@
 
         options = $.extend({
             timeout: null,
-            buffer: 50
-        }, options);
+            buffer: 50,
+            running: false
+        }, options );
 
         $.extend( this , options );
-
-        console.log(this);
     };
 
     animator.prototype = {
         
         start: function() {
 
-            if (this.fallback === false)
-                return;
+            if (this.fallback !== false) {
 
-            this.running = true;
+                this.running = true;
 
-            var t = this.duration + this.delay + this.buffer;
-            
-            this.node.addEventListener( this.eventType , this );
-            this.node.addEventListener( 'hx_init' , this );
+                var t = this.duration + this.delay + this.buffer;
+                
+                this.node.addEventListener( this.eventType , this );
+                this.node.addEventListener( 'hx_init' , this );
 
-            var fallback = function() {
-                this.node._hx.trigger( 'fallback' , this.property );
-                this.node._hx.trigger( this.eventType , {
-                    propertyName: this.property
-                });
-            }.bind( this );
+                /*var fallback = function() {
+                    this.node._hx.trigger( 'fallback' , this.property );
+                    this.node._hx.trigger( this.eventType , {
+                        propertyName: this.property
+                    });
+                }.bind( this );
 
-            this.timeout = setTimeout( fallback , t );
+                this.timeout = setTimeout( fallback , t );*/
+            }
         },
 
         handleEvent: function( e ) {
+
             switch (e.type) {
+                
                 case this.eventType:
+                    
                     var name = e.propertyName || e.detail.propertyName;
                     var re = new RegExp( this.property , 'i' );
+                    
                     if (re.test( name )) {
                         this.destroy();
-                        this.complete( e , this.property );
+                        this.done( e , this.property );
                     }
+
                     break;
+
                 case 'hx_init':
-                    this.cancel();
+                    //this.cancel();
                     break;
             }
         },
@@ -60,7 +65,9 @@
         }
     };
 
+
     $.extend( hx , {animator: animator} );
+
     
 }( hxManager ));
 

@@ -38,7 +38,7 @@ body {
     -ms-transform-style: preserve-3d;
     transform-style: preserve-3d;
 
-    -webkit-transform: translateX(200px);
+    /*-webkit-transform: translateX(200px);*/
 }
 
 .tgt-container .tgt:nth-child(1) {
