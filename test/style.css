@@ -23,7 +23,9 @@ body {
     transform-style: preserve-3d;
 }
 
-.tgt {
+.tgt,
+.tgt2
+{
     text-align: center;
     position: absolute;
     top: 100px;
@@ -41,15 +43,21 @@ body {
     /*-webkit-transform: translateX(200px);*/
 }
 
-.tgt-container .tgt:nth-child(1) {
+.tgt-container .tgt:nth-child(1),
+.tgt-container .tgt2:nth-child(1)
+{
     left: 10px;
 }
 
-.tgt-container .tgt:nth-child(2) {
+.tgt-container .tgt:nth-child(2),
+.tgt-container .tgt2:nth-child(2)
+{
     left: 100px;
 }
 
-.tgt-container .tgt:nth-child(3) {
+.tgt-container .tgt:nth-child(3),
+.tgt-container .tgt2:nth-child(3)
+{
     left: 190px;
 }
 

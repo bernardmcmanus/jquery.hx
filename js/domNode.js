@@ -23,7 +23,7 @@
     };
 
 
-    var _hxProto = {
+    var hxModule = {
 
         updateComponent: function( property , raw , defaults ) {
             
@@ -38,118 +38,81 @@
             }
         },
 
-        applyXform: function( property , xformString , options ) {
+        applyXform: function( property , passed , xformString , options ) {
 
-            this._hx.queue.add( property , xformString , options );
-            
-        },
+            $(this).trigger( 'hx.applyXform' , {
+                property: property,
+                xform: passed,
+                options: options
+            });
 
-        once: function( event , callback ) {
-            $(this).on( event , function temp() {
-                $(this).off( event , temp );
-                callback.apply( this , arguments );
-            }.bind( this ));
+            this._hx.queue.push( property , xformString , options );
         },
 
         cleanup: function() {
+
             Config.removeOnClean.forEach(function( key ) {
+
                 delete this[key];
+
             }.bind( this ));
-        },
-
-        /*trigger: function() {
-            var event = new hx.event( arguments );
-            this.dispatchEvent( event );
-        }*/
-
-    };
-
-
-    var transition = {
-
-        start: function( xform , property , options ) {
-            //this._hx.trigger( 'applyXform' , property , xform.value , options );
-        },
-
-        complete: function( e , property ) {
-
-            //this._hx.trigger( 'transitionEnd' , property );
-            this._hx.queue[ property ].splice( 0 , 1 );
-
-            var next = this._hx.queue[ property ][0];
-
-            if (typeof next !== 'undefined' && !next.running) {
-                next.start();
-            }
         }
 
     };
 
 
-    function getScopedModule( context , module , scopeArgs ) {
+    var queueHooks = {
 
-        var _module = $.extend( {} , module );
+        instanceComplete: function( property ) {
+            console.log(property + ' instance complete.');
+        },
 
-        for (var key in _module) {
+        branchComplete: function( property ) {
+            console.log(property + ' branch complete.');
+        },
 
-            _module[key] = (function( func , _scopeArgs ) {
-
-                _scopeArgs = _scopeArgs || [];
-
-                return function() {
-
-                    var args = Array.prototype.slice.call( arguments , 0 );
-
-                    _scopeArgs.forEach(function( a ) {
-                        args.push( a );
-                    });
-
-                    func.apply( this , args );
-
-                }.bind( context );
-
-            }( _module[key] , scopeArgs[key] ));
-            
+        queueComplete: function() {
+            console.log('queue complete.');
         }
-
-        return _module;
-    }
+    };
 
 
     function _init( node ) {
 
         var _node = $.extend( node , this );
+        var _queueHooks = getScopedModule( _node , queueHooks );
+        var _hxModule = getScopedModule( _node , hxModule );
 
         _node._hx = $.extend({
-            queue: new Queue( _node ),
+            queue: new Queue( _node , _queueHooks ),
             components: {}
-        } , _getScopedProto.call( _node ));
+        } , _hxModule );
 
         return _node;
     }
 
     
-    function _getScopedProto() {
+    function getScopedModule( context , module ) {
 
-        var _proto = $.extend( {} , _hxProto );
+        var _module = {};
 
-        for (var key in _proto) {
-            _proto[key] = _proto[key].bind( this );
+        for (var key in module) {
+            _module[key] = module[key].bind( context );
         }
 
-        return _proto;
+        return _module;
     }
 
     
-    function _checkDisplayState( element ) {
+    function _checkDisplayState( node ) {
         
-        var hx_display = _getHXDisplay( element );
-        var style = element.style.display;
+        var hx_display = _getHXDisplay( node );
+        var style = node.style.display;
         var response = null;
 
         if (hx_display === null) {
             
-            var computed = window.getComputedStyle( element ).display;
+            var computed = getComputedStyle( node ).display;
 
             // determine the hx_display code
             if (computed !== 'none' && style === '') {
@@ -169,7 +132,7 @@
                 hx_display = 3;
             }
 
-            _setHXDisplay( element , hx_display );
+            _setHXDisplay( node , hx_display );
 
         }
 
@@ -190,8 +153,8 @@
     }
 
     
-    function _getHXDisplay( element ) {
-        var hx_display = typeof element.hx_display !== 'undefined' ? element.hx_display : null;
+    function _getHXDisplay( node ) {
+        var hx_display = typeof node.hx_display !== 'undefined' ? node.hx_display : null;
         if (hx_display !== null) {
             hx_display = parseInt( hx_display , 10 );
         }
@@ -199,14 +162,14 @@
     }
 
     
-    function _setHXDisplay( element , value ) {
-        element.hx_display = value;
+    function _setHXDisplay( node , value ) {
+        node.hx_display = value;
     }
 
     
-    function _prepHidden( element ) {
-        element.style.visibility = 'hidden';
-        element.style.display = 'block';
+    function _prepHidden( node ) {
+        node.style.visibility = 'hidden';
+        node.style.display = 'block';
     }
 
 

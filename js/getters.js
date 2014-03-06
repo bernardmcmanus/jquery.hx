@@ -26,28 +26,42 @@
 
     get.xformKeys = function( xform ) {
 
-        xform.order = xform.order || [];
-
         var map = Config.maps.component;
+        var order = $.extend( [] , ( xform.order || [] ));
+
+        for (var i = 0; i < xform.order.length; i++) {
+            if (Config.keys.config.indexOf( xform.order[i] ) >= 0) {
+                var p = order.indexOf( xform.order[i] );
+                order.splice( p , 1 );
+            }
+        }
+
+        var out = {
+            passed: {
+                order: $.extend( [] , order )
+            },
+            mapped: {
+                order: $.extend( [] , order )
+            }
+        };
         
         for (var key in xform) {
-            
+
             if (!map[key]) {
                 continue;
             }
-
-            xform[map[key]] = xform[key];
             
-            var i = xform.order.indexOf( key );
+            out.passed[key] = xform[key];
+            out.mapped[map[key]] = xform[key];
+            
+            var index = xform.order.indexOf( key );
 
-            if (i >= 0) {
-                xform.order[i] = map[key];
+            if (index >= 0) {
+                out.mapped.order[index] = map[key];
             }
-
-            delete xform[key];
         }
 
-        return xform;
+        return out;
     };
 
 
@@ -60,12 +74,14 @@
             if (key === 'easing') {
                 _options[key] = Easing( options[key] );
             }
-            else if (Config.keys.config.indexOf( key ) >= 0)  {
+            else if (key === 'order') {
+                continue;
+            }
+            else if (Config.keys.config.indexOf( key ) >= 0) {
                 _options[key] = options[key];
             }
         }
 
-        //return $.extend( {} , _options );
         return _options;
     };
 
@@ -123,7 +139,7 @@
             return components;
         }
 
-        return $.extend( {} , exec() );
+        return exec();
     };
 
 

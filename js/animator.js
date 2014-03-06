@@ -9,61 +9,63 @@
         }, options );
 
         $.extend( this , options );
+
+        this.listeners = this._getListeners();
     };
 
     animator.prototype = {
         
         start: function() {
 
+            this.running = true;
+
+            $(this.node).on( this.eventType , this.listeners._transitionEnd );
+
             if (this.fallback !== false) {
-
-                this.running = true;
-
-                var t = this.duration + this.delay + this.buffer;
-                
-                this.node.addEventListener( this.eventType , this );
-                this.node.addEventListener( 'hx_init' , this );
-
-                /*var fallback = function() {
-                    this.node._hx.trigger( 'fallback' , this.property );
-                    this.node._hx.trigger( this.eventType , {
-                        propertyName: this.property
-                    });
-                }.bind( this );
-
-                this.timeout = setTimeout( fallback , t );*/
+                this.timeout = _createFallback.call( this );
             }
         },
 
-        handleEvent: function( e ) {
+        _getListeners: function() {
 
-            switch (e.type) {
-                
-                case this.eventType:
-                    
-                    var name = e.propertyName || e.detail.propertyName;
-                    var re = new RegExp( this.property , 'i' );
-                    
-                    if (re.test( name )) {
-                        this.destroy();
-                        this.done( e , this.property );
-                    }
+            return {
+                _transitionEnd: this._transitionEnd.bind( this )
+            };
+        },
 
-                    break;
+        _transitionEnd: function( e , data ) {
 
-                case 'hx_init':
-                    //this.cancel();
-                    break;
+            e.originalEvent = e.originalEvent || {};
+            data = data || {};
+
+            var name = e.originalEvent.propertyName || data.propertyName;
+            var re = new RegExp( this.property , 'i' );
+            
+            if (re.test( name )) {
+                this.destroy();
+                this._complete( this.property );
             }
         },
 
         destroy: function() {
             clearTimeout( this.timeout );
             this.running = false;
-            this.node.removeEventListener( this.eventType , this );
-            this.node.removeEventListener( 'hx_init' , this );
+            $(this.node).off( this.eventType , this.listeners._transitionEnd );
         }
     };
+
+
+    function _createFallback() {
+
+        var t = this.duration + this.delay + this.buffer;
+
+        var fallback = function() {
+            var data = {propertyName: this.property};
+            $(this.node).trigger( this.eventType , data );
+        }.bind( this );
+
+        return setTimeout( fallback , t );
+    }
 
 
     $.extend( hx , {animator: animator} );

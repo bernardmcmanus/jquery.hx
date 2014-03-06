@@ -1,15 +1,16 @@
 (function( hx , Animator , VendorPatch ) {
 
 
-    var queue = function( node ) {
+    var queue = function( node , hooks ) {
         this.node = node;
+        this.hooks = hooks;
         this.branches = {};
     };
 
 
     queue.prototype = {
 
-        add: function( property , xformString , options ) {
+        push: function( property , xformString , options ) {
 
             var branch = (this.branches[property] = this.branches[property] || []);
 
@@ -18,7 +19,7 @@
                 property: property,
                 value: xformString,
                 eventType: VendorPatch.getEventType(),
-                done: this._instanceComplete.bind( this )
+                _complete: this._instanceComplete.bind( this )
             } , options );
 
             branch.push(
@@ -45,10 +46,12 @@
             animator.start();
         },
 
-        _instanceComplete: function( e , property ) {
+        _instanceComplete: function( property ) {
 
             var branch = this.branches[property];
-            branch.splice( 0 , 1 );
+            var instance = branch.splice( 0 , 1 )[0];
+
+            console.log(instance);
 
             if (branch.length > 0) {
                 this._exec( property );
@@ -56,10 +59,18 @@
             else {
                 this._branchComplete( property );
             }
+
+            this.hooks.instanceComplete( property );
         },
 
         _branchComplete: function( property ) {
-            console.log('branch complete');
+            
+            var sequence = getActiveSequence( this.branches );
+            setTransition( this.node , sequence );
+
+            delete this.branches[property];
+
+            this.hooks.branchComplete( property );
         },
 
         _queueComplete: function() {
@@ -79,8 +90,6 @@
         }
 
         $(node).css( tProp , tString );
-
-        console.log( tProp , tString );
     }
 
 

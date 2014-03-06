@@ -26,23 +26,23 @@
 
         _set: function( property , options ) {
 
-            options = hxManager.get.xformKeys( options );
+            var xform = hxManager.get.xformKeys( options );
 
             this.forEach(function( node ) {
                 
-                var raw = hxManager.get.rawComponents( options );
+                var raw = hxManager.get.rawComponents( xform.mapped );
                 var defs = hxManager.get.xformDefaults( raw );
                 
                 node._hx.updateComponent( property , raw , defs );
 
-                var xformString = hxManager.get.xformString( property , node._hx.components[property] , options.order );
+                var xformString = hxManager.get.xformString( property , node._hx.components[property] , xform.mapped.order );
                 var opt = hxManager.get.xformOptions( options );
 
-                node._hx.applyXform( property , xformString , opt );
+                node._hx.applyXform( property , xform.passed , xformString , opt );
 
             }.bind( this ));
 
-            return this;
+            return $(this);
         },
 
         go: function( property ) {
@@ -53,12 +53,16 @@
             // progress to the next transformation in the queue
         },
 
+        times: function( n ) {
+            // repeat the most recently added transformation n times
+        },
+
         at: function( property , percent , func ) {
             // execute func at percent completion of queue[property]
         },
 
         done: function( func ) {
-            // execute func upon completion of entire queue
+            this._callback = func || function() {};
         }
 
     };

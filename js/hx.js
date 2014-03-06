@@ -4,7 +4,7 @@
     $.fn.hx = function( action , options ) {
 
         options = options || {};
-        options.order = Helper.object.getOrder.call( options );
+        options.order = options.order || Helper.object.getOrder.call( options );
 
         var hxm = new hx( this );
 
@@ -18,7 +18,7 @@
 
 
     $.fn.hx.transform = function( hxm , options ) {
-        options = $.extend( Defaults.transform , options );
+        options = $.extend( {} , Defaults.transform , options );
         return hxm._set( 'transform' , options );
     };
 

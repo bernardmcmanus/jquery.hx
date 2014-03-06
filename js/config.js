@@ -13,9 +13,7 @@
             component: {
                 translate: 'translate3d',
                 scale: 'scale3d',
-                rotate: 'rotate3d',
-                translate2d: 'translate',
-                scale2d: 'scale'
+                rotate: 'rotate3d'
             },
 
             vector: {

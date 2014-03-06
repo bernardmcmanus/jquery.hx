@@ -221,21 +221,25 @@
         }
     };
     
-    var easing = function( name ) {
+    var easing = function( def ) {
+
+        if ((/cubic\-bezier\(/).test( def )) {
+            return def;
+        }
 
         var b = {};
 
-        if (typeof name === 'object') {
-            b = name;
+        if (typeof def === 'object') {
+            b = def;
         }
         else {
 
             // check support for beziers with points outside 0 - 1
-            if (fallback[name] && !VendorPatch.getBezierSupport()) {
-                b = fallback[name];
+            if (fallback[def] && !VendorPatch.getBezierSupport()) {
+                b = fallback[def];
             }
             else {
-                b = type[name] ? type[name] : type.ease;
+                b = type[def] ? type[def] : type.ease;
             }
         }
 
