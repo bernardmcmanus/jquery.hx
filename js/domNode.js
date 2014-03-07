@@ -1,4 +1,4 @@
-(function( hx , Config , Queue ) {
+(function( hx , Config , Get , Queue ) {
 
     
     var domNode = function( element ) {
@@ -40,13 +40,13 @@
 
         applyXform: function( property , passed , xformString , options ) {
 
+            this._hx.queue.push( property , xformString , options );
+
             $(this).trigger( 'hx.applyXform' , {
                 property: property,
                 xform: passed,
                 options: options
             });
-
-            this._hx.queue.push( property , xformString , options );
         },
 
         cleanup: function() {
@@ -63,8 +63,8 @@
 
     var queueHooks = {
 
-        instanceComplete: function( property ) {
-            console.log(property + ' instance complete.');
+        instanceComplete: function( property , instance ) {
+            instance.done.call( this );
         },
 
         branchComplete: function( property ) {
@@ -72,7 +72,8 @@
         },
 
         queueComplete: function() {
-            console.log('queue complete.');
+            $(this).trigger( 'hx.queueComplete' );
+            //console.log('queue complete.');
         }
     };
 
@@ -80,8 +81,8 @@
     function _init( node ) {
 
         var _node = $.extend( node , this );
-        var _queueHooks = getScopedModule( _node , queueHooks );
-        var _hxModule = getScopedModule( _node , hxModule );
+        var _queueHooks = Get.scopedModule( queueHooks , _node );
+        var _hxModule = Get.scopedModule( hxModule , _node );
 
         _node._hx = $.extend({
             queue: new Queue( _node , _queueHooks ),
@@ -89,18 +90,6 @@
         } , _hxModule );
 
         return _node;
-    }
-
-    
-    function getScopedModule( context , module ) {
-
-        var _module = {};
-
-        for (var key in module) {
-            _module[key] = module[key].bind( context );
-        }
-
-        return _module;
     }
 
     
@@ -193,7 +182,7 @@
     $.extend( hx , {domNode: domNode} );
 
     
-}( hxManager , hxManager.config , hxManager.queue ));
+}( hxManager , hxManager.config , hxManager.get , hxManager.queue ));
 
 
 

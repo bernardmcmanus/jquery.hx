@@ -70,7 +70,8 @@
                 easing: 'ease',
                 delay: 0,
                 relative: true,
-                fallback: true
+                fallback: true,
+                done: function() {}
             }
         }
 

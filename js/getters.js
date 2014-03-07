@@ -4,6 +4,18 @@
     var get = {};
 
 
+    get.scopedModule = function( module , context ) {
+
+        var _module = {};
+
+        for (var key in module) {
+            _module[key] = module[key].bind( context );
+        }
+
+        return _module;
+    };
+
+
     get.computedMatrix = function( node ) {
 
         var matrix = VendorPatch.getComputedMatrix( node );

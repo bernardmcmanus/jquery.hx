@@ -1,4 +1,4 @@
-(function( hx , Animator , VendorPatch ) {
+(function( hx , Helper , VendorPatch , Animator ) {
 
 
     var queue = function( node , hooks ) {
@@ -31,6 +31,10 @@
             }
         },
 
+        isComplete: function() {
+            return Helper.object.size.call( this.branches ) === 0;
+        },
+
         getCurrentInstance: function( property ) {
             return this.branches[property][0];
         },
@@ -51,7 +55,7 @@
             var branch = this.branches[property];
             var instance = branch.splice( 0 , 1 )[0];
 
-            console.log(instance);
+            this.hooks.instanceComplete( property , instance );
 
             if (branch.length > 0) {
                 this._exec( property );
@@ -59,8 +63,6 @@
             else {
                 this._branchComplete( property );
             }
-
-            this.hooks.instanceComplete( property );
         },
 
         _branchComplete: function( property ) {
@@ -71,10 +73,14 @@
             delete this.branches[property];
 
             this.hooks.branchComplete( property );
+
+            if (this.isComplete()) {
+                this._queueComplete();
+            }
         },
 
         _queueComplete: function() {
-
+            this.hooks.queueComplete();
         }
         
     };
@@ -130,7 +136,7 @@
     $.extend( hx , {queue: queue} );
 
     
-}( hxManager , hxManager.animator , hxManager.vendorPatch ));
+}( hxManager , hxManager.helper , hxManager.vendorPatch , hxManager.animator ));
 
 
 

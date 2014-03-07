@@ -1,9 +1,9 @@
 (function() {
 
     
-    $('.tgt').on( 'hx.applyXform' , function( e , data ) {
-        //console.log(arguments);
-    });
+    /*$('.tgt').on( 'hx.applyXform' , function( e , data ) {
+        $('.tgt2, .tgt3').hx( 'transform' , data.xform );
+    });*/
 
 
     /*$('.tgt').on( 'hx_transitionEnd' , function( e ) {
@@ -26,8 +26,12 @@
             duration: 800,
             easing: 'easeOutBack',
             done: function() {
-                console.log('transform 1 complete');
+                //console.log('transform 1 complete');
             }
+        })
+
+        .done(function() {
+            console.log('DONE');
         })
 
         .hx( 'transform' , {
@@ -37,7 +41,7 @@
             duration: 900,
             easing: 'easeOutBack',
             done: function() {
-                console.log('transform 2 complete');
+                //console.log('transform 2 complete');
             }
         })
 
@@ -48,7 +52,7 @@
             duration: 1000,
             easing: 'easeOutBack',
             done: function() {
-                console.log('transform 3 complete');
+                //console.log('transform 3 complete');
             }
         });
     }
