@@ -16,7 +16,6 @@
         });
 
         this.hxManager = 1;
-        this._callback = function() {};
 
         return $.extend( jQ , nodes , this );
     };
@@ -24,23 +23,30 @@
 
     hxManager.prototype = {
 
-        _set: function( property , options ) {
-
-            addHooks.call( this );
-
-            var xform = hxManager.get.xformKeys( options );
+        _set: function( actions ) {
 
             this.each(function( i ) {
-                
-                var raw = hxManager.get.rawComponents( xform.mapped );
-                var defs = hxManager.get.xformDefaults( raw );
-                
-                this[i]._hx.updateComponent( property , raw , defs );
 
-                var xformString = hxManager.get.xformString( property , this[i]._hx.components[property] , xform.mapped.order );
-                var opt = hxManager.get.xformOptions( options );
+                var pod = new hxManager.pod( this[i] );
 
-                this[i]._hx.applyXform( property , xform.passed , xformString , opt );
+                actions.forEach(function( action ) {
+
+                    var xform = hxManager.get.xformKeys( action );
+                    var options = hxManager.get.xformOptions( action );
+                    var raw = hxManager.get.rawComponents( xform.mapped );
+                    var defs = hxManager.get.xformDefaults( raw );
+
+                    pod.addBean({
+                        type: action.type,
+                        xform: xform,
+                        options: options,
+                        raw: raw,
+                        defaults: defs
+                    });
+
+                });
+
+                this[i]._hx.addPod( pod );
 
             }.bind( this ));
 
@@ -58,7 +64,7 @@
             return true;
         },
 
-        go: function( property ) {
+        /*go: function( property ) {
             // clear the queue and run the most recently added transformation
             return this;
         },
@@ -76,17 +82,21 @@
         at: function( property , percent , func ) {
             // execute func at percent completion of queue[property]
             return this;
-        },
+        },*/
 
-        done: function( func ) {
-            this._callback = func || function() {};
+        then: function( action ) {
+
+            if (typeof action === 'object') {
+                this.hx( action );
+            }
+
             return this;
         }
 
     };
 
 
-    var nodeHooks = {
+    /*var nodeHooks = {
 
         queueComplete: function( e ) {
 
@@ -94,23 +104,10 @@
                 return;
             }
             
-            $(this).off( 'hx.queueComplete' , this._nodeHooks.queueComplete );
             this._callback();
         },
 
-    };
-
-
-    function addHooks() {
-
-        if (this._nodeHooks) {
-            return;
-        }
-
-        this._nodeHooks = hxManager.get.scopedModule( nodeHooks , this );
-
-        $(this).on( 'hx.queueComplete' , this._nodeHooks.queueComplete );
-    }
+    };*/
 
     
 }( window ));

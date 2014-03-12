@@ -4,7 +4,7 @@
     var config = {
         
         keys: {
-            config: [ 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'relative' , 'pseudoHide' , 'done' , 'fallback' , 'order' ],
+            config: [ 'type' , 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'pseudoHide' , 'done' , 'fallback' , 'order' ],
             xform: [ 'translate3d' , 'scale3d' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
         },
 
@@ -13,7 +13,13 @@
             component: {
                 translate: 'translate3d',
                 scale: 'scale3d',
-                rotate: 'rotate3d'
+                rotate: 'rotate3d',
+                rotateX: 'rotateX',
+                rotateY: 'rotateY',
+                rotateZ: 'rotateZ',
+                matrix: 'matrix',
+                matrix3d: 'matrix3d',
+                opacity: 'opacity'
             },
 
             vector: {
@@ -69,7 +75,14 @@
                 duration: 400,
                 easing: 'ease',
                 delay: 0,
-                relative: true,
+                fallback: true,
+                done: function() {}
+            },
+
+            opacity: {
+                duration: 400,
+                easing: 'ease',
+                delay: 0,
                 fallback: true,
                 done: function() {}
             }

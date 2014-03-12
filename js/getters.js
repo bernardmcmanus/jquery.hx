@@ -56,7 +56,7 @@
                 order: $.extend( [] , order )
             }
         };
-        
+
         for (var key in xform) {
 
             if (!map[key]) {
@@ -66,7 +66,7 @@
             out.passed[key] = xform[key];
             out.mapped[map[key]] = xform[key];
             
-            var index = xform.order.indexOf( key );
+            var index = out.mapped.order.indexOf( key );
 
             if (index >= 0) {
                 out.mapped.order[index] = map[key];
@@ -80,13 +80,14 @@
     get.xformOptions = function( options ) {
 
         var _options = {};
+        var defaults = Config.$hx[options.type];
         
         for (var key in options) {
 
             if (key === 'easing') {
                 _options[key] = Easing( options[key] );
             }
-            else if (key === 'order') {
+            else if (key === 'order' || key === 'type') {
                 continue;
             }
             else if (Config.keys.config.indexOf( key ) >= 0) {
@@ -94,7 +95,7 @@
             }
         }
 
-        return _options;
+        return $.extend( {} , defaults , _options );
     };
 
 
@@ -145,7 +146,7 @@
 
                 var values = _mapVectorToArray( options[key] );
                 var defaults = get.componentDefaults( key );
-                components[key] = _checkComponentDefaults( key , values , defaults , options.relative );
+                components[key] = _checkComponentDefaults( key , values , defaults );
             }
 
             return components;
@@ -155,12 +156,13 @@
     };
 
 
-    get.xformString = function( property , component , order ) {
+    get.xformString = function( property , component , defaults , order ) {
 
         function _buildComponentString( component , values ) {
 
-            if (values.length < 1)
+            if (values.length < 1) {
                 return '';
+            }
 
             var joinWith = '';
             var appendWith = '';
@@ -206,10 +208,16 @@
             var xform = [];
 
             order.forEach(function( key ) {
+
                 if (Config.keys.config.indexOf( key ) < 0) {
-                    var compString = _buildComponentString( key , component[key] );
-                    if (compString !== '')
+
+                    var _component = _checkComponentDefaults( key , component[key] , defaults[key] );
+
+                    var compString = _buildComponentString( key , _component );
+
+                    if (compString !== '') {
                         xform.push( compString );
+                    }
                 }
             });
 
@@ -249,8 +257,10 @@
             case 'rotateX':
             case 'rotateY':
             case 'rotateZ':
-            case 'opacity':
                 defaults = [ 0 ];
+                break;
+            case 'opacity':
+                defaults = [ 1 ];
                 break;
         }
 

@@ -25,28 +25,35 @@
 
     var hxModule = {
 
-        updateComponent: function( property , raw , defaults ) {
+        updateComponent: function( bean ) {
             
-            var component = (this._hx.components[property] = this._hx.components[property] || {});
+            var component = (this._hx.components[bean.type] = this._hx.components[bean.type] || {});
             
-            for (var key in raw) {
-                component[key] = component[key] || defaults[key];
-                component[key] = raw[key].map(function( a , b ) {
+            for (var key in bean.raw) {
+                
+                component[key] = (component[key] || bean.defaults[key]);
+
+                component[key] = (component[key].length === bean.defaults[key].length ? component[key] : bean.defaults[key]);
+                
+                component[key] = bean.raw[key].map(function( a , b ) {
                     var exp = _extractOperator( a );
                     return exp.op ? eval(component[key][b] + exp.op + exp.val) : exp.val;
                 });
             }
+
+            return Get.xformString( bean.type , component , bean.defaults , bean.xform.mapped.order );
         },
 
-        applyXform: function( property , passed , xformString , options ) {
+        addPod: function( pod ) {
 
-            this._hx.queue.push( property , xformString , options );
+            var _podHooks = Get.scopedModule( podHooks , this );
+            pod.setHooks( _podHooks );
 
-            $(this).trigger( 'hx.applyXform' , {
-                property: property,
-                xform: passed,
-                options: options
-            });
+            this._hx.queue.pushPod( pod );
+        },
+
+        setHooks: function( hooks ) {
+            this._hx.hooks = hooks;
         },
 
         cleanup: function() {
@@ -61,19 +68,31 @@
     };
 
 
-    var queueHooks = {
+    var podHooks = {
 
-        instanceComplete: function( property , instance ) {
-            instance.done.call( this );
+        beanStart: function( bean ) {
+
+            $(this).trigger( 'hx.applyXform' , {
+                property: bean.type,
+                xform: bean.xform.passed,
+                options: bean.options
+            });
         },
 
-        branchComplete: function( property ) {
-            console.log(property + ' branch complete.');
+        beanComplete: function( bean ) {
+            bean.animator.done.call( this );
         },
 
-        queueComplete: function() {
-            $(this).trigger( 'hx.queueComplete' );
-            //console.log('queue complete.');
+        clusterComplete: function( property ) {
+            //console.log(property + ' cluster complete.');
+        },
+
+        podComplete: function() {
+
+            if (!this._hx.queue.next()) {
+                console.log('queue complete.');
+            }
+
         }
     };
 
@@ -81,12 +100,12 @@
     function _init( node ) {
 
         var _node = $.extend( node , this );
-        var _queueHooks = Get.scopedModule( queueHooks , _node );
         var _hxModule = Get.scopedModule( hxModule , _node );
 
         _node._hx = $.extend({
-            queue: new Queue( _node , _queueHooks ),
-            components: {}
+            queue: new Queue(),
+            components: {},
+            hooks: {}
         } , _hxModule );
 
         return _node;

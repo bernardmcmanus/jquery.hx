@@ -43,7 +43,7 @@
             
             if (re.test( name )) {
                 this.destroy();
-                this._complete( this.property );
+                this._complete();
             }
         },
 
