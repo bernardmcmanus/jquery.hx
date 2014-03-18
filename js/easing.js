@@ -3,7 +3,7 @@
 **  http://blackberry.github.io/Alice/
 */
 
-(function( hx , VendorPatch ) {
+(function( window , hx , VendorPatch ) {
 
     var type = {
         linear: {
@@ -248,7 +248,7 @@
 
     $.extend( hx , {easing: easing} );
 
-}( hxManager , hxManager.vendorPatch ));
+}( window , hxManager , hxManager.vendorPatch ));
 
 
 

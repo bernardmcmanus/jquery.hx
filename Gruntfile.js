@@ -2,18 +2,24 @@ module.exports = function( grunt ) {
 
     var libs = [
         'js/hxManager.js',
+        'js/config.js',
         'js/helper.js',
         'js/vendorPatch.js',
         'js/easing.js',
+        'js/getters.js',
         'js/animator.js',
-        'js/hx.js'
+        'js/pod.js',
+        'js/queue.js',
+        'js/domNode.js',
+        'js/hx.js',
+        'lib/promise-0.1.1.min.js'
     ];
 
     grunt.initConfig({
 
             pkg: grunt.file.readJSON('package.json'),
 
-            clean : ["hx-v*"],
+            clean : ["hx-*"],
 
             uglify : {
                 options : {
@@ -21,7 +27,7 @@ module.exports = function( grunt ) {
                 },
                 release : {
                     files : {
-                        'hx-v<%= pkg.version %>.min.js' : libs
+                        'hx-<%= pkg.version %>.min.js' : libs
                     }
                 }
             },
@@ -33,7 +39,7 @@ module.exports = function( grunt ) {
             },
 
             jshint : {
-                all : [ 'Gruntfile.js', 'js/*.js']
+                all : [ 'Gruntfile.js' , 'js/*.js' ]
             }
 
     });

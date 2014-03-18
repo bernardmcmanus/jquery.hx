@@ -1,4 +1,4 @@
-(function( hx ) {
+(function( window , hx ) {
 
 
     var config = {
@@ -94,7 +94,7 @@
     $.extend( hx , {config: config} );
 
     
-}( hxManager ));
+}( window , hxManager ));
 
 
 

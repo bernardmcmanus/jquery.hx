@@ -1,4 +1,4 @@
-(function( hx ) {
+(function( window , hx ) {
 
     var animator = function( options ) {
 
@@ -71,7 +71,7 @@
     $.extend( hx , {animator: animator} );
 
     
-}( hxManager ));
+}( window , hxManager ));
 
 
 

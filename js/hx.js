@@ -1,4 +1,4 @@
-(function( $ , hx , Defaults , Helper ) {
+(function( window , $ , hx , Helper ) {
 
     
     $.fn.hx = function( actions ) {
@@ -8,14 +8,14 @@
         actions = Array.isArray( actions ) ? actions : [actions];
 
         actions.forEach(function( a ) {
-            a.order = a.order || Helper.object.getOrder.call( a );
+            a.order = a.order || Helper.object.getOrder( a );
         });
 
-        return hxm._set( actions );
+        return hxm._addPod( actions );
     };
 
  
-}( jQuery , hxManager , hxManager.config.$hx , hxManager.helper ));
+}( window , jQuery , hxManager , hxManager.helper ));
 
 
 

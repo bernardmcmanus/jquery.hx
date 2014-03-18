@@ -23,7 +23,7 @@
 
     hxManager.prototype = {
 
-        _set: function( actions ) {
+        _addPod: function( actions ) {
 
             this.each(function( i ) {
 
@@ -53,7 +53,24 @@
             return this;
         },
 
-        _isComplete: function() {
+        _addPromise: function( func ) {
+
+            var p = [];
+
+            this.each(function( i ) {
+
+                var promise = new Promise(function( resolve , reject ) {
+                    this[i]._hx.addPromise( resolve );
+                }.bind( this ));
+
+                p.push( promise );
+
+            }.bind( this ));
+
+            Promise.all( p ).then( func.bind( this ));
+        },
+
+        /*_isComplete: function() {
 
             for (var i = 0; i < this.length; i++) {
                 if (!this[i]._hx.queue.isComplete()) {
@@ -62,7 +79,7 @@
             }
 
             return true;
-        },
+        },*/
 
         /*go: function( property ) {
             // clear the queue and run the most recently added transformation
@@ -86,8 +103,14 @@
 
         then: function( action ) {
 
-            if (typeof action === 'object') {
+            if (typeof action === 'object' && !Array.isArray( action )) {
                 this.hx( action );
+            }
+            else if (Array.isArray( action ) && typeof action[0] === 'object') {
+                this.hx( action );
+            }
+            else if (typeof action === 'function') {
+                this._addPromise( action );
             }
 
             return this;

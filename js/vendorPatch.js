@@ -1,4 +1,4 @@
-(function( hx , Config ) {
+(function( window , hx , Config ) {
 
 
     var vendorPatch = function() {
@@ -84,7 +84,7 @@
     $.extend( hx , {vendorPatch: new vendorPatch()} );
 
     
-}( hxManager , hxManager.config.vendorPatch ));
+}( window , hxManager , hxManager.config.vendorPatch ));
 
 
 

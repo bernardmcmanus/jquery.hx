@@ -1,4 +1,4 @@
-(function( hx , Config , Get , Queue ) {
+(function( window , hx , Config , Helper , Get , Queue ) {
 
     
     var domNode = function( element ) {
@@ -28,18 +28,18 @@
         updateComponent: function( bean ) {
             
             var component = (this._hx.components[bean.type] = this._hx.components[bean.type] || {});
-            
-            for (var key in bean.raw) {
+
+            Helper.object.each( bean.raw , function( raw , key , i ) {
                 
                 component[key] = (component[key] || bean.defaults[key]);
-
                 component[key] = (component[key].length === bean.defaults[key].length ? component[key] : bean.defaults[key]);
                 
                 component[key] = bean.raw[key].map(function( a , b ) {
+                    var _eval = eval;
                     var exp = _extractOperator( a );
-                    return exp.op ? eval(component[key][b] + exp.op + exp.val) : exp.val;
+                    return exp.op ? _eval(component[key][b] + exp.op + exp.val) : exp.val;
                 });
-            }
+            });
 
             return Get.xformString( bean.type , component , bean.defaults , bean.xform.mapped.order );
         },
@@ -52,7 +52,15 @@
             this._hx.queue.pushPod( pod );
         },
 
+        addPromise: function( func ) {
+            //func();
+            //this._hx.queue.pushPromise( func );
+            var lastPod = Helper.array.last( this._hx.queue );
+            lastPod.done.push( func );
+        },
+
         setHooks: function( hooks ) {
+
             this._hx.hooks = hooks;
         },
 
@@ -72,7 +80,7 @@
 
         beanStart: function( bean ) {
 
-            $(this).trigger( 'hx.applyXform' , {
+            $(this).trigger( 'hx.xformStart' , {
                 property: bean.type,
                 xform: bean.xform.passed,
                 options: bean.options
@@ -80,6 +88,11 @@
         },
 
         beanComplete: function( bean ) {
+            
+            $(this).trigger( 'hx.xformComplete' , {
+                property: bean.type,
+            });
+
             bean.animator.done.call( this );
         },
 
@@ -87,7 +100,11 @@
             //console.log(property + ' cluster complete.');
         },
 
-        podComplete: function() {
+        podComplete: function( pod ) {
+
+            pod.done.forEach(function( func ) {
+                func();
+            });
 
             if (!this._hx.queue.next()) {
                 console.log('queue complete.');
@@ -201,7 +218,7 @@
     $.extend( hx , {domNode: domNode} );
 
     
-}( hxManager , hxManager.config , hxManager.get , hxManager.queue ));
+}( window , hxManager , hxManager.config , hxManager.helper , hxManager.get , hxManager.queue ));
 
 
 

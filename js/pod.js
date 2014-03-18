@@ -1,10 +1,11 @@
-(function( hx , Helper , VendorPatch , Animator ) {
+(function( window , hx , Helper , VendorPatch , Animator ) {
 
 
     var pod = function( node ) {
         this.node = node;
         this.beans = {};
         this.hooks = {};
+        this.done = [];
     };
 
 
@@ -25,16 +26,15 @@
 
             setTransition( this.node , sequence );
 
-            for (var key in sequence) {
-
-                var bean = sequence[key];
-
-                if (typeof bean.animator !== 'undefined') {
-                    continue;
-                }
+            Helper.object.each( sequence , function( bean , key ) {
                 
+                if (typeof bean.animator !== 'undefined') {
+                    return;
+                }
+
                 this._runBean( bean );
-            }
+
+            } , this );
         },
 
         _runBean: function( bean ) {
@@ -60,7 +60,7 @@
         },
 
         isComplete: function() {
-            return Helper.object.size.call( this.beans ) === 0;
+            return Helper.object.size( this.beans ) === 0;
         },
 
         _beanComplete: function( bean ) {
@@ -94,7 +94,7 @@
         },
 
         _podComplete: function() {
-            this.hooks.podComplete();
+            this.hooks.podComplete( this );
         }
         
     };
@@ -120,12 +120,15 @@
 
 
     function getActiveSequence( beans ) {
+
         var sequence = {};
-        for (var key in beans) {
-            if (beans[key].length > 0) {
-                sequence[key] = beans[key][0];
+        
+        Helper.object.each( beans , function( bean , key ) {
+            if (bean.length > 0) {
+                sequence[key] = bean[0];
             }
-        }
+        });
+
         return sequence;
     }
 
@@ -133,15 +136,15 @@
     function buildTransitionString( sequence ) {
         
         var arr = [];
-        
-        for (var key in sequence) {
-            var options = sequence[key].options;
+
+        Helper.object.each( sequence , function( part , key ) {
+            var options = part.options;
             var component = key + ' ' + options.duration + 'ms ' + options.easing + ' ' + options.delay + 'ms';
             if (arr.indexOf( component ) < 0) {
                 arr.push( component );
             }
-        }
-
+        });
+        
         return VendorPatch.getPrefixed(
             arr.join( ', ' )
         );
@@ -151,7 +154,7 @@
     $.extend( hx , {pod: pod} );
 
     
-}( hxManager , hxManager.helper , hxManager.vendorPatch , hxManager.animator ));
+}( window , hxManager , hxManager.helper , hxManager.vendorPatch , hxManager.animator ));
 
 
 

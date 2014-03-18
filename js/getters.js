@@ -1,4 +1,4 @@
-(function( hx , Config , Helper , VendorPatch , Easing ) {
+(function( window , hx , Config , Helper , VendorPatch , Easing ) {
 
 
     var get = {};
@@ -8,9 +8,9 @@
 
         var _module = {};
 
-        for (var key in module) {
-            _module[key] = module[key].bind( context );
-        }
+        Helper.object.each( module , function( func , key ) {
+            _module[key] = func.bind( context );
+        });
 
         return _module;
     };
@@ -41,12 +41,12 @@
         var map = Config.maps.component;
         var order = $.extend( [] , ( xform.order || [] ));
 
-        for (var i = 0; i < xform.order.length; i++) {
-            if (Config.keys.config.indexOf( xform.order[i] ) >= 0) {
-                var p = order.indexOf( xform.order[i] );
+        order.forEach(function( key ) {
+            if (Config.keys.config.indexOf( key ) >= 0) {
+                var p = order.indexOf( key );
                 order.splice( p , 1 );
             }
-        }
+        });
 
         var out = {
             passed: {
@@ -57,21 +57,22 @@
             }
         };
 
-        for (var key in xform) {
+        Helper.object.each( xform , function( val , key ) {
 
             if (!map[key]) {
-                continue;
+                return;
             }
-            
-            out.passed[key] = xform[key];
-            out.mapped[map[key]] = xform[key];
-            
+
+            out.passed[key] = val;
+            out.mapped[map[key]] = val;
+
             var index = out.mapped.order.indexOf( key );
 
             if (index >= 0) {
                 out.mapped.order[index] = map[key];
             }
-        }
+
+        });
 
         return out;
     };
@@ -81,19 +82,20 @@
 
         var _options = {};
         var defaults = Config.$hx[options.type];
-        
-        for (var key in options) {
+
+        Helper.object.each( options , function( val , key ) {
 
             if (key === 'easing') {
-                _options[key] = Easing( options[key] );
+                _options[key] = Easing( val );
             }
             else if (key === 'order' || key === 'type') {
-                continue;
+                return;
             }
             else if (Config.keys.config.indexOf( key ) >= 0) {
-                _options[key] = options[key];
+                _options[key] = val;
             }
-        }
+
+        });
 
         return $.extend( {} , defaults , _options );
     };
@@ -101,9 +103,9 @@
 
     get.xformDefaults = function( raw ) {
         var defs = {};
-        for (var key in raw) {
+        Helper.object.each( raw , function( val , key ) {
             defs[key] = get.componentDefaults( key );
-        }
+        });
         return defs;
     };
 
@@ -112,7 +114,7 @@
 
         function _mapVectorToArray( vector ) {
             
-            if (typeof vector !== 'object' && Helper.object.size.call( vector ) < 1) {
+            if (typeof vector !== 'object' && Helper.object.size( vector ) < 1) {
                 return [ vector ];
             }
 
@@ -125,11 +127,11 @@
             var v = vector;
             var arr = [];
             var i = 0;
-            
-            for (var key in v) {
+
+            Helper.object.each( v , function( val , key ) {
                 i = map[key];
-                arr[i] = v[key];
-            }
+                arr[i] = val;
+            });
 
             return arr;
         }
@@ -138,16 +140,17 @@
 
             var components = {};
 
-            for (var key in options) {
-                
+            Helper.object.each( options , function( val , key ) {
+
                 if (Config.keys.config.indexOf( key ) >= 0) {
-                    continue;
+                    return;
                 }
 
-                var values = _mapVectorToArray( options[key] );
+                var values = _mapVectorToArray( val );
                 var defaults = get.componentDefaults( key );
                 components[key] = _checkComponentDefaults( key , values , defaults );
-            }
+
+            });
 
             return components;
         }
@@ -273,7 +276,7 @@
         var defs = $.extend( [] , defaults );
         var newVals = $.extend( defs , values );
                 
-        if (Helper.array.compare.call( defaults , newVals ) && Config.keys.xform.indexOf( component ) >= 0) {
+        if (Helper.array.compare( defaults , newVals ) && Config.keys.xform.indexOf( component ) >= 0) {
             newVals = [];
         }
         
@@ -294,12 +297,14 @@
 
         var response = false;
 
-        for (var key in types) {
-            if (types[key].test( str )) {
-                response = key;
-                break;
+        Helper.object.each( types , function( val , key ) {
+            if (response !== false) {
+                return;
             }
-        }
+            if (val.test( str )) {
+                response = key;
+            }
+        });
 
         return response;
     }
@@ -331,7 +336,7 @@
     $.extend( hx , {get: get} );
 
     
-}( hxManager , hxManager.config , hxManager.helper , hxManager.vendorPatch , hxManager.easing ));
+}( window , hxManager , hxManager.config , hxManager.helper , hxManager.vendorPatch , hxManager.easing ));
 
 
 

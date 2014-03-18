@@ -1,4 +1,4 @@
-(function( hx ) {
+(function( window , hx ) {
 
 
     var queue = function() {
@@ -15,6 +15,15 @@
             if (this.length === 1) {
                 this[0].run();
             }
+        },
+
+        pushPromise: function( func ) {
+            //console.log(func);
+            var promise = {
+                run: func
+            };
+
+            this.push( promise );
         },
 
         next: function() {
@@ -39,7 +48,7 @@
     $.extend( hx , {queue: queue} );
 
     
-}( hxManager ));
+}( window , hxManager ));
 
 
 
