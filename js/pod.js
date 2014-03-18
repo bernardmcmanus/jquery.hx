@@ -1,19 +1,53 @@
-(function( window , hx , Helper , When , VendorPatch ) {
+(function( window , hx , Config , Helper , When , VendorPatch ) {
 
 
-    var pod = function( node ) {
+    // =========================== pod constructor ========================== //
+
+
+    var pod = function( node , type ) {
+
+        if (!isValidType( type )) {
+            throw new TypeError( 'you must pass a valid type to the hxManager.pod constructor.' );
+        }
+
+        var _pod = null;
+        var whenModule = new When();
+
+        switch (type) {
+
+            case 'xform':
+                _pod = new xformPod( node , whenModule );
+                break;
+
+            case 'promise':
+                _pod = new promisePod( whenModule );
+                break;
+        }
+
+        return _pod;
+    };
+
+
+    function isValidType( type ) {
+        return (type && type !== '' && Config.types.indexOf( type ) >= 0);
+    }
+
+
+    // ============================== xformPod ============================== //
+
+
+    var xformPod = function( node , whenModule ) {
 
         this.node = node;
         this.beans = {};
-        this.done = [];
+        this.type = 'xform';
 
-        var whenModule = new When();
         this.when = whenModule.when.bind( whenModule );
         this.happen = whenModule.happen.bind( whenModule );
     };
 
 
-    pod.prototype = {
+    xformPod.prototype = {
 
         addBean: function( bean ) {
             var type = bean.getData( 'type' );
@@ -152,10 +186,39 @@
     }
 
 
+    // ============================= promisePod ============================= //
+
+
+    var promisePod = function( whenModule ) {
+        this.type = 'promise';
+        this.when = whenModule.when.bind( whenModule );
+        this.happen = whenModule.happen.bind( whenModule );
+    };
+
+
+    promisePod.prototype = {
+
+        run: function() {
+            this.happen( 'promiseMade' );
+        },
+
+        resolve: function() {
+            this.happen( 'promiseResolved' );
+        },
+
+        complete: function() {
+            this.happen( 'podComplete' , [ this ] );
+        }
+    };
+
+
+    // ====================================================================== //
+
+
     $.extend( hx , {pod: pod} );
 
     
-}( window , hxManager , hxManager.helper , hxManager.when , hxManager.vendorPatch ));
+}( window , hxManager , hxManager.config.pod , hxManager.helper , hxManager.when , hxManager.vendorPatch ));
 
 
 

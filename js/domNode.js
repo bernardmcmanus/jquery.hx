@@ -44,7 +44,7 @@
             return Get.xformString( bean.type , component , bean.defaults , bean.xform.mapped.order );
         },
 
-        addPod: function( pod ) {
+        addXformPod: function( pod ) {
 
             pod.when( 'beanStart' , podHooks.beanStart , this );
             pod.when( 'beanComplete' , podHooks.beanComplete , this );
@@ -54,19 +54,17 @@
             this._hx.queue.pushPod( pod );
         },
 
-        addPromise: function( func ) {
-            //func();
-            //this._hx.queue.pushPromise( func );
-            var lastPod = Helper.array.last( this._hx.queue );
-            lastPod.done.push( func );
+        addPromisePod: function( pod ) {
+
+            pod.when( 'podComplete' , podHooks.podComplete , this );
+
+            this._hx.queue.pushPod( pod );
         },
 
         cleanup: function() {
 
             Config.removeOnClean.forEach(function( key ) {
-
                 delete this[key];
-
             }.bind( this ));
         }
 
@@ -78,30 +76,26 @@
         beanStart: function( bean ) {
 
             $(this).trigger( 'hx.xformStart' , {
-                property: bean.type,
+                property: bean.getData( 'type' ),
                 xform: bean.xform.passed,
-                options: bean.options
+                options: bean.getData( 'options' )
             });
         },
 
         beanComplete: function( bean ) {
             
             $(this).trigger( 'hx.xformComplete' , {
-                property: bean.type,
+                property: bean.getData( 'type' ),
             });
 
             bean.animator.done.call( this );
         },
 
         clusterComplete: function( property ) {
-            //console.log(property + ' cluster complete.');
+            
         },
 
         podComplete: function( pod ) {
-
-            pod.done.forEach(function( func ) {
-                func();
-            });
 
             if (!this._hx.queue.next()) {
                 console.log('queue complete.');

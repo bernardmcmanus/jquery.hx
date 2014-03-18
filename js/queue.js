@@ -17,15 +17,6 @@
             }
         },
 
-        pushPromise: function( func ) {
-            //console.log(func);
-            var promise = {
-                run: func
-            };
-
-            this.push( promise );
-        },
-
         next: function() {
 
             this.splice( 0 , 1 );

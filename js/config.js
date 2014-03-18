@@ -30,10 +30,6 @@
             }
         },
 
-        domNode: {
-            removeOnClean: [ '_hx' , 'hx_display' ]
-        },
-
         vendorPatch: {
 
             vendors: {
@@ -67,6 +63,14 @@
                 (/(^\-{0})+transition/g),
                 (/(^\-{0})+transform/g)
             ]
+        },
+
+        pod: {
+            types: [ 'xform' , 'promise' ]
+        },
+
+        domNode: {
+            removeOnClean: [ '_hx' , 'hx_display' ]
         },
 
         $hx: {

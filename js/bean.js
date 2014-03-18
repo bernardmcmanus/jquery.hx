@@ -1,9 +1,9 @@
 (function( window , hx , When , Get , Animator ) {
 
 
-    var bean = function( action ) {
+    var bean = function( seed ) {
         
-        var data = _getBeanData( action );
+        var data = _getBeanData( seed );
         $.extend( this , data );
 
         var whenModule = new When();
@@ -45,15 +45,15 @@
     };
 
 
-    function _getBeanData( action ) {
+    function _getBeanData( seed ) {
 
-        var xform = Get.xformKeys( action );
-        var options = Get.xformOptions( action );
+        var xform = Get.xformKeys( seed );
+        var options = Get.xformOptions( seed );
         var raw = Get.rawComponents( xform.mapped );
         var defs = Get.xformDefaults( raw );
 
         return {
-            type: action.type,
+            type: seed.type,
             xform: xform,
             options: options,
             raw: raw,

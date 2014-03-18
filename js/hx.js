@@ -1,17 +1,21 @@
 (function( window , $ , hx , Helper ) {
 
     
-    $.fn.hx = function( actions ) {
+    $.fn.hx = function( hxArgs ) {
 
         var hxm = new hx( this );
 
-        actions = Array.isArray( actions ) ? actions : [actions];
+        if (!hxArgs) {
+            return hxm;
+        }
 
-        actions.forEach(function( a ) {
+        hxArgs = Array.isArray( hxArgs ) ? hxArgs : [hxArgs];
+
+        hxArgs.forEach(function( a ) {
             a.order = a.order || Helper.object.getOrder( a );
         });
 
-        return hxm._addPod( actions );
+        return hxm._addXformPod( hxArgs );
     };
 
  

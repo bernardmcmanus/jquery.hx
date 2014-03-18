@@ -12,13 +12,13 @@
     });*/
 
 
-    $('#target').on( 'click', test2 );
+    $('#target').on( 'click', test1 );
 
 
     function test1() {
 
         $('.tgt, .tgt2, .tgt3')
-
+        .hx()
         .hx([
             {
                 type: 'transform',
@@ -49,21 +49,12 @@
             }
         ])
 
-        .then(function( f , r ) {
-            console.log(arguments);
+        .then(function( resolve , reject ) {
             console.log('cool!');
+            resolve();
         })
 
-        /*.then([
-            function() {
-                console.log('fulfilled!');
-            },
-            function() {
-                console.log('rejected!');
-            }
-        ])*/
-
-        .then({
+        .hx({
             type: 'transform',
             translate: {x: '-=200'},
             rotate: {x: 0, y: 0, z: 0, a: 0},
@@ -76,7 +67,7 @@
             }
         })
 
-        .then({
+        .hx({
             type: 'transform',
             rotateZ: 360,
             duration: 1200,
@@ -86,7 +77,7 @@
             }
         })
 
-        .then({
+        .hx({
             type: 'transform',
             rotateZ: 0,
             duration: 1200,
@@ -94,6 +85,10 @@
             done: function() {
                 console.log('transform 4 complete');
             }
+        })
+
+        .done(function() {
+            console.log('awesome!');
         });
     }
 
@@ -120,13 +115,31 @@
             easing: 'easeOutBack'
         })
 
-        .then(function() {
-            console.log(this);
-            console.log('cool!');
+        .then(function( resolve , reject ) {
+
+            $('.tgt3')
+
+            .hx([
+                {
+                    type: 'transform',
+                    rotateZ: '+=360',
+                    duration: 1200,
+                    easing: 'easeOutBack'
+                },
+                {
+                    type: 'transform',
+                    rotateZ: 0,
+                    duration: 1200,
+                    easing: 'easeOutBack'
+                }
+            ])
+
+            .then( resolve );
         })
 
-        .then(function() {
-            console.log('cooler!');
+        .then(function( resolve , reject ) {
+            console.log('cool!');
+            resolve();
         })
 
         .hx({
