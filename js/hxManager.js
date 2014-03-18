@@ -31,18 +31,8 @@
 
                 actions.forEach(function( action ) {
 
-                    var xform = hxManager.get.xformKeys( action );
-                    var options = hxManager.get.xformOptions( action );
-                    var raw = hxManager.get.rawComponents( xform.mapped );
-                    var defs = hxManager.get.xformDefaults( raw );
-
-                    pod.addBean({
-                        type: action.type,
-                        xform: xform,
-                        options: options,
-                        raw: raw,
-                        defaults: defs
-                    });
+                    var bean = new hxManager.bean( action );
+                    pod.addBean( bean );
 
                 });
 

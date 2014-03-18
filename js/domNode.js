@@ -46,8 +46,10 @@
 
         addPod: function( pod ) {
 
-            var _podHooks = Get.scopedModule( podHooks , this );
-            pod.setHooks( _podHooks );
+            pod.when( 'beanStart' , podHooks.beanStart , this );
+            pod.when( 'beanComplete' , podHooks.beanComplete , this );
+            pod.when( 'clusterComplete' , podHooks.clusterComplete , this );
+            pod.when( 'podComplete' , podHooks.podComplete , this );
 
             this._hx.queue.pushPod( pod );
         },
@@ -57,11 +59,6 @@
             //this._hx.queue.pushPromise( func );
             var lastPod = Helper.array.last( this._hx.queue );
             lastPod.done.push( func );
-        },
-
-        setHooks: function( hooks ) {
-
-            this._hx.hooks = hooks;
         },
 
         cleanup: function() {
@@ -121,8 +118,7 @@
 
         _node._hx = $.extend({
             queue: new Queue(),
-            components: {},
-            hooks: {}
+            components: {}
         } , _hxModule );
 
         return _node;

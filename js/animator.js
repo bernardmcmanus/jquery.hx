@@ -1,4 +1,4 @@
-(function( window , hx ) {
+(function( window , hx , When ) {
 
     var animator = function( options ) {
 
@@ -9,6 +9,10 @@
         }, options );
 
         $.extend( this , options );
+
+        var whenModule = new When();
+        this.when = whenModule.when.bind( whenModule );
+        this.happen = whenModule.happen.bind( whenModule );
 
         this.listeners = this._getListeners();
     };
@@ -24,6 +28,10 @@
             if (this.fallback !== false) {
                 this.timeout = _createFallback.call( this );
             }
+        },
+
+        isRunning: function() {
+            return this.running === true;
         },
 
         _getListeners: function() {
@@ -43,7 +51,8 @@
             
             if (re.test( name )) {
                 this.destroy();
-                this._complete();
+                //this._complete();
+                this.happen( 'complete' );
             }
         },
 
@@ -71,7 +80,7 @@
     $.extend( hx , {animator: animator} );
 
     
-}( window , hxManager ));
+}( window , hxManager , hxManager.when ));
 
 
 

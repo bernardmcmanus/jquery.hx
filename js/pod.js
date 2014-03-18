@@ -1,23 +1,24 @@
-(function( window , hx , Helper , VendorPatch , Animator ) {
+(function( window , hx , Helper , When , VendorPatch ) {
 
 
     var pod = function( node ) {
+
         this.node = node;
         this.beans = {};
-        this.hooks = {};
         this.done = [];
+
+        var whenModule = new When();
+        this.when = whenModule.when.bind( whenModule );
+        this.happen = whenModule.happen.bind( whenModule );
     };
 
 
     pod.prototype = {
 
         addBean: function( bean ) {
-            var cluster = (this.beans[bean.type] = this.beans[bean.type] || []);
+            var type = bean.getData( 'type' );
+            var cluster = (this.beans[type] = this.beans[type] || []);
             cluster.push( bean );
-        },
-
-        setHooks: function( hooks ) {
-            this.hooks = hooks;
         },
 
         run: function() {
@@ -28,7 +29,7 @@
 
             Helper.object.each( sequence , function( bean , key ) {
                 
-                if (typeof bean.animator !== 'undefined') {
+                if (bean.hasAnimator()) {
                     return;
                 }
 
@@ -39,24 +40,23 @@
 
         _runBean: function( bean ) {
 
-            bean.value = this.node._hx.updateComponent( bean );
+            bean.setValue(
+                this.node._hx.updateComponent( bean )
+            );
 
-            var options = $.extend({
-
+            var options = {
                 node: this.node,
-                property: bean.type,
+                property: bean.getData( 'type' ),
                 eventType: VendorPatch.getEventType(),
-                _complete: this._beanComplete.bind( this , bean )
+            };
 
-            } , bean.options );
-
-            bean.animator = new Animator( options );
+            bean.createAnimator( options );
+            bean.when( 'complete' , this._beanComplete , this );
 
             applyXform( this.node , bean );
+            bean.startAnimator();
 
-            bean.animator.start();
-
-            this.hooks.beanStart( bean );
+            this.happen( 'beanStart' , [ bean ] );
         },
 
         isComplete: function() {
@@ -65,17 +65,18 @@
 
         _beanComplete: function( bean ) {
 
-            var cluster = this.beans[bean.type];
+            var type = bean.getData( 'type' );
+            var cluster = this.beans[type];
 
             cluster.splice( 0 , 1 );
 
-            this.hooks.beanComplete( bean );
+            this.happen( 'beanComplete' , [ bean ] );
 
             if (cluster.length > 0) {
                 this.run();
             }
             else {
-                this._clusterComplete( bean.type );
+                this._clusterComplete( type );
             }
         },
 
@@ -86,7 +87,7 @@
 
             delete this.beans[property];
 
-            this.hooks.clusterComplete( property );
+            this.happen( 'clusterComplete' , [ property ] );
 
             if (this.isComplete()) {
                 this._podComplete();
@@ -94,7 +95,7 @@
         },
 
         _podComplete: function() {
-            this.hooks.podComplete( this );
+            this.happen( 'podComplete' , [ this ] );
         }
         
     };
@@ -114,8 +115,8 @@
 
 
     function applyXform( node , bean ) {
-        var tProp = VendorPatch.getPrefixed( bean.type );
-        $(node).css( tProp , bean.value );
+        var tProp = VendorPatch.getPrefixed( bean.getData( 'type' ));
+        $(node).css( tProp , bean.getData( 'value' ));
     }
 
 
@@ -154,7 +155,7 @@
     $.extend( hx , {pod: pod} );
 
     
-}( window , hxManager , hxManager.helper , hxManager.vendorPatch , hxManager.animator ));
+}( window , hxManager , hxManager.helper , hxManager.when , hxManager.vendorPatch ));
 
 
 
