@@ -4,8 +4,8 @@
     var config = {
         
         keys: {
-            config: [ 'type' , 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
-            xform: [ 'translate3d' , 'scale3d' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
+            config: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
+            xform: [ 'translate3d' , 'scale3d' , 'translate' , 'scale' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
         },
 
         maps: {
@@ -14,12 +14,8 @@
                 translate: 'translate3d',
                 scale: 'scale3d',
                 rotate: 'rotate3d',
-                rotateX: 'rotateX',
-                rotateY: 'rotateY',
-                rotateZ: 'rotateZ',
-                matrix: 'matrix',
-                matrix3d: 'matrix3d',
-                opacity: 'opacity'
+                translate2d: 'translate',
+                scale2d: 'scale'
             },
 
             vector: {
@@ -28,6 +24,17 @@
                 z: 2,
                 a: 3
             }
+        },
+
+        xformDefaults: {
+            matrix3d: [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ],
+            matrix: [ 1 , 0 , 0 , 1 , 0 , 0 ],
+            translate3d: [ 0 , 0 , 0 ],
+            scale3d: [ 1 , 1 , 1 ],
+            rotate3d: [ 0 , 0 , 0 , 0 ],
+            translate: [ 0 , 0 ],
+            scale: [ 1 , 1 ],
+            singleAxisRotate: [ 0 ]
         },
 
         vendorPatch: {

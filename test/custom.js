@@ -3,7 +3,8 @@
     
     /*$('.tgt').on( 'hx.xformStart' , function( e , data ) {
         console.log(data);
-        $('.tgt2, .tgt3').hx( 'transform' , data.xform );
+        var xform = $.extend( {type: data.type} , data.xform , data.options );
+        $('.tgt2, .tgt3').hx( xform );
     });*/
 
 
@@ -17,7 +18,38 @@
     });*/
 
 
-    $('#target').on( 'click', test5 );
+    $('#target').on( 'click', test1 );
+
+
+    function test0() {
+
+        $('.tgt')
+
+        .hx([
+            {
+                type: 'transform',
+                translate: {x: '+=200'},
+                rotate: {x: 1, y: 1, z: 1, a: '+=360'},
+                scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
+                duration: 800,
+                easing: 'easeOutBack'
+            },
+            {
+                type: 'opacity',
+                value: 0.3,
+                duration: 800
+            },
+            {
+            type: 'background-color',
+                value: '#fff',
+                duration: 800
+            }
+        ])
+
+        .done(function() {
+            console.log('done');
+        });
+    }
 
 
     function test1() {
@@ -38,7 +70,7 @@
             },
             {
                 type: 'opacity',
-                opacity: 0.3,
+                value: 0.3,
                 duration: 1000,
                 done: function() {
                     console.log('opacity 1 complete');
@@ -46,7 +78,7 @@
             },
             {
                 type: 'opacity',
-                opacity: 1,
+                value: 1,
                 duration: 400,
                 done: function() {
                     console.log('opacity 2 complete');
@@ -72,25 +104,39 @@
             }
         })
 
-        .hx({
-            type: 'transform',
-            rotateZ: 360,
-            duration: 1200,
-            easing: 'easeOutBack',
-            done: function() {
-                console.log('transform 3 complete');
+        .hx([
+            {
+                type: 'transform',
+                rotateZ: 360,
+                duration: 1200,
+                easing: 'easeOutBack',
+                done: function() {
+                    console.log('transform 3 complete');
+                }
+            },
+            {
+                type: 'background-color',
+                value: '#fff',
+                duration: 1200
             }
-        })
+        ])
 
-        .hx({
-            type: 'transform',
-            rotateZ: 0,
-            duration: 1200,
-            easing: 'easeOutBack',
-            done: function() {
-                console.log('transform 4 complete');
+        .hx([
+            {
+                type: 'transform',
+                rotateZ: 0,
+                duration: 1200,
+                easing: 'easeOutBack',
+                done: function() {
+                    console.log('transform 4 complete');
+                }
+            },
+            {
+                type: 'background-color',
+                value: '',
+                duration: 1200
             }
-        })
+        ])
 
         .done(function() {
             console.log('awesome!');
@@ -104,7 +150,7 @@
 
         .hx({
             type: 'opacity',
-            opacity: 0,
+            value: 0,
             duration: 800
         })
 
@@ -120,7 +166,7 @@
             },
             {
                 type: 'opacity',
-                opacity: 1,
+                value: 1,
                 duration: 600
             }
         ])
@@ -251,7 +297,7 @@
 
         .hx({
             type: 'opacity',
-            opacity: 1
+            value: 1
         })
 
         .done(function() {

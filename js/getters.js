@@ -16,35 +16,90 @@
     };
 
 
+    // TODO - implement get.computedMatrix
     get.computedMatrix = function( node ) {
 
-        var matrix = VendorPatch.getComputedMatrix( node );
-
-        if (_isMatrix( matrix ) !== false) {
+        function _isMatrix( str ) {
             
-            matrix = _parse( matrix );
-            
-            if (matrix.transform.length < 1)
-                return null;
+            if (!str) {
+                return false;
+            }
 
-            return matrix;
+            var types = {
+                matrix3d: (/matrix3d\(/i),
+                matrix: (/matrix\(/i)
+            };
 
-        } else {
-            return null;
+            var response = false;
+
+            Helper.object.each( types , function( val , key ) {
+                if (response !== false) {
+                    return;
+                }
+                if (val.test( str )) {
+                    response = key;
+                }
+            });
+
+            return response;
         }
-        
+
+        function _parse( str ) {
+            
+            var type = _isMatrix( str );
+            
+            if (!type) {
+                return {};
+            }
+            
+            var defaults = get.componentDefaults( type );
+            var arr = str.replace( /(px|\s|\))/gi , '' ).split( '(' )[1].split( ',' );
+
+            arr.map(function( i ) {
+                return parseFloat( i , 10 );
+            });
+
+            arr = _checkComponentDefaults( type , arr , defaults );
+
+            return {
+                type: type,
+                transform: arr
+            };
+        }
+
+        function exec() {
+
+            var matrix = VendorPatch.getComputedMatrix( node );
+
+            if (_isMatrix( matrix ) !== false) {
+                
+                matrix = _parse( matrix );
+                
+                if (matrix.transform.length < 1) {
+                    return null;
+                }
+
+                return matrix;
+
+            }
+            else {
+                return null;
+            }
+
+        }
+
+        return exec();
     };
 
 
-    get.xformKeys = function( xform ) {
+    get.xformKeys = function( seed ) {
 
         var map = Config.maps.component;
-        var order = $.extend( [] , ( xform.order || [] ));
+        var order = [];
 
-        order.forEach(function( key ) {
-            if (Config.keys.config.indexOf( key ) >= 0) {
-                var p = order.indexOf( key );
-                order.splice( p , 1 );
+        seed.order.forEach(function( key ) {
+            if (Config.keys.config.indexOf( key ) < 0) {
+                order.push( key );
             }
         });
 
@@ -57,22 +112,36 @@
             }
         };
 
-        Helper.object.each( xform , function( val , key ) {
+        order.forEach(function( key , i ) {
 
-            if (!map[key]) {
-                return;
-            }
-
+            var val = seed[key];
             out.passed[key] = val;
-            out.mapped[map[key]] = val;
+
+            if (typeof map[key] === 'undefined' && Config.keys.config.indexOf( key ) < 0) {
+                out.mapped[key] = val;
+            }
+            else {
+                out.mapped[map[key]] = val;
+            }
 
             var index = out.mapped.order.indexOf( key );
 
-            if (index >= 0) {
+            if (index >= 0 && typeof map[key] !== 'undefined') {
                 out.mapped.order[index] = map[key];
+            }
+            else {
+                out.mapped.order[index] = key;
             }
 
         });
+
+        // if this is a non-tranform seed, change mapped.value to seed.type
+        if (seed.type !== 'transform') {
+            var p = out.mapped.order.indexOf( 'value' );
+            out.mapped.order.splice( p , 1 , seed.type );
+            out.mapped[seed.type] = out.mapped.value;
+            delete out.mapped.value;
+        }
 
         return out;
     };
@@ -110,10 +179,10 @@
     };
 
 
-    get.rawComponents = function( options ) {
+    get.rawComponents = function( mapped ) {
 
         function _mapVectorToArray( vector ) {
-            
+
             if (typeof vector !== 'object' && Helper.object.size( vector ) < 1) {
                 return [ vector ];
             }
@@ -140,7 +209,7 @@
 
             var components = {};
 
-            Helper.object.each( options , function( val , key ) {
+            Helper.object.each( mapped , function( val , key ) {
 
                 if (Config.keys.config.indexOf( key ) >= 0) {
                     return;
@@ -237,33 +306,33 @@
 
         switch (component) {
             case 'matrix3d':
-                defaults = [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ];
+                defaults = Config.xformDefaults.matrix3d;
                 break;
             case 'matrix':
-                defaults = [ 1 , 0 , 0 , 1 , 0 , 0 ];
+                defaults = Config.xformDefaults.matrix;
                 break;
             case 'translate3d':
-                defaults = [ 0 , 0 , 0 ];
+                defaults = Config.xformDefaults.translate3d;
                 break;
             case 'scale3d':
-                defaults = [ 1 , 1 , 1 ];
+                defaults = Config.xformDefaults.scale3d;
                 break;
             case 'rotate3d':
-                defaults = [ 0 , 0 , 0 , 0 ];
+                defaults = Config.xformDefaults.rotate3d;
                 break;
             case 'translate':
-                defaults = [ 0 , 0 ];
+                defaults = Config.xformDefaults.translate;
                 break;
             case 'scale':
-                defaults = [ 1 , 1 ];
+                defaults = Config.xformDefaults.scale;
                 break;
             case 'rotateX':
             case 'rotateY':
             case 'rotateZ':
-                defaults = [ 0 ];
+                defaults = Config.xformDefaults.singleAxisRotate;
                 break;
-            case 'opacity':
-                defaults = [ 1 ];
+            default:
+                defaults = [ '' ];
                 break;
         }
 
@@ -281,55 +350,6 @@
         }
         
         return newVals;
-    }
-
-
-    function _isMatrix( str ) {
-        
-        if (!str) {
-            return false;
-        }
-
-        var types = {
-            matrix3d: (/matrix3d\(/i),
-            matrix: (/matrix\(/i)
-        };
-
-        var response = false;
-
-        Helper.object.each( types , function( val , key ) {
-            if (response !== false) {
-                return;
-            }
-            if (val.test( str )) {
-                response = key;
-            }
-        });
-
-        return response;
-    }
-
-    function _parse( str ) {
-        
-        var type = _isMatrix( str );
-        
-        if (!type) {
-            return {};
-        }
-        
-        var defaults = get.componentDefaults( type );
-        var arr = str.replace( /(px|\s|\))/gi , '' ).split( '(' )[1].split( ',' );
-
-        arr.map(function( i ) {
-            return parseFloat( i , 10 );
-        });
-
-        arr = _checkComponentDefaults( type , arr , defaults );
-
-        return {
-            type: type,
-            transform: arr
-        };
     }
 
     

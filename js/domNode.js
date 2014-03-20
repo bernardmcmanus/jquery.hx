@@ -34,10 +34,10 @@
                 component[key] = (component[key] || bean.defaults[key]);
                 component[key] = (component[key].length === bean.defaults[key].length ? component[key] : bean.defaults[key]);
                 
-                component[key] = bean.raw[key].map(function( a , b ) {
+                component[key] = bean.raw[key].map(function( value , i ) {
                     var _eval = eval;
-                    var exp = _extractOperator( a );
-                    return exp.op ? _eval(component[key][b] + exp.op + exp.val) : exp.val;
+                    var exp = _extractOperator( value );
+                    return exp.op ? _eval(component[key][i] + exp.op + exp.val) : exp.val;
                 });
             });
 
@@ -76,7 +76,7 @@
         beanStart: function( bean ) {
 
             $(this).trigger( 'hx.xformStart' , {
-                property: bean.getData( 'type' ),
+                type: bean.getData( 'type' ),
                 xform: bean.getData( 'xform' ).passed,
                 options: bean.getData( 'options' )
             });
@@ -85,14 +85,14 @@
         beanComplete: function( bean ) {
             
             $(this).trigger( 'hx.xformComplete' , {
-                property: bean.getData( 'type' ),
+                type: bean.getData( 'type' ),
             });
 
             bean.animator.done.call( this );
         },
 
-        clusterComplete: function( property ) {
-            
+        clusterComplete: function( type ) {
+            //console.log(type + ' cluster complete.');
         },
 
         podComplete: function( pod ) {
@@ -202,7 +202,12 @@
             exp = exp.replace( re , '' );
         }
 
-        out.val = parseFloat( exp , 10 );
+        out.val = exp;
+
+        if (out.op) {
+            out.val = parseFloat( out.val , 10 );
+        }
+        
         return out;
     }
 
