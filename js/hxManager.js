@@ -54,18 +54,20 @@
                 // create a promisePod for each dom node
                 var pod = new hxManager.pod( this[i] , 'promise' );
 
-                // create a microPromise for each pod
-                var microPromise = new Promise(function( resolve ) {
-                    // when the promisePod is resolved, resolve the microPromise
-                    pod.when( 'promiseResolved' , resolve );
-                });
-
                 // when the pod reaches its turn in the queue, resolve it
                 pod.when( 'promiseMade' , pod.resolve , pod );
 
+                // create a microPromise for each pod
+                var microPromise = new Promise(function( resolve ) {
+                    // when the pod is resolved, resolve the microPromise
+                    pod.when( 'promiseResolved' , resolve );
+                });
+
+                // add the promise to the dom node queue
+                this[i]._hx.addPromisePod( pod );
+
                 pods.push( pod );
                 micro.push( microPromise );
-                this[i]._hx.addPromisePod( pod );
 
             }.bind( this ));
 
@@ -88,26 +90,6 @@
             });
         },
 
-        /*go: function( property ) {
-            // clear the queue and run the most recently added transformation
-            return this;
-        },
-
-        step: function( property ) {
-            // progress to the next transformation in the queue
-            return this;
-        },
-
-        times: function( n ) {
-            // repeat the most recently added transformation n times
-            return this;
-        },
-
-        at: function( property , percent , func ) {
-            // execute func at percent completion of queue[property]
-            return this;
-        },*/
-
         then: function( hxArgs ) {
 
             if (typeof hxArgs === 'function') {
@@ -127,8 +109,42 @@
             if (typeof hxArgs === 'function') {
                 this._addPromisePod( resolution );
             }
-        }
+        },
 
+        /*
+        **  these methods are experimental
+        **  and are subject to change
+        */
+
+        defer: function() {
+            // add an unresolveable promise pod to the queue
+            this._addPromisePod( function(){} );
+            return this;
+        },
+
+        resolve: function( all ) {
+
+            // all controls whether all pods or only promise pods will be resolved
+            all = (typeof all !== 'undefined' ? all : false);
+
+            // force resolve the current pod in each queue
+            this.each(function( i ) {
+
+                var pod = this[i]._hx.queue.getCurrent();
+
+                if (pod && (all || (!all && pod.getType() === 'promise'))) {
+                    pod.complete();
+                }
+
+            }.bind( this ));
+
+            return this;
+        },
+
+        go: function() {
+            // clear the queue and run the most recently added transformation
+            return this;
+        }
     };
 
     

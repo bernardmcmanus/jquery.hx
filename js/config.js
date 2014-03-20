@@ -4,7 +4,7 @@
     var config = {
         
         keys: {
-            config: [ 'type' , 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'pseudoHide' , 'done' , 'fallback' , 'order' ],
+            config: [ 'type' , 'property' , 'value' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
             xform: [ 'translate3d' , 'scale3d' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
         },
 
@@ -74,22 +74,11 @@
         },
 
         $hx: {
-
-            transform: {
-                duration: 400,
-                easing: 'ease',
-                delay: 0,
-                fallback: true,
-                done: function() {}
-            },
-
-            opacity: {
-                duration: 400,
-                easing: 'ease',
-                delay: 0,
-                fallback: true,
-                done: function() {}
-            }
+            duration: 400,
+            easing: 'ease',
+            delay: 0,
+            fallback: true,
+            done: function() {}
         }
 
     };

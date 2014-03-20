@@ -29,6 +29,15 @@
             return false;
         },
 
+        getCurrent: function() {
+            if (this.length > 0) {
+                return this[0];
+            }
+            else {
+                return false;
+            }
+        },
+
         isComplete: function() {
             return this.length === 0;
         }

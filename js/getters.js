@@ -81,7 +81,7 @@
     get.xformOptions = function( options ) {
 
         var _options = {};
-        var defaults = Config.$hx[options.type];
+        var defaults = Config.$hx;
 
         Helper.object.each( options , function( val , key ) {
 

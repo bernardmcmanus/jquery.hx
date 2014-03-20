@@ -53,7 +53,7 @@
             }
 
             if (!iterator) {
-                throw 'Error: you must pass an iterator function to helper.object.each';
+                throw 'Error: you must pass an iterator function to hxManager.helper.object.each';
             }
 
             context = context || window;

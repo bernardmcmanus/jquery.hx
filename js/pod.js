@@ -29,7 +29,7 @@
 
 
     function isValidType( type ) {
-        return (type && type !== '' && Config.types.indexOf( type ) >= 0);
+        return (type && typeof type === 'string' && type !== '' && Config.types.indexOf( type ) >= 0);
     }
 
 
@@ -53,6 +53,10 @@
             var type = bean.getData( 'type' );
             var cluster = (this.beans[type] = this.beans[type] || []);
             cluster.push( bean );
+        },
+
+        getType: function() {
+            return this.type;
         },
 
         run: function() {
@@ -124,11 +128,11 @@
             this.happen( 'clusterComplete' , [ property ] );
 
             if (this.isComplete()) {
-                this._podComplete();
+                this.complete();
             }
         },
 
-        _podComplete: function() {
+        complete: function() {
             this.happen( 'podComplete' , [ this ] );
         }
         
@@ -208,6 +212,10 @@
 
         complete: function() {
             this.happen( 'podComplete' , [ this ] );
+        },
+
+        getType: function() {
+            return this.type;
         }
     };
 

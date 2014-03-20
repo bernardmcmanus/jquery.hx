@@ -77,7 +77,7 @@
 
             $(this).trigger( 'hx.xformStart' , {
                 property: bean.getData( 'type' ),
-                xform: bean.xform.passed,
+                xform: bean.getData( 'xform' ).passed,
                 options: bean.getData( 'options' )
             });
         },
@@ -98,7 +98,7 @@
         podComplete: function( pod ) {
 
             if (!this._hx.queue.next()) {
-                console.log('queue complete.');
+                //console.log('queue complete.');
             }
 
         }
@@ -183,8 +183,10 @@
 
     
     function _prepHidden( node ) {
-        node.style.visibility = 'hidden';
+        node.style.opacity = 0;
         node.style.display = 'block';
+        // trigger a dom reflow
+        node.getBoundingClientRect();
     }
 
 
