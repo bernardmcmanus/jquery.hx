@@ -74,6 +74,10 @@
             ]
         },
 
+        animator: {
+            buffer: 50
+        },
+
         pod: {
             types: [ 'xform' , 'promise' ]
         },

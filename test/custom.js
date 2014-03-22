@@ -1,11 +1,11 @@
 (function() {
 
     
-    $('.tgt').on( 'hx.xformStart' , function( e , data ) {
+    /*$('.tgt').on( 'hx.xformStart' , function( e , data ) {
         console.log(data);
         //var xform = $.extend( {type: data.type} , data.xform , data.options );
         //$('.tgt2, .tgt3').hx( xform );
-    });
+    });*/
 
 
     /*$('.tgt').on( 'hx.xformComplete' , function( e , data ) {
@@ -13,9 +13,10 @@
     });*/
 
 
-    $('#target').on( 'click', test4 );
+    $('#target').on( 'click', test0 );
 
 
+    // test - null values
     function test0() {
 
         $('.tgt')
@@ -23,21 +24,40 @@
         .hx([
             {
                 type: 'transform',
-                translate: {x: '+=200'},
+                translate: {x: '+=135'},
+                scale: {x: 2.12},
                 rotate: {x: 1, y: 1, z: 1, a: '+=360'},
-                scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
-                duration: 800,
-                easing: 'easeOutBack'
+                duration: 600
+            },
+            {
+                type: 'transform',
+                translate: null,
+                scale: null,
+                rotate: null,
+                duration: 600,
+                delay: 1000
             },
             {
                 type: 'opacity',
-                value: 0.3,
-                duration: 800
+                value: 0.5,
+                duration: 600
             },
             {
-            type: 'background-color',
+                type: 'opacity',
+                value: null,
+                duration: 600,
+                delay: 1000
+            },
+            {
+                type: 'background-color',
                 value: '#fff',
-                duration: 800
+                duration: 600
+            },
+            {
+                type: 'background-color',
+                value: null,
+                duration: 600,
+                delay: 1000
             }
         ])
 
@@ -139,7 +159,7 @@
     }
 
 
-    function test2() {
+    function test2_0() {
 
         $('.tgt, .tgt2')
 
@@ -197,12 +217,50 @@
             .done( resolve );
         })
 
-        .done( test2 );
+        .done( test2_0 );
+    }
+
+
+    // test - then reject
+    function test2_1() {
+
+        $('.tgt, .tgt2')
+
+        .hx({
+            type: 'opacity',
+            value: 0,
+            duration: 800
+        })
+
+        .hx([
+            {
+                type: 'transform',
+                translate: {x: '+=200'},
+                rotate: {x: 1, y: 1, z: 1, a: '+=360'},
+                scale: {x: '+=0.2', y: '+=0.2', z: '+=0.2'},
+                duration: 800,
+                delay: 200,
+                easing: 'easeOutBack'
+            },
+            {
+                type: 'opacity',
+                value: 1,
+                duration: 600
+            }
+        ])
+
+        .then(function( resolve , reject ) {
+            reject();
+        })
+
+        .done(function() {
+            console.log('Uh-oh! This shouldn\'t execute!');
+        });
     }
 
 
     // example - defer
-    function test3( incrementor , order ) {
+    function test3_0( incrementor , order ) {
 
         incrementor = typeof incrementor === 'string' ? incrementor : '+=360';
         order = Array.isArray( order ) ? order : [ '.tgt' , '.tgt2' , '.tgt3' ];
@@ -243,13 +301,153 @@
         tgt3.done(function() {
             incrementor = (incrementor === '+=360' ? '-=360' : '+=360');
             order.reverse();
-            test3( incrementor , order );
+            test3_0( incrementor , order );
+        });
+    }
+
+
+    // example - cancel
+    function test3_1( incrementor , order ) {
+
+        incrementor = typeof incrementor === 'string' ? incrementor : '+=360';
+        order = Array.isArray( order ) ? order : [ '.tgt' , '.tgt2' , '.tgt3' ];
+
+        var selector = order.join( ', ' );
+
+        if (this === $('#target').get( 0 )) {
+
+            if ($('#target').hasClass( 'cancel' )) {
+                
+                $('#target').removeClass( 'cancel' );
+
+                $(selector)
+
+                .hx( 'cancel' )
+
+                .done(function() {
+                    console.log('woop woop!');
+                });
+
+                return;
+            }
+            else {
+                $('#target').addClass( 'cancel' );
+            }
+        }
+
+        var tgt1 = $(order[0]).hx();
+        var tgt2 = $(order[1]).hx();
+        var tgt3 = $(order[2]).hx();
+
+        tgt1.hx({
+            type: 'transform',
+            rotateZ: incrementor,
+            duration: 1200,
+            easing: 'easeOutBack'
+        });
+
+        tgt2.hx( 'defer' ).hx({
+            type: 'transform',
+            rotateZ: incrementor,
+            duration: 1200,
+            easing: 'easeOutBack'
+        });
+
+        tgt3.hx( 'defer' ).hx({
+            type: 'transform',
+            rotateZ: incrementor,
+            duration: 1200,
+            easing: 'easeOutBack'
+        });
+
+        tgt1.done(function() {
+            tgt2.hx( 'resolve' );
+        });
+
+        tgt2.done(function() {
+            tgt3.hx( 'resolve' );
+        });
+
+        tgt3.done(function() {
+            incrementor = (incrementor === '+=360' ? '-=360' : '+=360');
+            order.reverse();
+            test3_1( incrementor , order );
+        });
+    }
+
+
+    // example - clear
+    function test3_2( incrementor , order ) {
+
+        incrementor = typeof incrementor === 'string' ? incrementor : '+=360';
+        order = Array.isArray( order ) ? order : [ '.tgt' , '.tgt2' , '.tgt3' ];
+
+        var selector = order.join( ', ' );
+
+        if (this === $('#target').get( 0 )) {
+
+            if ($('#target').hasClass( 'cancel' )) {
+                
+                $('#target').removeClass( 'cancel' );
+
+                $(selector)
+
+                .hx( 'clear' )
+
+                .done(function() {
+                    console.log('woop woop!');
+                });
+
+                return;
+            }
+            else {
+                $('#target').addClass( 'cancel' );
+            }
+        }
+
+        var tgt1 = $(order[0]).hx();
+        var tgt2 = $(order[1]).hx();
+        var tgt3 = $(order[2]).hx();
+
+        tgt1.hx({
+            type: 'transform',
+            rotateZ: incrementor,
+            duration: 1200,
+            easing: 'easeOutBack'
+        });
+
+        tgt2.hx( 'defer' ).hx({
+            type: 'transform',
+            rotateZ: incrementor,
+            duration: 1200,
+            easing: 'easeOutBack'
+        });
+
+        tgt3.hx( 'defer' ).hx({
+            type: 'transform',
+            rotateZ: incrementor,
+            duration: 1200,
+            easing: 'easeOutBack'
+        });
+
+        tgt1.done(function() {
+            tgt2.hx( 'resolve' );
+        });
+
+        tgt2.done(function() {
+            tgt3.hx( 'resolve' );
+        });
+
+        tgt3.done(function() {
+            incrementor = (incrementor === '+=360' ? '-=360' : '+=360');
+            order.reverse();
+            test3_2( incrementor , order );
         });
     }
 
 
     // example - race
-    function test3_5( delay ) {
+    function test3_3( delay ) {
 
         delay = (typeof delay === 'number' ? delay : 500);
 
@@ -284,8 +482,7 @@
         .hx( 'race' , function( resolve , reject ) {
             console.log('cool');
             resolve();
-            $(this)
-            .hx( 'resolve' , true );
+            $(this).hx( 'resolve' , true );
         })
 
         .done(function() {
@@ -293,7 +490,7 @@
         });
 
         if (delay > 0) {
-            test3_5( 0 );
+            test3_3( 0 );
         }
     }
 
@@ -335,6 +532,7 @@
     }
 
 
+    // test - hx_display & timed defer
     function test5() {
 
         $('.tgt, .tgt2, .tgt3')
@@ -354,6 +552,7 @@
     }
 
 
+    // test - translateZ
     function test6() {
 
         $('.tgt-container').css({
@@ -370,14 +569,14 @@
 
         .hx({
             type: 'transform',
-            translate: {x: '+=200'}
+            translate: {x: 200}
         })
 
         .defer()
 
         .hx({
             type: 'transform',
-            translate: {z: '+=400'},
+            translate: {z: '+=200'},
         });
 
         setTimeout(function() {
@@ -386,15 +585,14 @@
     }
 
 
-
-
-    var click = 0;
-
+    // test - order
     function test7() {
 
         var xform = {};
+        var selector = '.tgt';
 
-        if (click < 1) {
+        if ($('div[class*=\'click\']').length < 1) {
+
             xform = {
                 type: 'transform',
                 translate: {x: '+=50', y: '+=50'},
@@ -402,54 +600,34 @@
                 duration: 1200,
                 easing: 'easeOutBack'
             };
+
+            $(selector).addClass( 'click1' );
         }
-        else if (click === 1) {
+        else if ($(selector).hasClass( 'click1' )) {
+
             xform = {
                 type: 'transform',
-                translate: {},
                 scale: {x: '+=0.5', y: '+=0.5'},
-                //translate: {x: 50, y: 50},
-                //order: [ 'translate' , 'scale' ],
-                //order: [ 'scale' , 'translate' ],
+                order: [ 'scale' , 'translate' ],
                 duration: 1200,
                 easing: 'easeOutBack'
             };
+
+            $(selector).removeClass( 'click1' ).addClass( 'click2' );
         }
-        else if (click > 1) {
+        else if ($(selector).hasClass( 'click2' )) {
+
             xform = {
                 type: 'transform',
-                scale: {},
+                scale: null,
                 translate: {x: '+=50', y: '+=50'},
-                //translate: {x: 50, y: 50},
-                //order: [ 'translate' , 'scale' ],
-                //order: [ 'scale' , 'translate' ],
+                rotateZ: '+=90',
                 duration: 1200,
                 easing: 'easeOutBack'
             };
         }
-        else {
-            return;
-        }
 
-        click++;
-
-        $('.tgt')
-
-        .hx([
-            xform/*,
-            {
-                type: 'opacity',
-                value: 0.5,
-                duration: 1200
-            },
-            {
-                type: 'background-color',
-                value: '#fff',
-                duration: 1200
-            }*/
-        ])
-
-        .done(function() {
+        $(selector).hx( xform ).done(function() {
             console.log('done!');
         });
     }

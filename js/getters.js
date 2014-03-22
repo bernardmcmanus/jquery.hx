@@ -16,8 +16,8 @@
     };
 
 
-    // TODO - implement get.computedMatrix
-    get.computedMatrix = function( node ) {
+    // TODO - implement get.computedMatrix to account for transforms applied in CSS
+    /*get.computedMatrix = function( node ) {
 
         function _isMatrix( str ) {
             
@@ -89,7 +89,7 @@
         }
 
         return exec();
-    };
+    };*/
 
 
     get.xformKeys = function( seed ) {
@@ -141,8 +141,13 @@
 
         });
 
-        // if this is a non-tranform seed, change mapped.value to seed.type
+        // do some special stuff for non-tranform seeds
         if (seed.type !== 'transform') {
+
+            // if mapped.value is null, set it to an empty string
+            out.mapped.value = (out.mapped.value !== null ? out.mapped.value : '');
+
+            // change mapped.value to seed.type
             var p = out.mapped.order.indexOf( 'value' );
             out.mapped.order.splice( p , 1 , seed.type );
             out.mapped[seed.type] = out.mapped.value;

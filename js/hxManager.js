@@ -50,6 +50,7 @@
             var micro = [];
             var pods = [];
             var _func = func.bind( this );
+            var clear = this.clear.bind( this );
 
             this.each(function( i ) {
 
@@ -73,7 +74,7 @@
 
             }.bind( this ));
 
-            // when all microPromises have been resolved, create the macroPromise
+            // when the appropriate microPromises have been resolved, create the macroPromise
             Promise[ method ]( micro ).then(function() {
 
                 var macroPromise = new Promise( _func );
@@ -86,9 +87,7 @@
                 });
 
                 // otherwise, clear the queue so we can start again
-                macroPromise.catch(function() {
-                    console.log('macroPromise was rejected!');
-                });
+                macroPromise.catch( clear );
             });
         },
 
@@ -106,23 +105,20 @@
             return this;
         },
 
-        done: function( hxArgs ) {
+        race: function( hxArgs ) {
             
-            function resolution( resolve , reject ) {
-                hxArgs();
-                resolve();
+            if (typeof hxArgs === 'function') {
+                this._addPromisePod( hxArgs , 'race' );
             }
 
-            if (typeof hxArgs === 'function') {
-                this._addPromisePod( resolution );
-            }
+            return this;
         },
 
         defer: function( time ) {
             
-            this._addPromisePod(function(){
+            this._addPromisePod(function( resolve , reject ) {
                 if (typeof time !== 'undefined') {
-                    setTimeout( this.resolve.bind( this ) , time );
+                    setTimeout( resolve , time );
                 }
             });
 
@@ -131,20 +127,7 @@
 
         resolve: function( all ) {
 
-            // force resolve the current pod in each queue
-            /*this.each(function( i ) {
-
-                var pod = this[i]._hx.queue.getCurrent();
-
-                if (pod && pod.getType() === 'promise') {
-                    pod.complete();
-                }
-
-            }.bind( this ));
-
-            return this;*/
-
-            // all controls whether all pods or only promise pods will be resolved
+            // all controls whether all pod types or only promise pods will be resolved
             all = (typeof all !== 'undefined' ? all : false);
 
             // force resolve the current pod in each queue
@@ -161,18 +144,43 @@
             return this;
         },
 
-        race: function( hxArgs ) {
+        clear: function() {
             
-            if (typeof hxArgs === 'function') {
-                this._addPromisePod( hxArgs , 'race' );
-            }
+            // clear all pods in each queue            
+            this.each(function( i ) {
+
+                this[i]._hx.queue.clear();
+
+            }.bind( this ));
 
             return this;
         },
 
-        go: function() {
-            // clear the queue and run the most recently added transformation
+        cancel: function() {
+            
+            // clear all but the current pod in each queue
+            this.each(function( i ) {
+
+                this[i]._hx.queue.clear( false );
+
+            }.bind( this ));
+
+            // resolve any remaining promise pods
+            this.resolve();
+
             return this;
+        },
+
+        done: function( hxArgs ) {
+            
+            function resolution( resolve , reject ) {
+                hxArgs();
+                resolve();
+            }
+
+            if (typeof hxArgs === 'function') {
+                this._addPromisePod( resolution );
+            }
         }
     };
 

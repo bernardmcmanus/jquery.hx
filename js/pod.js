@@ -11,16 +11,15 @@
         }
 
         var _pod = null;
-        var whenModule = new When();
 
         switch (type) {
 
             case 'xform':
-                _pod = new xformPod( node , whenModule );
+                _pod = new xformPod( node );
                 break;
 
             case 'promise':
-                _pod = new promisePod( whenModule );
+                _pod = new promisePod();
                 break;
         }
 
@@ -36,14 +35,14 @@
     // ============================== xformPod ============================== //
 
 
-    var xformPod = function( node , whenModule ) {
+    var xformPod = function( node ) {
 
         this.node = node;
         this.beans = {};
         this.type = 'xform';
 
-        this.when = whenModule.when.bind( whenModule );
-        this.happen = whenModule.happen.bind( whenModule );
+        // create the when module
+        When( this );
     };
 
 
@@ -91,7 +90,7 @@
             bean.createAnimator( options );
             bean.when( 'complete' , this._beanComplete , this );
 
-            // check the hx_display code and correct the display if needed
+            // check the hx_display code and correct style.display if needed
             this.node._hx.checkDisplayState();
 
             applyXform( this.node , bean );
@@ -149,12 +148,12 @@
 
 
     function forceComplete( sequence ) {
-        
+
         Helper.object.each( sequence , function( bean ) {
             if (!bean.isComplete()) {
                 bean.complete();
             }
-        })
+        });
     }
 
 
@@ -181,9 +180,9 @@
 
         var sequence = {};
         
-        Helper.object.each( beans , function( bean , key ) {
-            if (bean.length > 0) {
-                sequence[key] = bean[0];
+        Helper.object.each( beans , function( cluster , key ) {
+            if (cluster.length > 0) {
+                sequence[key] = cluster[0];
             }
         });
 
@@ -212,10 +211,12 @@
     // ============================= promisePod ============================= //
 
 
-    var promisePod = function( whenModule ) {
+    var promisePod = function() {
+
         this.type = 'promise';
-        this.when = whenModule.when.bind( whenModule );
-        this.happen = whenModule.happen.bind( whenModule );
+
+        // create the when module
+        When( this );
     };
 
 

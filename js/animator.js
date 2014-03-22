@@ -1,18 +1,17 @@
-(function( window , hx , When ) {
+(function( window , hx , Config , When ) {
 
     var animator = function( options ) {
 
         options = $.extend({
             timeout: null,
-            buffer: 50,
+            buffer: Config.buffer,
             running: false
         }, options );
 
         $.extend( this , options );
 
-        var whenModule = new When();
-        this.when = whenModule.when.bind( whenModule );
-        this.happen = whenModule.happen.bind( whenModule );
+        // create the when module
+        When( this );
 
         this.listeners = this._getListeners();
     };
@@ -79,7 +78,7 @@
     $.extend( hx , {animator: animator} );
 
     
-}( window , hxManager , hxManager.when ));
+}( window , hxManager , hxManager.config.animator , hxManager.when ));
 
 
 

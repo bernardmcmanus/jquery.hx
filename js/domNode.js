@@ -111,18 +111,15 @@
                 type: bean.getData( 'type' ),
             });
 
-            bean.animator.done.call( this );
+            bean.getData( 'done' ).call( this );
         },
 
         clusterComplete: function( type ) {
-            //console.log(type + ' cluster complete.');
+            
         },
 
         podComplete: function( pod ) {
-            if (!this._hx.queue.next()) {
-                //console.log('queue complete.');
-            }
-
+            this._hx.queue.next();
         }
     };
 

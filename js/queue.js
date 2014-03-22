@@ -19,7 +19,7 @@
 
         next: function() {
 
-            this.splice( 0 , 1 );
+            this.shift();
 
             if (!this.isComplete()) {
                 this[0].run();
@@ -27,6 +27,21 @@
             }
 
             return false;
+        },
+
+        clear: function( all ) {
+
+            // all controls whether all pods or all but the current pod will be cleared
+            all = (typeof all !== 'undefined' ? all : true);
+
+            if (this.isComplete()) {
+                return;
+            }
+
+            while (this.length > (all ? 0 : 1)) {
+                this.pop();
+            }
+
         },
 
         getCurrent: function() {

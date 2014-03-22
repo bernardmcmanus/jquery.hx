@@ -6,9 +6,8 @@
         var data = _getBeanData( seed );
         $.extend( this , data );
 
-        var whenModule = new When();
-        this.when = whenModule.when.bind( whenModule );
-        this.happen = whenModule.happen.bind( whenModule );
+        // create the when module
+        When( this );
     };
 
 
@@ -48,7 +47,21 @@
         },
 
         getData: function( property ) {
-            return this[property];
+
+            var data = null;
+
+            switch (property) {
+
+                case 'done':
+                    data = (this.hasAnimator() ? this.animator.done : function() {});
+                break;
+
+                default:
+                    data = this[property];
+                break;
+            }
+
+            return data;
         }
     };
 

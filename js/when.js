@@ -1,21 +1,28 @@
 (function( window , hx ) {
 
 
-    var when = function() {
+    var when = function( subject ) {
+        var whenModule = new _when();
+        subject.when = whenModule.when.bind( whenModule );
+        subject.happen = whenModule.happen.bind( whenModule );
+    };
+
+
+    var _when = function() {
         this.handlers = {};
     };
 
 
-    when.prototype = {
+    _when.prototype = {
 
         when: function( event , handler , context ) {
 
             if (!event) {
-                throw 'Error: you must pass an event type to hxManager.when.when';
+                throw 'Error: you must pass an event type to hxManager._when.when';
             }
 
             if (!handler || typeof handler !== 'function') {
-                throw 'Error: you must pass a valid handler to hxManager.when.when';
+                throw 'Error: you must pass a valid handler to hxManager._when.when';
             }
 
             context = context || null;
