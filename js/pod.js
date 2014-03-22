@@ -108,7 +108,7 @@
             var type = bean.getData( 'type' );
             var cluster = this.beans[type];
 
-            cluster.splice( 0 , 1 );
+            cluster.shift();
 
             this.happen( 'beanComplete' , [ bean ] );
 
@@ -136,7 +136,7 @@
 
         complete: function() {
 
-            if (!this.isComplete() && this.getType() === 'xform') {
+            if (!this.isComplete()) {
                 var sequence = getActiveSequence( this.beans );
                 forceComplete( sequence );
             }
