@@ -8,11 +8,6 @@
             throw 'Error: You must pass an element to the hxManager.domNode constructor.';
         }
 
-        // check the element's hx_display code
-        if (!_checkDisplayState.call( this , element )) {
-            _prepHidden.call( this , element );
-        }
-
         // if this is already an hx element, return it
         if (typeof element._hx !== 'undefined') {
             return element;
@@ -25,23 +20,51 @@
 
     var hxModule = {
 
-        updateComponent: function( bean ) {
-            
-            var component = (this._hx.components[bean.type] = this._hx.components[bean.type] || {});
+        checkDisplayState: function() {
+            if (!_checkDisplayState.call( this , this )) {
+                _prepHidden.call( this , this );
+            }
+        },
 
-            Helper.object.each( bean.raw , function( raw , key , i ) {
+        updateComponent: function( bean ) {
+
+            var type = bean.getData( 'type' );
+            var raw = bean.getData( 'raw' );
+            var defs = bean.getData( 'defaults' );
+            var rules = bean.getData( 'rules' );
+            
+            var component = (this._hx.components[type] = this._hx.components[type] || {});
+            var nodeOrder = (this._hx.order[type] = this._hx.order[type] || []);
+            
+            var instance = {};
+            var instOrder = bean.getData( 'xform' ).mapped.order;
+
+            Helper.object.each( raw , function( val , key , i ) {
                 
-                component[key] = (component[key] || bean.defaults[key]);
-                component[key] = (component[key].length === bean.defaults[key].length ? component[key] : bean.defaults[key]);
+                instance[key] = (component[key] || defs[key]);
+                instance[key] = (instance[key].length === defs[key].length ? instance[key] : defs[key]);
                 
-                component[key] = bean.raw[key].map(function( value , i ) {
+                instance[key] = raw[key].map(function( value , i ) {
+
                     var _eval = eval;
                     var exp = _extractOperator( value );
-                    return exp.op ? _eval(component[key][i] + exp.op + exp.val) : exp.val;
+                    var result = null;
+
+                    if (rules[key][i]) {
+                        result = exp.op ? _eval(instance[key][i] + exp.op + exp.val) : exp.val;
+                    }
+                    else {
+                        result = instance[key][i];
+                    }
+
+                    return result;
                 });
             });
 
-            return Get.xformString( bean.type , component , bean.defaults , bean.xform.mapped.order );
+            $.extend( component , instance );
+            this._hx.order[type] = Get.extendedOrder( nodeOrder , instOrder );
+
+            return Get.xformString( type , component , defs , this._hx.order[type] );
         },
 
         addXformPod: function( pod ) {
@@ -96,7 +119,6 @@
         },
 
         podComplete: function( pod ) {
-
             if (!this._hx.queue.next()) {
                 //console.log('queue complete.');
             }
@@ -112,7 +134,8 @@
 
         _node._hx = $.extend({
             queue: new Queue(),
-            components: {}
+            components: {},
+            order: {}
         } , _hxModule );
 
         return _node;

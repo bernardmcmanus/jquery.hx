@@ -18,6 +18,10 @@
             this.value = value;
         },
 
+        isComplete: function() {
+            return (this.hasAnimator() && !this.animator.isRunning());
+        },
+
         createAnimator: function( options ) {
 
             if (!this.hasAnimator()) {
@@ -33,6 +37,10 @@
             if (this.hasAnimator() && !this.animator.isRunning()) {
                 this.animator.start();
             }
+        },
+
+        complete: function() {
+            this.animator.destroy();
         },
 
         hasAnimator: function() {
@@ -51,13 +59,15 @@
         var options = Get.xformOptions( seed );
         var raw = Get.rawComponents( xform.mapped );
         var defs = Get.xformDefaults( raw );
+        var rules = Get.updateRules( xform.mapped , raw );
 
         return {
             type: seed.type,
             xform: xform,
             options: options,
             raw: raw,
-            defaults: defs
+            defaults: defs,
+            rules: rules
         };
     }
 

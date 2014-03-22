@@ -51,7 +51,6 @@
             
             if (re.test( name )) {
                 this.destroy();
-                //this._complete();
                 this.happen( 'complete' );
             }
         },

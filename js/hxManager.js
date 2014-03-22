@@ -43,7 +43,9 @@
             return this;
         },
 
-        _addPromisePod: function( func ) {
+        _addPromisePod: function( func , method ) {
+
+            method = method || 'all';
 
             var micro = [];
             var pods = [];
@@ -72,7 +74,7 @@
             }.bind( this ));
 
             // when all microPromises have been resolved, create the macroPromise
-            Promise.all( micro ).then(function() {
+            Promise[ method ]( micro ).then(function() {
 
                 var macroPromise = new Promise( _func );
 
@@ -89,6 +91,11 @@
                 });
             });
         },
+
+        /*
+        **  these methods are experimental
+        **  and are subject to change
+        */
 
         then: function( hxArgs ) {
 
@@ -111,18 +118,31 @@
             }
         },
 
-        /*
-        **  these methods are experimental
-        **  and are subject to change
-        */
+        defer: function( time ) {
+            
+            this._addPromisePod(function(){
+                if (typeof time !== 'undefined') {
+                    setTimeout( this.resolve.bind( this ) , time );
+                }
+            });
 
-        defer: function() {
-            // add an unresolveable promise pod to the queue
-            this._addPromisePod( function(){} );
             return this;
         },
 
         resolve: function( all ) {
+
+            // force resolve the current pod in each queue
+            /*this.each(function( i ) {
+
+                var pod = this[i]._hx.queue.getCurrent();
+
+                if (pod && pod.getType() === 'promise') {
+                    pod.complete();
+                }
+
+            }.bind( this ));
+
+            return this;*/
 
             // all controls whether all pods or only promise pods will be resolved
             all = (typeof all !== 'undefined' ? all : false);
@@ -137,6 +157,15 @@
                 }
 
             }.bind( this ));
+
+            return this;
+        },
+
+        race: function( hxArgs ) {
+            
+            if (typeof hxArgs === 'function') {
+                this._addPromisePod( hxArgs , 'race' );
+            }
 
             return this;
         },

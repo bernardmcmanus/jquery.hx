@@ -1,4 +1,4 @@
-(function( window , $ , hx , Helper ) {
+(function( window , $ , hx , Helper , Get ) {
 
     
     $.fn.hx = function( hxArgs ) {
@@ -15,7 +15,7 @@
                     hxm[method].apply( hxm , arguments );
                 }
                 catch( err ) {}
-                
+
             break;
 
             case 'object':
@@ -23,7 +23,12 @@
                 hxArgs = Array.isArray( hxArgs ) ? hxArgs : [hxArgs];
 
                 hxArgs.forEach(function( a ) {
-                    a.order = a.order || Helper.object.getOrder( a );
+                    if (typeof a.order !== 'undefined') {
+                        a.order = Get.mappedOrder( a );
+                    }
+                    else {
+                        a.order = Helper.object.getOrder( a );
+                    }
                 });
 
                 hxm._addXformPod( hxArgs );
@@ -35,7 +40,7 @@
     };
 
  
-}( window , jQuery , hxManager , hxManager.helper ));
+}( window , jQuery , hxManager , hxManager.helper , hxManager.get ));
 
 
 

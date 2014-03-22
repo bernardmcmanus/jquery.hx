@@ -115,6 +115,12 @@
         order.forEach(function( key , i ) {
 
             var val = seed[key];
+
+            // order can be passed in a seed, so all components won't necessarily be defined at this point
+            if (typeof val === 'undefined') {
+                return;
+            }
+
             out.passed[key] = val;
 
             if (typeof map[key] === 'undefined' && Config.keys.config.indexOf( key ) < 0) {
@@ -144,6 +150,24 @@
         }
 
         return out;
+    };
+
+
+    get.mappedOrder = function( seed ) {
+
+        var ord = [];
+        var map = Config.maps.component;
+
+        seed.order.forEach(function( val ) {
+            if (typeof map[val] !== 'undefined' && typeof seed[val] === 'undefined') {
+                val = map[val];
+            }
+            if (ord.indexOf( val ) < 0) {
+                ord.push( val );
+            }
+        });
+
+        return ord;
     };
 
 
@@ -228,6 +252,58 @@
     };
 
 
+    get.updateRules = function( mapped , raw ) {
+
+        var Rules = {};
+        var map = Config.maps.array;
+
+        Helper.object.each( raw , function( val , key ) {
+
+            var rule = [];
+
+            val.forEach(function( part , i ) {
+
+                var mapKey = map[i];
+
+                if (typeof mapped[key][mapKey] !== 'undefined') {
+                    rule.push( true );
+                }
+                else if (typeof mapped[key] === 'string' || typeof mapped[key] === 'number') {
+                    rule.push( true );
+                }
+                else {
+                    rule.push( false );
+                }
+            });
+
+            Rules[key] = rule;
+
+        });
+
+        return Rules;
+    };
+
+
+    get.extendedOrder = function( nodeOrder , instOrder ) {
+
+        var order = [];
+
+        nodeOrder.forEach(function( val ) {
+            if (instOrder.indexOf( val ) < 0) {
+                order.push( val );
+            }
+        });
+
+        instOrder.forEach(function( val ) {
+            if (order.indexOf( val ) < 0) {
+                order.push( val );
+            }
+        });
+
+        return order;
+    };
+
+
     get.xformString = function( property , component , defaults , order ) {
 
         function _buildComponentString( component , values ) {
@@ -283,8 +359,10 @@
 
                 if (Config.keys.config.indexOf( key ) < 0) {
 
-                    var _component = _checkComponentDefaults( key , component[key] , defaults[key] );
+                    // make sure defaults are defined before comparing
+                    defaults[key] = defaults[key] || get.componentDefaults( key );
 
+                    var _component = _checkComponentDefaults( key , component[key] , defaults[key] );
                     var compString = _buildComponentString( key , _component );
 
                     if (compString !== '') {
@@ -300,11 +378,11 @@
     };
 
 
-    get.componentDefaults = function( component ) {
+    get.componentDefaults = function( type ) {
 
         var defaults = [];
 
-        switch (component) {
+        switch (type) {
             case 'matrix3d':
                 defaults = Config.xformDefaults.matrix3d;
                 break;
@@ -340,12 +418,12 @@
     };
 
 
-    function _checkComponentDefaults( component , values , defaults ) {
+    function _checkComponentDefaults( type , values , defaults ) {
         
         var defs = $.extend( [] , defaults );
         var newVals = $.extend( defs , values );
                 
-        if (Helper.array.compare( defaults , newVals ) && Config.keys.xform.indexOf( component ) >= 0) {
+        if (Helper.array.compare( defaults , newVals ) && Config.keys.xform.indexOf( type ) >= 0) {
             newVals = [];
         }
         

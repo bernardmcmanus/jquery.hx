@@ -23,7 +23,9 @@
                 y: 1,
                 z: 2,
                 a: 3
-            }
+            },
+
+            array: [ 'x' , 'y' , 'z' , 'a' ]
         },
 
         xformDefaults: {

@@ -91,6 +91,9 @@
             bean.createAnimator( options );
             bean.when( 'complete' , this._beanComplete , this );
 
+            // check the hx_display code and correct the display if needed
+            this.node._hx.checkDisplayState();
+
             applyXform( this.node , bean );
             bean.startAnimator();
 
@@ -133,10 +136,26 @@
         },
 
         complete: function() {
+
+            if (!this.isComplete() && this.getType() === 'xform') {
+                var sequence = getActiveSequence( this.beans );
+                forceComplete( sequence );
+            }
+
             this.happen( 'podComplete' , [ this ] );
         }
         
     };
+
+
+    function forceComplete( sequence ) {
+        
+        Helper.object.each( sequence , function( bean ) {
+            if (!bean.isComplete()) {
+                bean.complete();
+            }
+        })
+    }
 
 
     function setTransition( node , sequence ) {

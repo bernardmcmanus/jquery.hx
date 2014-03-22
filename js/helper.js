@@ -8,7 +8,7 @@
 
         compare: function ( subject , array ) {
             
-            if (!array) {
+            if (!subject || !array) {
                 return false;
             }
 
