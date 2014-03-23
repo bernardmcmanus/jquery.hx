@@ -23,13 +23,13 @@
 
     hxManager.prototype = {
 
-        _addXformPod: function( hxArgs ) {
+        _addXformPod: function( bundle ) {
 
             this.each(function( i ) {
 
                 var pod = new hxManager.pod( this[i] , 'xform' );
 
-                hxArgs.forEach(function( seed ) {
+                bundle.forEach(function( seed ) {
 
                     var bean = new hxManager.bean( seed );
                     pod.addBean( bean );
@@ -96,19 +96,19 @@
         **  and are subject to change
         */
 
-        then: function( hxArgs ) {
+        then: function( func ) {
 
-            if (typeof hxArgs === 'function') {
-                this._addPromisePod( hxArgs );
+            if (typeof func === 'function') {
+                this._addPromisePod( func );
             }
 
             return this;
         },
 
-        race: function( hxArgs ) {
+        race: function( func ) {
             
-            if (typeof hxArgs === 'function') {
-                this._addPromisePod( hxArgs , 'race' );
+            if (typeof func === 'function') {
+                this._addPromisePod( func , 'race' );
             }
 
             return this;
@@ -171,14 +171,14 @@
             return this;
         },
 
-        done: function( hxArgs ) {
+        done: function( func ) {
             
             function resolution( resolve , reject ) {
-                hxArgs();
+                func();
                 resolve();
             }
 
-            if (typeof hxArgs === 'function') {
+            if (typeof func === 'function') {
                 this._addPromisePod( resolution );
             }
         }
