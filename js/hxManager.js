@@ -172,15 +172,19 @@
         },
 
         done: function( func ) {
+
+            if (typeof func !== 'function') {
+                return;
+            }
+
+            var _func = func.bind( this );
             
             function resolution( resolve , reject ) {
-                func();
+                _func();
                 resolve();
             }
 
-            if (typeof func === 'function') {
-                this._addPromisePod( resolution );
-            }
+            this._addPromisePod( resolution );
         }
     };
 
