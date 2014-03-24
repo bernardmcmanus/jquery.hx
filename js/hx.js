@@ -23,7 +23,7 @@
                 hxArgs = Array.isArray( hxArgs ) ? hxArgs : [hxArgs];
 
                 hxArgs.forEach(function( a ) {
-                    if (typeof a.order !== 'undefined') {
+                    if (typeof a.order !== 'undefined' && a.order !== null) {
                         a.order = Get.mappedOrder( a );
                     }
                     else {
