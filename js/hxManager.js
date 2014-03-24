@@ -91,11 +91,6 @@
             });
         },
 
-        /*
-        **  these methods are experimental
-        **  and are subject to change
-        */
-
         then: function( func ) {
 
             if (typeof func === 'function') {
