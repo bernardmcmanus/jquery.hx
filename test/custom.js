@@ -13,7 +13,7 @@
     });*/
 
     $(document).on( 'ready' , function() {
-        $('#target').on( 'click', tests.t3.s3 );
+        $('#target').on( 'click', tests.t3.s4 );
     });
 
 
@@ -104,7 +104,7 @@
             ])
 
             .then(function( resolve , reject ) {
-                console.log('cool!');
+                console.log('cool');
                 resolve();
             })
 
@@ -156,7 +156,7 @@
             ])
 
             .done(function() {
-                console.log('awesome!');
+                console.log('awesome');
             });
         },
 
@@ -523,7 +523,7 @@
                 })
                 
                 .then(function( resolve , reject ) {
-                    console.log('awesome!');
+                    console.log('awesome');
                     resolve();
                 })
 
@@ -537,7 +537,7 @@
                 })
 
                 .done(function() {
-                    console.log('done!');
+                    console.log('done');
                 });
             }
         },
@@ -557,7 +557,7 @@
             })
 
             .done(function() {
-                console.log('done!');
+                console.log('done');
             });
         },
 
@@ -636,7 +636,7 @@
             }
 
             $(selector).hx( xform ).done(function() {
-                console.log('done!');
+                console.log('done');
             });
         }
     };
