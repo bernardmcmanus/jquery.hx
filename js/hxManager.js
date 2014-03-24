@@ -128,7 +128,7 @@
             // force resolve the current pod in each queue
             this.each(function( i ) {
 
-                var pod = this[i]._hx.queue.getCurrent();
+                var pod = this[i]._hx.getCurrentPod();
 
                 if (pod && (all || (!all && pod.getType() === 'promise'))) {
                     pod.complete();

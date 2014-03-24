@@ -88,6 +88,10 @@
             this._hx.queue.clear( all );
         },
 
+        getCurrentPod: function() {
+            return this._hx.queue.getCurrent();
+        },
+
         getPodCount: function( type ) {
             return this._hx.queue.getPodCount( type );
         },
