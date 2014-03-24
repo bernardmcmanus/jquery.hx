@@ -144,7 +144,7 @@
             // clear all pods in each queue            
             this.each(function( i ) {
 
-                this[i]._hx.queue.clear();
+                this[i]._hx.clearQueue();
 
             }.bind( this ));
 
@@ -156,7 +156,7 @@
             // clear all but the current pod in each queue
             this.each(function( i ) {
 
-                this[i]._hx.queue.clear( false );
+                this[i]._hx.clearQueue( false );
 
             }.bind( this ));
 
