@@ -108,9 +108,14 @@
             var type = bean.getData( 'type' );
             var cluster = this.beans[type];
 
-            cluster.shift();
-
             this.happen( 'beanComplete' , [ bean ] );
+
+            // if cluster is undefined, the pod must have been force-completed
+            if (!cluster) {
+                return;
+            }
+
+            cluster.shift();
 
             if (cluster.length > 0) {
                 this.run();
@@ -120,14 +125,14 @@
             }
         },
 
-        _clusterComplete: function( property ) {
-            
+        _clusterComplete: function( type ) {
+
             var sequence = getActiveSequence( this.beans );
             setTransition( this.node , sequence );
 
-            delete this.beans[property];
+            delete this.beans[type];
 
-            this.happen( 'clusterComplete' , [ property ] );
+            this.happen( 'clusterComplete' , [ type ] );
 
             if (this.isComplete()) {
                 this.complete();
@@ -137,23 +142,36 @@
         complete: function() {
 
             if (!this.isComplete()) {
-                var sequence = getActiveSequence( this.beans );
-                forceComplete( sequence );
+                forceComplete.call( this , this.beans );
             }
-
-            this.happen( 'podComplete' , [ this ] );
+            else {
+                this.happen( 'podComplete' , [ this ] );
+            }
         }
         
     };
 
 
-    function forceComplete( sequence ) {
+    function forceComplete( beans ) {
 
-        Helper.object.each( sequence , function( bean ) {
-            if (!bean.isComplete()) {
-                bean.complete();
-            }
-        });
+        Helper.object.each( beans , function( cluster , key ) {
+            
+            var lastBean = cluster.pop();
+            delete beans[key];
+
+            lastBean.complete();
+
+            this.happen( 'beanComplete' , [ lastBean ] );
+            this.happen( 'clusterComplete' , [ lastBean.getData( 'type' ) ] );
+
+        } , this );
+
+        this.happen( 'podComplete' , [ this ] );
+
+        // if this is the last xform pod in the queue, reset the transition
+        if (!this.node._hx.getPodCount( 'xform' )) {
+            setTransition( this.node , {} );
+        }
     }
 
 

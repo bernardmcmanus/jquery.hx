@@ -53,6 +53,19 @@
             }
         },
 
+        getPodCount: function( type ) {
+
+            var count = 0;
+
+            this.forEach(function( pod ) {
+                if (!type || pod.getType() === type) {
+                    count++;
+                }
+            });
+
+            return count;
+        },
+
         isComplete: function() {
             return this.length === 0;
         }

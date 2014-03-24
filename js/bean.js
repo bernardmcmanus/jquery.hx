@@ -39,7 +39,9 @@
         },
 
         complete: function() {
-            this.animator.destroy();
+            if (!this.isComplete()) {
+                this.animator.destroy();
+            }
         },
 
         hasAnimator: function() {

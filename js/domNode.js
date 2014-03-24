@@ -84,6 +84,10 @@
             this._hx.queue.pushPod( pod );
         },
 
+        getPodCount: function( type ) {
+            return this._hx.queue.getPodCount( type );
+        },
+
         cleanup: function() {
 
             Config.removeOnClean.forEach(function( key ) {
