@@ -13,7 +13,7 @@
     });*/
 
     $(document).on( 'ready' , function() {
-        $('#target').on( 'click', tests.t3.s4 );
+        $('#target').on( 'click', tests.t4 );
     });
 
 
@@ -542,7 +542,7 @@
             }
         },
 
-        // test - hx_display & timed defer
+        // test - timed defer, hx_display, & seed order
         t4: function() {
 
             $('.tgt, .tgt2, .tgt3')
@@ -551,10 +551,20 @@
 
             .hx( 'defer' , 1000 )
 
-            .hx({
-                type: 'opacity',
-                value: null
-            })
+            .hx([
+                {
+                    type: 'opacity',
+                    value: null
+                },
+                {
+                    type: 'transform',
+                    translate: {y: '+=100'}
+                },
+                {
+                    type: 'transform',
+                    rotateZ: '+=180'
+                }
+            ])
 
             .done(function() {
                 console.log('done');

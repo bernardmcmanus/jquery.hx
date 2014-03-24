@@ -20,7 +20,13 @@
 
             case 'object':
 
-                hxArgs = Array.isArray( hxArgs ) ? hxArgs : [hxArgs];
+                if (Array.isArray( hxArgs )) {
+                    // make sure transform seeds are placed first in the bundle
+                    hxArgs = Get.orderedBundle( hxArgs );
+                }
+                else {
+                    hxArgs = [hxArgs];
+                }
 
                 hxArgs.forEach(function( a ) {
                     if (typeof a.order !== 'undefined' && a.order !== null) {

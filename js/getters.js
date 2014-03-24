@@ -92,6 +92,25 @@
     };*/
 
 
+    get.orderedBundle = function( bundle ) {
+
+        var xformSeeds = [];
+        var otherSeeds = [];
+
+        bundle.forEach(function( seed ) {
+
+            if (seed.type === 'transform') {
+                xformSeeds.push( seed );
+            }
+            else {
+                otherSeeds.push( seed );
+            }
+        });
+
+        return xformSeeds.concat( otherSeeds );
+    };
+
+
     get.xformKeys = function( seed ) {
 
         var map = Config.maps.component;
