@@ -13,7 +13,7 @@
     });*/
 
     $(document).on( 'ready' , function() {
-        $('#target').on( 'click', tests.t4 );
+        $('#target').on( 'click', tests.t3.s1 );
     });
 
 
@@ -309,7 +309,7 @@
                 });
             },
 
-            // test - cancel
+            // test - break
             s1: function( incrementor , order ) {
 
                 incrementor = typeof incrementor === 'string' ? incrementor : '+=360';
@@ -319,13 +319,13 @@
 
                 if (this === $('#target').get( 0 )) {
 
-                    if ($('#target').hasClass( 'cancel' )) {
+                    if ($('#target').hasClass( 'break' )) {
                         
-                        $('#target').removeClass( 'cancel' );
+                        $('#target').removeClass( 'break' );
 
                         $(selector)
 
-                        .hx( 'cancel' )
+                        .hx( 'break' )
 
                         .done(function() {
                             console.log('woop woop!');
@@ -334,7 +334,7 @@
                         return;
                     }
                     else {
-                        $('#target').addClass( 'cancel' );
+                        $('#target').addClass( 'break' );
                     }
                 }
 

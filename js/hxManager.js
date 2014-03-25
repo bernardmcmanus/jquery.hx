@@ -151,7 +151,7 @@
             return this;
         },
 
-        cancel: function() {
+        break: function() {
             
             // clear all but the current pod in each queue
             this.each(function( i ) {
