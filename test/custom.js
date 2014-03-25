@@ -563,6 +563,11 @@
                 {
                     type: 'transform',
                     rotateZ: '+=180'
+                },
+                {
+                    type: 'transform',
+                    rotateZ: null,
+                    translate: null
                 }
             ])
 
