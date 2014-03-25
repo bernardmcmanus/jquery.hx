@@ -39,8 +39,6 @@
                 this[i]._hx.addXformPod( pod );
 
             }.bind( this ));
-
-            return this;
         },
 
         _addPromisePod: function( func , method ) {
