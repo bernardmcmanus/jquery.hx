@@ -86,7 +86,7 @@
             removeOnClean: [ '_hx' , 'hx_display' ]
         },
 
-        $hx: {
+        hx: {
             duration: 400,
             easing: 'ease',
             delay: 0,
