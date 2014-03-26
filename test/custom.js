@@ -12,8 +12,36 @@
         console.log(data);
     });*/
 
+
+    var interactionEvent = hxManager.vendorPatch.isMobile ? 'touchstart' : 'click';
+
+
     $(document).on( 'ready' , function() {
-        $('#target').on( 'click', tests.t3.s1 );
+
+        $('#target').on( interactionEvent , tests.t3.s4 );
+
+        if (interactionEvent === 'touchstart') {
+
+            $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart' , function() {
+                $(this).addClass( 'indicate' );
+            });
+
+            $('#target, .tgt, .tgt2, .tgt3').on( 'touchend' , function() {
+                $(this).removeClass( 'indicate' );
+            });
+        }
+        else {
+
+            $('#target, .tgt, .tgt2, .tgt3').on( 'mousedown' , function() {
+                
+                $(this).addClass( 'indicate' );
+
+                $(window).on( 'mouseup' , function cool() {
+                    $(this).off( 'mouseup' , cool );
+                    $('#target, .tgt, .tgt2, .tgt3').removeClass( 'indicate' );
+                });
+            });
+        }
     });
 
 
@@ -451,8 +479,8 @@
             s3: function() {
 
                 var selector = '.tgt, .tgt2, .tgt3';
-                var duration = 1200;
-                var delay = 300;
+                var duration = 800;
+                var delay = 500;
 
                 $('.tgt').hx({
                     type: 'transform',
@@ -484,7 +512,8 @@
 
                 .off( 'hx.xformComplete' ).on( 'hx.xformComplete' , function( e , data ) {
                     if (!winner) {
-                        console.log(this.className + ' wins!');
+                        var winnerName = (this.className).replace( /\sreverse/i , '' );
+                        console.log(winnerName + ' wins!');
                         winner = true;
                     }
                 })
@@ -509,16 +538,21 @@
             // test - promises
             s4: function() {
 
-                $('.tgt, .tgt2, .tgt3').off( 'click' ).on( 'click' , function() {
+                function cool() {
                     $(this).hx( 'resolve' );
-                });
+                }
 
                 $('.tgt, .tgt2, .tgt3')
 
+                .off( interactionEvent , cool )
+
+                .on( interactionEvent , cool )
+
                 .hx({
                     type: 'transform',
-                    rotateZ: '+=360',
-                    duration: 1200,
+                    translate: {y: 100},
+                    rotateZ: 360,
+                    duration: 1000,
                     easing: 'easeOutBack'
                 })
                 
@@ -531,8 +565,9 @@
 
                 .hx({
                     type: 'transform',
+                    translate: null,
                     rotateZ: null,
-                    duration: 1200,
+                    duration: 1000,
                     easing: 'easeOutBack'
                 })
 

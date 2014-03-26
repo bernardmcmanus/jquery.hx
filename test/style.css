@@ -77,6 +77,12 @@ body {
     left: 190px;
 }
 
+.indicate {
+    -webkit-box-shadow: 0 0 4px 1px #fff;
+    -moz-box-shadow: 0 0 4px 1px #fff;
+    box-shadow: 0 0 4px 1px #fff;
+}
+
 
 
 
