@@ -213,7 +213,14 @@
         var arr = [];
 
         Helper.object.each( sequence , function( part , key ) {
+
             var options = part.options;
+
+            // don't add a component for transitions with duration and delay of 0
+            if (options.duration < 1 && options.delay < 1) {
+                return;
+            }
+
             var component = key + ' ' + options.duration + 'ms ' + options.easing + ' ' + options.delay + 'ms';
             if (arr.indexOf( component ) < 0) {
                 arr.push( component );

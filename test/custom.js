@@ -18,7 +18,7 @@
 
     $(document).on( 'ready' , function() {
 
-        $('#target').on( interactionEvent , tests.t3.s4 );
+        $('#target').on( interactionEvent , tests.t7 );
 
         if (interactionEvent === 'touchstart') {
 
@@ -688,6 +688,83 @@
             $(selector).hx( xform ).done(function() {
                 console.log('done');
             });
+        },
+
+        // test - zero duration
+        t7: function() {
+
+            var start, move, diff, target;
+            var selector = '.tgt, .tgt2, .tgt3';
+
+            function reset() {
+                start = {};
+                move = {now:{},last:{}};
+                diff = {total:{},inst:{}};
+            }
+
+            function coolStart( e ) {
+
+                e = e.originalEvent;
+
+                reset();
+
+                if (e.type === 'touchstart') {
+                    start.x = e.touches[0].clientX;
+                    start.y = e.touches[0].clientY;
+                }
+                else if (e.type === 'mousedown') {
+                    start.x = e.clientX;
+                    start.y = e.clientY;
+                }
+
+                target = this;
+
+                $(window).on( 'touchmove mousemove' , coolMove );
+                $(window).on( 'touchend mouseup' , coolEnd );
+            }
+
+            function coolMove( e ) {
+
+                e.preventDefault();
+                e = e.originalEvent;
+
+                move.last.x = move.now.x || start.x;
+                move.last.y = move.now.y || start.y;
+
+                if (e.type === 'touchmove') {
+                    move.now.x = e.touches[0].clientX;
+                    move.now.y = e.touches[0].clientY;
+                }
+                else if (e.type === 'mousemove') {
+                    move.now.x = e.clientX;
+                    move.now.y = e.clientY;
+                }
+
+                diff.total.x = move.now.x - start.x;
+                diff.total.y = move.now.y - start.y;
+
+                diff.inst.x = move.now.x - move.last.x;
+                diff.inst.y = move.now.y - move.last.y;
+
+                $(target).hx( 'zero' , {
+                    type: 'transform',
+                    translate: {
+                        x: ((diff.inst.x < 0 ? '-=' : '+=') + Math.abs(diff.inst.x)),
+                        y: ((diff.inst.y < 0 ? '-=' : '+=') + Math.abs(diff.inst.y))
+                    }
+                });
+            }
+
+            function coolEnd( e ) {
+                $(window).off( 'touchmove mousemove' , coolMove );
+                $(window).off( 'touchend mouseup' , coolEnd );
+                try {
+                    console.log($(target).get(0)._hx);
+                }
+                catch( err ) {}
+            }
+
+            $(selector).on( 'touchstart mousedown' , coolStart );
         }
     };
 

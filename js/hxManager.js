@@ -164,6 +164,19 @@
             return this;
         },
 
+        zero: function( hxArgs ) {
+
+            $.extend( hxArgs , {
+                duration: 0,
+                delay: 0,
+                fallback: false
+            });
+
+            this.hx( hxArgs ).clear( true );
+
+            return this;
+        },
+
         done: function( func ) {
 
             if (typeof func !== 'function') {
