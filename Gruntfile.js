@@ -19,9 +19,9 @@ module.exports = function( grunt ) {
 
     grunt.initConfig({
 
-            pkg: grunt.file.readJSON('package.json'),
+            pkg: grunt.file.readJSON( 'package.json' ),
 
-            clean : ["hx-*"],
+            clean : [ 'hx-*' ],
 
             uglify : {
                 options : {
@@ -34,9 +34,9 @@ module.exports = function( grunt ) {
                 }
             },
 
-            "git-describe" : {
-                "options" : {
-                    prop : "git-version"
+            'git-describe' : {
+                'options' : {
+                    prop : 'git-version'
                 }
             },
 
@@ -46,11 +46,11 @@ module.exports = function( grunt ) {
 
     });
 
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-git-describe');
+    grunt.loadNpmTasks( 'grunt-contrib-jshint' );
+    grunt.loadNpmTasks( 'grunt-contrib-clean' );
+    grunt.loadNpmTasks( 'grunt-contrib-uglify' );
+    grunt.loadNpmTasks( 'grunt-git-describe' );
 
-    grunt.registerTask('default', ['jshint','git-describe', 'clean', 'uglify']);
+    grunt.registerTask( 'default' , [ 'jshint' , 'git-describe' , 'clean' , 'uglify' ]);
 
 };
