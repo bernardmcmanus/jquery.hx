@@ -18,7 +18,10 @@
         },
 
         isComplete: function() {
-            return (this.hasAnimator() && !this.animator.isRunning());
+            if (this.hasAnimator()) {
+                return !this.animator.isRunning();
+            }
+            return false;
         },
 
         createAnimator: function( options ) {
@@ -39,7 +42,7 @@
         },
 
         complete: function() {
-            if (!this.isComplete()) {
+            if (this.hasAnimator() && !this.isComplete()) {
                 this.animator.destroy();
             }
         },

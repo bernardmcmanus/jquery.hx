@@ -34,14 +34,9 @@
             // all controls whether all pods or all but the current pod will be cleared
             all = (typeof all !== 'undefined' ? all : true);
 
-            if (this.isComplete()) {
-                return;
-            }
-
             while (this.length > (all ? 0 : 1)) {
-                this.pop();
+                this.pop().cancel();
             }
-
         },
 
         getCurrent: function() {

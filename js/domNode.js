@@ -73,6 +73,7 @@
             pod.when( 'beanComplete' , podHooks.beanComplete , this );
             pod.when( 'clusterComplete' , podHooks.clusterComplete , this );
             pod.when( 'podComplete' , podHooks.podComplete , this );
+            pod.when( 'podCanceled' , podHooks.xformCanceled , this );
 
             this._hx.queue.pushPod( pod );
         },
@@ -80,6 +81,7 @@
         addPromisePod: function( pod ) {
 
             pod.when( 'podComplete' , podHooks.podComplete , this );
+            pod.when( 'podCanceled' , podHooks.promiseCanceled , this );
 
             this._hx.queue.pushPod( pod );
         },
@@ -102,7 +104,6 @@
                 delete this[key];
             }.bind( this ));
         }
-
     };
 
 
@@ -132,6 +133,16 @@
 
         podComplete: function( pod ) {
             this._hx.queue.next();
+        },
+
+        xformCanceled: function( pod ) {
+            pod.dispel( 'beanComplete' );
+            pod.dispel( 'clusterComplete' );
+            pod.dispel( 'podComplete' );
+        },
+
+        promiseCanceled: function( pod ) {
+            pod.dispel( 'podComplete' );
         }
     };
 

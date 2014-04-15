@@ -147,6 +147,17 @@
             else {
                 this.happen( 'podComplete' , [ this ] );
             }
+        },
+
+        cancel: function() {
+
+            this.happen( 'podCanceled' , [ this ] );
+
+            Helper.object.each( this.beans , function( cluster , key ) {
+                while (cluster.length > 0) {
+                    cluster.shift().complete();
+                }
+            });
         }
         
     };
@@ -264,6 +275,10 @@
 
         complete: function() {
             this.happen( 'podComplete' , [ this ] );
+        },
+
+        cancel: function() {
+            this.happen( 'podCanceled' , [ this ] );
         },
 
         getType: function() {

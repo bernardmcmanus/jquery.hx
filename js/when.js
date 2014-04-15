@@ -5,6 +5,7 @@
         var whenModule = new _when();
         subject.when = whenModule.when.bind( whenModule );
         subject.happen = whenModule.happen.bind( whenModule );
+        subject.dispel = whenModule.dispel.bind( whenModule );
     };
 
 
@@ -38,6 +39,10 @@
             handlers.forEach(function( func ) {
                 func.apply( null , args );
             });
+        },
+
+        dispel: function( event ) {
+            delete this.handlers[event];
         },
 
         _addHandler: function( event , handler ) {
