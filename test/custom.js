@@ -18,7 +18,7 @@
 
     $(document).on( 'ready' , function() {
 
-        $('#target').on( interactionEvent , tests.t7 );
+        $('#target').on( interactionEvent , tests.t9 );
 
         if (interactionEvent === 'touchstart') {
 
@@ -765,6 +765,102 @@
             }
 
             $(selector).on( 'touchstart mousedown' , coolStart );
+        },
+
+        // test - persistent transforms
+        t8: function() {
+
+            var selector = '.tgt,.tgt2,.tgt3';
+
+            if (!$(selector).hasClass( 'click1' )) {
+                $(selector).hx({
+                    type: 'transform',
+                    translate: {x: '+=100'}
+                });
+                $(selector).addClass( 'click1' );
+            }
+            else {
+                $(selector).hx({
+                    type: 'transform',
+                    translate: {y: '+=100'}
+                });
+                $(selector).removeClass( 'click1' );
+            }
+        },
+
+        // test - null transitions
+        t9: function() {
+
+            var selector = '.tgt';
+
+            $(selector).hx([
+                {
+                    type: 'transform',
+                    translate: {y: '+=300'},
+                    duration: 800
+                },
+                {
+                    type: 'opacity',
+                    value: 0.3,
+                    duration: 800
+                }
+
+            ]);
+
+            setTimeout(function() {
+
+                $(selector)
+                .hx( 'clear' )
+                /*.hx([
+                    {
+                        type: 'transform',
+                        translate: {y: 0},
+                        duration: 0
+                    },
+                    {
+                        type: 'opacity',
+                        value: null,
+                        duration: 800
+                    }
+
+                ])*/
+                .hx({
+                    type: 'transform',
+                    translate: {y: 0},
+                    duration: 0
+                })
+                .then(function( resolve , reject ) {
+                    var t = getComputedStyle(document.querySelector('.tgt')).transition;
+                    //reject();
+                })
+                /*.hx({
+                    type: 'opacity',
+                    value: null,
+                    duration: 800
+                })*/
+                .done(function() {
+                    console.log('done');
+                    //alert($(this).css( '-webkit-transition' ));
+                });
+
+            }, 400 );
+        },
+
+        // test - update component
+        t10: function() {
+
+            var selector = '.tgt,.tgt2,.tgt3';
+            var rand = Math.round(Math.random() * 100);
+
+            $(selector)
+            .hx({
+                type: 'transform',
+                translate: {x: ('+=' + rand), y: ('+=' + rand)}
+            })
+            .update({
+                type: 'transform',
+                translate: {x: 100, y: 100}
+            });
         }
     };
 

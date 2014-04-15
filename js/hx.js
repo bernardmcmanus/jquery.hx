@@ -29,12 +29,7 @@
                 }
 
                 hxArgs.forEach(function( a ) {
-                    if (typeof a.order !== 'undefined' && a.order !== null) {
-                        a.order = Get.mappedOrder( a );
-                    }
-                    else {
-                        a.order = Helper.object.getOrder( a );
-                    }
+                    a.order = Get.seedOrder( a );
                 });
 
                 hxm._addXformPod( hxArgs );

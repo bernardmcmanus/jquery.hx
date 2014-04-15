@@ -177,6 +177,18 @@
     };
 
 
+    get.seedOrder = function( seed ) {
+        var order;
+        if (typeof seed.order !== 'undefined' && seed.order !== null) {
+            order = get.mappedOrder( seed );
+        }
+        else {
+            order = Helper.object.getOrder( seed );
+        }
+        return order;
+    };
+
+
     get.mappedOrder = function( seed ) {
 
         var ord = [];

@@ -118,6 +118,24 @@
             return this;
         },
 
+        update: function( seed ) {
+
+            if (typeof seed === 'object') {
+
+                seed = Array.isArray( seed ) ? hxManager.helper.array.last( seed ) : seed;
+                seed.order = hxManager.get.seedOrder( seed );
+
+                this.each(function( i ) {
+
+                    var bean = new hxManager.bean( seed );
+                    this[i]._hx.updateComponent( bean );
+
+                }.bind( this ));
+            }
+
+            return this;
+        },
+
         resolve: function( all ) {
 
             // all controls whether all pod types or only promise pods will be resolved
