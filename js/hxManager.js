@@ -120,6 +120,8 @@
 
         update: function( seed ) {
 
+            // update a node's components without applying the transition
+
             if (typeof seed === 'object') {
 
                 seed = Array.isArray( seed ) ? hxManager.helper.array.last( seed ) : seed;
@@ -184,8 +186,11 @@
 
         zero: function( hxArgs ) {
 
+            // duration is intentionally passed as a string to
+            // avoid being overridden by vendorPatch.getDuration
+
             $.extend( hxArgs , {
-                duration: 0,
+                duration: '0',
                 delay: 0,
                 fallback: false
             });

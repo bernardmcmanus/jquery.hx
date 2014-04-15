@@ -20,21 +20,21 @@
                 return str;
             }
 
-            for (var i = 0; i < Config.prefixProps.length; i++) {
-                
-                var re = Config.prefixProps[i];
+            Config.prefixProps.forEach(function( re ) {
+
                 var match = re.exec( str );
                 
                 if (match) {
                     str = str.replace( re , ('-' + this.ua + '-' + match[0]) );
                 }
-            }
+
+            }.bind( this ));
 
             return str;
         },
 
         getComputedMatrix: function( element ) {
-            var style = window.getComputedStyle( element );
+            var style = getComputedStyle( element );
             var transform = this.ua !== 'other' ? (this.ua + 'Transform') : 'transform';
             return style[transform] || style.transform;
         },
@@ -44,6 +44,13 @@
                 return false;
             }
             return true;
+        },
+
+        getDuration: function( duration ) {
+            if (duration === 0 && _isAndroidNative( this.os )) {
+                return 1;
+            }
+            return duration;
         }
         
     };

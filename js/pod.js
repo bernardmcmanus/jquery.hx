@@ -128,7 +128,7 @@
         _clusterComplete: function( type ) {
 
             var sequence = getActiveSequence( this.beans );
-            setTransition( this.node , sequence );
+            setTransition( this.node , sequence , true );
 
             delete this.beans[type];
 
@@ -170,15 +170,17 @@
 
         // if this is the last xform pod in the queue, reset the transition
         if (!this.node._hx.getPodCount( 'xform' )) {
-            setTransition( this.node , {} );
+            setTransition( this.node , {} , true );
         }
     }
 
 
-    function setTransition( node , sequence ) {
+    function setTransition( node , sequence , last ) {
+
+        last = typeof last !== 'undefined' ? last : false;
 
         var tProp = VendorPatch.getPrefixed( 'transition' );
-        var tString = buildTransitionString( sequence );
+        var tString = buildTransitionString( sequence , last );
 
         if (node.style.transition === tString) {
             return;
@@ -208,13 +210,18 @@
     }
 
 
-    function buildTransitionString( sequence ) {
+    function buildTransitionString( sequence , last ) {
         
         var arr = [];
 
         Helper.object.each( sequence , function( part , key ) {
 
             var options = part.options;
+
+            // android native browser won't respond to zero duration when cancelling a transition
+            if (!last) {
+                options.duration = VendorPatch.getDuration( options.duration );
+            }
 
             // don't add a component for transitions with duration and delay of 0
             if (options.duration < 1 && options.delay < 1) {
