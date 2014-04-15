@@ -18,7 +18,7 @@
 
     $(document).on( 'ready' , function() {
 
-        $('#target').on( interactionEvent , tests.t9 );
+        $('#target').on( interactionEvent , tests.t11 );
 
         if (interactionEvent === 'touchstart') {
 
@@ -793,54 +793,20 @@
 
             var selector = '.tgt';
 
-            $(selector).hx([
-                {
-                    type: 'transform',
-                    translate: {y: '+=300'},
-                    duration: 800
-                },
-                {
-                    type: 'opacity',
-                    value: 0.3,
-                    duration: 800
-                }
-
-            ]);
+            $(selector).hx({
+                type: 'transform',
+                translate: {y: '+=300'},
+                duration: 800
+            });
 
             setTimeout(function() {
 
                 $(selector)
                 .hx( 'clear' )
-                /*.hx([
-                    {
-                        type: 'transform',
-                        translate: {y: 0},
-                        duration: 0
-                    },
-                    {
-                        type: 'opacity',
-                        value: null,
-                        duration: 800
-                    }
-
-                ])*/
                 .hx({
                     type: 'transform',
                     translate: {y: 0},
                     duration: 0
-                })
-                .then(function( resolve , reject ) {
-                    var t = getComputedStyle(document.querySelector('.tgt')).transition;
-                    //reject();
-                })
-                /*.hx({
-                    type: 'opacity',
-                    value: null,
-                    duration: 800
-                })*/
-                .done(function() {
-                    console.log('done');
-                    //alert($(this).css( '-webkit-transition' ));
                 });
 
             }, 400 );
@@ -861,7 +827,67 @@
                 type: 'transform',
                 translate: {x: 100, y: 100}
             });
-        }
+        },
+
+        // test - cancel cleared pods
+        t11: function() {
+
+            var selector = '.tgt';
+
+            $(selector).hx([
+                {
+                    type: 'transform',
+                    translate: {y: '+=300'},
+                    duration: 800,
+                    done: function() {
+                        console.log('done_a');
+                    }
+                },
+                {
+                    type: 'opacity',
+                    value: 0.3,
+                    duration: 800,
+                    done: function() {
+                        console.log('done_b');
+                    }
+                }
+
+            ])
+            .hx({
+                type: 'opacity',
+                value: null,
+                duration: 800,
+                done: function() {
+                    console.log('done_c');
+                }
+            })
+            .hx({
+                type: 'opacity',
+                value: 0,
+                duration: 800,
+                done: function() {
+                    console.log('done_d');
+                }
+            })
+            .done(function() {
+                console.log('done1');
+            });
+
+            setTimeout(function() {
+
+                $(selector)
+                .hx( 'clear' )
+                .hx({
+                    type: 'transform',
+                    translate: null,
+                    duration: 800
+                })
+                .done(function() {
+                    console.log('done2');
+                });
+    
+            }, 400 );
+        },
     };
 
 }());
