@@ -14,15 +14,15 @@
         }
 
         // otherwise, create a new hx element
-        return _init.call( this , element );
+        return _init( this , element );
     };
 
 
     var hxModule = {
 
         checkDisplayState: function() {
-            if (!_checkDisplayState.call( this , this )) {
-                _prepHidden.call( this , this );
+            if (!_checkDisplayState( this )) {
+                _prepHidden( this );
             }
         },
 
@@ -36,32 +36,32 @@
             var component = (this._hx.components[type] = this._hx.components[type] || {});
             var nodeOrder = (this._hx.order[type] = this._hx.order[type] || []);
             
-            var instance = {};
+            var xformInst = {};
             var instOrder = bean.getData( 'xform' ).mapped.order;
 
             Helper.object.each( raw , function( val , key , i ) {
                 
-                instance[key] = (component[key] || defs[key]);
-                instance[key] = (instance[key].length === defs[key].length ? instance[key] : defs[key]);
+                xformInst[key] = (component[key] || defs[key]);
+                xformInst[key] = (xformInst[key].length === defs[key].length ? xformInst[key] : defs[key]);
                 
-                instance[key] = raw[key].map(function( value , i ) {
+                xformInst[key] = raw[key].map(function( value , i ) {
 
                     var _eval = eval;
                     var exp = _extractOperator( value );
                     var result = null;
 
                     if (rules[key][i]) {
-                        result = exp.op ? _eval(instance[key][i] + exp.op + exp.val) : exp.val;
+                        result = exp.op ? _eval(xformInst[key][i] + exp.op + exp.val) : exp.val;
                     }
                     else {
-                        result = instance[key][i];
+                        result = xformInst[key][i];
                     }
 
                     return result;
                 });
             });
 
-            $.extend( component , instance );
+            $.extend( component , xformInst );
             this._hx.order[type] = Get.extendedOrder( nodeOrder , instOrder );
 
             return Get.xformString( type , component , defs , this._hx.order[type] );
@@ -69,19 +69,19 @@
 
         addXformPod: function( pod ) {
 
-            pod.when( 'beanStart' , podHooks.beanStart , this );
-            pod.when( 'beanComplete' , podHooks.beanComplete , this );
-            pod.when( 'clusterComplete' , podHooks.clusterComplete , this );
-            pod.when( 'podComplete' , podHooks.podComplete , this );
-            pod.when( 'podCanceled' , podHooks.xformCanceled , this );
+            pod.when( 'beanStart' , beanStart , this );
+            pod.when( 'beanComplete' , beanComplete , this );
+            pod.when( 'clusterComplete' , clusterComplete , this );
+            pod.when( 'podComplete' , podComplete , this );
+            pod.when( 'podCanceled' , xformCanceled , this );
 
             this._hx.queue.pushPod( pod );
         },
 
         addPromisePod: function( pod ) {
 
-            pod.when( 'podComplete' , podHooks.podComplete , this );
-            pod.when( 'podCanceled' , podHooks.promiseCanceled , this );
+            pod.when( 'podComplete' , podComplete , this );
+            pod.when( 'podCanceled' , promiseCanceled , this );
 
             this._hx.queue.pushPod( pod );
         },
@@ -107,49 +107,44 @@
     };
 
 
-    var podHooks = {
-
-        beanStart: function( bean ) {
-
-            $(this).trigger( 'hx.xformStart' , {
-                type: bean.getData( 'type' ),
-                xform: bean.getData( 'xform' ).passed,
-                options: bean.getData( 'options' )
-            });
-        },
-
-        beanComplete: function( bean ) {
-            
-            $(this).trigger( 'hx.xformComplete' , {
-                type: bean.getData( 'type' ),
-            });
-
-            bean.getData( 'done' ).call( this );
-        },
-
-        clusterComplete: function( type ) {
-            
-        },
-
-        podComplete: function( pod ) {
-            this._hx.queue.next();
-        },
-
-        xformCanceled: function( pod ) {
-            pod.dispel( 'beanComplete' );
-            pod.dispel( 'clusterComplete' );
-            pod.dispel( 'podComplete' );
-        },
-
-        promiseCanceled: function( pod ) {
-            pod.dispel( 'podComplete' );
-        }
-    };
+    function beanStart( bean ) {
+        $(this).trigger( 'hx.xformStart' , {
+            type: bean.getData( 'type' ),
+            xform: bean.getData( 'xform' ).passed,
+            options: bean.getData( 'options' )
+        });
+    }
 
 
-    function _init( node ) {
+    function beanComplete( bean ) {
+        $(this).trigger( 'hx.xformComplete' , {
+            type: bean.getData( 'type' ),
+        });
+        bean.getData( 'done' ).call( this );
+    }
 
-        var _node = $.extend( node , this );
+    function clusterComplete( type ) {
+        // do something on cluster complete
+    }
+
+    function podComplete( pod ) {
+        this._hx.queue.next();
+    }
+
+    function xformCanceled( pod ) {
+        pod.dispel( 'beanComplete' );
+        pod.dispel( 'clusterComplete' );
+        pod.dispel( 'podComplete' );
+    }
+
+    function promiseCanceled( pod ) {
+        pod.dispel( 'podComplete' );
+    }
+
+
+    function _init( instance , element ) {
+
+        var _node = $.extend( element , instance );
         var _hxModule = Get.scopedModule( hxModule , _node );
 
         _node._hx = $.extend({
@@ -162,15 +157,15 @@
     }
 
     
-    function _checkDisplayState( node ) {
+    function _checkDisplayState( instance ) {
         
-        var hx_display = _getHXDisplay( node );
-        var style = node.style.display;
+        var hx_display = _getHXDisplay( instance );
+        var style = instance.style.display;
         var response = null;
 
         if (hx_display === null) {
             
-            var computed = getComputedStyle( node ).display;
+            var computed = getComputedStyle( instance ).display;
 
             // determine the hx_display code
             if (computed !== 'none' && style === '') {
@@ -190,7 +185,7 @@
                 hx_display = 3;
             }
 
-            _setHXDisplay( node , hx_display );
+            _setHXDisplay( instance , hx_display );
 
         }
 
@@ -211,8 +206,8 @@
     }
 
     
-    function _getHXDisplay( node ) {
-        var hx_display = typeof node.hx_display !== 'undefined' ? node.hx_display : null;
+    function _getHXDisplay( instance ) {
+        var hx_display = typeof instance.hx_display !== 'undefined' ? instance.hx_display : null;
         if (hx_display !== null) {
             hx_display = parseInt( hx_display , 10 );
         }
@@ -220,16 +215,16 @@
     }
 
     
-    function _setHXDisplay( node , value ) {
-        node.hx_display = value;
+    function _setHXDisplay( instance , value ) {
+        instance.hx_display = value;
     }
 
     
-    function _prepHidden( node ) {
-        node.style.opacity = 0;
-        node.style.display = 'block';
+    function _prepHidden( instance ) {
+        instance.style.opacity = 0;
+        instance.style.display = 'block';
         // trigger a dom reflow
-        node.getBoundingClientRect();
+        instance.getBoundingClientRect();
     }
 
 

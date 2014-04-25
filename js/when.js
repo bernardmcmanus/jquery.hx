@@ -18,12 +18,8 @@
 
         when: function( event , handler , context ) {
 
-            if (!event) {
-                throw 'Error: you must pass an event type to hxManager._when.when';
-            }
-
-            if (!handler || typeof handler !== 'function') {
-                throw 'Error: you must pass a valid handler to hxManager._when.when';
+            if (!event || (!handler || typeof handler !== 'function')) {
+                throw 'Error: Invalid when args.';
             }
 
             context = context || null;

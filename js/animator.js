@@ -25,7 +25,7 @@
             $(this.node).on( this.eventType , this.listeners._transitionEnd );
 
             if (this.fallback !== false) {
-                this.timeout = _createFallback.call( this );
+                this.timeout = _createFallback( this );
             }
         },
 
@@ -62,14 +62,14 @@
     };
 
 
-    function _createFallback() {
+    function _createFallback( instance ) {
 
-        var t = this.duration + this.delay + this.buffer;
+        var t = instance.duration + instance.delay + instance.buffer;
 
         var fallback = function() {
-            var data = {propertyName: this.property};
-            $(this.node).trigger( this.eventType , data );
-        }.bind( this );
+            var data = {propertyName: instance.property};
+            $(instance.node).trigger( instance.eventType , data );
+        };
 
         return setTimeout( fallback , t );
     }

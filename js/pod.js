@@ -7,7 +7,7 @@
     var pod = function( node , type ) {
 
         if (!isValidType( type )) {
-            throw new TypeError( 'you must pass a valid type to the hxManager.pod constructor.' );
+            throw new TypeError( 'Invalid pod type' );
         }
 
         var _pod = null;
@@ -28,7 +28,7 @@
 
 
     function isValidType( type ) {
-        return (type && typeof type === 'string' && type !== '' && Config.types.indexOf( type ) >= 0);
+        return (typeof type === 'string' && Config.types.indexOf( type ) >= 0);
     }
 
 
@@ -142,7 +142,7 @@
         complete: function() {
 
             if (!this.isComplete()) {
-                forceComplete.call( this , this.beans );
+                forceComplete( this , this.beans );
             }
             else {
                 this.happen( 'podComplete' , [ this ] );
@@ -163,7 +163,7 @@
     };
 
 
-    function forceComplete( beans ) {
+    function forceComplete( instance , beans ) {
 
         Helper.object.each( beans , function( cluster , key ) {
             
@@ -172,16 +172,16 @@
 
             lastBean.complete();
 
-            this.happen( 'beanComplete' , [ lastBean ] );
-            this.happen( 'clusterComplete' , [ lastBean.getData( 'type' ) ] );
+            instance.happen( 'beanComplete' , [ lastBean ] );
+            instance.happen( 'clusterComplete' , [ lastBean.getData( 'type' ) ] );
 
-        } , this );
+        });
 
-        this.happen( 'podComplete' , [ this ] );
+        instance.happen( 'podComplete' , [ instance ] );
 
         // if this is the last xform pod in the queue, reset the transition
-        if (!this.node._hx.getPodCount( 'xform' )) {
-            setTransition( this.node , {} , true );
+        if (!instance.node._hx.getPodCount( 'xform' )) {
+            setTransition( instance.node , {} , true );
         }
     }
 
