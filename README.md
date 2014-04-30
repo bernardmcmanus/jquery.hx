@@ -1,6 +1,18 @@
 # jQuery.hx
 
 #### A hardware-accelerated animation library for mobile and desktop.
+
+##### Contents
+* [Overview](#overview)
+* [The Basics](#the-basics)
+* [Animations](#animations)
+* [Methods](#methods)
+* [Options](#options)
+* [Troubleshooting](#troubleshooting)
+* [Compatibility](#compatibility)
+* [Dependencies](#dependencies)
+* [Build Instructions](#build-instructions)
+
 =====
 
 ### Overview
