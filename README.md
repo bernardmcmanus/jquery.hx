@@ -1,21 +1,36 @@
-# jQuery.hx
+# jquery.hx
 
 #### A hardware-accelerated animation library for mobile and desktop.
 
-##### Contents
-* [Overview](#overview)
-* [The Basics](#the-basics)
-* [Animations](#animations)
-* [Methods](#methods)
-* [Options](#options)
-* [Troubleshooting](#troubleshooting)
-* [Compatibility](#compatibility)
-* [Dependencies](#dependencies)
-* [Build Instructions](#build-instructions)
+## Contents
+* [__Overview__](#overview)
+* [__The Basics__](#the-basics)
+    * [Beans & Pods](#beans--pods)
+    * [Queueing](#queueing)
+    * [Promises](#promises)
+* [__Animations__](#animations)
+    * [Operators, Values, and Persistent States](#operators-values-and-persistent-states)
+    * [Hardware-Accelerated (3D) Transforms](#hardware-accelerated-3d-transforms)
+    * [Non Hardware-Accelerated (2D) Transforms](#non-hardware-accelerated-2d-transforms)
+    * [Non-Transform Types](#non-transform-types)
+* [__Methods__](#methods)
+    * [Overview](#overview-1)
+    * [Synchronous Methods](#synchronous-methods)
+    * [Asynchronous Methods](#asynchronous-methods)
+* [__Options__](#options)
+    * [General Options](#general-options)
+    * [Transform Options](#transform-options)
+    * [Non-Transform Options](#non-transform-options)
+* [__Troubleshooting__](#troubleshooting)
+    * [Transform Order](#transform-order)
+    * [Queue Jams](#queue-jams)
+* [__Compatibility__](#compatibility)
+* [__Dependencies__](#dependencies)
+* [__Build Instructions__](#build-instructions)
 
 =====
 
-### Overview
+## Overview
 
 hx is a JavaScript animation library that couples the slick animation capabilities of CSS3 with the power and flexibility of JS, making complex animation sequences a breeze. It's written as a jQuery plugin and uses the familiar syntax:
 
@@ -25,40 +40,9 @@ $('selector').hx( arguments );
 
 =====
 
-### The Basics
+## The Basics
 
-###### Queueing
-
-More to come on queueing. For now, it's important to know that each element in an hx instance has its own queue which executes independently. This allows us to do things like:
-
-```javascript
-    $('sel1').hx({
-        ...
-        duration: 400
-    });
-
-    $('sel2').hx({
-        ...
-        duration: 800
-    });
-
-    $('sel3').hx({
-        ...
-        duration: 1200
-    });
-
-    $('sel1').hx({
-        ...
-        duration: 800,
-        delay: 400
-    });
-
-    $('sel1,sel2,sel3').hx( 'done' , function() {
-        // this function will be executed after 1600ms
-    });
-```
-
-###### Beans & Pods
+### Beans & Pods
 
 The hx method accepts a single transformation object, or __bean__:
 
@@ -78,7 +62,7 @@ as well as an array of beans, or __pod__:
 ```
 
 * Pods execute _synchronously_, meaning each pod in the queue will not run until the pod before it has been resolved. A pod will be resolved once all of its beans have been resolved.
-* Beans of the same type execute synchronously. Within a pod, each bean<sub>a</sub> will not run until the bean<sub>a</sub> before it has been resolved.
+* Beans of the same type execute _synchronously_. Within a pod, each bean<sub>a</sub> will not run until the bean<sub>a</sub> before it has been resolved.
 * Beans of different types execute _asynchronously_. Within a pod, bean<sub>a</sub> and bean<sub>b</sub> can run simultaneously.
 
 It's important to note that passing a transformation to the hx method will always create a pod. In the following snippet, the transform and opacity beans will execute simultaneously because they are in the same pod:
@@ -106,7 +90,41 @@ However, if we separate the beans into two hx calls, the second pod will not exe
     });
 ```
 
-###### Promises
+### Queueing
+
+Each time ```$('selector').hx( ... )``` is invoked, a __pod__ is being pushed to a queue for each element returned by ```'selector'```. Each element has its own queue which executes independently. This allows us to do things like:
+
+```javascript
+    $('selector1').hx({
+        ...
+        duration: 400
+    });
+
+    $('selector2').hx({
+        ...
+        duration: 800
+    });
+
+    $('selector3').hx({
+        ...
+        duration: 1200
+    });
+
+    $('selector1, selector2, selector3').hx( 'done' , function() {
+        // this function will be executed after 1200ms
+    });
+```
+
+The following diagram illustrates how the queues for each element in the previous example will be executed. Since we used the selector ```'selector1, selector2, selector3'```, the ```done``` function will not run until all of the associated promise pods have been resolved:
+
+![hx queue](doc/hx_queue.png "hx queue")
+
+1. An animation pod is pushed to each queue.
+2. Promise pods associated with the ```done``` function are pushed to each queue.
+3. As each animation pod finishes running, the promise pod that follows it will be resolved.
+4. Once all of the promise pods have been resolved, the promise function is executed.
+
+### Promises
 
 hx is bundled with the latest promises <a href="http://s3.amazonaws.com/es6-promises/promise-0.1.1.min.js" target="_blank">polyfill</a>, so it will work even in browsers that have not yet implemented promises. If you're not familiar with the concept of promises, you may find these resources helpful:
 * <a href="http://www.html5rocks.com/en/tutorials/es6/promises/" target="_blank">Intro to Promises</a>
@@ -114,9 +132,9 @@ hx is bundled with the latest promises <a href="http://s3.amazonaws.com/es6-prom
 
 =====
 
-### Animations
+## Animations
 
-##### Operators, Values, and Persistent States
+### Operators, Values, and Persistent States
 hx supports the use of assignment operators (`+=`, `-=`, `*=`, `/=`, and `%=`) to perform relative changes:
 ```javascript
     $('selector').hx({
@@ -163,7 +181,7 @@ A property can be reset by setting it to null:
     // the element is translated to (0,0)
 ```
 
-##### Hardware-Accelerated (3D) Transforms
+### Hardware-Accelerated (3D) Transforms
 ```javascript
 type: 'transform'
 ```
@@ -192,7 +210,7 @@ rotateY: 0
 rotateZ: 0
 ```
 
-##### Non Hardware-Accelerated (2D) Transforms
+### Non Hardware-Accelerated (2D) Transforms
 ```javascript
 type: 'transform'
 ```
@@ -205,7 +223,7 @@ translate2d: {x: 0, y: 0}
 scale2d: {x: 0, y: 0}
 ```
 
-##### Non-Transform Types
+### Non-Transform Types
 
 Although opacity is the only officially supported non-transform type, hx should handle any transitionable CSS property. The syntax for non-transform CSS properties is shown below.
 
@@ -223,9 +241,9 @@ value: '#fff'
 
 =====
 
-### Methods
+## Methods
 
-##### Overview
+### Overview
 
 hx methods can be called in two ways:
 * Inline, chained to an hx call, or
@@ -252,7 +270,7 @@ $('selector').hx( 'done' , function() {
 });
 ```
 
-##### Synchronous Methods
+### Synchronous Methods
 
 ###### hx
 * Applies a transformation if the first argument is an object __(bean)__ or array __(pod)__, or calls another method if the first argument is a string.
@@ -352,7 +370,7 @@ $('selector1, selector2').hx( 'done' , function() {
 });
 ```
 
-##### Asynchronous Methods
+### Asynchronous Methods
 
 ###### clear
 * Clears all pods in the queue.
@@ -412,9 +430,9 @@ $('selector').hx( 'zero' , {
 
 =====
 
-### Options
+## Options
 
-##### General Options
+### General Options
 
 ###### type
 The CSS property to be animated, i.e. transform, opacity, etc.
@@ -523,7 +541,7 @@ $('selector').hx({
 });
 ```
 
-##### Transform Options
+### Transform Options
 
 ###### transforms
 * `Object || Integer || String`
@@ -535,7 +553,7 @@ $('selector').hx({
 * _Optional_
 * Default: n/a
 
-##### Non-Transform Options
+### Non-Transform Options
 
 ###### value
 * `Integer || String`
@@ -544,9 +562,9 @@ $('selector').hx({
 
 =====
 
-### Troubleshooting
+## Troubleshooting
 
-###### Transform Order
+### Transform Order
 
 The order in which transforms are applied will affect the final outcome. The following snippet will actually translate the target by 200 pixels because scale is being applied first.
 
@@ -579,7 +597,7 @@ $('selector').hx([
 ]);
 ```
 
-###### Queue Jams
+### Queue Jams
 
 More on this later. In short, queue jams are caused by an unresolved pod in the queue preventing subsequent pods from being executed. To resolve a single pod:
 ```javascript
@@ -598,19 +616,19 @@ $('selector').hx( 'clear' );
 
 =====
 
-### Compatibility
+## Compatibility
 
 hx is supported in both mobile and desktop versions of all major browsers including Chrome, Safari, Firefox, Opera, and Internet Explorer 9+.
 
 =====
 
-### Dependencies
+## Dependencies
 
-hx requires jQuery 1.10.0 or higher.
+hx requires jQuery 1.7.0 or higher.
 
 =====
 
-### Build Instructions
+## Build Instructions
 
 You need NPM installed. Navigate to the git directory and run the following commands:
 
