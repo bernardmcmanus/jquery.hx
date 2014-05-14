@@ -630,7 +630,14 @@ hx requires jQuery 1.7.0 or higher.
 
 ## Build Instructions
 
-You need NPM installed. Navigate to the git directory and run the following commands:
+You must have NPM installed to build jquery.hx. To install dependencies, navigate to the git directory and run:
 
     npm install
+
+To build the minified production version, run:
+
     grunt
+
+To build the non-minified development version, run:
+
+    grunt dev
