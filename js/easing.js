@@ -3,7 +3,9 @@
 **  http://blackberry.github.io/Alice/
 */
 
+
 (function( window , hx , VendorPatch ) {
+
 
     var type = {
         linear: [ 0.25 , 0.25 , 0.75 , 0.75 ],
@@ -36,41 +38,52 @@
         easeInOutCirc: [ 0.785 , 0.135 , 0.15 , 0.86 ],
         easeInOutBack: [ 0.68 , -0.55 , 0.265 , 1.55 ],
         easeOutBackMod1: [ 0.7 , -1 , 0.5 , 2 ],
-        easeMod1: [ 0.25 , 0.2 , 0.25 , 1 ]
+        easeMod1: [ 0.25 , 0.2 , 0.25 , 1 ],
+        gravityUp: [ 0.05 , 0.6 , 0.3 , 1 ],
+        gravityDown: [ 0.65 , 0.01 , 0.78 , 0.5 ]
     };
 
-    var fallback = {
-        easeInBack: [ 0.6 , 0 , 0.735 , 0.045 ],
-        easeOutBack: [ 0.175 , 0.885 , 0.32 , 1 ],
-        easeInOutBack: [ 0.68 , 0 , 0.265 , 1 ],
-        easeOutBackMod1: [ 0.7 , 0 , 0.5 , 1 ]
-    };
     
-    var easing = function( def ) {
-
-        if ((/cubic\-bezier\(/).test( def )) {
-            return def;
-        }
+    function easing( def ) {
 
         var b;
 
-        if (typeof def === 'object') {
+        if ((/cubic\-bezier\(/).test( def )) {
+            b = parseBezierString( def );
+        }
+        else if (typeof def === 'object') {
             b = [ def.p1 , def.p2 , def.p3 , def.p4 ];
         }
         else {
-            // check support for beziers with points outside 0 - 1
-            if (fallback[def] && !VendorPatch.getBezierSupport()) {
-                b = fallback[def];
-            }
-            else {
-                b = type[def] ? type[def] : type.ease;
-            }
+            b = type[def] ? type[def] : type.ease;
+        }
+
+        // check unclamped bezier support
+        if (!VendorPatch.getBezierSupport()) {
+            b = getClampedBezier( b );
         }
 
         return 'cubic-bezier(' + b.join( ',' ) + ')';
-    };
+    }
 
-    $.extend( hx , {easing: easing} );
+
+    function parseBezierString( str ) {
+        var arr = str.replace( /(\s|\))/gi , '' ).split( '(' )[1].split( ',' );
+        return arr.map(function( a ) {
+            return parseFloat( a , 10 );
+        });
+    }
+
+
+    function getClampedBezier( arr ) {
+        return arr.map(function( a ) {
+            return (a < 0 ? 0 : (a > 1 ? 1 : a));
+        });
+    }
+
+
+    $.extend( hx , { easing: easing });
+
 
 }( window , hxManager , hxManager.vendorPatch ));
 
