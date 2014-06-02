@@ -1,101 +1,116 @@
 (function( window , hx ) {
 
 
-    var helper = {};
+    var Helper = {};
+    var type = 'type';
+    var name = 'name';
+    var array = 'array';
+    var object = 'object';
 
 
-    helper.array = {
+    Helper[array] = {};
+    Helper[object] = {};
 
-        compare: function ( subject , array ) {
-            
-            if (!subject || !array) {
-                return false;
-            }
 
-            if (subject.length != array.length) {
-                return false;
-            }
+    function compare( subject , array ) {
+        
+        if (!subject || !array) {
+            return false;
+        }
 
-            for (var i = 0, l = subject.length; i < l; i++) {
-                if (subject[i] instanceof Array && array[i] instanceof Array) {
-                    if (!subject[i].compare( array[i] )) {
-                        return false;
-                    }
-                }
-                else if (subject[i] != array[i]) {
+        if (subject.length != array.length) {
+            return false;
+        }
+
+        for (var i = 0, l = subject.length; i < l; i++) {
+            if (subject[i] instanceof Array && array[i] instanceof Array) {
+                if (!subject[i].compare( array[i] )) {
                     return false;
                 }
             }
-
-            return true;
-        },
-
-        last: function( subject , value ) {
-
-            var L = subject.length > 0 ? subject.length - 1 : 0;
-
-            if (typeof value !== 'undefined') {
-                subject[L] = value;
+            else if (subject[i] != array[i]) {
+                return false;
             }
-
-            return subject[L];
         }
 
-    };
+        return true;
+    }
+    compare[type] = array;
+    Helper[compare[type]][compare[name]] = compare;
 
 
-    helper.object = {
+    function last( subject , value ) {
 
-        each: function( subject , iterator , context ) {
+        var L = subject.length > 0 ? subject.length - 1 : 0;
 
-            if (!subject || !iterator) {
-                return;
-            }
+        if (typeof value !== 'undefined') {
+            subject[L] = value;
+        }
 
-            context = context || window;
+        return subject[L];
+    }
+    last[type] = array;
+    Helper[last[type]][last[name]] = last;
 
-            var i = 0;
-            for (var key in subject) {
-                iterator.call( context , subject[key] , key , i );
-                i++;
-            }
-        },
 
-        getOrder: function( subject ) {
-            var a = [];
-            for (var key in subject) {
-                a.push( key );
-            }
-            return a;
-        },
+    function each( subject , iterator , context ) {
 
-        size: function( subject ) {
+        if (!subject || !iterator) {
+            return;
+        }
 
-            if (typeof subject !== 'object') {
+        context = context || window;
+
+        var keys = Object.keys( subject );
+
+        for (var i = 0; i < keys.length; i++) {
+            iterator.call( context , subject[keys[i]] , keys[i] , i );
+        }
+    }
+    each[type] = object;
+    Helper[each[type]][each[name]] = each;
+
+
+    function getOrder( subject ) {
+        var a = [];
+        for (var key in subject) {
+            a.push( key );
+        }
+        return a;
+    }
+    getOrder[type] = object;
+    Helper[getOrder[type]][getOrder[name]] = getOrder;
+
+
+    function size( subject ) {
+
+        if (typeof subject !== 'object') {
+            return 0;
+        }
+
+        var dataTypes = [ Boolean , Number , String ];
+
+        for (var i = 0; i < dataTypes.length; i++) {
+            if (subject instanceof dataTypes[i]) {
                 return 0;
             }
-
-            var dataTypes = [ Boolean , Number , String ];
-
-            for (var i = 0; i < dataTypes.length; i++) {
-                if (subject instanceof dataTypes[i]) {
-                    return 0;
-                }
-            }
-
-            var size = 0;
-
-            for (var key in subject) {
-                size++;
-            }
-
-            return size;
         }
 
-    };
+        return Object.keys( subject ).length;
+
+        /*var size = 0;
+
+        for (var key in subject) {
+            size++;
+        }
+
+        return size;*/
+    }
+    size[type] = object;
+    Helper[size[type]][size[name]] = size;
 
     
-    $.extend( hx , {helper: helper} );
+    $.extend( hx , { Helper : Helper });
 
 
 }( window , hxManager ));

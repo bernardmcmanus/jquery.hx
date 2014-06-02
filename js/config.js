@@ -1,11 +1,11 @@
 (function( window , hx ) {
 
 
-    var config = {
+    var Config = {
         
         keys: {
-            config: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
-            xform: [ 'translate3d' , 'scale3d' , 'translate' , 'scale' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
+            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
+            transform: [ 'translate3d' , 'scale3d' , 'translate' , 'scale' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
         },
 
         maps: {
@@ -15,31 +15,126 @@
                 scale: 'scale3d',
                 rotate: 'rotate3d',
                 translate2d: 'translate',
-                scale2d: 'scale'
+                scale2d: 'scale',
+                matrix: 'matrix3d',
+                matrix2d: 'matrix'
             },
 
-            vector: {
-                x: 0,
-                y: 1,
-                z: 2,
-                a: 3
+            styleString: {
+
+                translate: {
+                    join: 'px,',
+                    append: 'px'
+                },
+
+                scale: {
+                    join: ',',
+                    append: ''
+                },
+
+                rotate: {
+                    join: ',',
+                    append: 'deg'
+                },
+
+                matrix: {
+                    join: ',',
+                    append: ''
+                },
+
+                other: {
+                    join: '',
+                    append: ''
+                }
             },
 
-            array: [ 'x' , 'y' , 'z' , 'a' ]
+            transform: {
+
+                matrix3d: {
+                    a1: 0,
+                    b1: 1,
+                    c1: 2,
+                    d1: 3,
+                    a2: 4,
+                    b2: 5,
+                    c2: 6,
+                    d2: 7,
+                    a3: 8,
+                    b3: 9,
+                    c3: 10,
+                    d3: 11,
+                    a4: 12,
+                    b4: 13,
+                    c4: 14,
+                    d4: 15
+                },
+
+                matrix: {
+                    a: 0,
+                    b: 1,
+                    c: 2,
+                    d: 3,
+                    tx: 4,
+                    ty: 5
+                },
+
+                rotateX: {
+                    '0': 0
+                },
+
+                rotateY: {
+                    '0': 0
+                },
+
+                rotateZ: {
+                    '0': 0
+                },
+
+                other: {
+                    x: 0,
+                    y: 1,
+                    z: 2,
+                    a: 3
+                }
+            },
+
+            nonTransform: {
+
+                other: {
+                    '0': 0
+                }
+            }
         },
 
-        xformDefaults: {
-            matrix3d: [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ],
-            matrix: [ 1 , 0 , 0 , 1 , 0 , 0 ],
-            translate3d: [ 0 , 0 , 0 ],
-            scale3d: [ 1 , 1 , 1 ],
-            rotate3d: [ 0 , 0 , 0 , 0 ],
-            translate: [ 0 , 0 ],
-            scale: [ 1 , 1 ],
-            singleAxisRotate: [ 0 ]
+        defaults: {
+
+            transform: {
+                matrix3d: [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ],
+                translate3d: [ 0 , 0 , 0 ],
+                scale3d: [ 1 , 1 , 1 ],
+                rotate3d: [ 0 , 0 , 0 , 0 ],
+                rotateX: [ 0 ],
+                rotateY: [ 0 ],
+                rotateZ: [ 0 ],
+                matrix: [ 1 , 0 , 0 , 1 , 0 , 0 ],
+                translate: [ 0 , 0 ],
+                scale: [ 1 , 1 ]
+            },
+
+            nonTransform: {
+                value: ''
+            },
+
+            options: {
+                duration: 400,
+                easing: 'ease',
+                delay: 0,
+                fallback: true,
+                done: function() {}
+            }
         },
 
-        vendorPatch: {
+        VendorPatch: {
 
             vendors: {
                 webkit  : (/webkit/i),
@@ -74,30 +169,22 @@
             ]
         },
 
-        animator: {
+        Animator: {
+            timeout: null,
             buffer: 50
         },
 
-        pod: {
+        Pod: {
             types: [ 'xform' , 'promise' ]
         },
 
-        domNode: {
+        DomNode: {
             removeOnClean: [ '_hx' , 'hx_display' ]
-        },
-
-        hx: {
-            duration: 400,
-            easing: 'ease',
-            delay: 0,
-            fallback: true,
-            done: function() {}
         }
-
     };
 
     
-    $.extend( hx , {config: config} );
+    $.extend( hx , { Config : Config });
 
     
 }( window , hxManager ));

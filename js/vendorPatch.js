@@ -1,18 +1,25 @@
 (function( window , hx , Config ) {
 
 
-    var vendorPatch = function() {
+    function VendorPatch() {
+
         this.ua = _getUserAgent();
         this.os = _getOS();
         this.isMobile = _isMobile();
-    };
+
+        Object.defineProperty( this , 'eventType' , {
+            get: function() {
+                return Config.events[ this.ua ];
+            }
+        });
+    }
 
 
-    vendorPatch.prototype = {
+    VendorPatch.prototype = {
 
-        getEventType: function() {
+        /*getEventType: function() {
             return Config.events[ this.ua ];
-        },
+        },*/
 
         getPrefixed: function( str ) {
 
@@ -88,10 +95,10 @@
     }
 
 
-    $.extend( hx , {vendorPatch: new vendorPatch()} );
+    $.extend( hx , { VendorPatch : new VendorPatch() });
 
     
-}( window , hxManager , hxManager.config.vendorPatch ));
+}( window , hxManager , hxManager.Config.VendorPatch ));
 
 
 

@@ -3,9 +3,9 @@ module.exports = function( grunt ) {
 
     var libs = [
         'js/hxManager.js',
+        'js/prototypes/when.js',
         'js/config.js',
         'js/helper.js',
-        'js/when.js',
         'js/vendorPatch.js',
         'js/easing.js',
         'js/getters.js',
@@ -24,28 +24,28 @@ module.exports = function( grunt ) {
         pkg: grunt.file.readJSON('package.json'),
 
         jshint : {
-            all : [ 'Gruntfile.js' , 'js/*.js' ]
+            all : [ 'Gruntfile.js' , 'js/*.js' , 'js/prototypes/*.js' ]
         },
 
         clean : [ 'hx-*.js' ],
 
         concat: {
             options: {
-                banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
             },
             build: {
                 src: libs,
-                dest: 'hx-<%= pkg.version %>.js'
+                dest: 'hx-<%= pkg.version %>n.js'
             }
         },
 
         uglify: {
             options: {
-                banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             release : {
                 files : {
-                    'hx-<%= pkg.version %>.min.js' : libs
+                    'hx-<%= pkg.version %>n.min.js' : libs
                 }
             }
         }

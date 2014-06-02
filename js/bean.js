@@ -1,93 +1,82 @@
-(function( window , hx , When , Get , Animator ) {
+(function( window , hx , Config , Helper , When , Easing , Animator , KeyMap ) {
 
 
-    var bean = function( seed ) {
-        
-        var data = _getBeanData( seed );
-        $.extend( this , data );
+    function Bean( seed ) {
 
-        // create the when module
-        When( this );
+        if (!seed.type) {
+            throw new TypeError( 'Bean type is required.' );
+        }
+
+        Object.defineProperty( this , 'hasAnimator' , {
+            get: function() {
+                return (typeof this.animator !== 'undefined');
+            }
+        });
+
+        Object.defineProperty( this , 'complete' , {
+            get: function() {
+                return (this.hasAnimator ? !this.animator.running : false);
+            }
+        });
+
+        Object.defineProperty( this , 'easing' , {
+            get: function() {
+                return Easing( this.options.easing );
+            }
+        });
+
+        $.extend( this , getCompiledData( seed ));
+    }
+
+
+    Bean.prototype = Object.create( When );
+
+
+    Bean.prototype.setStyleString = function( str ) {
+        this.styleString = str;
     };
 
 
-    bean.prototype = {
-        
-        setValue: function( value ) {
-            this.value = value;
-        },
+    Bean.prototype.createAnimator = function( options ) {
 
-        isComplete: function() {
-            if (this.hasAnimator()) {
-                return !this.animator.isRunning();
-            }
-            return false;
-        },
+        if (!this.hasAnimator) {
+            
+            $.extend( options , this.options.export() );
+            this.animator = new Animator( options );
 
-        createAnimator: function( options ) {
-
-            if (!this.hasAnimator()) {
-                
-                $.extend( options , this.options );
-                this.animator = new Animator( options );
-
-                this.animator.when( 'complete' , onComplete , this );
-            }
-        },
-
-        startAnimator: function() {
-            if (this.hasAnimator() && !this.animator.isRunning()) {
-                this.animator.start();
-            }
-        },
-
-        complete: function() {
-            if (this.hasAnimator() && !this.isComplete()) {
-                this.animator.destroy();
-            }
-        },
-
-        hasAnimator: function() {
-            return (typeof this.animator !== 'undefined');
-        },
-
-        getData: function( property ) {
-
-            var data = null;
-
-            switch (property) {
-
-                case 'done':
-                    data = (this.hasAnimator() ? this.animator.done : function() {});
-                break;
-
-                default:
-                    data = this[property];
-                break;
-            }
-
-            return data;
+            this.animator.when( 'complete' , onComplete , this );
         }
     };
 
 
-    function _getBeanData( seed ) {
+    Bean.prototype.startAnimator = function() {
+        if (this.hasAnimator && !this.animator.running) {
+            this.animator.start();
+        }
+    };
 
-        var xform = Get.xformKeys( seed );
-        var options = Get.xformOptions( seed );
-        var raw = Get.rawComponents( xform.mapped );
-        var defs = Get.xformDefaults( raw );
-        var rules = Get.updateRules( xform.mapped , raw );
 
-        return {
-            type: seed.type,
-            xform: xform,
-            options: options,
-            raw: raw,
-            defaults: defs,
-            rules: rules
-        };
-    }
+    Bean.prototype.resolveBean = function() {
+        if (this.hasAnimator && !this.complete) {
+            this.animator.destroy();
+        }
+    };
+
+
+    Bean.prototype.getData = function( property ) {
+
+        switch (property) {
+
+            case 'type':
+                return this.type;
+
+            case 'done':
+                return this.options.done;
+
+            default:
+                return this[property];
+        }
+    };
 
 
     function onComplete() {
@@ -95,10 +84,171 @@
     }
 
 
-    $.extend( hx , {bean: bean} );
+    function getCompiledData( seed ) {
+
+        var type = seed.type;
+
+        var order = _getOrder( seed );
+
+        var options = _getOptions( seed );
+
+        var defaults = _getDefaults( type , order );
+
+        var raw = _getRaw( seed , defaults );
+
+        var compiled = _getCompiled( type , raw , defaults );
+
+        var rules = _getRules( type , compiled , raw );
+
+        return {
+            type: type,
+            order: order,
+            options: options,
+            raw: raw,
+            defaults: defaults,
+            compiled: compiled,
+            rules: rules
+        };
+    }
+
+
+    function _getOrder( seed ) {
+
+        var order = new KeyMap({
+            passed: (seed.order || []),
+            computed: Helper.object.getOrder( seed )
+        });
+
+        return order
+            .cast()
+            .each(function( keyMap , key ) {
+                keyMap
+                    .subtract( Config.keys.options )
+                    .unique()
+                    .setMaster()
+                    .mapTo( Config.maps.component );
+            });
+
+        /*var order = new KeyMap(
+            (seed.order || []).concat( Helper.object.getOrder( seed ))
+        );
+
+        return order
+            .subtract( Config.keys.options )
+            .unique()
+            .setMaster()
+            .mapTo( Config.maps.component );*/
+    }
+
+
+    function _getOptions( seed ) {
+
+        var options = new KeyMap( seed , Config.defaults.options );
+
+        return options
+            .scrub(
+                Object.keys( Config.defaults.options )
+            )
+            .setMaster();
+    }
+
+
+    function _getRaw( seed , defaults ) {
+
+        var raw = new KeyMap( seed );
+
+        return raw
+            .subtract( Config.keys.options )
+            .setMaster()
+            .mapTo( Config.maps.component )
+            .each(function( val , key ) {
+                if (val === null) {
+                    val = defaults[key].export();
+                }
+                raw[key] = (typeof val === 'object' ? val : [ val ]);
+            })
+            .cast();
+    }
+
+
+    function _getDefaults( type , order ) {
+
+        var defaults = new KeyMap(
+            Config.defaults[type] || Config.defaults.nonTransform
+        );
+
+        return defaults
+            .scrub( order.computed.export() )
+            .each(function( val , key ) {
+                defaults[key] = (typeof val === 'object' ? val : [ val ]);
+            })
+            .cast()
+            .setMaster();
+    }
+
+
+    function _getCompiled( type , raw , defaults ) {
+
+        var compiled = raw.clone();
+
+        return compiled
+            .cast()
+            .each(function( keyMap , key ) {
+                //if (keyMap instanceof KeyMap) {
+                    var map = Config.maps[ type ] || Config.maps.nonTransform;
+                    keyMap
+                        .mapTo( map[key] || map.other )
+                        .merge(
+                            defaults[key].export()
+                        );
+                //}
+            })
+            .setMaster();
+    }
+
+
+    function _getRules( type , compiled , raw ) {
+
+        var compareTo = raw.clone()
+            .cast()
+            .each(function( keyMap , key ) {
+                //if (keyMap instanceof KeyMap) {
+                    //console.log(keyMap);
+                    var map = Config.maps[ type ] || Config.maps.nonTransform;
+                    keyMap.mapTo( map[key] || map.other );
+                //}
+            });
+
+        //return compareTo;
+
+        //var rules = compiled.clone();
+
+        return compiled.clone()
+            .cast()
+            .compare( compareTo );
+
+        /*return rules
+            .cast()
+            .each(function( keyMap , key ) {
+                if (keyMap instanceof KeyMap) {
+                    var map = Config.maps[ type ] || Config.maps.nonTransform;
+                    keyMap.mapFrom( map[key] || map.other );
+                }
+            })
+            .compare( raw )
+            .each(function( keyMap , key ) {
+                if (keyMap instanceof KeyMap) {
+                    var map = Config.maps[ type ] || Config.maps.nonTransform;
+                    keyMap.mapTo( map[key] || map.other );
+                }
+            });*/
+    }
+
+
+    $.extend( hx , { Bean : Bean });
 
     
-}( window , hxManager , hxManager.when , hxManager.get , hxManager.animator ));
+}( window , hxManager , hxManager.Config , hxManager.Helper , hxManager.When , hxManager.Easing , hxManager.Animator , hxManager.KeyMap ));
 
 
 

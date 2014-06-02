@@ -1,12 +1,7 @@
-(function( window , hx , Config , Helper , Get , Queue ) {
+(function( window , hx , Config , Helper , Get , KeyMap , Queue ) {
 
     
-    var domNode = function( element ) {
-
-        // make sure an element is passed to the constructor
-        if (!element) {
-            throw 'Error: You must pass an element to the hxManager.domNode constructor.';
-        }
+    function DomNode( element ) {
 
         // if this is already an hx element, return it
         if (typeof element._hx !== 'undefined') {
@@ -15,7 +10,7 @@
 
         // otherwise, create a new hx element
         return _init( this , element );
-    };
+    }
 
 
     var hxModule = {
@@ -26,45 +21,146 @@
             }
         },
 
-        updateComponent: function( bean ) {
+        getStyleString: function( type ) {
 
-            var type = bean.getData( 'type' );
-            var raw = bean.getData( 'raw' );
-            var defs = bean.getData( 'defaults' );
-            var rules = bean.getData( 'rules' );
+            var that = this;
+            var stringMap = Config.maps.styleString;
+            var order = that._hx.getOrder( type );
+
+            var arr = order.map(function( name ) {
+                var property = that._hx.getComponents( type , name );
+                var map = getPropertyMap( name );
+                if (map) {
+                    return name + '(' + property.join( map.join ) + map.append + ')';
+                }
+                return property[0];
+            });
+
+            function getPropertyMap( name ) {
+                var re;
+                for (var key in stringMap) {
+                    re = new RegExp( key , 'i' );
+                    if (re.test( name )) {
+                        return stringMap[key];
+                    }
+                }
+                return false;
+            }
+
+            return arr.join( ' ' );
+        },
+
+        getComponents: function( type , property ) {
+            var component = this._hx.components;
+            if (type) {
+                component[type] = (this._hx.components[type] = this._hx.components[type] || {});
+                if (property) {
+                    component[type][property] = component[type][property] || [];
+                    return component[type][property];
+                }
+                return component[type];
+            }
+            return component;
+        },
+
+        _setComponent: function( type , newComponent ) {
             
-            var component = (this._hx.components[type] = this._hx.components[type] || {});
-            var nodeOrder = (this._hx.order[type] = this._hx.order[type] || []);
-            
-            var xformInst = {};
-            var instOrder = bean.getData( 'xform' ).mapped.order;
+            var that = this;
+            var updated = {};
 
-            Helper.object.each( raw , function( val , key , i ) {
-                
-                xformInst[key] = (component[key] || defs[key]);
-                xformInst[key] = (xformInst[key].length === defs[key].length ? xformInst[key] : defs[key]);
-                
-                xformInst[key] = raw[key].map(function( value , i ) {
+            var defaults = new KeyMap(
+                Config.defaults[type] || Config.defaults.nonTransform
+            )
+            .scrub(
+                Object.keys( newComponent )
+            );
 
-                    var _eval = eval;
-                    var exp = _extractOperator( value );
-                    var result = null;
-
-                    if (rules[key][i]) {
-                        result = exp.op ? _eval(xformInst[key][i] + exp.op + exp.val) : exp.val;
+            new KeyMap( newComponent )
+                .each(function( val , property ) {
+                    if (Helper.array.compare( val , defaults[property] )) {
+                        that._hx._deleteComponent( type , property );
                     }
                     else {
-                        result = xformInst[key][i];
+                        updated[property] = val;
+                    }
+                });
+
+            updated = $.extend( that._hx.getComponents( type ) , updated );
+            that._hx.components[type] = updated;
+        },
+
+        _deleteComponent: function( type , property ) {
+            delete this._hx.components[type][property];
+        },
+
+        updateComponent: function( bean ) {
+
+            var that = this;
+
+            var type = bean.type;
+            var compiled = bean.compiled;
+            var defaults = bean.defaults;
+            var rules = bean.rules;
+            var newComponents = {};
+
+            compiled.each(function( compiledProperty , name ) {
+
+                var ruleProperty = rules[name];
+                var defaultProperty = defaults[name].export();
+                var storedProperty = $.extend( defaultProperty , that._hx.getComponents( type , name ));
+                
+                newComponents[name] = storedProperty.map(function( storedVal , i ) {
+
+                    // if ruleProperty[i] is true, update the stored value
+                    if (ruleProperty[i]) {
+                        return mergeUpdates( storedVal , compiledProperty[i] );
                     }
 
-                    return result;
+                    // otherwise, leave it as is
+                    return storedVal;
                 });
             });
 
-            $.extend( component , xformInst );
-            this._hx.order[type] = Get.extendedOrder( nodeOrder , instOrder );
+            function mergeUpdates( storedVal , newVal ) {
+                var _eval = eval;
+                var parts = _parseExpression( newVal );
+                return (parts.op ? _eval(storedVal + parts.op + parts.val) : parts.val);
+            }
 
-            return Get.xformString( type , component , defs , this._hx.order[type] );
+            that._hx._setComponent( type , newComponents );
+            this._hx._updateOrder( bean );
+
+            return that._hx.getStyleString( type );
+        },
+
+        getOrder: function( type ) {
+            var order = this._hx.order;
+            if (type) {
+                order[type] = (this._hx.order[type] = this._hx.order[type] || []);
+                return order[type];
+            }
+            return order;
+        },
+
+        _setOrder: function( type , newOrder ) {
+            this._hx.order[type] = newOrder;
+        },
+
+        _updateOrder: function( bean ) {
+            var that = this;
+            var type = bean.type;
+            var storedOrder = that._hx.getOrder( type );
+            var passedOrder = bean.order.passed.export();
+            var computedOrder = bean.order.computed.export();
+            var newOrder = (passedOrder.concat( storedOrder )).concat( computedOrder );
+            that._hx._setOrder( type ,
+                new KeyMap( newOrder )
+                    .unique()
+                    .scrub(
+                        Object.keys( that._hx.getComponents( type ))
+                    )
+                    .export()
+            );
         },
 
         addXformPod: function( pod ) {
@@ -91,7 +187,7 @@
         },
 
         getCurrentPod: function() {
-            return this._hx.queue.getCurrent();
+            return this._hx.queue.current;
         },
 
         getPodCount: function( type ) {
@@ -108,19 +204,19 @@
 
 
     function beanStart( bean ) {
-        $(this).trigger( 'hx.xformStart' , {
+        /*$(this).trigger( 'hx.xformStart' , {
             type: bean.getData( 'type' ),
             xform: bean.getData( 'xform' ).passed,
             options: bean.getData( 'options' )
-        });
+        });*/
     }
 
 
     function beanComplete( bean ) {
-        $(this).trigger( 'hx.xformComplete' , {
+        /*$(this).trigger( 'hx.xformComplete' , {
             type: bean.getData( 'type' ),
         });
-        bean.getData( 'done' ).call( this );
+        bean.getData( 'done' ).call( this );*/
     }
 
     function clusterComplete( type ) {
@@ -228,7 +324,7 @@
     }
 
 
-    function _extractOperator( exp ) {
+    function _parseExpression( exp ) {
 
         var re = /((\+|\-|\*|\/|\%){1})+\=/;
         var out = {op: null, val: 0};
@@ -250,10 +346,10 @@
     }
 
 
-    $.extend( hx , {domNode: domNode} );
+    $.extend( hx , { DomNode : DomNode });
 
     
-}( window , hxManager , hxManager.config , hxManager.helper , hxManager.get , hxManager.queue ));
+}( window , hxManager , hxManager.Config , hxManager.Helper , hxManager.Get , hxManager.KeyMap , hxManager.Queue ));
 
 
 

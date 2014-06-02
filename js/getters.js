@@ -1,10 +1,10 @@
 (function( window , hx , Config , Helper , VendorPatch , Easing ) {
 
 
-    var get = {};
+    var Get = {};
 
 
-    get.scopedModule = function( module , context ) {
+    Get.scopedModule = function( module , context ) {
 
         var _module = {};
 
@@ -16,8 +16,8 @@
     };
 
 
-    // TODO - implement get.computedMatrix to account for transforms applied in CSS
-    /*get.computedMatrix = function( node ) {
+    // TODO - implement Get.computedMatrix to account for transforms applied in CSS
+    /*Get.computedMatrix = function( node ) {
 
         function _isMatrix( str ) {
             
@@ -52,7 +52,7 @@
                 return {};
             }
             
-            var defaults = get.componentDefaults( type );
+            var defaults = Get.componentDefaults( type );
             var arr = str.replace( /(px|\s|\))/gi , '' ).split( '(' )[1].split( ',' );
 
             arr.map(function( i ) {
@@ -92,7 +92,7 @@
     };*/
 
 
-    get.orderedBundle = function( bundle ) {
+    Get.orderedBundle = function( bundle ) {
 
         var xformSeeds = [];
         var otherSeeds = [];
@@ -111,7 +111,7 @@
     };
 
 
-    get.xformKeys = function( seed ) {
+    /*Get.xformKeys = function( seed ) {
 
         var map = Config.maps.component;
         var order = [];
@@ -177,10 +177,10 @@
     };
 
 
-    get.seedOrder = function( seed ) {
+    Get.seedOrder = function( seed ) {
         var order;
         if (typeof seed.order !== 'undefined' && seed.order !== null) {
-            order = get.mappedOrder( seed );
+            order = Get.mappedOrder( seed );
         }
         else {
             order = Helper.object.getOrder( seed );
@@ -189,7 +189,7 @@
     };
 
 
-    get.mappedOrder = function( seed ) {
+    Get.mappedOrder = function( seed ) {
 
         var ord = [];
         var map = Config.maps.component;
@@ -207,7 +207,7 @@
     };
 
 
-    get.xformOptions = function( options ) {
+    Get.xformOptions = function( options ) {
 
         var _options = {};
         var defaults = Config.hx;
@@ -230,16 +230,16 @@
     };
 
 
-    get.xformDefaults = function( raw ) {
+    Get.xformDefaults = function( raw ) {
         var defs = {};
         Helper.object.each( raw , function( val , key ) {
-            defs[key] = get.componentDefaults( key );
+            defs[key] = Get.componentDefaults( key );
         });
         return defs;
     };
 
 
-    get.rawComponents = function( mapped ) {
+    Get.rawComponents = function( mapped ) {
 
         function _mapVectorToArray( vector ) {
 
@@ -276,7 +276,7 @@
                 }
 
                 var values = _mapVectorToArray( val );
-                var defaults = get.componentDefaults( key );
+                var defaults = Get.componentDefaults( key );
                 components[key] = _checkComponentDefaults( key , values , defaults );
 
             });
@@ -288,7 +288,7 @@
     };
 
 
-    get.updateRules = function( mapped , raw ) {
+    Get.updateRules = function( mapped , raw ) {
 
         var Rules = {};
         var map = Config.maps.array;
@@ -317,10 +317,10 @@
         });
 
         return Rules;
-    };
+    };*/
 
 
-    get.extendedOrder = function( nodeOrder , instOrder ) {
+    /*Get.extendedOrder = function( nodeOrder , instOrder ) {
 
         var order = [];
 
@@ -337,10 +337,10 @@
         });
 
         return order;
-    };
+    };*/
 
 
-    get.xformString = function( property , component , defaults , order ) {
+    /*Get.xformString = function( property , component , defaults , order ) {
 
         function _buildComponentString( component , values ) {
 
@@ -396,7 +396,7 @@
                 if (Config.keys.config.indexOf( key ) < 0) {
 
                     // make sure defaults are defined before comparing
-                    defaults[key] = defaults[key] || get.componentDefaults( key );
+                    defaults[key] = defaults[key] || Get.componentDefaults( key );
 
                     var _component = _checkComponentDefaults( key , component[key] , defaults[key] );
                     var compString = _buildComponentString( key , _component );
@@ -414,7 +414,7 @@
     };
 
 
-    get.componentDefaults = function( type ) {
+    Get.componentDefaults = function( type ) {
 
         var defaults = [];
 
@@ -464,13 +464,13 @@
         }
         
         return newVals;
-    }
+    }*/
 
     
-    $.extend( hx , {get: get} );
+    $.extend( hx , { Get : Get });
 
     
-}( window , hxManager , hxManager.config , hxManager.helper , hxManager.vendorPatch , hxManager.easing ));
+}( window , hxManager , hxManager.Config , hxManager.Helper , hxManager.VendorPatch , hxManager.Easing ));
 
 
 

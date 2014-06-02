@@ -44,7 +44,7 @@
     };
 
     
-    function easing( def ) {
+    function Easing( def ) {
 
         var b;
 
@@ -82,10 +82,10 @@
     }
 
 
-    $.extend( hx , { easing: easing });
+    $.extend( hx , { Easing : Easing });
 
 
-}( window , hxManager , hxManager.vendorPatch ));
+}( window , hxManager , hxManager.VendorPatch ));
 
 
 

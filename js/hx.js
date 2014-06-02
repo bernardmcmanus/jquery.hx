@@ -9,12 +9,14 @@
 
             case 'string':
 
-                var method = Array.prototype.splice.call( arguments , 0 , 1 );
+                var method = Array.prototype.shift.call( arguments );
 
                 try {
                     hxm[method].apply( hxm , arguments );
                 }
-                catch( err ) {}
+                catch( err ) {
+                    throw new TypeError( method + ' is not a function.' );
+                }
 
             break;
 
@@ -25,12 +27,8 @@
                     hxArgs = Get.orderedBundle( hxArgs );
                 }
                 else {
-                    hxArgs = [hxArgs];
+                    hxArgs = [ hxArgs ];
                 }
-
-                hxArgs.forEach(function( a ) {
-                    a.order = Get.seedOrder( a );
-                });
 
                 hxm._addXformPod( hxArgs );
 
@@ -41,7 +39,7 @@
     };
 
  
-}( window , jQuery , hxManager , hxManager.helper , hxManager.get ));
+}( window , jQuery , hxManager , hxManager.Helper , hxManager.Get ));
 
 
 

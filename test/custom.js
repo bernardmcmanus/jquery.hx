@@ -13,12 +13,12 @@
     });*/
 
 
-    var interactionEvent = hxManager.vendorPatch.isMobile ? 'touchstart' : 'click';
+    var interactionEvent = hxManager.VendorPatch.isMobile ? 'touchstart' : 'click';
 
 
     $(document).on( 'ready' , function() {
 
-        $('#target').on( interactionEvent , tests.t11 );
+        $('#target').on( interactionEvent , tests.t12 );
 
         if (interactionEvent === 'touchstart') {
 
@@ -888,6 +888,65 @@
     
             }, 400 );
         },
+
+        // test - gravity easing
+        t12: function() {
+
+            var selector = '.tgt';
+
+            if ($(selector).hasClass( 'clicked-once' )) {
+                $(selector).hx({
+                    type: 'transform',
+                    rotateX: 20,
+                    translate: null,
+                    //translate: {x: 300, y: '+=50'},
+                    order: [ 'rotateX' ]
+                });
+                $(selector).removeClass( 'clicked-once' );
+                return;
+            }
+
+            $(selector)
+            .hx([
+                {
+                    type: 'opacity',
+                    value: 0.5,
+                    duration: 1200,
+                    easing: 'easeInOutBack'
+                },
+                {
+                    type: 'transform',
+                    //matrix: {a2: '-=15'},
+                    translate: {y: 300},
+                    rotateZ: 20,
+                    scale: {x: 0.5, y: 0.5},
+                    //order: [ 'scale' , 'translate' , 'rotateZ' ],
+                    duration: 1200,
+                    easing: 'easeInOutBack'
+                }
+            ])
+            .done(function() {
+                console.log('done!');
+            });
+
+            $(selector).addClass( 'clicked-once' );
+
+            //console.log($(selector).get(0)._hx);
+
+
+            /*var selector = '.tgt';
+
+            $(selector).hx({
+                type: 'transform',
+                translate: {y: $(selector).hasClass( 'fall' ) ? 0 : 600},
+                duration: 1200,
+                easing: $(selector).hasClass( 'fall' ) ? 'gravityUp' : 'gravityDown'
+            })
+            .done(function() {
+                $(this).toggleClass( 'fall' );
+                tests.t12();
+            });*/
+        }
     };
 
 }());

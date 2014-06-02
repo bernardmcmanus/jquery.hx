@@ -1,7 +1,7 @@
 {
     "name": "jquery.hx",
     "description": "Hardware-Accelerated Animation Library",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "author": "Bernard McManus",
     "repository": {
         "type": "git",
