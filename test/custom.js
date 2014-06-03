@@ -897,14 +897,28 @@
             if ($(selector).hasClass( 'clicked-once' )) {
                 $(selector).hx({
                     type: 'transform',
-                    rotateX: 20,
-                    translate: null,
-                    //translate: {x: 300, y: '+=50'},
-                    order: [ 'rotateX' ]
+                    translate: {x: '+=15', y: 0},
+                    rotateX: '+=20'
                 });
                 $(selector).removeClass( 'clicked-once' );
                 return;
             }
+
+            $('.tgt2')
+            .hx( 'defer' )
+            .then(function( resolve , reject ) {
+                //throw new Error( 'whaaaaat' );
+                //reject(0);
+                var stupid;
+                stupid.dumb = 5;
+                console.log('test');
+            })
+            .hx({
+                type: 'transform',
+                rotateZ: 360,
+                duration: 1200,
+                easing: 'easeInOutBack'
+            });
 
             $(selector)
             .hx([
@@ -927,6 +941,7 @@
             ])
             .done(function() {
                 console.log('done!');
+                $('.tgt2').hx( 'resolve' );
             });
 
             $(selector).addClass( 'clicked-once' );

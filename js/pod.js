@@ -1,6 +1,10 @@
 (function( window , hx , Config , Helper , When , VendorPatch ) {
 
 
+    var EACH = Helper.object.each;
+    var ODP = Object.defineProperty;
+
+
     // =========================== pod constructor ========================== //
 
 
@@ -40,13 +44,13 @@
         this.node = node;
         this.beans = {};
         
-        Object.defineProperty( this , 'type' , {
+        ODP( this , 'type' , {
             get: function() {
                 return 'xform';
             }
         });
 
-        Object.defineProperty( this , 'resolved' , {
+        ODP( this , 'resolved' , {
             get: function() {
                 return Helper.object.size( this.beans ) === 0;
             }
@@ -54,23 +58,23 @@
     }
 
 
-    xformPod.prototype = Object.create( When );
+    var xformPod_prototype = (xformPod.prototype = Object.create( When ));
 
 
-    xformPod.prototype.addBean = function( bean ) {
+    xformPod_prototype.addBean = function( bean ) {
         var type = bean.type;
         var cluster = (this.beans[type] = this.beans[type] || []);
         cluster.push( bean );
     };
 
 
-    xformPod.prototype.run = function() {
+    xformPod_prototype.run = function() {
 
         var sequence = getActiveSequence( this.beans );
 
         setTransition( this.node , sequence );
 
-        Helper.object.each( sequence , function( bean , key ) {
+        EACH( sequence , function( bean , key ) {
             
             if (bean.hasAnimator) {
                 return;
@@ -82,7 +86,7 @@
     };
 
 
-    xformPod.prototype._runBean = function( bean ) {
+    xformPod_prototype._runBean = function( bean ) {
 
         bean.setStyleString(
             this.node._hx.updateComponent( bean )
@@ -107,7 +111,7 @@
     };
 
 
-    xformPod.prototype._beanComplete = function( bean ) {
+    xformPod_prototype._beanComplete = function( bean ) {
 
         var type = bean.type;
         var cluster = this.beans[type];
@@ -130,7 +134,7 @@
     };
 
 
-    xformPod.prototype._clusterComplete = function( type ) {
+    xformPod_prototype._clusterComplete = function( type ) {
 
         var sequence = getActiveSequence( this.beans );
         setTransition( this.node , sequence , true );
@@ -145,7 +149,7 @@
     };
 
 
-    xformPod.prototype.resolvePod = function() {
+    xformPod_prototype.resolvePod = function() {
 
         if (!this.resolved) {
             forceResolve( this , this.beans );
@@ -156,11 +160,11 @@
     };
 
 
-    xformPod.prototype.cancel = function() {
+    xformPod_prototype.cancel = function() {
 
         this.happen( 'podCanceled' , [ this ] );
 
-        Helper.object.each( this.beans , function( cluster , key ) {
+        EACH( this.beans , function( cluster , key ) {
             while (cluster.length > 0) {
                 cluster.shift().resolveBean();
             }
@@ -170,7 +174,7 @@
 
     function forceResolve( instance , beans ) {
 
-        Helper.object.each( beans , function( cluster , key ) {
+        EACH( beans , function( cluster , key ) {
             
             var lastBean = cluster.pop();
             delete beans[key];
@@ -216,7 +220,7 @@
 
         var sequence = {};
         
-        Helper.object.each( beans , function( cluster , key ) {
+        EACH( beans , function( cluster , key ) {
             if (cluster.length > 0) {
                 sequence[key] = cluster[0];
             }
@@ -230,7 +234,7 @@
         
         var arr = [];
 
-        Helper.object.each( sequence , function( bean , type ) {
+        EACH( sequence , function( bean , type ) {
 
             var options = bean.options;
             var easing = bean.easing;
@@ -261,7 +265,7 @@
 
 
     function promisePod() {
-        Object.defineProperty( this , 'type' , {
+        ODP( this , 'type' , {
             get: function() {
                 return 'promise';
             }
@@ -269,51 +273,27 @@
     }
 
 
-    promisePod.prototype = Object.create( When );
+    var promisePod_prototype = (promisePod.prototype = Object.create( When ));
 
 
-    promisePod.prototype.run = function() {
+    promisePod_prototype.run = function() {
         this.happen( 'promiseMade' );
     };
 
 
-    promisePod.prototype.resolve = function() {
+    promisePod_prototype.resolvePromise = function() {
         this.happen( 'promiseResolved' );
     };
 
 
-    promisePod.prototype.complete = function() {
+    promisePod_prototype.resolvePod = function() {
         this.happen( 'podComplete' , [ this ] );
     };
 
 
-    promisePod.prototype.cancel = function() {
+    promisePod_prototype.cancel = function() {
         this.happen( 'podCanceled' , [ this ] );
     };
-
-
-    /*promisePod.prototype = {
-
-        run: function() {
-            this.happen( 'promiseMade' );
-        },
-
-        resolve: function() {
-            this.happen( 'promiseResolved' );
-        },
-
-        complete: function() {
-            this.happen( 'podComplete' , [ this ] );
-        },
-
-        cancel: function() {
-            this.happen( 'podCanceled' , [ this ] );
-        },
-
-        getType: function() {
-            return this.type;
-        }
-    };*/
 
 
     // ====================================================================== //

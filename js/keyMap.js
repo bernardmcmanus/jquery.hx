@@ -1,6 +1,10 @@
 (function( window , hx , Helper ) {
 
 
+    var EACH = Helper.object.each;
+    var ODP = Object.defineProperty;
+
+
     function KeyMap() {
 
         if (arguments.length < 1) {
@@ -10,12 +14,12 @@
         var master = Array.prototype.shift.call( arguments );
         var family = Array.isArray( master ) ? 'array' : 'object';
 
-        Helper.object.each( arguments , function( val ) {
+        EACH( arguments , function( val ) {
             val = (val instanceof KeyMap ? val.export() : val);
             master = $.extend( new _empty( family ) , val , master );
         });
 
-        Object.defineProperty( this , 'master' , {
+        ODP( this , 'master' , {
             get: function() {
                 return master;
             },
@@ -24,7 +28,7 @@
             }
         });
 
-        Object.defineProperty( this , 'family' , {
+        ODP( this , 'family' , {
             get: function() {
                 return family;
             },
@@ -36,7 +40,7 @@
             }
         });
 
-        Object.defineProperty( this , 'length' , {
+        ODP( this , 'length' , {
             get: function() {
                 return this.keys().length;
             }
@@ -76,8 +80,8 @@
 
         merge: function() {
 
-            Helper.object.each( arguments , function( extender ) {
-                Helper.object.each( extender , function( val , key ) {
+            EACH( arguments , function( extender ) {
+                EACH( extender , function( val , key ) {
                     this[key] = (typeof this[key] !== 'undefined' ? this[key] : val);
                 } , this );
             } , this );
@@ -222,7 +226,7 @@
         },
 
         each: function( iterator ) {
-            Helper.object.each( this , iterator , this );
+            EACH( this , iterator , this );
             return this;
         },
 
@@ -268,7 +272,7 @@
 
 
     function _export( subject , output ) {
-        Helper.object.each( subject , function( val , key ) {
+        EACH( subject , function( val , key ) {
             output[key] = (val instanceof KeyMap ? val.export() : val);
         });
         return output;
@@ -285,7 +289,7 @@
         if (typeof subject !== 'object') {
             return response;
         }
-        Helper.object.each( subject , function( val ) {
+        EACH( subject , function( val ) {
             if (response) {
                 return;
             }

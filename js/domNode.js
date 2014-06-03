@@ -204,19 +204,19 @@
 
 
     function beanStart( bean ) {
-        /*$(this).trigger( 'hx.xformStart' , {
-            type: bean.getData( 'type' ),
-            xform: bean.getData( 'xform' ).passed,
-            options: bean.getData( 'options' )
-        });*/
+        $(this).trigger( 'hx.xformStart' , {
+            type: bean.type,
+            xform: bean.raw.revert().export(),
+            options: bean.options
+        });
     }
 
 
     function beanComplete( bean ) {
-        /*$(this).trigger( 'hx.xformComplete' , {
-            type: bean.getData( 'type' ),
+        $(this).trigger( 'hx.xformComplete' , {
+            type: bean.type,
         });
-        bean.getData( 'done' ).call( this );*/
+        bean.options.done.call( this );
     }
 
     function clusterComplete( type ) {

@@ -31,24 +31,11 @@
 
     hxManager.prototype._addXformPod = function( bundle ) {
 
-        this.each(function( i ) {
+        var that = this;
 
-            var pod = new hxManager.Pod( this[i] , 'xform' );
+        that.each(function( i ) {
 
-            bundle.forEach(function( seed ) {
-
-                var bean = new hxManager.Bean( seed );
-                pod.addBean( bean );
-
-            });
-
-            this[i]._hx.addXformPod( pod );
-
-        }.bind( this ));
-
-        /*this.each(function( i ) {
-
-            var pod = new hxManager.Pod( this[i] , 'xform' );
+            var pod = new hxManager.Pod( that[i] , 'xform' );
 
             bundle.forEach(function( seed ) {
 
@@ -57,9 +44,8 @@
 
             });
 
-            this[i]._hx.addXformPod( pod );
-
-        }.bind( this ));*/
+            that[i]._hx.addXformPod( pod );
+        });
     };
 
 
@@ -67,18 +53,19 @@
 
         method = method || 'all';
 
+        var that = this;
         var micro = [];
         var pods = [];
-        var _func = func.bind( this );
-        var clear = this.clear.bind( this );
+        var _func = func.bind( that );
+        var clear = that.clear.bind( that );
 
-        this.each(function( i ) {
+        that.each(function( i ) {
 
             // create a promisePod for each dom node
-            var pod = new hxManager.Pod( this[i] , 'promise' );
+            var pod = new hxManager.Pod( that[i] , 'promise' );
 
-            // when the pod reaches its turn in the queue, resolve it
-            pod.when( 'promiseMade' , pod.resolve , pod );
+            // when the pod reaches its turn in the queue, resolve its promise
+            pod.when( 'promiseMade' , pod.resolvePromise , pod );
 
             // create a microPromise for each pod
             var microPromise = new Promise(function( resolve ) {
@@ -87,60 +74,71 @@
             });
 
             // add the promise to the dom node queue
-            this[i]._hx.addPromisePod( pod );
+            that[i]._hx.addPromisePod( pod );
 
             pods.push( pod );
             micro.push( microPromise );
 
-        }.bind( this ));
+        });
 
         // when the appropriate microPromises have been resolved, create the macroPromise
         Promise[ method ]( micro ).then(function() {
 
             var macroPromise = new Promise( _func );
 
-            // if the macroPromise is resolved, complete the pods
+            // if the macroPromise is resolved, resolve the pods
             macroPromise.then(function() {
                 pods.forEach(function( pod ) {
-                    pod.complete();
+                    pod.resolvePod();
                 });
             });
 
             // otherwise, clear the queue so we can start again
-            macroPromise.catch( clear );
+            macroPromise.catch(function( err ) {
+                clear();
+                if (err instanceof Error) {
+                    console.error( err.stack );
+                }
+            });
         });
     };
 
 
     hxManager.prototype.then = function( func ) {
 
+        var that = this;
+
         if (typeof func === 'function') {
-            this._addPromisePod( func );
+            that._addPromisePod( func );
         }
 
-        return this;
+        return that;
     };
 
 
     hxManager.prototype.race = function( func ) {
+
+        var that = this;
         
         if (typeof func === 'function') {
-            this._addPromisePod( func , 'race' );
+            that._addPromisePod( func , 'race' );
         }
 
-        return this;
+        return that;
     };
 
 
     hxManager.prototype.defer = function( time ) {
+
+        var that = this;
         
-        this._addPromisePod(function( resolve , reject ) {
+        that._addPromisePod(function( resolve , reject ) {
             if (typeof time !== 'undefined') {
                 setTimeout( resolve , time );
             }
         });
 
-        return this;
+        return that;
     };
 
 
@@ -148,69 +146,77 @@
 
         // update a node's components without applying the transition
 
+        var that = this;
+
         if (typeof seed === 'object') {
 
             seed = Array.isArray( seed ) ? hxManager.helper.array.last( seed ) : seed;
             seed.order = hxManager.get.seedOrder( seed );
 
-            this.each(function( i ) {
+            that.each(function( i ) {
 
                 var bean = new hxManager.Bean( seed );
-                this[i]._hx.updateComponent( bean );
+                that[i]._hx.updateComponent( bean );
 
-            }.bind( this ));
+            });
         }
 
-        return this;
+        return that;
     };
 
 
     hxManager.prototype.resolve = function( all ) {
 
+        var that = this;
+
         // all controls whether all pod types or only promise pods will be resolved
         all = (typeof all !== 'undefined' ? all : false);
 
         // force resolve the current pod in each queue
-        this.each(function( i ) {
+        that.each(function( i ) {
 
-            var pod = this[i]._hx.getCurrentPod();
+            var pod = that[i]._hx.getCurrentPod();
 
-            if (pod && (all || (!all && pod.getType() === 'promise'))) {
-                pod.complete();
+            if (pod && (all || (!all && pod.type === 'promise'))) {
+                pod.resolvePod();
             }
 
-        }.bind( this ));
+        });
 
-        return this;
+        return that;
     };
 
 
     hxManager.prototype.clear = function() {
+
+        var that = this;
         
         // clear all pods in each queue            
-        this.each(function( i ) {
+        that.each(function( i ) {
 
-            this[i]._hx.clearQueue();
+            that[i]._hx.clearQueue();
 
-        }.bind( this ));
+        });
 
-        return this;
+        return that;
     };
 
 
     hxManager.prototype.break = function() {
+
+        var that = this;
         
         // clear all but the current pod in each queue
-        this.each(function( i ) {
+        that.each(function( i ) {
 
-            this[i]._hx.clearQueue( false );
+            that[i]._hx.clearQueue( false );
 
-        }.bind( this ));
+        });
 
         // resolve any remaining promise pods
-        this.resolve();
+        that.resolve();
 
-        return this;
+        return that;
     };
 
 
@@ -219,32 +225,34 @@
         // duration is intentionally passed as a string to
         // avoid being overridden by vendorPatch.getDuration
 
+        var that = this;
+
         $.extend( hxArgs , {
             duration: '0',
             delay: 0,
             fallback: false
         });
 
-        this.hx( hxArgs ).clear( true );
+        that.hx( hxArgs ).clear( true );
 
-        return this;
+        return that;
     };
 
 
     hxManager.prototype.done = function( func ) {
 
+        var that = this;
+
         if (typeof func !== 'function') {
             return;
         }
-
-        var _func = func.bind( this );
         
         function resolution( resolve , reject ) {
-            _func();
+            func.call( that );
             resolve();
         }
 
-        this._addPromisePod( resolution );
+        that._addPromisePod( resolution );
     };
 
 

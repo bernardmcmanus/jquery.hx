@@ -17,10 +17,6 @@
 
     VendorPatch.prototype = {
 
-        /*getEventType: function() {
-            return Config.events[ this.ua ];
-        },*/
-
         getPrefixed: function( str ) {
 
             if (this.ua === 'other') {

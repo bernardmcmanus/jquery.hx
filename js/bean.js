@@ -1,25 +1,28 @@
 (function( window , hx , Config , Helper , When , Easing , Animator , KeyMap ) {
 
 
+    var ODP = Object.defineProperty;
+
+
     function Bean( seed ) {
 
         if (!seed.type) {
             throw new TypeError( 'Bean type is required.' );
         }
 
-        Object.defineProperty( this , 'hasAnimator' , {
+        ODP( this , 'hasAnimator' , {
             get: function() {
                 return (typeof this.animator !== 'undefined');
             }
         });
 
-        Object.defineProperty( this , 'complete' , {
+        ODP( this , 'complete' , {
             get: function() {
                 return (this.hasAnimator ? !this.animator.running : false);
             }
         });
 
-        Object.defineProperty( this , 'easing' , {
+        ODP( this , 'easing' , {
             get: function() {
                 return Easing( this.options.easing );
             }
@@ -59,22 +62,6 @@
     Bean.prototype.resolveBean = function() {
         if (this.hasAnimator && !this.complete) {
             this.animator.destroy();
-        }
-    };
-
-
-    Bean.prototype.getData = function( property ) {
-
-        switch (property) {
-
-            case 'type':
-                return this.type;
-
-            case 'done':
-                return this.options.done;
-
-            default:
-                return this[property];
         }
     };
 
