@@ -151,7 +151,6 @@
         if (typeof seed === 'object') {
 
             seed = Array.isArray( seed ) ? hxManager.helper.array.last( seed ) : seed;
-            seed.order = hxManager.get.seedOrder( seed );
 
             that.each(function( i ) {
 

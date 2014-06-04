@@ -2,7 +2,7 @@
     "name": "jquery.hx",
     "description": "Hardware-Accelerated Animation Library",
     "version": "1.0.3",
-    "build": "1",
+    "build": "2",
     "author": "Bernard McManus",
     "repository": {
         "type": "git",
@@ -14,6 +14,7 @@
         "grunt-contrib-concat": ">=0.4.0",
         "grunt-contrib-uglify": ">=0.2.2",
         "grunt-contrib-clean": ">=0.4.1",
-        "grunt-replace": ">=0.7.7"
+        "grunt-replace": ">=0.7.7",
+        "grunt-contrib-watch": ">=0.6.1"
     }
 }
