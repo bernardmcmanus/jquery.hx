@@ -3,206 +3,89 @@
 **  http://blackberry.github.io/Alice/
 */
 
-(function( hx ) {
-    var _easing = function( name ) {
-        var type = {
-            linear: {
-                p1: 0.25,
-                p2: 0.25,
-                p3: 0.75,
-                p4: 0.75
-            },
-            ease: {
-                p1: 0.25,
-                p2: 0.1,
-                p3: 0.25,
-                p4: 1
-            },
-            'ease-in': {
-                p1: 0.42,
-                p2: 0,
-                p3: 1,
-                p4: 1
-            },
-            'ease-out': {
-                p1: 0,
-                p2: 0,
-                p3: 0.58,
-                p4: 1
-            },
-            'ease-in-out': {
-                p1: 0.42,
-                p2: 0,
-                p3: 0.58,
-                p4: 1
-            },
-            easeInQuad: {
-                p1: 0.55,
-                p2: 0.085,
-                p3: 0.68,
-                p4: 0.53
-            },
-            easeInCubic: {
-                p1: 0.55,
-                p2: 0.055,
-                p3: 0.675,
-                p4: 0.19
-            },
-            easeInQuart: {
-                p1: 0.895,
-                p2: 0.03,
-                p3: 0.685,
-                p4: 0.22
-            },
-            easeInQuint: {
-                p1: 0.755,
-                p2: 0.05,
-                p3: 0.855,
-                p4: 0.06
-            },
-            easeInSine: {
-                p1: 0.47,
-                p2: 0,
-                p3: 0.745,
-                p4: 0.715
-            },
-            easeInExpo: {
-                p1: 0.95,
-                p2: 0.05,
-                p3: 0.795,
-                p4: 0.035
-            },
-            easeInCirc: {
-                p1: 0.6,
-                p2: 0.04,
-                p3: 0.98,
-                p4: 0.335
-            },
-            easeInBack: {
-                p1: 0.6,
-                p2: -0.28,
-                p3: 0.735,
-                p4: 0.045
-            },
-            easeOutQuad: {
-                p1: 0.25,
-                p2: 0.46,
-                p3: 0.45,
-                p4: 0.94
-            },
-            easeOutCubic: {
-                p1: 0.215,
-                p2: 0.61,
-                p3: 0.355,
-                p4: 1
-            },
-            easeOutQuart: {
-                p1: 0.165,
-                p2: 0.84,
-                p3: 0.44,
-                p4: 1
-            },
-            easeOutQuint: {
-                p1: 0.23,
-                p2: 1,
-                p3: 0.32,
-                p4: 1
-            },
-            easeOutSine: {
-                p1: 0.39,
-                p2: 0.575,
-                p3: 0.565,
-                p4: 1
-            },
-            easeOutExpo: {
-                p1: 0.19,
-                p2: 1,
-                p3: 0.22,
-                p4: 1
-            },
-            easeOutCirc: {
-                p1: 0.075,
-                p2: 0.82,
-                p3: 0.165,
-                p4: 1
-            },
-            easeOutBack: {
-                p1: 0.175,
-                p2: 0.885,
-                p3: 0.32,
-                p4: 1.275
-            },
-            easeInOutQuad: {
-                p1: 0.455,
-                p2: 0.03,
-                p3: 0.515,
-                p4: 0.955
-            },
-            easeInOutCubic: {
-                p1: 0.645,
-                p2: 0.045,
-                p3: 0.355,
-                p4: 1
-            },
-            easeInOutQuart: {
-                p1: 0.77,
-                p2: 0,
-                p3: 0.175,
-                p4: 1
-            },
-            easeInOutQuint: {
-                p1: 0.86,
-                p2: 0,
-                p3: 0.07,
-                p4: 1
-            },
-            easeInOutSine: {
-                p1: 0.445,
-                p2: 0.05,
-                p3: 0.55,
-                p4: 0.95
-            },
-            easeInOutExpo: {
-                p1: 1,
-                p2: 0,
-                p3: 0,
-                p4: 1
-            },
-            easeInOutCirc: {
-                p1: 0.785,
-                p2: 0.135,
-                p3: 0.15,
-                p4: 0.86
-            },
-            easeInOutBack: {
-                p1: 0.68,
-                p2: -0.55,
-                p3: 0.265,
-                p4: 1.55
-            },
-            easeOutBackMod1: {
-                p1: 0.7,
-                p2: -1,
-                p3: 0.5,
-                p4: 2
-            },
-            easeMod1: {
-                p1: 0.25,
-                p2: 0.2,
-                p3: 0.25,
-                p4: 1
-            },
-        };
-        var b = {};
-        if (typeof name === 'object') {
-            b = name;
-        } else {
-            b = type[name] ? type[name] : type.ease;
-        }
-        return 'cubic-bezier(' + b.p1 + ', ' + b.p2 + ', ' + b.p3 + ', ' + b.p4 + ')';
+
+(function( window , hx , VendorPatch ) {
+
+
+    var type = {
+        linear: [ 0.25 , 0.25 , 0.75 , 0.75 ],
+        ease: [ 0.25 , 0.1 , 0.25 , 1 ],
+        'ease-in': [ 0.42 , 0 , 1 , 1 ],
+        'ease-out': [ 0 , 0 , 0.58 , 1 ],
+        'ease-in-out': [ 0.42 , 0 , 0.58 , 1 ],
+        easeInQuad: [ 0.55 , 0.085 , 0.68 , 0.53 ],
+        easeInCubic: [ 0.55 , 0.055 , 0.675 , 0.19 ],
+        easeInQuart: [ 0.895 , 0.03 , 0.685 , 0.22 ],
+        easeInQuint: [ 0.755 , 0.05 , 0.855 , 0.06 ],
+        easeInSine: [ 0.47 , 0 , 0.745 , 0.715 ],
+        easeInExpo: [ 0.95 , 0.05 , 0.795 , 0.035 ],
+        easeInCirc: [ 0.6 , 0.04 , 0.98 , 0.335 ],
+        easeInBack: [ 0.6 , -0.28 , 0.735 , 0.045 ],
+        easeOutQuad: [ 0.25 , 0.46 , 0.45 , 0.94 ],
+        easeOutCubic: [ 0.215 , 0.61 , 0.355 , 1 ],
+        easeOutQuart: [ 0.165 , 0.84 , 0.44 , 1 ],
+        easeOutQuint: [ 0.23 , 1 , 0.32 , 1 ],
+        easeOutSine: [ 0.39 , 0.575 , 0.565 , 1 ],
+        easeOutExpo: [ 0.19 , 1 , 0.22 , 1 ],
+        easeOutCirc: [ 0.075 , 0.82 , 0.165 , 1 ],
+        easeOutBack: [ 0.175 , 0.885 , 0.32 , 1.275 ],
+        easeInOutQuad: [ 0.455 , 0.03 , 0.515 , 0.955 ],
+        easeInOutCubic: [ 0.645 , 0.045 , 0.355 , 1 ],
+        easeInOutQuart: [ 0.77 , 0 , 0.175 , 1 ],
+        easeInOutQuint: [ 0.86 , 0 , 0.07 , 1 ],
+        easeInOutSine: [ 0.445 , 0.05 , 0.55 , 0.95 ],
+        easeInOutExpo: [ 1 , 0 , 0 , 1 ],
+        easeInOutCirc: [ 0.785 , 0.135 , 0.15 , 0.86 ],
+        easeInOutBack: [ 0.68 , -0.55 , 0.265 , 1.55 ],
+        easeOutBackMod1: [ 0.7 , -1 , 0.5 , 2 ],
+        easeMod1: [ 0.25 , 0.2 , 0.25 , 1 ],
+        gravityUp: [ 0.05 , 0.6 , 0.3 , 1 ],
+        gravityDown: [ 0.65 , 0.01 , 0.78 , 0.5 ]
     };
-    $.extend( hx , {_easing: _easing} );
-}( hxManager ));
+
+    
+    function easing( def ) {
+
+        var b;
+
+        if ((/cubic\-bezier\(/).test( def )) {
+            b = parseBezierString( def );
+        }
+        else if (typeof def === 'object') {
+            b = [ def.p1 , def.p2 , def.p3 , def.p4 ];
+        }
+        else {
+            b = type[def] ? type[def] : type.ease;
+        }
+
+        // check unclamped bezier support
+        if (!VendorPatch.getBezierSupport()) {
+            b = getClampedBezier( b );
+        }
+
+        return 'cubic-bezier(' + b.join( ',' ) + ')';
+    }
+
+
+    function parseBezierString( str ) {
+        var arr = str.replace( /(\s|\))/gi , '' ).split( '(' )[1].split( ',' );
+        return arr.map(function( a ) {
+            return parseFloat( a , 10 );
+        });
+    }
+
+
+    function getClampedBezier( arr ) {
+        return arr.map(function( a ) {
+            return (a < 0 ? 0 : (a > 1 ? 1 : a));
+        });
+    }
+
+
+    $.extend( hx , { easing: easing });
+
+
+}( window , hxManager , hxManager.vendorPatch ));
 
 
 

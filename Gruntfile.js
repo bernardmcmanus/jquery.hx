@@ -1,49 +1,81 @@
 module.exports = function( grunt ) {
 
+
     var libs = [
-        'js/native.js',
         'js/hxManager.js',
-        'js/workflow.js',
+        'js/config.js',
+        'js/helper.js',
+        'js/when.js',
         'js/vendorPatch.js',
         'js/easing.js',
+        'js/getters.js',
         'js/animator.js',
-        'js/hx.js'
+        'js/bean.js',
+        'js/pod.js',
+        'js/queue.js',
+        'js/domNode.js',
+        'js/hx.js',
+        'lib/promise-0.1.1.min.js'
     ];
+
 
     grunt.initConfig({
 
-            pkg: grunt.file.readJSON('package.json'),
+        pkg: grunt.file.readJSON('package.json'),
 
-            clean : ["hx-v*"],
+        jshint : {
+            all : [ 'Gruntfile.js' , 'js/*.js' ]
+        },
 
-            uglify : {
-                options : {
-                    banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-                },
-                release : {
-                    files : {
-                        'hx-v<%= pkg.version %>.min.js' : libs
-                    }
-                }
+        clean : [ 'hx-*.js' ],
+
+        concat: {
+            options: {
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
             },
-
-            "git-describe" : {
-                "options" : {
-                    prop : "git-version"
-                }
-            },
-
-            jshint : {
-                all : [ 'Gruntfile.js', 'js/*.js']
+            build: {
+                src: libs,
+                dest: 'hx-<%= pkg.version %>.js'
             }
+        },
 
+        uglify: {
+            options: {
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+            },
+            release : {
+                files : {
+                    'hx-<%= pkg.version %>.min.js' : libs
+                }
+            }
+        }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-clean');
+
+    grunt.loadNpmTasks( 'grunt-contrib-clean' );
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-git-describe');
+    grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 
-    grunt.registerTask('default', ['jshint','git-describe', 'clean', 'uglify']);
 
+    grunt.registerTask( 'default' , [ 'jshint' , 'clean' , 'uglify' ]);
+    grunt.registerTask( 'dev' , [ 'jshint' , 'clean' , 'concat' ]);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

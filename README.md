@@ -1,90 +1,474 @@
-# jQuery.hx
+# jquery.hx
 
 #### A hardware-accelerated animation library for mobile and desktop.
+
+## Contents
+* [__Overview__](#overview)
+* [__The Basics__](#the-basics)
+    * [Beans & Pods](#beans--pods)
+    * [Queueing](#queueing)
+    * [Promises](#promises)
+* [__Animations__](#animations)
+    * [Operators, Values, and Persistent States](#operators-values-and-persistent-states)
+    * [Hardware-Accelerated (3D) Transforms](#hardware-accelerated-3d-transforms)
+    * [Non Hardware-Accelerated (2D) Transforms](#non-hardware-accelerated-2d-transforms)
+    * [Non-Transform Types](#non-transform-types)
+* [__Methods__](#methods)
+    * [Overview](#overview-1)
+    * [Synchronous Methods](#synchronous-methods)
+    * [Asynchronous Methods](#asynchronous-methods)
+* [__Options__](#options)
+    * [General Options](#general-options)
+    * [Transform Options](#transform-options)
+    * [Non-Transform Options](#non-transform-options)
+* [__Troubleshooting__](#troubleshooting)
+    * [Transform Order](#transform-order)
+    * [Queue Jams](#queue-jams)
+* [__Compatibility__](#compatibility)
+* [__Dependencies__](#dependencies)
+* [__Build Instructions__](#build-instructions)
+
 =====
+
+## Overview
+
+hx is a JavaScript animation library that couples the slick animation capabilities of CSS3 with the power and flexibility of JS, making complex animation sequences a breeze. It's written as a jQuery plugin and uses the familiar syntax:
+
+```javascript
+$('selector').hx( arguments );
+```
+
+=====
+
+## The Basics
+
+### Beans & Pods
+
+The hx method accepts a single transformation object, or __bean__:
+
+```javascript
+    $('selector').hx({
+        ...
+    });
+```
+
+as well as an array of beans, or __pod__:
+
+```javascript
+    $('selector').hx([
+        { ... },
+        { ... }
+    ]);
+```
+
+* Pods execute _synchronously_, meaning each pod in the queue will not run until the pod before it has been resolved. A pod will be resolved once all of its beans have been resolved.
+* Beans of the same type execute _synchronously_. Within a pod, each bean<sub>a</sub> will not run until the bean<sub>a</sub> before it has been resolved.
+* Beans of different types execute _asynchronously_. Within a pod, bean<sub>a</sub> and bean<sub>b</sub> can run simultaneously.
+
+It's important to note that passing a transformation to the hx method will always create a pod. In the following snippet, the transform and opacity beans will execute simultaneously because they are in the same pod:
+
+```javascript
+    $('selector').hx([
+        {
+            type: 'transform'
+        },
+        {
+            type: 'opacity'
+        }
+    ]);
+```
+
+However, if we separate the beans into two hx calls, the second pod will not execute until the first pod is resolved:
+
+```javascript
+    $('selector')
+    .hx({
+        type: 'transform'
+    })
+    .hx({
+        type: 'opacity'
+    });
+```
+
+### Queueing
+
+Each time ```$('selector').hx( ... )``` is invoked, a __pod__ is being pushed to a queue for each element returned by ```'selector'```. Each element has its own queue which executes independently. This allows us to do things like:
+
+```javascript
+    $('selector1').hx({
+        ...
+        duration: 400
+    });
+
+    $('selector2').hx({
+        ...
+        duration: 800
+    });
+
+    $('selector3').hx({
+        ...
+        duration: 1200
+    });
+
+    $('selector1, selector2, selector3').hx( 'done' , function() {
+        // this function will be executed after 1200ms
+    });
+```
+
+The following diagram illustrates how the queues for each element in the previous example will be executed. Since we used the selector ```'selector1, selector2, selector3'```, the ```done``` function will not run until all of the associated promise pods have been resolved:
+
+![hx queue](doc/hx_queue.png "hx queue")
+
+1. An animation pod is pushed to each queue.
+2. Promise pods associated with the ```done``` function are pushed to each queue.
+3. As each animation pod finishes running, the promise pod that follows it will be resolved.
+4. Once all of the promise pods have been resolved, the promise function is executed.
+
+### Promises
+
+hx is bundled with the latest promises <a href="http://s3.amazonaws.com/es6-promises/promise-0.1.1.min.js" target="_blank">polyfill</a>, so it will work even in browsers that have not yet implemented promises. If you're not familiar with the concept of promises, you may find these resources helpful:
+* <a href="http://www.html5rocks.com/en/tutorials/es6/promises/" target="_blank">Intro to Promises</a>
+* <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">MDN Promises Documentation</a>
+
+=====
+
+## Animations
+
+### Operators, Values, and Persistent States
+hx supports the use of assignment operators (`+=`, `-=`, `*=`, `/=`, and `%=`) to perform relative changes:
+```javascript
+    $('selector').hx({
+        type: 'transform',
+        rotateZ: '-=1',
+        translate: {y: '+=1'}
+    });
+```
+
+A numeric value represents an absolute transform:
+```javascript
+    $('selector').hx({
+        type: 'transform',
+        translate: {y: 100}
+    });
+```
+
+Information about transforms that have been applied to an element will persist until the property is reset:
+```javascript
+    $('selector').hx({
+        type: 'transform',
+        translate: {x: 50}
+    });
+
+    // some time later...
+
+    $('selector').hx({
+        type: 'transform',
+        translate: {y: 100}
+    });
+
+    // the translate.x component persists
+    // so the element is translated to (50,100)
+```
+
+A property can be reset by setting it to null:
+
+```javascript
+    $('selector').hx({
+        type: 'transform',
+        translate: null
+    });
+
+    // the element is translated to (0,0)
+```
+
+### Hardware-Accelerated (3D) Transforms
+```javascript
+type: 'transform'
+```
+###### translate
+```javascript
+translate: {x: 0, y: 0, z: 0}
+```
+###### scale
+```javascript
+scale: {x: 1, y: 1, z: 1}
+```
+###### rotate
+```javascript
+rotate: {x: 0, y: 0, z: 0, a: 0}
+```
+###### rotateX
+```javascript
+rotateX: 0
+```
+###### rotateY
+```javascript
+rotateY: 0
+```
+###### rotateZ
+```javascript
+rotateZ: 0
+```
+
+### Non Hardware-Accelerated (2D) Transforms
+```javascript
+type: 'transform'
+```
+###### translate2d
+```javascript
+translate2d: {x: 0, y: 0}
+```
+###### scale2d
+```javascript
+scale2d: {x: 0, y: 0}
+```
+
+### Non-Transform Types
+
+Although opacity is the only officially supported non-transform type, hx should handle any transitionable CSS property. The syntax for non-transform CSS properties is shown below.
+
+```javascript
+// numeric values
+type: 'opacity',
+value: 0
+
+// string values
+type: 'background-color',
+value: '#fff'
+```
+
+* __NOTE:__ non-transform properties cannot be hardware-accellerated.
+
+=====
+
+## Methods
 
 ### Overview
-hx is a jQuery plugin which enables you to use the hardware-accelerated transformations baked into CSS3 without any additional code. The plugin is called as follows:
+
+hx methods can be called in two ways:
+* Inline, chained to an hx call, or
+* Standalone, by passing the method name as the first argument of an hx call
+
+The following snippets are functionally equivalent:
+
 ```javascript
-$('selector').hx( 'action' , options );
-```
-To peform multiple transformations simultaneously, the plugin calls can be chained:
-```javascript
-$('selector')
-.hx( 'action1' , options )
-.hx( 'action2' , options );
-```
-The __done__ method provides a means to trigger a callback once all chained animations are complete:
-```javascript
-$('selector')
-.hx( 'action1' , options )
-.hx( 'action2' , options )
+$('selector').hx({
+    ...
+})
 .done(function() {
-    // do stuff here
-});
-```
-=====
-
-### Actions
-
-The following code blocks show the available actions called with their respective default option values.
-
-#### transform
-```javascript
-$('selector').hx( 'transform' , {
-    translate: {x: 0, y: 0, z: 0},
-    scale: {x: 1, y: 1, z: 1},
-    rotate: {x: 0, y: 0, z: 0, a: 0},
-    rotateX: 0,
-    rotateY: 0,
-    rotateZ: 0,
-    duration: 400,
-    easing: 'ease',
-    delay: 0,
-    relative: true
+    // it's done!
 });
 ```
 
-#### fadeIn
 ```javascript
-$('selector').hx( 'fadeIn' , {
-    duration: 400,
-    easing: 'ease',
-    delay: 0
+$('selector').hx({
+    ...
+});
+
+$('selector').hx( 'done' , function() {
+    // it's done!
 });
 ```
 
-#### fadeOut
+### Synchronous Methods
+
+###### hx
+* Applies a transformation if the first argument is an object __(bean)__ or array __(pod)__, or calls another method if the first argument is a string.
+
+###### defer
+* Prevents the queue from executing for a set amount of time, or until `resolve` is called.
+* Optional: `Integer`
+
 ```javascript
-$('selector').hx( 'fadeOut' , {
-    duration: 400,
-    easing: 'ease',
-    delay: 0,
-    pseudoHide: true
+$('selector')
+.hx( 'defer' , 500 )
+.hx({
+    ... // this pod will run after 500ms
+})
+.defer()
+.hx({
+    ... // this pod won't run yet
+});
+
+// some time later...
+$('selector').hx( 'resolve' );
+// now the last pod will run
+```
+
+###### then
+* Required: `Function`
+* `resolve` allows the queue to continue.
+* `reject` stops execution and clears the queue.
+* __NOTE:__ failing to resolve or reject the promise created by `then` will cause a queue jam.
+
+```javascript
+$('selector')
+.hx({
+    ...
+})
+.then(function( resolve , reject ) {
+    if (awesome) {
+        resolve();
+    } else {
+        reject();
+    }
+})
+.hx({
+    ...
+    // this pod runs if the promise is resolved
+    // if the promise is rejected, the queue is cleared
+    // and this pod is not executed
 });
 ```
 
-#### cancel
-Triggering the cancel action will allow an element to finish its current animation frame, but will prevent callbacks from being fired upon completion. Any subsequent frames will not be executed.
+###### race
+* Required: `Function`
+* `resolve` allows the queue to continue.
+* `reject` stops execution and clears the queue.
+* __NOTE:__ failing to resolve or reject the promise created by `race` will cause a queue jam.
+
 ```javascript
-$('selector').hx( 'cancel' );
+$('selector1').hx({
+    ...
+    duration: (1000 * Math.random())
+});
+
+$('selector2').hx({
+    ...
+    duration: (1000 * Math.random())
+});
+
+$('selector1, selector2')
+.hx( 'race' , function( resolve , reject ) {
+    // this function runs when the first
+    // element finishes its animation
+    resolve();
+});
+
+$('selector1').hx({
+    ... // this pod runs when race is resolved
+});
 ```
 
-#### debug
-Turns on debugging output for specified events.
+###### done
+* Required: `Function`
+* `done` performs the same way as `then`, but does not create a promise that needs to be resolved. It is intended for use at the end of an animation chain.
+
 ```javascript
-$('selector').hx( 'debug' , {
-    events: [],
-    log: function( msg ) {
-        console.log( msg );
+$('selector1').hx({
+    ...
+    duration: (1000 * Math.random())
+});
+
+$('selector2').hx({
+    ...
+    duration: (1000 * Math.random())
+});
+
+$('selector1, selector2').hx( 'done' , function() {
+    // it's done!
+});
+```
+
+### Asynchronous Methods
+
+###### clear
+* Clears all pods in the queue.
+
+```javascript
+$('selector').hx( 'clear' );
+```
+
+###### break
+* Clears all but the current pod in the queue.
+
+```javascript
+$('selector').hx( 'break' );
+```
+
+###### update
+* Required: `Object`
+* Updates an element's stored information without applying a transform.
+
+```javascript
+$('selector').hx( 'update' , {
+    type: 'transform',
+    translate: null
+});
+```
+
+###### resolve
+* Optional: `Boolean`
+* Resolves the current promise pod in the queue. If `true` is passed, the current pod will be resolved regardless of whether it is a promise or an animation pod.
+
+```javascript
+$('selector')
+.hx({
+    ... // this pod will be resolved before it is complete
+})
+.hx({
+    ...
+});
+
+// jump to the next animation pod
+$('selector').hx( 'resolve' , true );
+```
+
+###### zero
+* Required: `Object`
+* `zero` should be used to apply multiple transforms in rapid succession (like dragging an element).
+* __NOTE:__ `zero` will apply a single transition, then clear the queue. Don't use zero in combination with any other methods.
+
+```javascript
+$('selector').hx( 'zero' , {
+    translate: {
+        x: ('+=' + delta.x),
+        y: ('+=' + delta.y)
     }
 });
 ```
+
 =====
 
-### Options
+## Options
 
-#### easing
+### General Options
+
+###### type
+The CSS property to be animated, i.e. transform, opacity, etc.
+* `String`
+* __Required__
+* Default: n/a
+
+###### duration
+The transition duration in milliseconds.
+* `Integer`
+* _Optional_
+* Default: 400
+
+###### delay
+The transition delay in milliseconds.
+* `Integer`
+* _Optional_
+* Default: 0
+
+###### fallback
+By default, hx creates a fallback timeout to ensure transition end events are captured and prevent queue jams from occurring. This can be disabled at the bean level by passing `fallback: false`.
+* `Boolean`
+* _Optional_
+* Default: true
+
+###### done
+A callback to be executed upon bean completion.
+* `Function`
+* _Optional_
+* Default: null
+
+###### easing
+The transition easing.
+* `String || Object`
+* _Optional_
+* Default: ease
 
 <table>
     <tr>
@@ -139,228 +523,121 @@ $('selector').hx( 'debug' , {
 
 <sup>*Bezier curves with values above 1 or below 0 are not compatible on all devices. See <a href="https://bugs.webkit.org/show_bug.cgi?id=45761" target="_blank">WebKit Bug 45761</a>.</sup>
 
-Custom easing is passed as an object with four points, p<sub>n</sub>:
+Custom easing can be passed as an object with four points, p<sub>n</sub>, or as a bezier string:
 
 ```javascript
-$('selector').hx( 'transform' , {
+$('selector').hx({
     ...
     easing: {p1: 0.17, p2: 0.67, p3: 0.38, p4: 0.67},
     ...
 });
-```
 
-#### relative
+// -- OR -- //
 
-The relative option controls whether a transformation is applied relative to previous transformations. For example, the following snippet will translate an element 50 pixels to the left every time it is applied:
-```javascript
-$('selector').hx( 'transform' , {
-    translate: {x: 50}
-});
-```
-
-When relative is set to false, the element will always be translated to (50, 0, 0):
-```javascript
-$('selector').hx( 'transform' , {
-    translate: {x: 50},
-    relative: false
-});
-```
-
-#### pseudoHide
-
-The pseudoHide option is necessary for full compatibility in Firefox and the native browser on certain Android devices. When pseudoHide is true, elements that are faded out will be hidden using the opacity and pointer-events properties. In most cases the result is functionaly equivalent to setting display equal to none, but allows for retrieval of the element's computed style.
-
-=====
-
-### Events
-
-#### hx_init
-
-Fires when a new hxManager instance is created.
-
-```javascript
-event.detail: {}
-```
-
-#### hx_setTransition
-
-Fires when transition duration, delay, or easing are updated.
-
-```javascript
-event.detail: {
-    propertyName: String,
-    string: String
-}
-```
-
-#### hx_applyXform
-
-Fires when a new transformation is applied.
-
-```javascript
-event.detail: {
-    propertyName: String,
-    string: String,
-    xform: Object
-}
-```
-
-#### hx_transitionEnd
-
-Fires upon completion of individual transitions.
-
-```javascript
-event.detail: {
-    propertyName: String
-}
-```
-
-#### hx_fallback
-
-Fires when the fallback timeout is triggered.
-
-```javascript
-event.detail: {
-    propertyName: String
-}
-```
-
-#### hx_cancel
-
-Fires when an hxManager instance is canceled.
-
-```javascript
-event.detail: {}
-```
-
-#### hx_done
-
-Fires upon completion of all chained transitions.
-
-```javascript
-event.detail: {}
-```
-
-=====
-
-### Examples
-
-Translate the element 300 pixels along the x axis and 150 along the y.
-```javascript
-$('selector').hx( 'transform' , {
-    translate: {x: 300, y: 150}
-});
-```
-
-Same as above, but this time scale the element by a factor of 1.5 along the x and y axes.
-```javascript
-$('selector').hx( 'transform' , {
-    translate: {x: 300, y: 150},
-    scale: {x: 1.5, y: 1.5}
-});
-```
-
-Next, add a 180-degree rotation about the z axis.
-```javascript
-$('selector').hx( 'transform' , {
-    translate: {x: 300, y: 150},
-    scale: {x: 1.5, y: 1.5},
-    rotate: {z: 1, a: 180}
-});
-```
-
-Now, fade the element out part way through the animation.
-```javascript
-$('selector')
-.hx( 'transform' , {
-    translate: {x: 300, y: 150},
-    scale: {x: 1.5, y: 1.5},
-    rotate: {z: 1, a: 180}
-})
-.hx( 'fadeOut' , {
-    duration: 300,
-    delay: 200
-});
-```
-
-Finally, use the __done__ method to fade the element back in and return it to its original size and position.
-```javascript
-$('selector')
-.hx( 'transform' , {
-    translate: {x: 300, y: 150},
-    scale: {x: 1.5, y: 1.5},
-    rotate: {z: 1, a: 180}
-})
-.hx( 'fadeOut' , {
-    duration: 300,
-    delay: 200
-})
-.done(function() {
-    $(this)
-    .hx( 'fadeIn' )
-    .hx( 'transform' , {
-        relative: false
-    });
-});
-```
-
-=====
-
-### Order Matters!
-
-#### Hidden Elements
-
-In general, you should not apply a transformation to a hidden element without first taking steps to make it visible. For example, if you are chaining transform and fadeIn actions, make sure the fadeIn call is placed _before_ the transform call.
-
-```javascript
-$('selector')
-.hx( 'fadeIn' )
-.hx( 'transform' , {
+$('selector').hx({
+    ...
+    easing: 'cubic-bezier(0.17, 0.67, 0.38, 0.67)',
     ...
 });
 ```
 
-Inversely, if you are chaining transform and fadeOut actions, make sure the fadeOut call is placed _after_ the transform call.
+### Transform Options
+
+###### transforms
+* `Object || Integer || String`
+* __Required__ (one or more)
+* Default: n/a
+
+###### order
+* `Array`
+* _Optional_
+* Default: n/a
+
+### Non-Transform Options
+
+###### value
+* `Integer || String`
+* __Required__
+* Default: n/a
+
+=====
+
+## Troubleshooting
+
+### Transform Order
+
+The order in which transforms are applied will affect the final outcome. The following snippet will actually translate the target by 200 pixels because scale is being applied first.
 
 ```javascript
-$('selector')
-.hx( 'transform' , {
-    ...
-})
-.hx( 'fadeOut' );
+$('selector').hx([
+    {
+        type: 'transform',
+        scale: {x: 2, y: 2}
+    },
+    {
+        type: 'transform',
+        translate: {x: '+=100', y: '+=100'}
+    }
+]);
 ```
 
-#### Transformations
-
-The order in which you apply transformations will affect the final outcome. For instance, the following snippet will translate an element 100 pixels to the right and scale it by a factor of 2 along the x axis.
+To correct this issue, order can be passed as a property of the second bean.
 
 ```javascript
-$('selector').hx( 'transform' , {
-    translate: {x: 100},
-    scale: {x: 2}
-});
+$('selector').hx([
+    {
+        type: 'transform',
+        scale: {x: 2, y: 2}
+    },
+    {
+        type: 'transform',
+        translate: {x: '+=100', y: '+=100'},
+        order: [ 'translate' , 'scale' ]
+    }
+]);
 ```
 
-However if scale is applied first, the element will be translated 200 pixels.
+### Queue Jams
+
+More on this later. In short, queue jams are caused by an unresolved pod in the queue preventing subsequent pods from being executed. To resolve a single pod:
+```javascript
+// resolve the current pod if it's a promise
+$('selector').hx( 'resolve' );
+
+// resolve the current pod if it's a promise or animation pod
+$('selector').hx( 'resolve' , true );
+```
+
+Or, to clear the entire queue:
 
 ```javascript
-$('selector').hx( 'transform' , {
-    scale: {x: 2},
-    translate: {x: 100}
-});
+$('selector').hx( 'clear' );
 ```
 
 =====
 
-### Compatibility
+## Compatibility
 
-jQuery.hx is supported in both mobile and desktop versions of all major browsers including Chrome, Safari, Firefox, Opera, and Internet Explorer 9+.
+hx is supported in both mobile and desktop versions of all major browsers including Chrome, Safari, Firefox, Opera, and Internet Explorer 9+.
 
 =====
 
-### Build Instructions
+## Dependencies
 
-You need NPM installed. Navigate to the git directory and run the following commands:
+hx requires jQuery 1.7.0 or higher.
+
+=====
+
+## Build Instructions
+
+You must have NPM installed to build jquery.hx. To install dependencies, navigate to the git directory and run:
 
     npm install
+
+To build the minified production version, run:
+
     grunt
+
+To build the non-minified development version, run:
+
+    grunt dev

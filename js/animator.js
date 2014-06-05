@@ -1,60 +1,84 @@
-(function( hx ) {
+(function( window , hx , Config , When ) {
 
-    var animator = function( config ) {
+    var animator = function( options ) {
 
-        config = $.extend({
+        options = $.extend({
             timeout: null,
-            buffer: 50
-        }, config);
+            buffer: Config.buffer,
+            running: false
+        }, options );
 
-        $.extend( this , config );
+        $.extend( this , options );
+
+        // create the when module
+        When( this );
+
+        this.listeners = this._getListeners();
     };
 
     animator.prototype = {
+        
         start: function() {
 
-            if (this.fallback === false)
-                return;
+            this.running = true;
 
-            var t = this.duration + this.delay + this.buffer;
-            
-            this.element.addEventListener( this.eventType , this );
-            this.element.addEventListener( 'hx_init' , this );
+            $(this.node).on( this.eventType , this.listeners._transitionEnd );
 
-            var fallback = function() {
-                this.trigger( 'hx_fallback' , this.property );
-                this.trigger( this.eventType , {
-                    propertyName: this.property
-                });
-            }.bind( this );
-
-            this.timeout = setTimeout( fallback , t );
-        },
-        handleEvent: function( e ) {
-            switch (e.type) {
-                case this.eventType:
-                    var name = e.propertyName || e.detail.propertyName;
-                    var re = new RegExp( this.property , 'i' );
-                    if (re.test( name )) {
-                        this.destroy();
-                        this.complete( e , this.property );
-                    }
-                    break;
-                case 'hx_init':
-                    this.cancel();
-                    break;
+            if (this.fallback !== false) {
+                this.timeout = _createFallback( this );
             }
         },
+
+        isRunning: function() {
+            return this.running === true;
+        },
+
+        _getListeners: function() {
+
+            return {
+                _transitionEnd: this._transitionEnd.bind( this )
+            };
+        },
+
+        _transitionEnd: function( e , data ) {
+
+            e.originalEvent = e.originalEvent || {};
+            data = data || {};
+
+            var name = e.originalEvent.propertyName || data.propertyName;
+            var re = new RegExp( this.property , 'i' );
+            
+            if (re.test( name )) {
+                this.destroy();
+                this.happen( 'complete' );
+            }
+        },
+
         destroy: function() {
             clearTimeout( this.timeout );
-            this.element.removeEventListener( this.eventType , this );
-            this.element.removeEventListener( 'hx_init' , this );
+            this.running = false;
+            $(this.node).off( this.eventType , this.listeners._transitionEnd );
         }
     };
 
+
+    function _createFallback( instance ) {
+
+        var t = instance.duration + instance.delay + instance.buffer;
+
+        var fallback = function() {
+            var data = {propertyName: instance.property};
+            $(instance.node).trigger( instance.eventType , data );
+        };
+
+        return setTimeout( fallback , t );
+    }
+
+
     $.extend( hx , {animator: animator} );
+
     
-}( hxManager ));
+}( window , hxManager , hxManager.config.animator , hxManager.when ));
 
 
 
