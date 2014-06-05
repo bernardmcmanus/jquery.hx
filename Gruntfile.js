@@ -97,6 +97,7 @@ module.exports = function( grunt ) {
     ]);
 
     grunt.registerTask( 'debug' , [
+        'dev',
         'watch'
     ]);
 };
