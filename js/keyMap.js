@@ -5,28 +5,27 @@
     var ODP = Object.defineProperty;
 
 
-    function KeyMap() {
+    function KeyMap( master ) {
 
-        if (arguments.length < 1) {
-            throw new Error( 'invalid KeyMap arguments' );
-        }
+        master = (master instanceof KeyMap ? master.export() : master);
 
-        var master = Array.prototype.shift.call( arguments );
         var family = Array.isArray( master ) ? 'array' : 'object';
 
-        EACH( arguments , function( val ) {
-            val = (val instanceof KeyMap ? val.export() : val);
-            master = $.extend( new _empty( family ) , val , master );
-        });
+        //master = $.extend( new _empty( family ) , master );
 
-        ODP( this , 'master' , {
+        // EACH( arguments , function( val ) {
+        //     val = (val instanceof KeyMap ? val.export() : val);
+        //     master = $.extend( new _empty( family ) , val , master );
+        // });
+
+        /*ODP( this , 'master' , {
             get: function() {
                 return master;
             },
             set: function( value ) {
                 master = value;
             }
-        });
+        });*/
 
         ODP( this , 'family' , {
             get: function() {
@@ -58,10 +57,6 @@
 
             this.each(function( val , key ) {
 
-                /*if (typeof val === 'object') {
-                    this[key] = new KeyMap( val );
-                }*/
-
                 if (!(val instanceof KeyMap) && typeof val === 'object') {
                     this[key] = new KeyMap( val );
                 }
@@ -69,10 +64,6 @@
                 if (deep && typeof val === 'object') {
                     this[key].cast( true );
                 }
-
-                /*if (deep && containsType( val , 'object' )) {
-                    this[key].cast( true );
-                }*/
             });
 
             return this;
@@ -182,13 +173,13 @@
         clone: function() {
             return new KeyMap(
                 this.export()
-            )
-            .setMaster(
-                this.getMaster()
             );
+            /*.setMaster(
+                this.getMaster()
+            );*/
         },
 
-        export: function(/* subject */) {
+        export: function() {
 
             var subject = (typeof arguments[0] === 'object' ? arguments[0] : this);
             var as = (arguments.length === 2 ? arguments[1] : (typeof arguments[0] === 'string' ? arguments[0] : this.family));
@@ -197,17 +188,17 @@
             return _export( subject , output );
         },
 
-        setMaster: function( master ) {
+        /*setMaster: function( master ) {
             master = master || this.export();
             this.master = master;
             return this;
-        },
+        },*/
 
-        getMaster: function() {
+        /*getMaster: function() {
             var family = Array.isArray( this.master ) ? 'array' : 'object';
             var output = new _empty( family );
             return _export( this.master , output );
-        },
+        },*/
 
         invert: function() {
             this.each(function( val , key ) {
@@ -218,12 +209,12 @@
             return this;
         },
 
-        revert: function() {
+        /*revert: function() {
             this.wipe();
             $.extend( this , this.getMaster() );
             this._update();
             return this;
-        },
+        },*/
 
         each: function( iterator ) {
             EACH( this , iterator , this );
@@ -282,23 +273,6 @@
     function _empty( family ) {
         return (family === 'array' ? [] : {});
     }
-
-
-    /*function containsType( subject , type ) {
-        var response = false;
-        if (typeof subject !== 'object') {
-            return response;
-        }
-        EACH( subject , function( val ) {
-            if (response) {
-                return;
-            }
-            if (typeof val === 'type') {
-                response = true;
-            }
-        });
-        return response;
-    }*/
 
 
     function clean( keyMap , template , method ) {

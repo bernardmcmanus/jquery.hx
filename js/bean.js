@@ -89,6 +89,7 @@
 
         return {
             type: type,
+            original: seed,
             order: order,
             options: options,
             raw: raw,
@@ -112,31 +113,19 @@
                 keyMap
                     .subtract( Config.keys.options )
                     .unique()
-                    .setMaster()
                     .mapTo( Config.maps.component );
             });
-
-        /*var order = new KeyMap(
-            (seed.order || []).concat( Helper.object.getOrder( seed ))
-        );
-
-        return order
-            .subtract( Config.keys.options )
-            .unique()
-            .setMaster()
-            .mapTo( Config.maps.component );*/
     }
 
 
     function _getOptions( seed ) {
 
-        var options = new KeyMap( seed , Config.defaults.options );
+        var options = $.extend( {} , Config.defaults.options , seed );
 
-        return options
+        return new KeyMap( options )
             .scrub(
                 Object.keys( Config.defaults.options )
-            )
-            .setMaster();
+            );
     }
 
 
@@ -146,7 +135,6 @@
 
         return raw
             .subtract( Config.keys.options )
-            .setMaster()
             .mapTo( Config.maps.component )
             .each(function( val , key ) {
                 if (val === null) {
@@ -169,8 +157,7 @@
             .each(function( val , key ) {
                 defaults[key] = (typeof val === 'object' ? val : [ val ]);
             })
-            .cast()
-            .setMaster();
+            .cast();
     }
 
 
@@ -181,16 +168,13 @@
         return compiled
             .cast()
             .each(function( keyMap , key ) {
-                //if (keyMap instanceof KeyMap) {
-                    var map = Config.maps[ type ] || Config.maps.nonTransform;
-                    keyMap
-                        .mapTo( map[key] || map.other )
-                        .merge(
-                            defaults[key].export()
-                        );
-                //}
-            })
-            .setMaster();
+                var map = Config.maps[ type ] || Config.maps.nonTransform;
+                keyMap
+                    .mapTo( map[key] || map.other )
+                    .merge(
+                        defaults[key].export()
+                    );
+            });
     }
 
 
@@ -199,36 +183,13 @@
         var compareTo = raw.clone()
             .cast()
             .each(function( keyMap , key ) {
-                //if (keyMap instanceof KeyMap) {
-                    //console.log(keyMap);
-                    var map = Config.maps[ type ] || Config.maps.nonTransform;
-                    keyMap.mapTo( map[key] || map.other );
-                //}
+                var map = Config.maps[ type ] || Config.maps.nonTransform;
+                keyMap.mapTo( map[key] || map.other );
             });
-
-        //return compareTo;
-
-        //var rules = compiled.clone();
 
         return compiled.clone()
             .cast()
             .compare( compareTo );
-
-        /*return rules
-            .cast()
-            .each(function( keyMap , key ) {
-                if (keyMap instanceof KeyMap) {
-                    var map = Config.maps[ type ] || Config.maps.nonTransform;
-                    keyMap.mapFrom( map[key] || map.other );
-                }
-            })
-            .compare( raw )
-            .each(function( keyMap , key ) {
-                if (keyMap instanceof KeyMap) {
-                    var map = Config.maps[ type ] || Config.maps.nonTransform;
-                    keyMap.mapTo( map[key] || map.other );
-                }
-            });*/
     }
 
 

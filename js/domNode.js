@@ -195,7 +195,6 @@
         },
 
         cleanup: function() {
-
             Config.removeOnClean.forEach(function( key ) {
                 delete this[key];
             }.bind( this ));
@@ -206,7 +205,7 @@
     function beanStart( bean ) {
         $(this).trigger( 'hx.xformStart' , {
             type: bean.type,
-            xform: bean.raw.revert().export(),
+            xform: bean.original,
             options: bean.options
         });
     }

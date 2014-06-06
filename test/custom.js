@@ -13,35 +13,20 @@
     });*/
 
 
-    var interactionEvent = hxManager.VendorPatch.isMobile ? 'touchstart' : 'click';
-
-
     $(document).on( 'ready' , function() {
 
-        $('#target').on( interactionEvent , tests.t12 );
+        $('#target').on( 'touchstart click' , function( e ) {
+            e.preventDefault();
+            tests.t7();
+        });
 
-        if (interactionEvent === 'touchstart') {
+        $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
+            $(this).addClass( 'indicate' );
+        });
 
-            $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart' , function() {
-                $(this).addClass( 'indicate' );
-            });
-
-            $('#target, .tgt, .tgt2, .tgt3').on( 'touchend' , function() {
-                $(this).removeClass( 'indicate' );
-            });
-        }
-        else {
-
-            $('#target, .tgt, .tgt2, .tgt3').on( 'mousedown' , function() {
-                
-                $(this).addClass( 'indicate' );
-
-                $(window).on( 'mouseup' , function cool() {
-                    $(this).off( 'mouseup' , cool );
-                    $('#target, .tgt, .tgt2, .tgt3').removeClass( 'indicate' );
-                });
-            });
-        }
+        $('#target, .tgt, .tgt2, .tgt3').on( 'touchend mouseup' , function() {
+            $('.indicate').removeClass( 'indicate' );
+        });
     });
 
 
@@ -544,9 +529,9 @@
 
                 $('.tgt, .tgt2, .tgt3')
 
-                .off( interactionEvent , cool )
+                .off( 'touchstart click' , cool )
 
-                .on( interactionEvent , cool )
+                .on( 'touchstart click' , cool )
 
                 .hx({
                     type: 'transform',
@@ -704,6 +689,7 @@
 
             function coolStart( e ) {
 
+                e.preventDefault();
                 e = e.originalEvent;
 
                 reset();
