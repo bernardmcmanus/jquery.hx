@@ -22,7 +22,7 @@ module.exports = function( grunt ) {
 
     grunt.initConfig({
 
-        pkg: grunt.file.readJSON('package.json'),
+        pkg: grunt.file.readJSON( 'package.json' ),
 
         jshint : {
             all : [ 'Gruntfile.js' , 'js/*.js' , 'js/prototypes/*.js' ]
@@ -30,22 +30,50 @@ module.exports = function( grunt ) {
 
         clean : [ 'hx-<%= pkg.version %>-nightly*.js' ],
 
-        replace: [{
-            options: {
-                patterns: [
+        replace: {
+
+            dev: {
+                options: {
+                    patterns: [
+                        {
+                            match : /(\.\.\/hx\-)(.*?)(\.js)/,
+                            replacement : '../hx-<%= pkg.version %>-nightly.js'
+                        }
+                    ]
+                },
+                files: [
                     {
-                        match : /(\.\.\/hx\-)(.*?)(\.js)/,
-                        replacement : '../hx-<%= pkg.version %>-nightly<%= pkg.build %>.js'
+                        src: 'test/index.html',
+                        dest: 'test/index.html'
                     }
                 ]
             },
-            files: [
-                {
-                    src: 'test/index.html',
-                    dest: 'test/index.html'
-                }
-            ]
-        }],
+
+            prod: {
+                options: {
+                    patterns: [
+                        {
+                            match: /(\"version\")(.*?)(\")(.{1,}?)(\")/i,
+                            replacement: '\"version\": \"<%= pkg.version %>\"'
+                        },
+                        {
+                            match: /(\"main\")(.*?)(\")(.{1,}?)(\")/i,
+                            replacement: '\"main\": \"hx-<%= pkg.version %>-nightly.min.js\"'
+                        }
+                    ]
+                },
+                files: [
+                    {
+                        src: 'bower.json',
+                        dest: 'bower.json'
+                    },
+                    {
+                        src: 'bower.json',
+                        dest: 'bower.json'
+                    }
+                ]
+            }
+        },
 
         watch: [{
             files: ([ 'package.json' ]).concat( libs ),
@@ -54,21 +82,21 @@ module.exports = function( grunt ) {
 
         concat: {
             options: {
-                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly build <%= pkg.build %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly build - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
             },
             build: {
                 src: libs,
-                dest: 'hx-<%= pkg.version %>-nightly<%= pkg.build %>.js'
+                dest: 'hx-<%= pkg.version %>-nightly.js'
             }
         },
 
         uglify: {
             options: {
-                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly build <%= pkg.build %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly build - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             release : {
                 files : {
-                    'hx-<%= pkg.version %>-nightly<%= pkg.build %>.min.js' : libs
+                    'hx-<%= pkg.version %>-nightly.min.js' : libs
                 }
             }
         }
@@ -86,13 +114,14 @@ module.exports = function( grunt ) {
     grunt.registerTask( 'default' , [
         'jshint',
         'clean',
+        'replace:prod',
         'uglify'
     ]);
 
     grunt.registerTask( 'dev' , [
         'jshint',
         'clean',
-        'replace',
+        'replace:dev',
         'concat'
     ]);
 
@@ -101,21 +130,3 @@ module.exports = function( grunt ) {
         'watch'
     ]);
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
