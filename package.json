@@ -2,11 +2,10 @@
     "name": "jquery.hx",
     "description": "Hardware-Accelerated Animation Library",
     "version": "1.0.3",
-    "build": "2",
     "author": "Bernard McManus",
     "repository": {
         "type": "git",
-        "url": "https://github.com/elnarddogg/jquery.hx.git"
+        "url": "https://github.com/millennialmedia/jquery.hx"
     },
     "devDependencies": {
         "grunt": "~0.4.2",
