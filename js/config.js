@@ -4,7 +4,7 @@
     var Config = {
         
         keys: {
-            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
+            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'listen' , 'order' ],
             transform: [ 'translate3d' , 'scale3d' , 'translate' , 'scale' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
         },
 
@@ -130,6 +130,7 @@
                 easing: 'ease',
                 delay: 0,
                 fallback: true,
+                listen: true,
                 done: function() {}
             }
         },

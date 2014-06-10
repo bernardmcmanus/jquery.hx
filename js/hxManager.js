@@ -26,10 +26,10 @@
     }
 
 
-    hxManager.prototype = Object.create( jQuery.prototype );
+    var hxManager_prototype = (hxManager.prototype = Object.create( jQuery.prototype ));
 
 
-    hxManager.prototype._addXformPod = function( bundle ) {
+    hxManager_prototype._addXformPod = function( bundle ) {
 
         var that = this;
 
@@ -49,7 +49,7 @@
     };
 
 
-    hxManager.prototype._addPromisePod = function( func , method ) {
+    hxManager_prototype._addPromisePod = function( func , method ) {
 
         method = method || 'all';
 
@@ -104,7 +104,7 @@
     };
 
 
-    hxManager.prototype.then = function( func ) {
+    hxManager_prototype.then = function( func ) {
 
         var that = this;
 
@@ -116,7 +116,7 @@
     };
 
 
-    hxManager.prototype.race = function( func ) {
+    hxManager_prototype.race = function( func ) {
 
         var that = this;
         
@@ -128,7 +128,7 @@
     };
 
 
-    hxManager.prototype.defer = function( time ) {
+    hxManager_prototype.defer = function( time ) {
 
         var that = this;
         
@@ -142,7 +142,7 @@
     };
 
 
-    hxManager.prototype.update = function( seed ) {
+    hxManager_prototype.update = function( seed ) {
 
         // update a node's components without applying the transition
 
@@ -164,7 +164,7 @@
     };
 
 
-    hxManager.prototype.resolve = function( all ) {
+    hxManager_prototype.resolve = function( all ) {
 
         var that = this;
 
@@ -186,7 +186,7 @@
     };
 
 
-    hxManager.prototype.clear = function() {
+    hxManager_prototype.clear = function() {
 
         var that = this;
         
@@ -201,7 +201,7 @@
     };
 
 
-    hxManager.prototype.break = function() {
+    hxManager_prototype.break = function() {
 
         var that = this;
         
@@ -219,7 +219,7 @@
     };
 
 
-    hxManager.prototype.zero = function( hxArgs ) {
+    hxManager_prototype.zero = function( hxArgs ) {
 
         // duration is intentionally passed as a string to
         // avoid being overridden by vendorPatch.getDuration
@@ -238,7 +238,7 @@
     };
 
 
-    hxManager.prototype.done = function( func ) {
+    hxManager_prototype.done = function( func ) {
 
         var that = this;
 
