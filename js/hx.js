@@ -1,9 +1,9 @@
-(function( window , $ , hx , Helper , Get ) {
+(function( $ , hxManager , Helper , Get ) {
 
     
     $.fn.hx = function( hxArgs ) {
 
-        var hxm = new hx( this );
+        var hxm = new hxManager( this );
 
         switch (typeof hxArgs) {
 
@@ -11,18 +11,17 @@
 
                 var method = Array.prototype.shift.call( arguments );
 
-                try {
-                    hxm[method].apply( hxm , arguments );
-                }
-                catch( err ) {
+                if (typeof hxm[method] !== 'function') {
                     throw new TypeError( method + ' is not a function.' );
                 }
+
+                hxm[method].apply( hxm , arguments );
 
             break;
 
             case 'object':
 
-                if (Array.isArray( hxArgs )) {
+                if (hxArgs instanceof Array) {
                     // make sure transform seeds are placed first in the bundle
                     hxArgs = Get.orderedBundle( hxArgs );
                 }
@@ -39,7 +38,7 @@
     };
 
  
-}( window , jQuery , hxManager , hxManager.Helper , hxManager.Get ));
+}( jQuery , hxManager , hxManager.Helper , hxManager.Get ));
 
 
 

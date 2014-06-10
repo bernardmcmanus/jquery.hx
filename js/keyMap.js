@@ -1,8 +1,8 @@
-(function( window , hx , Helper ) {
+hxManager.KeyMap = (function( Helper ) {
 
 
     var EACH = Helper.object.each;
-    var ODP = Object.defineProperty;
+    var Object_defineProperty = Object.defineProperty;
 
 
     function KeyMap( master ) {
@@ -18,7 +18,7 @@
         //     master = $.extend( new _empty( family ) , val , master );
         // });
 
-        /*ODP( this , 'master' , {
+        /*Object_defineProperty( this , 'master' , {
             get: function() {
                 return master;
             },
@@ -27,7 +27,7 @@
             }
         });*/
 
-        ODP( this , 'family' , {
+        Object_defineProperty( this , 'family' , {
             get: function() {
                 return family;
             },
@@ -39,7 +39,7 @@
             }
         });
 
-        ODP( this , 'length' , {
+        Object_defineProperty( this , 'length' , {
             get: function() {
                 return this.keys().length;
             }
@@ -352,10 +352,10 @@
     }
 
 
-    $.extend( hx , { KeyMap : KeyMap });
+    return KeyMap;
 
     
-}( window , hxManager , hxManager.Helper ));
+}( hxManager.Helper ));
 
 
 

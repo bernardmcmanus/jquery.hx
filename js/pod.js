@@ -1,8 +1,8 @@
-(function( window , hx , Config , Helper , When , VendorPatch ) {
+hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
 
 
     var EACH = Helper.object.each;
-    var ODP = Object.defineProperty;
+    var Object_defineProperty = Object.defineProperty;
 
 
     // =========================== pod constructor ========================== //
@@ -44,13 +44,13 @@
         this.node = node;
         this.beans = {};
         
-        ODP( this , 'type' , {
+        Object_defineProperty( this , 'type' , {
             get: function() {
                 return 'xform';
             }
         });
 
-        ODP( this , 'resolved' , {
+        Object_defineProperty( this , 'resolved' , {
             get: function() {
                 return Helper.object.size( this.beans ) === 0;
             }
@@ -265,7 +265,7 @@
 
 
     function promisePod() {
-        ODP( this , 'type' , {
+        Object_defineProperty( this , 'type' , {
             get: function() {
                 return 'promise';
             }
@@ -299,10 +299,10 @@
     // ====================================================================== //
 
 
-    $.extend( hx , { Pod : Pod });
+    return Pod;
 
     
-}( window , hxManager , hxManager.Config.Pod , hxManager.Helper , hxManager.When , hxManager.VendorPatch ));
+}( hxManager.Config.Pod , hxManager.Helper , hxManager.When , hxManager.VendorPatch ));
 
 
 

@@ -4,7 +4,7 @@
 */
 
 
-(function( window , hx , VendorPatch ) {
+hxManager.Easing = (function( VendorPatch ) {
 
 
     var type = {
@@ -82,10 +82,10 @@
     }
 
 
-    $.extend( hx , { Easing : Easing });
+    return Easing;
 
 
-}( window , hxManager , hxManager.VendorPatch ));
+}( hxManager.VendorPatch ));
 
 
 

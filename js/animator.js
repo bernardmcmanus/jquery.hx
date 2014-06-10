@@ -1,58 +1,85 @@
-(function( window , hx , Config , When ) {
+hxManager.Animator = (function( Config , When ) {
+
 
     function Animator( options ) {
 
-        $.extend( this , Config , options );
-        this.listeners = this._getListeners();
+        var that = this;
 
-        Object.defineProperty( this , 'running' , {
+        $.extend( that , Config , options );
+        //this.listeners = this._getListeners();
+
+        that.transitionEnd = that._transitionEnd.bind( that );
+
+        Object.defineProperty( that , 'running' , {
             get: function() {
-                return this.timeout !== null;
+                return that.timeout !== null;
             }
         });
     }
 
 
-    Animator.prototype = Object.create( When );
+    var Animator_prototype = (Animator.prototype = Object.create( When ));
 
 
-    Animator.prototype.start = function() {
-        $(this.node).on( this.eventType , this.listeners._transitionEnd );
-        this.timeout = (this.fallback !== false ? _createFallback( this ) : 1);
+    Animator_prototype.start = function() {
+
+        var that = this;
+
+        $(that.node).on( that.eventType , that.transitionEnd );
+
+        that.timeout = (function() {
+            if (that.fallback === false) {
+                return 1;
+            }
+            else {
+                var t = that.duration + that.delay + that.buffer;
+                return setTimeout( fallback , t );
+            }
+        }());
+
+        function fallback() {
+            var data = {propertyName: that.property};
+            $(that.node).trigger( that.eventType , data );
+        }
     };
 
 
-    Animator.prototype._getListeners = function() {
+    /*Animator_prototype._getListeners = function() {
 
         return {
             _transitionEnd: this._transitionEnd.bind( this )
         };
-    };
+    };*/
 
 
-    Animator.prototype._transitionEnd = function( e , data ) {
+    Animator_prototype._transitionEnd = function( e , data ) {
+
+        var that = this;
 
         e.originalEvent = e.originalEvent || {};
         data = data || {};
 
         var name = e.originalEvent.propertyName || data.propertyName;
-        var re = new RegExp( this.property , 'i' );
+        var re = new RegExp( that.property , 'i' );
         
         if (re.test( name )) {
-            this.destroy();
-            this.happen( 'complete' );
+            that.destroy();
+            that.happen( 'complete' );
         }
     };
 
 
-    Animator.prototype.destroy = function() {
-        clearTimeout( this.timeout );
-        this.timeout = null;
-        $(this.node).off( this.eventType , this.listeners._transitionEnd );
+    Animator_prototype.destroy = function() {
+        
+        var that = this;
+
+        clearTimeout( that.timeout );
+        that.timeout = null;
+        $(that.node).off( that.eventType , that.transitionEnd );
     };
 
 
-    function _createFallback( instance ) {
+    /*function _createFallback( instance ) {
 
         var t = instance.duration + instance.delay + instance.buffer;
 
@@ -62,13 +89,13 @@
         };
 
         return setTimeout( fallback , t );
-    }
+    }*/
 
 
-    $.extend( hx , { Animator : Animator });
+    return Animator;
 
     
-}( window , hxManager , hxManager.Config.Animator , hxManager.When ));
+}( hxManager.Config.Animator , hxManager.When ));
 
 
 

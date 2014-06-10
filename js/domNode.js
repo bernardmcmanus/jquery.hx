@@ -1,4 +1,4 @@
-(function( window , hx , Config , Helper , Get , KeyMap , Queue ) {
+hxManager.DomNode = (function( Config , Helper , Get , KeyMap , Queue ) {
 
     
     function DomNode( element ) {
@@ -345,10 +345,10 @@
     }
 
 
-    $.extend( hx , { DomNode : DomNode });
+    return DomNode;
 
     
-}( window , hxManager , hxManager.Config , hxManager.Helper , hxManager.Get , hxManager.KeyMap , hxManager.Queue ));
+}( hxManager.Config , hxManager.Helper , hxManager.Get , hxManager.KeyMap , hxManager.Queue ));
 
 
 

@@ -17,7 +17,7 @@
 
         $('#target').on( 'touchstart click' , function( e ) {
             e.preventDefault();
-            tests.t7();
+            tests.t3.s3();
         });
 
         $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
@@ -503,7 +503,7 @@
                     }
                 })
 
-                .hx( 'race' , function( resolve , reject ) {
+                .hx( 'race' , function( resolve ) {
                     $(this).hx( 'resolve' , true );
                     resolve();
                 })

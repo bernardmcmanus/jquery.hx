@@ -1,15 +1,18 @@
-(function( window , hx ) {
+hxManager.Queue = (function() {
+
+
+    var Object_defineProperty = Object.defineProperty;
 
 
     function Queue() {
 
-        Object.defineProperty( this , 'current' , {
+        Object_defineProperty( this , 'current' , {
             get: function() {
                 return this[0] || false;
             }
         });
 
-        Object.defineProperty( this , 'complete' , {
+        Object_defineProperty( this , 'complete' , {
             get: function() {
                 return this.length === 0;
             }
@@ -17,10 +20,10 @@
     }
 
 
-    Queue.prototype = Object.create( Array.prototype );
+    var Queue_prototype = (Queue.prototype = Object.create( Array.prototype ));
 
 
-    Queue.prototype.pushPod = function( pod ) {
+    Queue_prototype.pushPod = function( pod ) {
 
         this.push( pod );
 
@@ -30,7 +33,7 @@
     };
 
 
-    Queue.prototype.next = function() {
+    Queue_prototype.next = function() {
 
         this.shift();
 
@@ -43,7 +46,7 @@
     };
 
 
-    Queue.prototype.clear = function( all ) {
+    Queue_prototype.clear = function( all ) {
 
         // all controls whether all pods or all but the current pod will be cleared
         all = (typeof all !== 'undefined' ? all : true);
@@ -54,12 +57,12 @@
     };
 
 
-    Queue.prototype.getPodCount = function( type ) {
+    Queue_prototype.getPodCount = function( type ) {
 
         var count = 0;
 
         this.forEach(function( pod ) {
-            if (!type || pod.getType() === type) {
+            if (!type || pod.type === type) {
                 count++;
             }
         });
@@ -68,10 +71,10 @@
     };
 
 
-    $.extend( hx , { Queue : Queue });
+    return Queue;
 
     
-}( window , hxManager ));
+}());
 
 
 

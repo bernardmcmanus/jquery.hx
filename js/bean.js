@@ -1,4 +1,4 @@
-(function( window , hx , Config , Helper , When , Easing , Animator , KeyMap ) {
+hxManager.Bean = (function( Config , Helper , When , Easing , Animator , KeyMap ) {
 
 
     var ODP = Object.defineProperty;
@@ -32,15 +32,15 @@
     }
 
 
-    Bean.prototype = Object.create( When );
+    var Bean_prototype = (Bean.prototype = Object.create( When ));
 
 
-    Bean.prototype.setStyleString = function( str ) {
+    Bean_prototype.setStyleString = function( str ) {
         this.styleString = str;
     };
 
 
-    Bean.prototype.createAnimator = function( options ) {
+    Bean_prototype.createAnimator = function( options ) {
 
         if (!this.hasAnimator) {
             
@@ -52,14 +52,14 @@
     };
 
 
-    Bean.prototype.startAnimator = function() {
+    Bean_prototype.startAnimator = function() {
         if (this.hasAnimator && !this.animator.running) {
             this.animator.start();
         }
     };
 
 
-    Bean.prototype.resolveBean = function() {
+    Bean_prototype.resolveBean = function() {
         if (this.hasAnimator && !this.complete) {
             this.animator.destroy();
         }
@@ -193,10 +193,10 @@
     }
 
 
-    $.extend( hx , { Bean : Bean });
+    return Bean;
 
     
-}( window , hxManager , hxManager.Config , hxManager.Helper , hxManager.When , hxManager.Easing , hxManager.Animator , hxManager.KeyMap ));
+}( hxManager.Config , hxManager.Helper , hxManager.When , hxManager.Easing , hxManager.Animator , hxManager.KeyMap ));
 
 
 

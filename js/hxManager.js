@@ -229,7 +229,8 @@
         $.extend( hxArgs , {
             duration: '0',
             delay: 0,
-            fallback: false
+            fallback: false,
+            listen: false
         });
 
         that.hx( hxArgs ).clear( true );

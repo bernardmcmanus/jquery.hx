@@ -68,7 +68,7 @@ module.exports = function( grunt ) {
                         },
                         {
                             match: /(\"main\")(.*?)(\")(.{1,}?)(\")/i,
-                            replacement: '\"main\": \"mojo-<%= pkg.version %>.min.js\"'
+                            replacement: '\"main\": \"hx-<%= pkg.version %>.min.js\"'
                         }
                     ]
                 },

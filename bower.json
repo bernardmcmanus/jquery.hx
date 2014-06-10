@@ -5,8 +5,8 @@
     "authors": [
         "Bernard McManus"
     ],
-    "description": "A hardware-accelerated animation library for mobile and desktop.",
-    "main": "hx-1.0.3-nightly.min.js",
+    "description": "Hardware-Accelerated Animation Library",
+    "main": "hx-1.0.3.min.js",
     "keywords": [
         "jquery",
         "animation"
