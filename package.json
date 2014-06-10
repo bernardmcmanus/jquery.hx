@@ -5,7 +5,7 @@
     "author": "Bernard McManus",
     "repository": {
         "type": "git",
-        "url": "https://github.com/elnarddogg/jquery.hx.git"
+        "url": "https://github.com/millennialmedia/jquery.hx"
     },
     "devDependencies": {
         "grunt": "~0.4.2",

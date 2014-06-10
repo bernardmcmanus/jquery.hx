@@ -1,0 +1,22 @@
+{
+    "name": "jquery.hx",
+    "version": "1.0.3",
+    "homepage": "https://github.com/millennialmedia/jquery.hx",
+    "authors": [
+        "Bernard McManus"
+    ],
+    "description": "A hardware-accelerated animation library for mobile and desktop.",
+    "main": "hx-1.0.3-nightly.min.js",
+    "keywords": [
+        "jquery",
+        "animation"
+    ],
+    "license": "MIT",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ]
+}
