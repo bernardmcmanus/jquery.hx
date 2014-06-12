@@ -1,4 +1,4 @@
-(function( window , hx , Config ) {
+hxManager.VendorPatch = (function( Config ) {
 
 
     function VendorPatch() {
@@ -91,10 +91,10 @@
     }
 
 
-    $.extend( hx , { VendorPatch : new VendorPatch() });
+    return new VendorPatch();
 
     
-}( window , hxManager , hxManager.Config.VendorPatch ));
+}( hxManager.Config.VendorPatch ));
 
 
 

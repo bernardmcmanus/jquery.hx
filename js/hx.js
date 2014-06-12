@@ -1,4 +1,4 @@
-(function( $ , hxManager , Helper , Get ) {
+(function( $ , hxManager ) {
 
     
     $.fn.hx = function( hxArgs ) {
@@ -9,13 +9,14 @@
 
             case 'string':
 
-                var method = Array.prototype.shift.call( arguments );
+                var args = $.extend( [] , arguments );
+                var method = args.shift();
 
                 if (typeof hxm[method] !== 'function') {
                     throw new TypeError( method + ' is not a function.' );
                 }
 
-                hxm[method].apply( hxm , arguments );
+                hxm[method].apply( hxm , args );
 
             break;
 
@@ -23,7 +24,9 @@
 
                 if (hxArgs instanceof Array) {
                     // make sure transform seeds are placed first in the bundle
-                    hxArgs = Get.orderedBundle( hxArgs );
+                    hxArgs = hxArgs.sort(function( seed ) {
+                        return seed.type === 'transform' ? -1 : 1;
+                    });
                 }
                 else {
                     hxArgs = [ hxArgs ];
@@ -38,7 +41,7 @@
     };
 
  
-}( jQuery , hxManager , hxManager.Helper , hxManager.Get ));
+}( jQuery , hxManager ));
 
 
 

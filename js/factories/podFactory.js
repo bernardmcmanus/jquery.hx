@@ -1,38 +1,20 @@
-hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
+hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
 
     var EACH = Helper.object.each;
     var Object_defineProperty = Object.defineProperty;
 
 
-    // =========================== pod constructor ========================== //
-
-
-    function Pod( node , type ) {
-
-        if (!isValidType( type )) {
-            throw new TypeError( 'Invalid pod type' );
-        }
-
-        var _pod = null;
+    function PodFactory( node , type ) {
 
         switch (type) {
 
             case 'xform':
-                _pod = new xformPod( node );
-                break;
+                return new xformPod( node );
 
             case 'promise':
-                _pod = new promisePod();
-                break;
+                return new promisePod();
         }
-
-        return _pod;
-    }
-
-
-    function isValidType( type ) {
-        return (typeof type === 'string' && Config.types.indexOf( type ) >= 0);
     }
 
 
@@ -41,24 +23,33 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
 
     function xformPod( node ) {
 
-        this.node = node;
-        this.beans = {};
+        var that = this;
+        var handlers = {};
+
+        that.node = node;
+        that.beans = {};
+
+        Object_defineProperty( that , 'handlers' , {
+            get: function() {
+                return handlers;
+            }
+        });
         
-        Object_defineProperty( this , 'type' , {
+        Object_defineProperty( that , 'type' , {
             get: function() {
                 return 'xform';
             }
         });
 
-        Object_defineProperty( this , 'resolved' , {
+        Object_defineProperty( that , 'resolved' , {
             get: function() {
-                return Helper.object.size( this.beans ) === 0;
+                return Helper.object.size( that.beans ) === 0;
             }
         });
     }
 
 
-    var xformPod_prototype = (xformPod.prototype = Object.create( When ));
+    var xformPod_prototype = (xformPod.prototype = new MOJO());
 
 
     xformPod_prototype.addBean = function( bean ) {
@@ -88,26 +79,36 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
 
     xformPod_prototype._runBean = function( bean ) {
 
+        var that = this;
+
         bean.setStyleString(
-            this.node._hx.updateComponent( bean )
+            that.node._hx.updateComponent( bean )
         );
 
-        var options = {
-            node: this.node,
-            property: bean.type,
-            eventType: VendorPatch.eventType,
-        };
+        if (bean.options.listen) {
 
-        bean.createAnimator( options );
-        bean.when( 'complete' , this._beanComplete , this );
+            var options = {
+                node: that.node,
+                property: bean.type,
+                eventType: VendorPatch.eventType,
+            };
 
-        // check the hx_display code and correct style.display if needed
-        this.node._hx.checkDisplayState();
+            bean.createAnimator( options );
+            bean.when( 'beanComplete' , function( e , bean ) {
+                that._beanComplete( bean );
+            });
 
-        applyXform( this.node , bean );
-        bean.startAnimator();
+            applyXform( that.node , bean );
+            bean.startAnimator();
 
-        this.happen( 'beanStart' , [ bean ] );
+            that.happen( 'beanStart' , bean );
+        }
+        else {
+            // handle zero-duration
+            applyXform( that.node , bean );
+            that.happen( 'beanStart' , bean );
+            that._beanComplete( bean );
+        }
     };
 
 
@@ -116,12 +117,12 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
         var type = bean.type;
         var cluster = this.beans[type];
 
-        this.happen( 'beanComplete' , [ bean ] );
+        this.happen( 'beanComplete' , bean );
 
         // if cluster is undefined, the pod must have been force-completed
-        if (!cluster) {
+        /*if (!cluster) {
             return;
-        }
+        }*/
 
         cluster.shift();
 
@@ -141,7 +142,7 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
 
         delete this.beans[type];
 
-        this.happen( 'clusterComplete' , [ type ] );
+        this.happen( 'clusterComplete' , type );
 
         if (this.resolved) {
             this.resolvePod();
@@ -155,14 +156,14 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
             forceResolve( this , this.beans );
         }
         else {
-            this.happen( 'podComplete' , [ this ] );
+            this.happen( 'podComplete' , this );
         }
     };
 
 
     xformPod_prototype.cancel = function() {
 
-        this.happen( 'podCanceled' , [ this ] );
+        this.happen( 'podCanceled' , this );
 
         EACH( this.beans , function( cluster , key ) {
             while (cluster.length > 0) {
@@ -181,12 +182,12 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
 
             lastBean.resolveBean();
 
-            instance.happen( 'beanComplete' , [ lastBean ] );
-            instance.happen( 'clusterComplete' , [ lastBean.type ] );
+            instance.happen( 'beanComplete' , lastBean );
+            instance.happen( 'clusterComplete' , lastBean.type );
 
         });
 
-        instance.happen( 'podComplete' , [ instance ] );
+        instance.happen( 'podComplete' , instance );
 
         // if this is the last xform pod in the queue, reset the transition
         if (!instance.node._hx.getPodCount( 'xform' )) {
@@ -265,7 +266,17 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
 
 
     function promisePod() {
-        Object_defineProperty( this , 'type' , {
+
+        var that = this;
+        var handlers = {};
+
+        Object_defineProperty( that , 'handlers' , {
+            get: function() {
+                return handlers;
+            }
+        });
+
+        Object_defineProperty( that , 'type' , {
             get: function() {
                 return 'promise';
             }
@@ -273,7 +284,7 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
     }
 
 
-    var promisePod_prototype = (promisePod.prototype = Object.create( When ));
+    var promisePod_prototype = (promisePod.prototype = new MOJO());
 
 
     promisePod_prototype.run = function() {
@@ -287,22 +298,24 @@ hxManager.Pod = (function( Config , Helper , When , VendorPatch ) {
 
 
     promisePod_prototype.resolvePod = function() {
-        this.happen( 'podComplete' , [ this ] );
+        var that = this;
+        that.happen( 'podComplete' , that );
     };
 
 
     promisePod_prototype.cancel = function() {
-        this.happen( 'podCanceled' , [ this ] );
+        var that = this;
+        that.happen( 'podCanceled' , that );
     };
 
 
     // ====================================================================== //
 
 
-    return Pod;
+    return PodFactory;
 
     
-}( hxManager.Config.Pod , hxManager.Helper , hxManager.When , hxManager.VendorPatch ));
+}( hxManager.Helper , hxManager.VendorPatch ));
 
 
 

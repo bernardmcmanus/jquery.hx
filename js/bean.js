@@ -1,7 +1,7 @@
-hxManager.Bean = (function( Config , Helper , When , Easing , Animator , KeyMap ) {
+hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
 
-    var ODP = Object.defineProperty;
+    var Object_defineProperty = Object.defineProperty;
 
 
     function Bean( seed ) {
@@ -10,29 +10,38 @@ hxManager.Bean = (function( Config , Helper , When , Easing , Animator , KeyMap 
             throw new TypeError( 'Bean type is required.' );
         }
 
-        ODP( this , 'hasAnimator' , {
+        var that = this;
+        var handlers = {};
+
+        Object_defineProperty( that , 'handlers' , {
             get: function() {
-                return (typeof this.animator !== 'undefined');
+                return handlers;
             }
         });
 
-        ODP( this , 'complete' , {
+        Object_defineProperty( that , 'hasAnimator' , {
             get: function() {
-                return (this.hasAnimator ? !this.animator.running : false);
+                return (typeof that.animator !== 'undefined');
             }
         });
 
-        ODP( this , 'easing' , {
+        Object_defineProperty( that , 'complete' , {
             get: function() {
-                return Easing( this.options.easing );
+                return (that.hasAnimator ? !that.animator.running : false);
             }
         });
 
-        $.extend( this , getCompiledData( seed ));
+        Object_defineProperty( that , 'easing' , {
+            get: function() {
+                return Easing( that.options.easing );
+            }
+        });
+
+        $.extend( that , getCompiledData( seed ));
     }
 
 
-    var Bean_prototype = (Bean.prototype = Object.create( When ));
+    var Bean_prototype = (Bean.prototype = new MOJO());
 
 
     Bean_prototype.setStyleString = function( str ) {
@@ -42,12 +51,16 @@ hxManager.Bean = (function( Config , Helper , When , Easing , Animator , KeyMap 
 
     Bean_prototype.createAnimator = function( options ) {
 
-        if (!this.hasAnimator) {
-            
-            $.extend( options , this.options.export() );
-            this.animator = new Animator( options );
+        var that = this;
 
-            this.animator.when( 'complete' , onComplete , this );
+        if (!that.hasAnimator) {
+            
+            $.extend( options , that.options );
+            that.animator = new Animator( options );
+
+            that.animator.when( 'animatorComplete' , function( e ) {
+                that.happen( 'beanComplete' , that );
+            });
         }
     };
 
@@ -66,11 +79,6 @@ hxManager.Bean = (function( Config , Helper , When , Easing , Animator , KeyMap 
     };
 
 
-    function onComplete() {
-        this.happen( 'complete' , [ this ] );
-    }
-
-
     function getCompiledData( seed ) {
 
         var type = seed.type;
@@ -79,7 +87,7 @@ hxManager.Bean = (function( Config , Helper , When , Easing , Animator , KeyMap 
 
         var options = _getOptions( seed );
 
-        var defaults = _getDefaults( type , order );
+        var defaults = Config.getDefaults( type , order.computed );
 
         var raw = _getRaw( seed , defaults );
 
@@ -102,101 +110,172 @@ hxManager.Bean = (function( Config , Helper , When , Easing , Animator , KeyMap 
 
     function _getOrder( seed ) {
 
-        var order = new KeyMap({
-            passed: (seed.order || []),
-            computed: Helper.object.getOrder( seed )
-        });
-
-        return order
-            .cast()
-            .each(function( keyMap , key ) {
-                keyMap
-                    .subtract( Config.keys.options )
-                    .unique()
-                    .mapTo( Config.maps.component );
+        var passed = (seed.order || [])
+            .map(function( key ) {
+                return Config.maps.component[key] || key;
             });
+
+        var computed = Object.keys( seed )
+            .filter(function( key , i ) {
+                return Config.keys.options.indexOf( key ) < 0;
+            })
+            .map(function( key ) {
+                return Config.maps.component[key] || key;
+            });
+
+        return {
+            passed: passed,
+            computed: computed
+        };
     }
 
 
     function _getOptions( seed ) {
 
-        var options = $.extend( {} , Config.defaults.options , seed );
+        var defaults = Config.defaults.options;
+        var options = $.extend( {} , defaults , seed );
 
-        return new KeyMap( options )
-            .scrub(
-                Object.keys( Config.defaults.options )
-            );
+        for (var key in options) {
+            if (!defaults.hasOwnProperty( key )) {
+                delete options[key];
+            }
+        }
+
+        return options;
     }
+
+
+    /*function _getDefaults( type , order ) {
+
+        var defaults = $.extend( {} , ( Config.defaults[type] || Config.defaults.nonTransform ));
+
+        for (var key in defaults) {
+            if (order.computed.indexOf( key ) < 0) {
+                delete defaults[key];
+            }
+            else {
+                var val = defaults[key];
+                defaults[key] = (typeof val === 'object' ? val : [ val ]);
+            }
+        }
+
+        return defaults;
+    }*/
 
 
     function _getRaw( seed , defaults ) {
 
-        var raw = new KeyMap( seed );
+        var type = seed.type;
+        var raw = $.extend( {} , seed );
+        var Config_maps = Config.maps;
 
-        return raw
-            .subtract( Config.keys.options )
-            .mapTo( Config.maps.component )
-            .each(function( val , key ) {
-                if (val === null) {
-                    val = defaults[key].export();
-                }
-                raw[key] = (typeof val === 'object' ? val : [ val ]);
-            })
-            .cast();
-    }
+        for (var key in raw) {
 
+            var val = raw[key];
 
-    function _getDefaults( type , order ) {
+            if (Config.keys.options.indexOf( key ) >= 0) {
+                delete raw[key];
+                continue;
+            }
+            
+            if (typeof Config_maps.component[key] !== 'undefined') {
+                var oldKey = key;
+                key = Config_maps.component[key];
+                raw[key] = val;
+                delete raw[oldKey];
+            }
 
-        var defaults = new KeyMap(
-            Config.defaults[type] || Config.defaults.nonTransform
-        );
+            if (val === null) {
+                // map defaults array to component keys
+                val = mapDefaults( defaults[key] );
+            }
 
-        return defaults
-            .scrub( order.computed.export() )
-            .each(function( val , key ) {
-                defaults[key] = (typeof val === 'object' ? val : [ val ]);
-            })
-            .cast();
+            raw[key] = (typeof val === 'object' ? val : [ val ]);
+        }
+
+        function mapDefaults( defaults ) {
+            var maps = Config_maps[type] || Config_maps.nonTransform;
+            var map = maps[key] || maps.other;
+            var keys = Object.keys( map );
+            var out = {};
+            for (var i = 0; i < defaults.length; i++) {
+                out[keys[i]] = defaults[i];
+            }
+            return out;
+        }
+
+        return raw;
     }
 
 
     function _getCompiled( type , raw , defaults ) {
 
-        var compiled = raw.clone();
+        var compiled = $.extend( {} , raw );
+        var maps = Config.maps[ type ] || Config.maps.nonTransform;
 
-        return compiled
-            .cast()
-            .each(function( keyMap , key ) {
-                var map = Config.maps[ type ] || Config.maps.nonTransform;
-                keyMap
-                    .mapTo( map[key] || map.other )
-                    .merge(
-                        defaults[key].export()
-                    );
-            });
+        for (var key in compiled) {
+            var map = maps[key] || maps.other;
+            var property = compiled[key];
+            var defs = defaults[key];
+            compiled[key] = mapProperty( property , map , defs );
+        }
+
+        function mapProperty( property , map , defaults ) {
+
+            var out = [], value, keys = Object.keys( map );
+
+            for (var i = 0; i < defaults.length; i++) {
+                value = property[keys[i]];
+                out[i] = typeof value !== 'undefined' ? value : defaults[i];
+            }
+
+            return out;
+        }
+
+        return compiled;
     }
 
 
     function _getRules( type , compiled , raw ) {
 
-        var compareTo = raw.clone()
-            .cast()
-            .each(function( keyMap , key ) {
-                var map = Config.maps[ type ] || Config.maps.nonTransform;
-                keyMap.mapTo( map[key] || map.other );
-            });
+        var maps = Config.maps[ type ] || Config.maps.nonTransform;
+        var rules = getDiff( compiled , raw );
 
-        return compiled.clone()
-            .cast()
-            .compare( compareTo );
+        function getDiff( subject , compareTo , map , level ) {
+
+            level = level || 0;
+
+            var diff = subject instanceof Array ? [] : {};
+
+            for (var key in subject) {
+
+                if (!level) {
+                    map = Object.keys( maps[key] || maps.other );
+                }
+
+                var keyCompare = map[key];
+                var valueSubject = subject[key];
+
+                if (typeof valueSubject === 'object') {                    
+                    var valueCompare = compareTo[keyCompare] || compareTo[key];
+                    diff[key] = getDiff( valueSubject , valueCompare , map , ( level + 1 ));
+                }
+                else {
+                    diff[key] = compareTo.hasOwnProperty( map[key] );
+                }
+            }
+
+            return diff;
+        }
+
+        return rules;
     }
 
 
     return Bean;
 
     
-}( hxManager.Config , hxManager.Helper , hxManager.When , hxManager.Easing , hxManager.Animator , hxManager.KeyMap ));
+}( hxManager.Config , hxManager.Helper , hxManager.Easing , hxManager.Animator ));
 
 
 

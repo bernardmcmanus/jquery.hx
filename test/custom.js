@@ -29,13 +29,39 @@
         });
     });
 
-
     var tests = {
 
         // test - null values
         t0: function() {
 
             $('.tgt')
+            /*.hx({
+                type: 'transform',
+                translate: {x: '+=135', z: '+=135'},
+                scale: {x: 2.12},
+                rotateZ: '+=360',
+                duration: 600
+            })*/
+            .hx([
+                {
+                    type: 'opacity',
+                    value: 0.8,
+                    duration: 800
+                },
+                {
+                    type: 'transform',
+                    translate: {x: '+=135'}
+                },
+                {
+                    type: 'transform',
+                    translate: {y: '+=135'}
+                }
+            ])
+            .done(function() {
+                console.log(this);
+            });
+
+            /*$('.tgt')
 
             .hx([
                 {
@@ -75,11 +101,11 @@
                     duration: 600,
                     delay: 1000
                 }
-            ])
+            ]);*/
 
-            .done(function() {
+            /*.done(function() {
                 console.log('done');
-            });
+            });*/
         },
 
         t1: function() {
@@ -504,15 +530,16 @@
                 })
 
                 .hx( 'race' , function( resolve ) {
-                    $(this).hx( 'resolve' , true );
                     resolve();
+                    $(this).hx( 'resolve' , true );
                 })
 
                 .hx({
                     type: 'transform',
                     translate: {
-                        y: ($(selector).hasClass( 'reverse' ) ? 0 : -100)
-                    }
+                        y: ($(selector).hasClass( 'reverse' ) ? 0 : 100)
+                    },
+                    order: [ 'translate' , 'rotateZ' ]
                 })
 
                 .done(function() {
@@ -533,28 +560,50 @@
 
                 .on( 'touchstart click' , cool )
 
-                .hx({
-                    type: 'transform',
-                    translate: {y: 100},
-                    rotateZ: 360,
-                    duration: 1000,
-                    easing: 'easeOutBack'
-                })
+                .hx([
+                    {
+                        type: 'opacity',
+                        value: 0.5,
+                        duration: 1000
+                    },
+                    {
+                        type: 'background-color',
+                        value: '#fff',
+                        duration: 1000
+                    },
+                    {
+                        type: 'transform',
+                        translate: {y: 100},
+                        rotateZ: 360,
+                        duration: 1000,
+                        easing: 'easeOutBack'
+                    }
+                ])
                 
-                .then(function( resolve , reject ) {
+                .then(function() {
                     console.log('awesome');
-                    resolve();
+                    console.log(this);
                 })
 
-                .defer()
-
-                .hx({
-                    type: 'transform',
-                    translate: null,
-                    rotateZ: null,
-                    duration: 1000,
-                    easing: 'easeOutBack'
-                })
+                .hx([
+                    {
+                        type: 'opacity',
+                        value: null,
+                        duration: 1000
+                    },
+                    {
+                        type: 'background-color',
+                        value: null,
+                        duration: 1000
+                    },
+                    {
+                        type: 'transform',
+                        translate: null,
+                        rotateZ: null,
+                        duration: 1000,
+                        easing: 'easeOutBack'
+                    }
+                ])
 
                 .done(function() {
                     console.log('done');
@@ -681,6 +730,11 @@
             var start, move, diff, target;
             var selector = '.tgt, .tgt2, .tgt3';
 
+            $(selector).hx( 'update' , {
+                type: 'opacity',
+                value: 1
+            });
+
             function reset() {
                 start = {};
                 move = {now:{},last:{}};
@@ -732,13 +786,23 @@
                 diff.inst.x = move.now.x - move.last.x;
                 diff.inst.y = move.now.y - move.last.y;
 
-                $(target).hx( 'zero' , {
-                    type: 'transform',
-                    translate: {
-                        x: ((diff.inst.x < 0 ? '-=' : '+=') + Math.abs(diff.inst.x)),
-                        y: ((diff.inst.y < 0 ? '-=' : '+=') + Math.abs(diff.inst.y))
+                $(target).hx( 'zero' , [
+                    {
+                        type: 'opacity',
+                        value: ('+=' + ((diff.inst.x - diff.inst.y)/100))
+                    },
+                    {
+                        type: 'transform',
+                        translate: {
+                            x: ('+=' + diff.inst.x),
+                            y: ('+=' + diff.inst.y)
+                        },
+                        scale: {
+                            x: ('+=' + (diff.inst.x/100)),
+                            y: ('+=' + (diff.inst.y/100))
+                        }
                     }
-                });
+                ]);
             }
 
             function coolEnd( e ) {

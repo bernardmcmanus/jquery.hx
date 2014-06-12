@@ -1,4 +1,7 @@
-hxManager.Animator = (function( Config , When ) {
+hxManager.Animator = (function( Config ) {
+
+
+    var Object_defineProperty = Object.defineProperty;
 
 
     function Animator( options ) {
@@ -6,11 +9,17 @@ hxManager.Animator = (function( Config , When ) {
         var that = this;
 
         $.extend( that , Config , options );
-        //this.listeners = this._getListeners();
 
         that.transitionEnd = that._transitionEnd.bind( that );
+        var handlers = {};
 
-        Object.defineProperty( that , 'running' , {
+        Object_defineProperty( that , 'handlers' , {
+            get: function() {
+                return handlers;
+            }
+        });
+
+        Object_defineProperty( that , 'running' , {
             get: function() {
                 return that.timeout !== null;
             }
@@ -18,10 +27,10 @@ hxManager.Animator = (function( Config , When ) {
     }
 
 
-    var Animator_prototype = (Animator.prototype = Object.create( When ));
+    var Animator_prototype = (Animator.prototype = new MOJO());
 
 
-    Animator_prototype.start = function() {
+    Animator_prototype.set( 'start' , function() {
 
         var that = this;
 
@@ -41,18 +50,10 @@ hxManager.Animator = (function( Config , When ) {
             var data = {propertyName: that.property};
             $(that.node).trigger( that.eventType , data );
         }
-    };
+    });
 
 
-    /*Animator_prototype._getListeners = function() {
-
-        return {
-            _transitionEnd: this._transitionEnd.bind( this )
-        };
-    };*/
-
-
-    Animator_prototype._transitionEnd = function( e , data ) {
+    Animator_prototype.set( '_transitionEnd' , function( e , data ) {
 
         var that = this;
 
@@ -64,38 +65,25 @@ hxManager.Animator = (function( Config , When ) {
         
         if (re.test( name )) {
             that.destroy();
-            that.happen( 'complete' );
+            that.happen( 'animatorComplete' );
         }
-    };
+    });
 
 
-    Animator_prototype.destroy = function() {
+    Animator_prototype.set( 'destroy' , function() {
         
         var that = this;
 
         clearTimeout( that.timeout );
         that.timeout = null;
         $(that.node).off( that.eventType , that.transitionEnd );
-    };
-
-
-    /*function _createFallback( instance ) {
-
-        var t = instance.duration + instance.delay + instance.buffer;
-
-        var fallback = function() {
-            var data = {propertyName: instance.property};
-            $(instance.node).trigger( instance.eventType , data );
-        };
-
-        return setTimeout( fallback , t );
-    }*/
+    });
 
 
     return Animator;
 
     
-}( hxManager.Config.Animator , hxManager.When ));
+}( hxManager.Config.Animator ));
 
 
 

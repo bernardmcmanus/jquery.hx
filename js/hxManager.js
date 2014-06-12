@@ -1,4 +1,4 @@
-(function( window ) {
+window.hxManager = (function() {
 
 
     function hxManager( j ) {
@@ -11,7 +11,7 @@
 
         j.each(function() {
             nodes.push(
-                new hxManager.DomNode( this )
+                hxManager.DomNodeFactory( this )
             );
         });
 
@@ -35,7 +35,7 @@
 
         that.each(function( i ) {
 
-            var pod = new hxManager.Pod( that[i] , 'xform' );
+            var pod = hxManager.PodFactory( that[i] , 'xform' );
 
             bundle.forEach(function( seed ) {
 
@@ -62,10 +62,10 @@
         that.each(function( i ) {
 
             // create a promisePod for each dom node
-            var pod = new hxManager.Pod( that[i] , 'promise' );
+            var pod = hxManager.PodFactory( that[i] , 'promise' );
 
             // when the pod reaches its turn in the queue, resolve its promise
-            pod.when( 'promiseMade' , pod.resolvePromise , pod );
+            pod.when( 'promiseMade' , pod.resolvePromise.bind( pod ));
 
             // create a microPromise for each pod
             var microPromise = new Promise(function( resolve ) {
@@ -222,18 +222,24 @@
     hxManager_prototype.zero = function( hxArgs ) {
 
         // duration is intentionally passed as a string to
-        // avoid being overridden by vendorPatch.getDuration
+        // avoid being overridden by VendorPatch.getDuration
 
         var that = this;
 
-        $.extend( hxArgs , {
+        var options = {
             duration: '0',
             delay: 0,
             fallback: false,
             listen: false
-        });
+        };
 
-        that.hx( hxArgs ).clear( true );
+        hxArgs = hxArgs instanceof Array ? hxArgs : [ hxArgs ];
+
+        for (var i = 0; i < hxArgs.length; i++) {
+            $.extend( hxArgs[i] , options );
+        }
+
+        that.hx( hxArgs );
 
         return that;
     };
@@ -256,10 +262,10 @@
     };
 
 
-    window.hxManager = hxManager;
+    return hxManager;
 
     
-}( window ));
+}());
 
 
 

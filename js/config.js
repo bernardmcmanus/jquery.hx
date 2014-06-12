@@ -122,7 +122,7 @@ hxManager.Config = (function() {
             },
 
             nonTransform: {
-                value: ''
+                value: [ '' ]
             },
 
             options: {
@@ -173,15 +173,19 @@ hxManager.Config = (function() {
         Animator: {
             timeout: null,
             buffer: 50
-        },
-
-        Pod: {
-            types: [ 'xform' , 'promise' ]
-        },
-
-        DomNode: {
-            removeOnClean: [ '_hx' , 'hx_display' ]
         }
+    };
+
+
+    Config.getDefaults = function( type , properties ) {
+        var Config_defaults = Config.defaults;
+        var defaults = Config_defaults[type] || Config_defaults.nonTransform;
+        var out = {}, name;
+        for (var i = 0; i < properties.length; i++) {
+            name = properties[i];
+            out[name] = defaults[name];
+        }
+        return out;
     };
 
     

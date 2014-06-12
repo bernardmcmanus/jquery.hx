@@ -1,22 +1,24 @@
 module.exports = function( grunt ) {
 
 
+    var fs = require( 'fs-extra' );
+
+
     var libs = [
+        'lib/promise-0.1.1.min.js',
+        'lib/mojo-0.1.0.min.js',
         'js/hxManager.js',
-        'js/prototypes/when.js',
+        'js/hx.js',
         'js/config.js',
         'js/helper.js',
         'js/vendorPatch.js',
         'js/easing.js',
-        'js/getters.js',
         'js/animator.js',
-        'js/keyMap.js',
         'js/bean.js',
-        'js/pod.js',
         'js/queue.js',
-        'js/domNode.js',
-        'js/hx.js',
-        'lib/promise-0.1.1.min.js'
+        'js/nodeComponents.js',
+        'js/factories/podFactory.js',
+        'js/factories/domNodeFactory.js'
     ];
 
 
@@ -25,25 +27,50 @@ module.exports = function( grunt ) {
         pkg: grunt.file.readJSON( 'package.json' ),
 
         jshint : {
-            all : [ 'Gruntfile.js' , 'js/*.js' , 'js/prototypes/*.js' ]
+            all : [ 'Gruntfile.js' , 'js/*.js' , 'js/factories/*.js' ]
         },
 
-        clean : [ 'hx-<%= pkg.version %>-nightly*.js' ],
+        clean: {
+            build: [ 'hx-*-nightly*.js' ],
+            live: [ 'live' ]
+        },
 
         replace: {
             dev: {
                 options: {
                     patterns: [
                         {
-                            match : /(\.\.\/hx\-)(.*?)(\.js)/,
-                            replacement : '../hx-<%= pkg.version %>-nightly.js'
+                            match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
+                            replacement : '<script src=\"../hx-<%= pkg.version %>-nightly.js\"></script>'
                         }
                     ]
                 },
                 files: [
                     {
-                        src: 'test/index.html',
-                        dest: 'test/index.html'
+                        src: 'live/index.html',
+                        dest: 'live/index.html'
+                    }
+                ]
+            },
+            live: {
+                options: {
+                    patterns: [
+                        {
+                            match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
+                            replacement: function() {
+                                var template = '<script src=\"../[src]\"></script>';
+                                return libs.map(function( src , i ) {
+                                    return (i > 0 ? '\t\t' : '') + template.replace( /\[src\]/ , src );
+                                })
+                                .join( '\n' );
+                            }
+                        }
+                    ]
+                },
+                files: [
+                    {
+                        src: 'live/index.html',
+                        dest: 'live/index.html'
                     }
                 ]
             },
@@ -115,6 +142,13 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-contrib-watch' );
 
 
+    grunt.registerTask( 'createLive' , function() {
+        var src = __dirname + '/test';
+        var dest = __dirname + '/live';
+        fs.copySync( src , dest );
+    });
+
+
     grunt.registerTask( 'default' , [
         'jshint',
         'clean',
@@ -122,16 +156,27 @@ module.exports = function( grunt ) {
         'uglify'
     ]);
 
+
     grunt.registerTask( 'dev' , [
         'jshint',
-        'clean',
+        'clean:build',
+        'clean:live',
+        'createLive',
         'replace:dev',
         'concat'
     ]);
 
+
     grunt.registerTask( 'debug' , [
         'dev',
         'watch'
+    ]);
+    
+
+    grunt.registerTask( 'live' , [
+        'clean:live',
+        'createLive',
+        'replace:live'
     ]);
 };
 

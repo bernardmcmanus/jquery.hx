@@ -1,19 +1,38 @@
-(function( window , hx , Config , Helper , VendorPatch , Easing ) {
+hxManager.Get = (function( Config , Helper , VendorPatch ) {
 
 
-    var Get = {};
+    var EACH = Helper.object.each;
 
 
-    Get.scopedModule = function( module , context ) {
+    /*function scopedModule( module , context ) {
 
         var _module = {};
 
-        Helper.object.each( module , function( func , key ) {
+        EACH( module , function( func , key ) {
             _module[key] = func.bind( context );
         });
 
         return _module;
-    };
+    }*/
+
+
+    /*function orderedBundle( bundle ) {
+
+        var xformSeeds = [];
+        var otherSeeds = [];
+
+        bundle.forEach(function( seed ) {
+
+            if (seed.type === 'transform') {
+                xformSeeds.push( seed );
+            }
+            else {
+                otherSeeds.push( seed );
+            }
+        });
+
+        return xformSeeds.concat( otherSeeds );
+    }*/
 
 
     // TODO - implement Get.computedMatrix to account for transforms applied in CSS
@@ -32,7 +51,7 @@
 
             var response = false;
 
-            Helper.object.each( types , function( val , key ) {
+            EACH( types , function( val , key ) {
                 if (response !== false) {
                     return;
                 }
@@ -92,7 +111,7 @@
     };*/
 
 
-    Get.orderedBundle = function( bundle ) {
+    /*Get.orderedBundle = function( bundle ) {
 
         var xformSeeds = [];
         var otherSeeds = [];
@@ -108,13 +127,20 @@
         });
 
         return xformSeeds.concat( otherSeeds );
-    };
+    };*/
+
+
+    var Get = {};
+
+
+    //Get[scopedModule.name] = scopedModule;
+    //Get[orderedBundle.name] = orderedBundle;
 
     
-    $.extend( hx , { Get : Get });
+    return Get;
 
     
-}( window , hxManager , hxManager.Config , hxManager.Helper , hxManager.VendorPatch , hxManager.Easing ));
+}( hxManager.Config , hxManager.Helper , hxManager.VendorPatch ));
 
 
 
