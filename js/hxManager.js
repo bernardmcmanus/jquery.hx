@@ -46,6 +46,8 @@ window.hxManager = (function() {
 
             that[i]._hx.addXformPod( pod );
         });
+
+        return that;
     };
 
 
@@ -57,7 +59,6 @@ window.hxManager = (function() {
         var micro = [];
         var pods = [];
         var _func = func.bind( that );
-        var clear = that.clear.bind( that );
 
         that.each(function( i ) {
 
@@ -95,12 +96,53 @@ window.hxManager = (function() {
 
             // otherwise, clear the queue so we can start again
             macroPromise.catch(function( err ) {
-                clear();
+                that.clear();
                 if (err instanceof Error) {
                     console.error( err.stack );
                 }
             });
         });
+
+        return that;
+    };
+
+
+    hxManager_prototype.paint = function( type ) {
+
+        var that = this;
+
+        that.each(function( i ) {
+            that[i]._hx.paint( type );
+        });
+
+        return that;
+    };
+
+
+    hxManager_prototype.paintSync = function( type ) {
+
+        var that = this;
+
+        function resolution( resolve ) {
+            that.paint( type );
+            resolve();
+        }
+
+        that._addPromisePod( resolution );
+
+        return that;
+    };
+
+
+    hxManager_prototype.reset = function( type ) {
+
+        var that = this;
+
+        that.each(function( i ) {
+            that[i]._hx.resetComponents( type );
+        });
+
+        return that;
     };
 
 
@@ -142,21 +184,24 @@ window.hxManager = (function() {
     };
 
 
-    hxManager_prototype.update = function( seed ) {
+    hxManager_prototype.update = function( bundle ) {
 
         // update a node's components without applying the transition
 
         var that = this;
 
-        if (typeof seed === 'object') {
+        if (typeof bundle === 'object') {
 
-            seed = Array.isArray( seed ) ? hxManager.helper.array.last( seed ) : seed;
+            bundle = bundle instanceof Array ? bundle : [ bundle ];
 
-            that.each(function( i ) {
+            bundle.forEach(function( seed ) {
 
-                var bean = new hxManager.Bean( seed );
-                that[i]._hx.updateComponent( bean );
+                that.each(function( i ) {
 
+                    var bean = new hxManager.Bean( seed );
+                    that[i]._hx.updateComponent( bean );
+
+                });
             });
         }
 
@@ -253,12 +298,27 @@ window.hxManager = (function() {
             return;
         }
         
-        function resolution( resolve , reject ) {
+        function resolution( resolve ) {
             func.call( that );
             resolve();
         }
 
         that._addPromisePod( resolution );
+    };
+
+
+    hxManager_prototype.get = function( type , property ) {
+
+        var that = this;
+        var components = [];
+
+        that.each(function( i ) {
+            components.push(
+                that[i]._hx.getComponents( type , property )
+            );
+        });
+        
+        return components;
     };
 
 

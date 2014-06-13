@@ -4,6 +4,7 @@
     $.fn.hx = function( hxArgs ) {
 
         var hxm = new hxManager( this );
+        var out;
 
         switch (typeof hxArgs) {
 
@@ -16,7 +17,7 @@
                     throw new TypeError( method + ' is not a function.' );
                 }
 
-                hxm[method].apply( hxm , args );
+                out = hxm[method].apply( hxm , args );
 
             break;
 
@@ -32,12 +33,12 @@
                     hxArgs = [ hxArgs ];
                 }
 
-                hxm._addXformPod( hxArgs );
+                out = hxm._addXformPod( hxArgs );
 
             break;
         }
 
-        return hxm;
+        return out;
     };
 
  

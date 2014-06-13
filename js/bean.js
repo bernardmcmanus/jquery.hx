@@ -2,6 +2,7 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
 
     var Object_defineProperty = Object.defineProperty;
+    var Config_getMappedProperties = Config.getMappedProperties;
 
 
     function Bean( seed ) {
@@ -11,13 +12,8 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
         }
 
         var that = this;
-        var handlers = {};
 
-        Object_defineProperty( that , 'handlers' , {
-            get: function() {
-                return handlers;
-            }
-        });
+        MOJO.Hoist( that );
 
         Object_defineProperty( that , 'hasAnimator' , {
             get: function() {
@@ -110,22 +106,14 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
     function _getOrder( seed ) {
 
-        var passed = (seed.order || [])
-            .map(function( key ) {
-                return Config.maps.component[key] || key;
-            });
-
-        var computed = Object.keys( seed )
-            .filter(function( key , i ) {
-                return Config.keys.options.indexOf( key ) < 0;
-            })
-            .map(function( key ) {
-                return Config.maps.component[key] || key;
-            });
+        var passed = (seed.order || []);
+        var computed = Object.keys( seed ).filter(function( key , i ) {
+            return Config.keys.options.indexOf( key ) < 0;
+        });
 
         return {
-            passed: passed,
-            computed: computed
+            passed: Config_getMappedProperties( passed ),
+            computed: Config_getMappedProperties( computed )
         };
     }
 
@@ -145,23 +133,6 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
     }
 
 
-    /*function _getDefaults( type , order ) {
-
-        var defaults = $.extend( {} , ( Config.defaults[type] || Config.defaults.nonTransform ));
-
-        for (var key in defaults) {
-            if (order.computed.indexOf( key ) < 0) {
-                delete defaults[key];
-            }
-            else {
-                var val = defaults[key];
-                defaults[key] = (typeof val === 'object' ? val : [ val ]);
-            }
-        }
-
-        return defaults;
-    }*/
-
 
     function _getRaw( seed , defaults ) {
 
@@ -177,13 +148,11 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
                 delete raw[key];
                 continue;
             }
-            
-            if (typeof Config_maps.component[key] !== 'undefined') {
-                var oldKey = key;
-                key = Config_maps.component[key];
-                raw[key] = val;
-                delete raw[oldKey];
-            }
+
+            var oldKey = key;
+            key = Config_getMappedProperties( key );
+            raw[key] = val;
+            delete raw[oldKey];
 
             if (val === null) {
                 // map defaults array to component keys

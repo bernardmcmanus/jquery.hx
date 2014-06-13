@@ -2,39 +2,10 @@ hxManager.NodeComponents = (function( Config , Helper ) {
 
 
     function NodeComponents() {
-
         var that = this;
-        var handlers = {};
-
         that.order = {};
-
-        Object.defineProperty( that , 'handlers' , {
-            get: function() {
-                return handlers;
-            }
-        });
+        MOJO.Hoist( that );
     }
-
-
-    var _parseExpression = (NodeComponents._parseExpression = function( exp ) {
-
-        var re = /((\+|\-|\*|\/|\%){1})+\=/;
-        var out = {op: null, val: 0};
-        var match = re.exec( exp );
-
-        if (match) {
-            out.op = match[1];
-            exp = exp.replace( re , '' );
-        }
-
-        out.val = exp;
-
-        if (out.op) {
-            out.val = parseFloat( out.val , 10 );
-        }
-        
-        return out;
-    });
 
 
     var NodeComponents_prototype = (NodeComponents.prototype = new MOJO());
@@ -99,7 +70,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
         for (var property in newComponent) {
             var value = newComponent[property];
             if (Helper.array.compare( value , defaults[property] )) {
-                that._deleteComponent( type , property );
+                that.deleteComponent( type , property );
             }
             else {
                 updated[property] = value;
@@ -111,8 +82,13 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype._deleteComponent = function( type , property ) {
-        delete this[type][property];
+    NodeComponents_prototype.deleteComponent = function( type , property ) {
+        if (property) {
+            delete this[type][property];
+        }
+        else {
+            delete this[type];
+        }
     };
 
 
@@ -149,7 +125,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
 
         function mergeUpdates( storedVal , newVal ) {
             var _eval = eval;
-            var parts = _parseExpression( newVal );
+            var parts = parseExpression( newVal );
             return (parts.op ? _eval(storedVal + parts.op + parts.val) : parts.val);
         }
 
@@ -173,8 +149,13 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype._setOrder = function( type , newOrder ) {
-        this.order[type] = newOrder;
+    NodeComponents_prototype.setOrder = function( type , newOrder ) {
+        if (newOrder) {
+            this.order[type] = newOrder;
+        }
+        else {
+            delete this.order[type];
+        }
     };
 
 
@@ -194,8 +175,29 @@ hxManager.NodeComponents = (function( Config , Helper ) {
             return (newOrder.indexOf( property ) === i && componentKeys.indexOf( property ) >= 0);
         });
 
-        that._setOrder( type , newOrder );
+        that.setOrder( type , newOrder );
     };
+
+
+    function parseExpression( exp ) {
+
+        var re = /((\+|\-|\*|\/|\%){1})+\=/;
+        var out = {op: null, val: 0};
+        var match = re.exec( exp );
+
+        if (match) {
+            out.op = match[1];
+            exp = exp.replace( re , '' );
+        }
+
+        out.val = exp;
+
+        if (out.op) {
+            out.val = parseFloat( out.val , 10 );
+        }
+        
+        return out;
+    }
 
 
     return NodeComponents;

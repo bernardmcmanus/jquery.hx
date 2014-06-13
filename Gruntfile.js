@@ -106,10 +106,16 @@ module.exports = function( grunt ) {
             }
         },
 
-        watch: [{
-            files: ([ 'package.json' ]).concat( libs ),
-            tasks: [ 'dev' ]
-        }],
+        watch: {
+            src: {
+                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( libs ),
+                tasks: [ 'dev' ]
+            },
+            test: {
+                files: [ 'Gruntfile.js' , 'package.json' , 'test/*' ],
+                tasks: [ '_live' ]
+            }
+        },
 
         concat: {
             options: {
@@ -169,14 +175,20 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'debug' , [
         'dev',
-        'watch'
+        'watch:src'
+    ]);
+
+
+    grunt.registerTask( '_live' , [
+        'clean:live',
+        'createLive',
+        'replace:live'
     ]);
 
 
     grunt.registerTask( 'live' , [
-        'clean:live',
-        'createLive',
-        'replace:live'
+        '_live',
+        'watch:test'
     ]);
 };
 

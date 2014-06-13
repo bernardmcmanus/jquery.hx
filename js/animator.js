@@ -11,13 +11,8 @@ hxManager.Animator = (function( Config ) {
         $.extend( that , Config , options );
 
         that.transitionEnd = that._transitionEnd.bind( that );
-        var handlers = {};
 
-        Object_defineProperty( that , 'handlers' , {
-            get: function() {
-                return handlers;
-            }
-        });
+        MOJO.Hoist( that );
 
         Object_defineProperty( that , 'running' , {
             get: function() {
@@ -47,7 +42,7 @@ hxManager.Animator = (function( Config ) {
         }());
 
         function fallback() {
-            var data = {propertyName: that.property};
+            var data = {propertyName: that.type};
             $(that.node).trigger( that.eventType , data );
         }
     });
@@ -61,7 +56,7 @@ hxManager.Animator = (function( Config ) {
         data = data || {};
 
         var name = e.originalEvent.propertyName || data.propertyName;
-        var re = new RegExp( that.property , 'i' );
+        var re = new RegExp( that.type , 'i' );
         
         if (re.test( name )) {
             that.destroy();

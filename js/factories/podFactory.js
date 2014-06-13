@@ -24,16 +24,11 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
     function xformPod( node ) {
 
         var that = this;
-        var handlers = {};
 
         that.node = node;
         that.beans = {};
 
-        Object_defineProperty( that , 'handlers' , {
-            get: function() {
-                return handlers;
-            }
-        });
+        MOJO.Hoist( that );
         
         Object_defineProperty( that , 'type' , {
             get: function() {
@@ -61,9 +56,11 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
     xformPod_prototype.run = function() {
 
-        var sequence = getActiveSequence( this.beans );
+        var that = this;
+        var node = that.node;
+        var sequence = getActiveSequence( that.beans );
 
-        setTransition( this.node , sequence );
+        setTransition( node , sequence );
 
         EACH( sequence , function( bean , key ) {
             
@@ -71,25 +68,26 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
                 return;
             }
 
-            this._runBean( bean );
-
-        } , this );
+            that._runBean( node , bean );
+        });
     };
 
 
-    xformPod_prototype._runBean = function( bean ) {
+    xformPod_prototype._runBean = function( node , bean ) {
 
         var that = this;
+        var type = bean.type;
 
-        bean.setStyleString(
-            that.node._hx.updateComponent( bean )
-        );
+        node._hx.updateComponent( bean );
+        /*bean.setStyleString(
+            node._hx.updateComponent( bean )
+        );*/
 
         if (bean.options.listen) {
 
             var options = {
-                node: that.node,
-                property: bean.type,
+                node: node,
+                type: type,
                 eventType: VendorPatch.eventType,
             };
 
@@ -98,14 +96,15 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
                 that._beanComplete( bean );
             });
 
-            applyXform( that.node , bean );
+            //applyXform( node , bean );
+            node._hx.paint( type );
             bean.startAnimator();
 
             that.happen( 'beanStart' , bean );
         }
         else {
             // handle zero-duration
-            applyXform( that.node , bean );
+            applyXform( node , bean );
             that.happen( 'beanStart' , bean );
             that._beanComplete( bean );
         }
@@ -268,13 +267,8 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
     function promisePod() {
 
         var that = this;
-        var handlers = {};
 
-        Object_defineProperty( that , 'handlers' , {
-            get: function() {
-                return handlers;
-            }
-        });
+        MOJO.Hoist( that );
 
         Object_defineProperty( that , 'type' , {
             get: function() {

@@ -10,7 +10,7 @@ hxManager.Config = (function() {
 
         maps: {
 
-            component: {
+            property: {
                 translate: 'translate3d',
                 scale: 'scale3d',
                 rotate: 'rotate3d',
@@ -174,6 +174,21 @@ hxManager.Config = (function() {
             timeout: null,
             buffer: 50
         }
+    };
+
+
+    Config.getMappedProperties = function( properties ) {
+
+        var returnString = properties instanceof Array ? false : true;
+        properties = returnString ? [ properties ] : properties;
+
+        var map = Config.maps.property;
+
+        var out = properties.map(function( property ) {
+            return map[property] || property;
+        });
+
+        return (returnString ? out.pop() : out);
     };
 
 

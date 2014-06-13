@@ -1,4 +1,4 @@
-hxManager.DomNodeFactory = (function( Queue , NodeComponents ) {
+hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeComponents ) {
 
     
     function DomNodeFactory( element ) {
@@ -22,11 +22,48 @@ hxManager.DomNodeFactory = (function( Queue , NodeComponents ) {
 
     var hxModule = {
 
+        paint: function( type ) {
+            var tProp = VendorPatch.getPrefixed( type );
+            $(this).css( tProp , this._hx.getStyleString( type ));
+        },
+
+        getComponents: function( type , property ) {
+            if (property) {
+                property = Config.getMappedProperties( property );
+            }
+            return this._hx.components.getComponents( type , property );
+        },
+
+        getOrder: function( type ) {
+            return this._hx.components.getOrder( type );
+        },
+
         updateComponent: function( bean ) {
             var that_hx = this._hx;
             var components = this._hx.components;
             components.updateComponent( bean );
-            return components.getStyleString( bean.type );
+            return that_hx.getStyleString( bean.type );
+        },
+
+        resetComponents: function( type ) {
+
+            var components = this._hx.components;
+
+            if (type) {
+                components.setOrder( type );
+                delete components[type];
+            }
+            else {
+                var key = true;
+                while (key) {
+                    key = components.nextKey( key );
+                    if (key === 'order') {
+                        continue;
+                    }
+                    delete components[key];
+                    components.setOrder( key );
+                }
+            }
         },
 
         getStyleString: function( type ) {
@@ -125,7 +162,7 @@ hxManager.DomNodeFactory = (function( Queue , NodeComponents ) {
     return DomNodeFactory;
 
     
-}( hxManager.Queue , hxManager.NodeComponents ));
+}( hxManager.Config , hxManager.VendorPatch , hxManager.Queue , hxManager.NodeComponents ));
 
 
 

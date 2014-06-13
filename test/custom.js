@@ -17,7 +17,7 @@
 
         $('#target').on( 'touchstart click' , function( e ) {
             e.preventDefault();
-            tests.t3.s3();
+            tests.t0();
         });
 
         $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
@@ -50,15 +50,23 @@
                 },
                 {
                     type: 'transform',
-                    translate: {x: '+=135'}
+                    translate: {x: '+=135'},
+                    rotateZ: '+=45'
                 },
                 {
                     type: 'transform',
-                    translate: {y: '+=135'}
+                    translate: {y: '+=135'},
+                    rotateZ: '+=45'
                 }
             ])
-            .done(function() {
+            .then(function( resolve ) {
+                $(this).hx( 'reset' );
                 console.log(this);
+                resolve();
+            })
+            .paintSync( 'transform' )
+            .done(function() {
+                console.log($(this).hx( 'get' , 'transform' , 'translate' ));
             });
 
             /*$('.tgt')
@@ -543,7 +551,14 @@
                 })
 
                 .done(function() {
+
                     $(this).toggleClass( 'reverse' );
+
+                    /*$(this).hx( 'reset' , 'transform' );
+
+                    var comp = [];
+                    var out = $(this).hx( 'get' , comp , 'transform' );
+                    console.log(comp);*/
                 });
             },
 
