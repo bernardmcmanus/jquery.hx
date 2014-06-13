@@ -6,7 +6,7 @@
         "Bernard McManus"
     ],
     "description": "Hardware-Accelerated Animation Library",
-    "main": "hx-1.0.3.min.js",
+    "main": "hx-1.0.3-nightly.min.js",
     "keywords": [
         "jquery",
         "animation"
