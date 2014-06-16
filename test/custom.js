@@ -17,7 +17,7 @@
 
         $('#target').on( 'touchstart click' , function( e ) {
             e.preventDefault();
-            tests.t0();
+            tests.t3.s3();
         });
 
         $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
@@ -385,40 +385,40 @@
                     }
                 }
 
-                var tgt1 = $(order[0]).hx();
-                var tgt2 = $(order[1]).hx();
-                var tgt3 = $(order[2]).hx();
-
-                tgt1.hx({
+                $(order[0]).hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt2.hx( 'defer' ).hx({
+                $(order[1])
+                .hx( 'defer' )
+                .hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt3.hx( 'defer' ).hx({
+                $(order[2])
+                .hx( 'defer' )
+                .hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt1.done(function() {
-                    tgt2.hx( 'resolve' );
+                $(order[0]).hx( 'done' , function() {
+                    $(order[1]).hx( 'resolve' );
                 });
 
-                tgt2.done(function() {
-                    tgt3.hx( 'resolve' );
+                $(order[1]).hx( 'done' , function() {
+                    $(order[2]).hx( 'resolve' );
                 });
 
-                tgt3.done(function() {
+                $(order[2]).hx( 'done' , function() {
                     incrementor = (incrementor === '+=360' ? '-=360' : '+=360');
                     order.reverse();
                     tests.t3.s1( incrementor , order );
@@ -581,11 +581,16 @@
                         value: 0.5,
                         duration: 1000
                     },
-                    {
+                    /*{
                         type: 'background-color',
                         value: '#fff',
-                        duration: 1000
+                        duration: 500
                     },
+                    {
+                        type: 'background-color',
+                        value: null,
+                        duration: 500
+                    },*/
                     {
                         type: 'transform',
                         translate: {y: 100},
@@ -631,14 +636,14 @@
 
             $('.tgt, .tgt2, .tgt3')
 
-            .css( 'display' , 'none' )
+            .css( 'opacity' , 0 )
 
             .hx( 'defer' , 1000 )
 
             .hx([
                 {
                     type: 'opacity',
-                    value: null
+                    value: 1
                 },
                 {
                     type: 'transform',
@@ -823,10 +828,8 @@
             function coolEnd( e ) {
                 $(window).off( 'touchmove mousemove' , coolMove );
                 $(window).off( 'touchend mouseup' , coolEnd );
-                try {
-                    console.log($(target).get(0)._hx);
-                }
-                catch( err ) {}
+                console.log($(target).hx( 'get' ));
+                console.log(target._hx);
             }
 
             $(selector).on( 'touchstart mousedown' , coolStart );
@@ -942,11 +945,18 @@
 
                 $(selector)
                 .hx( 'clear' )
-                .hx({
-                    type: 'transform',
-                    translate: null,
-                    duration: 800
-                })
+                .hx([
+                    {
+                        type: 'transform',
+                        translate: null,
+                        duration: 800
+                    },
+                    {
+                        type: 'opacity',
+                        value: null,
+                        duration: 800
+                    }
+                ])
                 .done(function() {
                     console.log('done2');
                 });

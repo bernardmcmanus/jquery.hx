@@ -27,12 +27,6 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
             }
         });
 
-        Object_defineProperty( that , 'easing' , {
-            get: function() {
-                return Easing( that.options.easing );
-            }
-        });
-
         $.extend( that , getCompiledData( seed ));
     }
 
@@ -40,9 +34,9 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
     var Bean_prototype = (Bean.prototype = new MOJO());
 
 
-    Bean_prototype.setStyleString = function( str ) {
+    /*Bean_prototype.setStyleString = function( str ) {
         this.styleString = str;
-    };
+    };*/
 
 
     Bean_prototype.createAnimator = function( options ) {
@@ -128,6 +122,8 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
                 delete options[key];
             }
         }
+
+        options.easing = Easing( options.easing );
 
         return options;
     }

@@ -4,7 +4,7 @@ hxManager.Config = (function() {
     var Config = {
         
         keys: {
-            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'listen' , 'order' ],
+            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
             transform: [ 'translate3d' , 'scale3d' , 'translate' , 'scale' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
         },
 
@@ -130,7 +130,6 @@ hxManager.Config = (function() {
                 easing: 'ease',
                 delay: 0,
                 fallback: true,
-                listen: true,
                 done: function() {}
             }
         },
@@ -164,9 +163,9 @@ hxManager.Config = (function() {
                 other   : 'transitionend'
             },
 
-            prefixProps: [
-                (/(^\-{0})+transition/g),
-                (/(^\-{0})+transform/g)
+            prefix: [
+                (/(\-{0})transition/g),
+                (/(\-{0})transform/g)
             ]
         },
 

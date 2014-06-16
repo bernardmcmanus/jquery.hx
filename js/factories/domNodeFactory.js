@@ -1,4 +1,4 @@
-hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeComponents ) {
+hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMOJO , TransitionMOJO ) {
 
     
     function DomNodeFactory( element ) {
@@ -11,10 +11,11 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeCompone
         // otherwise, create a new hx element
         var _hxModule = GetScopedModule( hxModule , element );
 
-        element._hx = $.extend({
-            queue: new Queue(),
-            components: new NodeComponents()
-        } , _hxModule );
+        _hxModule.queue = new Queue();
+        _hxModule.componentMOJO = new ComponentMOJO();
+        _hxModule.transitionMOJO = new TransitionMOJO();
+
+        element._hx = _hxModule;
 
         return element;
     }
@@ -23,34 +24,74 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeCompone
     var hxModule = {
 
         paint: function( type ) {
-            var tProp = VendorPatch.getPrefixed( type );
-            $(this).css( tProp , this._hx.getStyleString( type ));
+
+            var that_hx = this._hx;
+            var style = {}, property, string;
+
+            if (type === undefined) {
+                type = $.extend( [] , Object.keys( that_hx.componentMOJO.order ));
+            }
+            else {
+                type = (type instanceof Array ? type : [ type ]);
+            }
+
+            for (var i = 0; i < type.length; i++) {
+                property = VendorPatch.getPrefixed( type[i] );
+                string = that_hx.getStyleString( type[i] );
+                style[property] = string;
+            }
+
+            $(this).css( style );
+        },
+
+        setTransition: function( bean ) {
+            this._hx.transitionMOJO.setTransition( bean );
+        },
+
+        deleteTransition: function( type ) {
+            this._hx.transitionMOJO.deleteTransition( type );
+        },
+
+        resetTransition: function() {
+            var transitionMOJO = this._hx.transitionMOJO;
+            var type = true;
+            while (type) {
+                type = transitionMOJO.nextKey( type );
+                transitionMOJO.deleteTransition( type );
+            }
+        },
+
+        applyTransition: function() {
+            var that = this;
+            var property = VendorPatch.getPrefixed( 'transition' );
+            var string = that._hx.getTransitionString();
+            if (that.style.transition === string) {
+                return;
+            }
+            $(that).css( property , string );
         },
 
         getComponents: function( type , property ) {
             if (property) {
                 property = Config.getMappedProperties( property );
             }
-            return this._hx.components.getComponents( type , property );
+            return this._hx.componentMOJO.getComponents( type , property );
         },
 
         getOrder: function( type ) {
-            return this._hx.components.getOrder( type );
+            return this._hx.componentMOJO.getOrder( type );
         },
 
         updateComponent: function( bean ) {
-            var that_hx = this._hx;
-            var components = this._hx.components;
-            components.updateComponent( bean );
-            return that_hx.getStyleString( bean.type );
+            this._hx.componentMOJO.updateComponent( bean );
         },
 
         resetComponents: function( type ) {
 
-            var components = this._hx.components;
+            var components = this._hx.componentMOJO;
 
             if (type) {
-                components.setOrder( type );
+                components.setOrder( type , [] );
                 delete components[type];
             }
             else {
@@ -61,13 +102,17 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeCompone
                         continue;
                     }
                     delete components[key];
-                    components.setOrder( key );
+                    components.setOrder( key , [] );
                 }
             }
         },
 
         getStyleString: function( type ) {
-            return this._hx.components.getStyleString( type );
+            return this._hx.componentMOJO.getString( type );
+        },
+
+        getTransitionString: function() {
+            return this._hx.transitionMOJO.getString();
         },
 
         addXformPod: function( pod ) {
@@ -128,7 +173,8 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeCompone
     }
 
     function clusterComplete( e , node , type ) {
-        // do something on cluster complete
+        node._hx.deleteTransition( type );
+        node._hx.applyTransition( type );
     }
 
     function podComplete( e , node , pod ) {
@@ -139,6 +185,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeCompone
         pod.dispel( 'beanComplete' );
         pod.dispel( 'clusterComplete' );
         pod.dispel( 'podComplete' );
+        node._hx.resetTransition();
     }
 
     function promiseCanceled( e , node , pod ) {
@@ -162,7 +209,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , NodeCompone
     return DomNodeFactory;
 
     
-}( hxManager.Config , hxManager.VendorPatch , hxManager.Queue , hxManager.NodeComponents ));
+}( hxManager.Config , hxManager.VendorPatch , hxManager.Queue , hxManager.ComponentMOJO , hxManager.TransitionMOJO ));
 
 
 

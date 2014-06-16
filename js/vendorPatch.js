@@ -23,7 +23,7 @@ hxManager.VendorPatch = (function( Config ) {
                 return str;
             }
 
-            Config.prefixProps.forEach(function( re ) {
+            Config.prefix.forEach(function( re ) {
 
                 var match = re.exec( str );
                 

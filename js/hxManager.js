@@ -200,7 +200,6 @@ window.hxManager = (function() {
 
                     var bean = new hxManager.Bean( seed );
                     that[i]._hx.updateComponent( bean );
-
                 });
             });
         }
@@ -224,7 +223,6 @@ window.hxManager = (function() {
             if (pod && (all || (!all && pod.type === 'promise'))) {
                 pod.resolvePod();
             }
-
         });
 
         return that;
@@ -237,9 +235,7 @@ window.hxManager = (function() {
         
         // clear all pods in each queue            
         that.each(function( i ) {
-
             that[i]._hx.clearQueue();
-
         });
 
         return that;
@@ -252,9 +248,7 @@ window.hxManager = (function() {
         
         // clear all but the current pod in each queue
         that.each(function( i ) {
-
             that[i]._hx.clearQueue( false );
-
         });
 
         // resolve any remaining promise pods
@@ -266,25 +260,10 @@ window.hxManager = (function() {
 
     hxManager_prototype.zero = function( hxArgs ) {
 
-        // duration is intentionally passed as a string to
-        // avoid being overridden by VendorPatch.getDuration
-
         var that = this;
 
-        var options = {
-            duration: '0',
-            delay: 0,
-            fallback: false,
-            listen: false
-        };
-
-        hxArgs = hxArgs instanceof Array ? hxArgs : [ hxArgs ];
-
-        for (var i = 0; i < hxArgs.length; i++) {
-            $.extend( hxArgs[i] , options );
-        }
-
-        that.hx( hxArgs );
+        that.update( hxArgs );
+        that.paint();
 
         return that;
     };

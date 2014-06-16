@@ -1,7 +1,7 @@
 hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
 
-    var EACH = Helper.object.each;
+    var Helper_each = Helper.each;
     var Object_defineProperty = Object.defineProperty;
 
 
@@ -36,9 +36,21 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
             }
         });
 
+        Object_defineProperty( that , 'sequence' , {
+            get: function() {
+                var sequence = {};
+                Helper_each( that.beans , function( cluster , type ) {
+                    if (cluster.length > 0) {
+                        sequence[type] = cluster[0];
+                    }
+                });
+                return sequence;
+            }
+        });
+
         Object_defineProperty( that , 'resolved' , {
             get: function() {
-                return Helper.object.size( that.beans ) === 0;
+                return Object.keys( that.beans ).length === 0;
             }
         });
     }
@@ -48,8 +60,9 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
 
     xformPod_prototype.addBean = function( bean ) {
+        var that = this;
         var type = bean.type;
-        var cluster = (this.beans[type] = this.beans[type] || []);
+        var cluster = (that.beans[type] = that.beans[type] || []);
         cluster.push( bean );
     };
 
@@ -58,11 +71,9 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
         var that = this;
         var node = that.node;
-        var sequence = getActiveSequence( that.beans );
+        //var sequence = getActiveSequence( that.beans );
 
-        setTransition( node , sequence );
-
-        EACH( sequence , function( bean , key ) {
+        Helper_each( that.sequence , function( bean , key ) {
             
             if (bean.hasAnimator) {
                 return;
@@ -70,6 +81,9 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
             that._runBean( node , bean );
         });
+
+        node._hx.applyTransition();
+        node._hx.paint();
     };
 
 
@@ -79,92 +93,85 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
         var type = bean.type;
 
         node._hx.updateComponent( bean );
-        /*bean.setStyleString(
-            node._hx.updateComponent( bean )
-        );*/
+        node._hx.setTransition( bean );
 
-        if (bean.options.listen) {
+        bean.createAnimator({
+            node: node,
+            type: type,
+            eventType: VendorPatch.eventType,
+        });
 
-            var options = {
-                node: node,
-                type: type,
-                eventType: VendorPatch.eventType,
-            };
-
-            bean.createAnimator( options );
-            bean.when( 'beanComplete' , function( e , bean ) {
-                that._beanComplete( bean );
-            });
-
-            //applyXform( node , bean );
-            node._hx.paint( type );
-            bean.startAnimator();
-
-            that.happen( 'beanStart' , bean );
-        }
-        else {
-            // handle zero-duration
-            applyXform( node , bean );
-            that.happen( 'beanStart' , bean );
+        bean.when( 'beanComplete' , function( e , bean ) {
             that._beanComplete( bean );
-        }
+        });
+
+        //node._hx.paint( type );
+        bean.startAnimator();
+
+        that.happen( 'beanStart' , bean );
     };
 
 
     xformPod_prototype._beanComplete = function( bean ) {
 
+        var that = this;
         var type = bean.type;
-        var cluster = this.beans[type];
+        var cluster = that.beans[type];
 
-        this.happen( 'beanComplete' , bean );
-
-        // if cluster is undefined, the pod must have been force-completed
-        /*if (!cluster) {
-            return;
-        }*/
+        that.happen( 'beanComplete' , bean );
 
         cluster.shift();
 
         if (cluster.length > 0) {
-            this.run();
+            that.run();
         }
         else {
-            this._clusterComplete( type );
+            that._clusterComplete( type );
         }
     };
 
 
     xformPod_prototype._clusterComplete = function( type ) {
 
-        var sequence = getActiveSequence( this.beans );
-        setTransition( this.node , sequence , true );
+        var that = this;
+        //var node = that.node;
+        //var sequence = getActiveSequence( that.beans );
+        //setTransition( that.node , sequence , true );
 
-        delete this.beans[type];
+        /*node._hx.deleteTransition( type );
+        node._hx.applyTransition( type );*/
 
-        this.happen( 'clusterComplete' , type );
+        delete that.beans[type];
 
-        if (this.resolved) {
-            this.resolvePod();
+        that.happen( 'clusterComplete' , type );
+
+        if (that.resolved) {
+            that.resolvePod();
         }
     };
 
 
     xformPod_prototype.resolvePod = function() {
 
-        if (!this.resolved) {
-            forceResolve( this , this.beans );
+        var that = this;
+
+        if (!that.resolved) {
+            that._forceResolve();
+            //forceResolve( that , that.beans );
         }
         else {
-            this.happen( 'podComplete' , this );
+            that.happen( 'podComplete' , that );
         }
     };
 
 
     xformPod_prototype.cancel = function() {
 
-        this.happen( 'podCanceled' , this );
+        var that = this;
 
-        EACH( this.beans , function( cluster , key ) {
+        that.happen( 'podCanceled' , that );
+
+        Helper_each( that.beans , function( cluster , key ) {
             while (cluster.length > 0) {
                 cluster.shift().resolveBean();
             }
@@ -172,93 +179,24 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
     };
 
 
-    function forceResolve( instance , beans ) {
+    xformPod_prototype._forceResolve = function() {
 
-        EACH( beans , function( cluster , key ) {
+        var that = this;
+        var beans = that.beans;
+
+        Helper_each( beans , function( cluster , type ) {
             
             var lastBean = cluster.pop();
-            delete beans[key];
+            delete beans[type];
 
             lastBean.resolveBean();
 
-            instance.happen( 'beanComplete' , lastBean );
-            instance.happen( 'clusterComplete' , lastBean.type );
-
+            that.happen( 'beanComplete' , lastBean );
+            that.happen( 'clusterComplete' , lastBean.type );
         });
 
-        instance.happen( 'podComplete' , instance );
-
-        // if this is the last xform pod in the queue, reset the transition
-        if (!instance.node._hx.getPodCount( 'xform' )) {
-            setTransition( instance.node , {} , true );
-        }
-    }
-
-
-    function setTransition( node , sequence , last ) {
-
-        last = typeof last !== 'undefined' ? last : false;
-
-        var tProp = VendorPatch.getPrefixed( 'transition' );
-        var tString = buildTransitionString( sequence , last );
-
-        if (node.style.transition === tString) {
-            return;
-        }
-
-        $(node).css( tProp , tString );
-    }
-
-
-    function applyXform( node , bean ) {
-        var tProp = VendorPatch.getPrefixed( bean.type );
-        $(node).css( tProp , bean.styleString );
-    }
-
-
-    function getActiveSequence( beans ) {
-
-        var sequence = {};
-        
-        EACH( beans , function( cluster , key ) {
-            if (cluster.length > 0) {
-                sequence[key] = cluster[0];
-            }
-        });
-
-        return sequence;
-    }
-
-
-    function buildTransitionString( sequence , last ) {
-        
-        var arr = [];
-
-        EACH( sequence , function( bean , type ) {
-
-            var options = bean.options;
-            var easing = bean.easing;
-
-            // android native browser won't respond to zero duration when cancelling a transition
-            if (!last) {
-                options.duration = VendorPatch.getDuration( options.duration );
-            }
-
-            // don't add a component for transitions with duration and delay of 0
-            if (options.duration < 1 && options.delay < 1) {
-                return;
-            }
-
-            var component = type + ' ' + options.duration + 'ms ' + easing + ' ' + options.delay + 'ms';
-            if (arr.indexOf( component ) < 0) {
-                arr.push( component );
-            }
-        });
-        
-        return VendorPatch.getPrefixed(
-            arr.join( ', ' )
-        );
-    }
+        that.happen( 'podComplete' , that );
+    };
 
 
     // ============================= promisePod ============================= //

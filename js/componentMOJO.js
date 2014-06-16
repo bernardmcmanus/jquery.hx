@@ -1,17 +1,17 @@
-hxManager.NodeComponents = (function( Config , Helper ) {
+hxManager.ComponentMOJO = (function( Config , Helper ) {
 
 
-    function NodeComponents() {
+    function ComponentMOJO() {
         var that = this;
         that.order = {};
         MOJO.Hoist( that );
     }
 
 
-    var NodeComponents_prototype = (NodeComponents.prototype = new MOJO());
+    var ComponentMOJO_prototype = (ComponentMOJO.prototype = new MOJO());
 
 
-    NodeComponents_prototype.getStyleString = function( type ) {
+    ComponentMOJO_prototype.getString = function( type ) {
 
         var that = this;
 
@@ -42,7 +42,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype.getComponents = function( type , property ) {
+    ComponentMOJO_prototype.getComponents = function( type , property ) {
 
         var that = this;
 
@@ -59,7 +59,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype._setComponent = function( type , newComponent ) {
+    ComponentMOJO_prototype._setComponent = function( type , newComponent ) {
 
         var that = this;
 
@@ -69,7 +69,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
 
         for (var property in newComponent) {
             var value = newComponent[property];
-            if (Helper.array.compare( value , defaults[property] )) {
+            if (Helper.compareArray( value , defaults[property] )) {
                 that.deleteComponent( type , property );
             }
             else {
@@ -82,17 +82,20 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype.deleteComponent = function( type , property ) {
+    ComponentMOJO_prototype.deleteComponent = function( type , property ) {
+        
+        var that = this;
+
         if (property) {
-            delete this[type][property];
+            delete that[type][property];
         }
         else {
-            delete this[type];
+            delete that[type];
         }
     };
 
 
-    NodeComponents_prototype.updateComponent = function( bean ) {
+    ComponentMOJO_prototype.updateComponent = function( bean ) {
 
         var that = this;
 
@@ -134,7 +137,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype.getOrder = function( type ) {
+    ComponentMOJO_prototype.getOrder = function( type ) {
 
         var that = this;
 
@@ -149,7 +152,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype.setOrder = function( type , newOrder ) {
+    ComponentMOJO_prototype.setOrder = function( type , newOrder ) {
         if (newOrder) {
             this.order[type] = newOrder;
         }
@@ -159,7 +162,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     };
 
 
-    NodeComponents_prototype._updateOrder = function( bean ) {
+    ComponentMOJO_prototype._updateOrder = function( bean ) {
         
         var that = this;
 
@@ -200,7 +203,7 @@ hxManager.NodeComponents = (function( Config , Helper ) {
     }
 
 
-    return NodeComponents;
+    return ComponentMOJO;
 
     
 }( hxManager.Config , hxManager.Helper ));

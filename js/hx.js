@@ -23,16 +23,7 @@
 
             case 'object':
 
-                if (hxArgs instanceof Array) {
-                    // make sure transform seeds are placed first in the bundle
-                    hxArgs = hxArgs.sort(function( seed ) {
-                        return seed.type === 'transform' ? -1 : 1;
-                    });
-                }
-                else {
-                    hxArgs = [ hxArgs ];
-                }
-
+                hxArgs = (hxArgs instanceof Array ? hxArgs : [ hxArgs ]);
                 out = hxm._addXformPod( hxArgs );
 
             break;

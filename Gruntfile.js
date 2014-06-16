@@ -16,7 +16,8 @@ module.exports = function( grunt ) {
         'js/animator.js',
         'js/bean.js',
         'js/queue.js',
-        'js/nodeComponents.js',
+        'js/componentMOJO.js',
+        'js/transitionMOJO.js',
         'js/factories/podFactory.js',
         'js/factories/domNodeFactory.js'
     ];
