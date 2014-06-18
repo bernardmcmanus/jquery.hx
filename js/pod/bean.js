@@ -51,15 +51,21 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
 
     Bean_prototype.startAnimator = function() {
-        if (this.hasAnimator && !this.animator.running) {
-            this.animator.start();
+
+        var that = this;
+
+        if (that.hasAnimator && !that.animator.running) {
+            that.animator.start();
         }
     };
 
 
     Bean_prototype.resolveBean = function() {
-        if (this.hasAnimator && !this.complete) {
-            this.animator.destroy();
+
+        var that = this;
+
+        if (that.hasAnimator && !that.complete) {
+            that.animator.destroy();
         }
     };
 
