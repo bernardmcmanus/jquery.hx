@@ -71,7 +71,6 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
         var that = this;
         var node = that.node;
-        //var sequence = getActiveSequence( that.beans );
 
         Helper_each( that.sequence , function( bean , key ) {
             
@@ -105,7 +104,6 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
             that._beanComplete( bean );
         });
 
-        //node._hx.paint( type );
         bean.startAnimator();
 
         that.happen( 'beanStart' , bean );
@@ -134,12 +132,6 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
     xformPod_prototype._clusterComplete = function( type ) {
 
         var that = this;
-        //var node = that.node;
-        //var sequence = getActiveSequence( that.beans );
-        //setTransition( that.node , sequence , true );
-
-        /*node._hx.deleteTransition( type );
-        node._hx.applyTransition( type );*/
 
         delete that.beans[type];
 
@@ -157,7 +149,6 @@ hxManager.PodFactory = (function( Helper , VendorPatch ) {
 
         if (!that.resolved) {
             that._forceResolve();
-            //forceResolve( that , that.beans );
         }
         else {
             that.happen( 'podComplete' , that );

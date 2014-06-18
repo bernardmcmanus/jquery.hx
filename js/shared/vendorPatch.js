@@ -1,15 +1,21 @@
 hxManager.VendorPatch = (function( Config ) {
 
 
+    var navigator_userAgent = navigator.userAgent;
+
+
     function VendorPatch() {
 
-        this.ua = _getUserAgent();
-        this.os = _getOS();
-        this.isMobile = _isMobile();
+        var that = this;
 
-        Object.defineProperty( this , 'eventType' , {
+        that.vendor = _getUserAgent();
+        that.os = _getOS();
+        that.isMobile = _isMobile();
+        that.RAF = _getRequestAnimationFrame();
+
+        Object.defineProperty( that , 'eventType' , {
             get: function() {
-                return Config.events[ this.ua ];
+                return Config.events[ that.vendor ];
             }
         });
     }
@@ -19,7 +25,9 @@ hxManager.VendorPatch = (function( Config ) {
 
         getPrefixed: function( str ) {
 
-            if (this.ua === 'other') {
+            var vendor = this.vendor;
+
+            if (vendor === 'other') {
                 return str;
             }
 
@@ -28,17 +36,17 @@ hxManager.VendorPatch = (function( Config ) {
                 var match = re.exec( str );
                 
                 if (match) {
-                    str = str.replace( re , ('-' + this.ua + '-' + match[0]) );
+                    str = str.replace( re , ('-' + vendor + '-' + match[0]) );
                 }
-
-            }.bind( this ));
+            });
 
             return str;
         },
 
         getComputedMatrix: function( element ) {
+            var vendor = this.vendor;
             var style = getComputedStyle( element );
-            var transform = this.ua !== 'other' ? (this.ua + 'Transform') : 'transform';
+            var transform = vendor !== 'other' ? (vendor + 'Transform') : 'transform';
             return style[transform] || style.transform;
         },
 
@@ -59,8 +67,24 @@ hxManager.VendorPatch = (function( Config ) {
     };
 
 
+    function _getRequestAnimationFrame() {
+        var W = window;
+        var name = 'equestAnimationFrame';
+        return (
+            W['r' + name] ||
+            W['webkitR' + name] ||
+            W['mozR' + name] ||
+            W['oR' + name] ||
+            W['msR' + name] ||
+            function( callback ) {
+                setTimeout( callback , ( 1000 / 60 ));
+            }
+        );
+    }
+
+
     function _getUserAgent() {
-        var uaString = navigator.userAgent;
+        var uaString = navigator_userAgent;
         for (var key in Config.vendors) {
             if (Config.vendors[key].test( uaString )) {
                 return key;
@@ -71,7 +95,7 @@ hxManager.VendorPatch = (function( Config ) {
 
 
     function _getOS() {
-        var uaString = navigator.userAgent;
+        var uaString = navigator_userAgent;
         for (var key in Config.os) {
             if (Config.os[key].test( uaString )) {
                 return key;
@@ -82,12 +106,12 @@ hxManager.VendorPatch = (function( Config ) {
 
 
     function _isMobile() {
-        return Config.tests.mobile.test( navigator.userAgent );
+        return Config.tests.mobile.test( navigator_userAgent );
     }
 
 
     function _isAndroidNative( os ) {
-        return (os === 'android' && !Config.tests.andNat.test( navigator.userAgent ));
+        return (os === 'android' && !Config.tests.andNat.test( navigator_userAgent ));
     }
 
 

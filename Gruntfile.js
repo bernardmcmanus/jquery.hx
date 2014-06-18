@@ -4,23 +4,30 @@ module.exports = function( grunt ) {
     var fs = require( 'fs-extra' );
 
 
-    var libs = [
-        'lib/promise-0.1.1.min.js',
-        'lib/mojo-0.1.0.min.js',
+    var Scripts = [
         'js/hxManager.js',
         'js/hx.js',
-        'js/config.js',
-        'js/helper.js',
-        'js/vendorPatch.js',
-        'js/easing.js',
-        'js/animator.js',
-        'js/bean.js',
-        'js/queue.js',
-        'js/componentMOJO.js',
-        'js/transitionMOJO.js',
-        'js/factories/podFactory.js',
-        'js/factories/domNodeFactory.js'
+        'js/shared/config.js',
+        'js/shared/helper.js',
+        'js/shared/vendorPatch.js',
+        'js/domNode/queue.js',
+        'js/domNode/componentMOJO.js',
+        'js/domNode/transitionMOJO.js',
+        'js/domNode/domNodeFactory.js',
+        'js/pod/easing.js',
+        'js/pod/animator.js',
+        'js/pod/bean.js',
+        'js/pod/podFactory.js'
     ];
+
+
+    var Libs = [
+        'js/lib/promise-0.1.1.min.js',
+        'js/lib/mojo-0.1.0.min.js'
+    ];
+
+
+    var All = Libs.concat( Scripts );
 
 
     grunt.initConfig({
@@ -28,7 +35,7 @@ module.exports = function( grunt ) {
         pkg: grunt.file.readJSON( 'package.json' ),
 
         jshint : {
-            all : [ 'Gruntfile.js' , 'js/*.js' , 'js/factories/*.js' ]
+            all : [ 'Gruntfile.js' ].concat( Scripts )
         },
 
         clean: {
@@ -46,12 +53,24 @@ module.exports = function( grunt ) {
                         }
                     ]
                 },
-                files: [
-                    {
-                        src: 'live/index.html',
-                        dest: 'live/index.html'
-                    }
-                ]
+                files: [{
+                    src: 'live/index.html',
+                    dest: 'live/index.html'
+                }]
+            },
+            prod: {
+                options: {
+                    patterns: [
+                        {
+                            match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
+                            replacement : '<script src=\"../hx-<%= pkg.version %>-nightly.min.js\"></script>'
+                        }
+                    ]
+                },
+                files: [{
+                    src: 'live/index.html',
+                    dest: 'live/index.html'
+                }]
             },
             live: {
                 options: {
@@ -60,7 +79,7 @@ module.exports = function( grunt ) {
                             match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
                             replacement: function() {
                                 var template = '<script src=\"../[src]\"></script>';
-                                return libs.map(function( src , i ) {
+                                return All.map(function( src , i ) {
                                     return (i > 0 ? '\t\t' : '') + template.replace( /\[src\]/ , src );
                                 })
                                 .join( '\n' );
@@ -68,12 +87,10 @@ module.exports = function( grunt ) {
                         }
                     ]
                 },
-                files: [
-                    {
-                        src: 'live/index.html',
-                        dest: 'live/index.html'
-                    }
-                ]
+                files: [{
+                    src: 'live/index.html',
+                    dest: 'live/index.html'
+                }]
             },
             bower: {
                 options: {
@@ -108,8 +125,12 @@ module.exports = function( grunt ) {
         },
 
         watch: {
+            debugProd: {
+                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( All ),
+                tasks: [ '_debugProd' ]
+            },
             src: {
-                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( libs ),
+                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( All ),
                 tasks: [ 'dev' ]
             },
             test: {
@@ -123,7 +144,7 @@ module.exports = function( grunt ) {
                 banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly build - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
             },
             build: {
-                src: libs,
+                src: All,
                 dest: 'hx-<%= pkg.version %>-nightly.js'
             }
         },
@@ -134,7 +155,7 @@ module.exports = function( grunt ) {
             },
             release : {
                 files : {
-                    'hx-<%= pkg.version %>-nightly.min.js' : libs
+                    'hx-<%= pkg.version %>-nightly.min.js' : All
                 }
             }
         }
@@ -166,8 +187,7 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'dev' , [
         'jshint',
-        'clean:build',
-        'clean:live',
+        'clean',
         'createLive',
         'replace:dev',
         'concat'
@@ -177,6 +197,19 @@ module.exports = function( grunt ) {
     grunt.registerTask( 'debug' , [
         'dev',
         'watch:src'
+    ]);
+
+    grunt.registerTask( '_debugProd' , [
+        'jshint',
+        'clean',
+        'createLive',
+        'replace:prod',
+        'uglify'
+    ]);
+
+    grunt.registerTask( 'debugProd' , [
+        '_debugProd',
+        'watch:debugProd'
     ]);
 
 

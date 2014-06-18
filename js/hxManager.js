@@ -53,6 +53,10 @@ window.hxManager = (function() {
 
     hxManager_prototype._addPromisePod = function( func , method ) {
 
+        if (typeof func !== 'function') {
+            throw new TypeError( 'PromisePod requires a function.' );
+        }
+
         method = method || 'all';
 
         var that = this;
@@ -128,9 +132,7 @@ window.hxManager = (function() {
             resolve();
         }
 
-        that._addPromisePod( resolution );
-
-        return that;
+        return that._addPromisePod( resolution );
     };
 
 
@@ -147,40 +149,21 @@ window.hxManager = (function() {
 
 
     hxManager_prototype.then = function( func ) {
-
-        var that = this;
-
-        if (typeof func === 'function') {
-            that._addPromisePod( func );
-        }
-
-        return that;
+        return this._addPromisePod( func );
     };
 
 
-    hxManager_prototype.race = function( func ) {
-
-        var that = this;
-        
-        if (typeof func === 'function') {
-            that._addPromisePod( func , 'race' );
-        }
-
-        return that;
+    hxManager_prototype.race = function( func ) {        
+        return this._addPromisePod( func , 'race' );
     };
 
 
-    hxManager_prototype.defer = function( time ) {
-
-        var that = this;
-        
-        that._addPromisePod(function( resolve , reject ) {
-            if (typeof time !== 'undefined') {
+    hxManager_prototype.defer = function( time ) {        
+        return this._addPromisePod(function( resolve , reject ) {
+            if (time) {
                 setTimeout( resolve , time );
             }
         });
-
-        return that;
     };
 
 
@@ -233,7 +216,7 @@ window.hxManager = (function() {
 
         var that = this;
         
-        // clear all pods in each queue            
+        // clear all pods in each queue
         that.each(function( i ) {
             that[i]._hx.clearQueue();
         });
@@ -252,9 +235,7 @@ window.hxManager = (function() {
         });
 
         // resolve any remaining promise pods
-        that.resolve();
-
-        return that;
+        return that.resolve();
     };
 
 
@@ -263,22 +244,17 @@ window.hxManager = (function() {
         var that = this;
 
         that.update( hxArgs );
-        that.paint();
-
-        return that;
+        return that.paint();
     };
 
 
+    // !!! done does not return the hxManager instance
     hxManager_prototype.done = function( func ) {
 
         var that = this;
-
-        if (typeof func !== 'function') {
-            return;
-        }
         
         function resolution( resolve ) {
-            func.call( that );
+            (func || function() {}).call( that );
             resolve();
         }
 
@@ -286,6 +262,7 @@ window.hxManager = (function() {
     };
 
 
+    // !!! get does not return the hxManager instance
     hxManager_prototype.get = function( type , property ) {
 
         var that = this;

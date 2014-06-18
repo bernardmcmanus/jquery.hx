@@ -9,7 +9,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         }
 
         // otherwise, create a new hx element
-        var _hxModule = GetScopedModule( hxModule , element );
+        var _hxModule = getScopedModule( hxModule , element );
 
         _hxModule.queue = new Queue();
         _hxModule.componentMOJO = new ComponentMOJO();
@@ -193,7 +193,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
     }
 
 
-    function GetScopedModule( module , context ) {
+    function getScopedModule( module , context ) {
 
         var scope = {}, func;
 

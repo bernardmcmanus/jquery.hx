@@ -34,11 +34,6 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
     var Bean_prototype = (Bean.prototype = new MOJO());
 
 
-    /*Bean_prototype.setStyleString = function( str ) {
-        this.styleString = str;
-    };*/
-
-
     Bean_prototype.createAnimator = function( options ) {
 
         var that = this;
