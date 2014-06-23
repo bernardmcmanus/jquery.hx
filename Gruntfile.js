@@ -16,6 +16,9 @@ module.exports = function( grunt ) {
         'js/domNode/domNodeFactory.js',
         'js/pod/easing.js',
         'js/pod/animator.js',
+        'js/pod/cssProperty.js',
+        'js/pod/transformProperty.js',
+        'js/pod/cssFactory.js',
         'js/pod/bean.js',
         'js/pod/podFactory.js'
     ];

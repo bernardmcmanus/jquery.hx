@@ -14,29 +14,15 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
     ComponentMOJO_prototype.getString = function( type ) {
 
         var that = this;
-
-        var stringMap = Config.maps.styleString;
         var order = that.getOrder( type );
 
-        var arr = order.map(function( name ) {
-            var property = that.getComponents( type , name );
-            var map = getPropertyMap( name );
-            if (map) {
-                return name + '(' + property.join( map.join ) + map.append + ')';
-            }
-            return property[0];
+        //console.log(order);
+
+        var arr = order.map(function( property ) {
+            return that.getComponents( type , property ).string;
         });
 
-        function getPropertyMap( name ) {
-            var re;
-            for (var key in stringMap) {
-                re = new RegExp( key , 'i' );
-                if (re.test( name )) {
-                    return stringMap[key];
-                }
-            }
-            return false;
-        }
+        //console.log(arr);
 
         return arr.join( ' ' );
     };
@@ -59,7 +45,7 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
     };
 
 
-    ComponentMOJO_prototype._setComponent = function( type , newComponent ) {
+    /*ComponentMOJO_prototype._setComponent = function( type , newComponent ) {
 
         var that = this;
 
@@ -79,10 +65,10 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
 
         updated = $.extend( that.getComponents( type ) , updated );
         that[type] = updated;
-    };
+    };*/
 
 
-    ComponentMOJO_prototype.deleteComponent = function( type , property ) {
+    /*ComponentMOJO_prototype.deleteComponent = function( type , property ) {
         
         var that = this;
 
@@ -92,47 +78,32 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
         else {
             delete that[type];
         }
-    };
+    };*/
 
 
     ComponentMOJO_prototype.updateComponent = function( bean ) {
 
+        var CSSFactory = hxManager.CSSFactory;
+
         var that = this;
+        var styles = bean.styles;
+        var component = (that[bean.type] = that[bean.type] || {});
+        var property;
 
-        var type = bean.type;
-        var compiled = bean.compiled;
-        var defaults = bean.defaults;
-        var rules = bean.rules;
-        var newComponents = {};
+        for (var name in styles) {
 
-        for (var name in compiled) {
-
-            var compiledProperty = compiled[name];
-            var ruleProperty = rules[name];
-            var defaultProperty = defaults[name];
-            var storedProperty = $.extend( [] , defaultProperty , that.getComponents( type , name ));
-            
-            newComponents[name] = storedProperty.map( mapCallback );
-        }
-
-        function mapCallback( storedVal , i ) {
-
-            // if ruleProperty[i] is true, update the stored value
-            if (ruleProperty[i]) {
-                return mergeUpdates( storedVal , compiledProperty[i] );
+            if (component[name] === undefined) {
+                component[name] = CSSFactory( name , styles[name] );
+            }
+            else {
+                component[name].update( styles[name] );
             }
 
-            // otherwise, leave it as is
-            return storedVal;
+            if (component[name].isDefault()) {
+                delete component[name];
+            }
         }
 
-        function mergeUpdates( storedVal , newVal ) {
-            var _eval = eval;
-            var parts = parseExpression( newVal );
-            return (parts.op ? _eval(storedVal + parts.op + parts.val) : parts.val);
-        }
-
-        that._setComponent( type , newComponents );
         that._updateOrder( bean );
     };
 
@@ -180,27 +151,6 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
 
         that.setOrder( type , newOrder );
     };
-
-
-    function parseExpression( exp ) {
-
-        var re = /((\+|\-|\*|\/|\%){1})+\=/;
-        var out = {op: null, val: 0};
-        var match = re.exec( exp );
-
-        if (match) {
-            out.op = match[1];
-            exp = exp.replace( re , '' );
-        }
-
-        out.val = exp;
-
-        if (out.op) {
-            out.val = parseFloat( out.val , 10 );
-        }
-        
-        return out;
-    }
 
 
     return ComponentMOJO;

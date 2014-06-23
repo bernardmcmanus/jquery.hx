@@ -41,6 +41,9 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
                 style[property] = string;
             }
 
+            //console.log(style);
+            //console.log(that_hx.componentMOJO);
+
             $(this).css( style );
         },
 

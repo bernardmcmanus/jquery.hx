@@ -17,7 +17,7 @@
 
         $('#target').on( 'touchstart click' , function( e ) {
             e.preventDefault();
-            tests.t3.s3();
+            tests.t13( true );
         });
 
         $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
@@ -1036,6 +1036,61 @@
                 $(this).toggleClass( 'fall' );
                 tests.t12();
             });*/
+        },
+
+        // test - request animation frame
+        t13: function( addListener ) {
+
+            //var selector = '.tgt,.tgt2,.tgt3';
+            var selector = '.tgt,.tgt2,.tgt3';
+            var duration = 800;
+
+            /*setTimeout(function() {
+                $('.tgt').hx( 'resolve' , true ).clear();
+            },600);*/
+
+            $(selector).hx([
+                {
+                    type: 'transform',
+                    rotateZ: '+=180',
+                    duration: duration,
+                    easing: 'easeOutBack'
+                },
+                {
+                    type: 'transform',
+                    translate: {
+                        y: ($(selector).hasClass( 'reverse' ) ? '-=100' : '+=100')
+                    },
+                    order: [ 'translate' , 'rotateZ' ]
+                }
+            ])
+            .done(function() {
+                $(this).toggleClass( 'reverse' );
+                //tests.t13();
+            });
+
+            return;
+
+            if (!addListener) {
+                return;
+            }
+
+            $('#target')
+            .off( 'touchstart click' )
+            .on( 'touchstart click' , function ( e ) {
+
+                e.preventDefault();
+
+                $(selector).hx( 'clear' );
+
+                $('#target')
+                .off( 'touchstart click' )
+                .on( 'touchstart click' , function( e ) {
+
+                    e.preventDefault();
+                    tests.t13( true );
+                });
+            });
         }
     };
 

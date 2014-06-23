@@ -18,9 +18,9 @@ hxManager.Config = (function() {
                 scale2d: 'scale',
                 matrix: 'matrix3d',
                 matrix2d: 'matrix'
-            },
+            }
 
-            styleString: {
+            /*styleString: {
 
                 translate: {
                     join: 'px,',
@@ -103,12 +103,12 @@ hxManager.Config = (function() {
                 other: {
                     '0': 0
                 }
-            }
+            }*/
         },
 
         defaults: {
 
-            transform: {
+            /*transform: {
                 matrix3d: [ 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 , 0 , 0 , 0 , 0 , 1 ],
                 translate3d: [ 0 , 0 , 0 ],
                 scale3d: [ 1 , 1 , 1 ],
@@ -123,7 +123,7 @@ hxManager.Config = (function() {
 
             nonTransform: {
                 value: [ '' ]
-            },
+            },*/
 
             options: {
                 duration: 400,
