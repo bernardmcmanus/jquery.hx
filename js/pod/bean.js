@@ -81,30 +81,11 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
         return {
             type: type,
-            original: seed,
+            seed: seed,
             order: order,
             options: options,
             styles: styles
         };
-
-        /*var defaults = Config.getDefaults( type , order.computed );
-
-        var raw = _getRaw( seed , defaults );
-
-        var compiled = _getCompiled( type , raw , defaults );
-
-        var rules = _getRules( type , compiled , raw );
-
-        return {
-            type: type,
-            original: seed,
-            order: order,
-            options: options,
-            raw: raw,
-            defaults: defaults,
-            compiled: compiled,
-            rules: rules
-        };*/
     }
 
 
@@ -149,13 +130,11 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
     function _getStyles( seed ) {
 
         var optionKeys = Config.keys.options;
-        var keyMap = Config.maps.property;
-        var styles = {}, mappedKey;
+        var styles = {};
 
         for (var key in seed) {
             if (optionKeys.indexOf( key ) < 0) {
-                mappedKey = keyMap[key] || key;
-                styles[mappedKey] = seed[key];
+                styles[key] = seed[key];
             }
         }
 

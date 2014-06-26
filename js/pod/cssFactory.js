@@ -1,16 +1,13 @@
 hxManager.CSSFactory = (function( TransformKeys , Transform , CSSProperty ) {
 
 
-    function CSSFactory( name , values , index ) {
-
-        // replace any #d at the end of the property name before checking it
-        var test = name.replace( /\dd/i , '' );
+    function CSSFactory( mappedName , name , values , index ) {
         
-        if (TransformKeys.indexOf( test ) >= 0) {
-            return new Transform( name , values , index );
+        if (TransformKeys.indexOf( mappedName ) >= 0) {
+            return new Transform( mappedName , name , values , index );
         }
         else {
-            return new CSSProperty( name , values , index );
+            return new CSSProperty( mappedName , name , values , index );
         }
     }
 

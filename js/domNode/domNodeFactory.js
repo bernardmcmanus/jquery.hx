@@ -41,9 +41,6 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
                 style[property] = string;
             }
 
-            //console.log(style);
-            //console.log(that_hx.componentMOJO);
-
             $(this).css( style );
         },
 
@@ -160,11 +157,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
 
     function beanStart( e , node , bean ) {
-        $(node).trigger( 'hx.xformStart' , {
-            type: bean.type,
-            xform: bean.original,
-            options: bean.options
-        });
+        $(node).trigger( 'hx.xformStart' , bean.seed );
     }
 
 

@@ -88,19 +88,22 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
         var that = this;
         var styles = bean.styles;
         var component = (that[bean.type] = that[bean.type] || {});
-        var property;
+        var keyMap = Config.maps.property;
+        var key, mappedKey;
 
-        for (var name in styles) {
+        for (key in styles) {
 
-            if (component[name] === undefined) {
-                component[name] = CSSFactory( name , styles[name] );
+            mappedKey = keyMap[key] || key;
+
+            if (component[mappedKey] === undefined) {
+                component[mappedKey] = CSSFactory( key , mappedKey , styles[key] );
             }
             else {
-                component[name].update( styles[name] );
+                component[mappedKey].update( styles[mappedKey] );
             }
 
-            if (component[name].isDefault()) {
-                delete component[name];
+            if (component[mappedKey].isDefault()) {
+                delete component[mappedKey];
             }
         }
 

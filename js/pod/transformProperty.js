@@ -1,14 +1,19 @@
-hxManager.Transform = (function( Helper ) {
+hxManager.Transform = (function( CSSProperty ) {
 
 
     var Object_defineProperty = Object.defineProperty;
-    var Helper_compareArray = Helper.compareArray;
 
 
-    function Transform( name , values , index ) {
+    function Transform( mappedName , name , values , index ) {
 
         var that = this;
-        var property = Properties[name];
+        var property = Properties[mappedName];
+
+        Object_defineProperty( that , 'mappedName' , {
+            get: function() {
+                return mappedName;
+            }
+        });
 
         Object_defineProperty( that , 'name' , {
             get: function() {
@@ -22,12 +27,6 @@ hxManager.Transform = (function( Helper ) {
             },
             set: function( value ) {
                 index = value;
-            }
-        });
-
-        Object_defineProperty( that , 'mappedName' , {
-            get: function() {
-                return property.mappedName;
             }
         });
 
@@ -45,7 +44,7 @@ hxManager.Transform = (function( Helper ) {
 
         Object_defineProperty( that , 'string' , {
             get: function() {
-                return name + '(' + that.join( property.join ) + property.append + ')';
+                return mappedName + '(' + that.join( property.join ) + property.append + ')';
             }
         });
 
@@ -55,7 +54,7 @@ hxManager.Transform = (function( Helper ) {
             }
         });
 
-        /*Object_defineProperty( that , 'object' , {
+        Object_defineProperty( that , 'values' , {
             get: function() {
                 var key, obj = {}, keyMap = that.keyMap;
                 for (var i = 0; i < keyMap.length; i++) {
@@ -64,7 +63,7 @@ hxManager.Transform = (function( Helper ) {
                 }
                 return obj;
             }
-        });*/
+        });
 
         that.defaults.forEach(function( val , i ) {
             that[i] = val;
@@ -74,69 +73,12 @@ hxManager.Transform = (function( Helper ) {
     }
 
 
-    var Transform_prototype = (Transform.prototype = Object.create( Array.prototype ));
-
-
-    Transform_prototype.update = function( values ) {
-
-        var that = this;
-        var keyMap = that.keyMap;
-        var key, i;
-
-        values = (( values && values !== 0 ) ? values : that.defaults );
-
-        if (typeof values !== 'object') {
-            values = [ values ];
-        }
-
-        for (i = 0; i < keyMap.length; i++) {
-
-            key = keyMap[i];
-
-            if (values[key] !== undefined) {
-                that[i] = mergeUpdates( that[i] , values[key] );
-            }
-        }
-
-        function mergeUpdates( storedVal , newVal ) {
-            var _eval = eval;
-            var parts = parseExpression( newVal );
-            return ( parts.op ? _eval( storedVal + parts.op + parts.val ) : parts.val );
-        }
-    };
-
-
-    Transform_prototype.isDefault = function() {
-        var that = this;
-        return Helper_compareArray( that , that.defaults );
-    };
-
-
-    function parseExpression( exp ) {
-
-        var re = /((\+|\-|\*|\/|\%){1})+\=/;
-        var out = {op: null, val: 0};
-        var match = re.exec( exp );
-
-        if (match) {
-            out.op = match[1];
-            exp = exp.replace( re , '' );
-        }
-
-        out.val = exp;
-
-        if (out.op) {
-            out.val = parseFloat( out.val , 10 );
-        }
-        
-        return out;
-    }
+    Transform.prototype = Object.create( CSSProperty.prototype );
 
 
     var Properties = {
 
         matrix3d: {
-            mappedName: 'matrix',
             defaults: [
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -154,7 +96,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         translate3d: {
-            mappedName: 'translate',
             defaults: [ 0 , 0 , 0 ],
             keyMap: [ 'x' , 'y' , 'z' ],
             join: 'px,',
@@ -162,7 +103,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         scale3d: {
-            mappedName: 'scale',
             defaults: [ 1 , 1 , 1 ],
             keyMap: [ 'x' , 'y' , 'z' ],
             join: ',',
@@ -170,7 +110,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         rotate3d: {
-            mappedName: 'rotate',
             defaults: [ 0 , 0 , 0 , 0 ],
             keyMap: [ 'x' , 'y' , 'z' , 'a' ],
             join: ',',
@@ -178,7 +117,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         rotateX: {
-            mappedName: 'rotateX',
             defaults: [ 0 ],
             keyMap: [ 0 ],
             join: ',',
@@ -186,7 +124,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         rotateY: {
-            mappedName: 'rotateY',
             defaults: [ 0 ],
             keyMap: [ 0 ],
             join: ',',
@@ -194,7 +131,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         rotateZ: {
-            mappedName: 'rotateZ',
             defaults: [ 0 ],
             keyMap: [ 0 ],
             join: ',',
@@ -202,7 +138,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         matrix: {
-            mappedName: 'matrix2d',
             defaults: [ 1 , 0 , 0 , 1 , 0 , 0 ],
             keyMap: [ 'a1' , 'b1' , 'c1' , 'd1' , 'a4' , 'b4' ],
             join: ',',
@@ -210,7 +145,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         translate: {
-            mappedName: 'translate2d',
             defaults: [ 0 , 0 ],
             keyMap: [ 'x' , 'y' ],
             join: 'px,',
@@ -218,7 +152,6 @@ hxManager.Transform = (function( Helper ) {
         },
 
         scale: {
-            mappedName: 'scale2d',
             defaults: [ 1 , 1 ],
             keyMap: [ 'x' , 'y' ],
             join: ',',
@@ -230,7 +163,7 @@ hxManager.Transform = (function( Helper ) {
     return Transform;
 
     
-}( hxManager.Helper ));
+}( hxManager.CSSProperty ));
 
 
 

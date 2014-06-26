@@ -3,8 +3,6 @@
     
     /*$('.tgt').on( 'hx.xformStart' , function( e , data ) {
         console.log(data);
-        //var xform = $.extend( {type: data.type} , data.xform , data.options );
-        //$('.tgt2, .tgt3').hx( xform );
     });*/
 
 
@@ -1042,7 +1040,7 @@
         t13: function( addListener ) {
 
             //var selector = '.tgt,.tgt2,.tgt3';
-            var selector = '.tgt,.tgt2,.tgt3';
+            var selector = '.tgt';
             var duration = 800;
 
             /*setTimeout(function() {
@@ -1058,20 +1056,27 @@
                 },
                 {
                     type: 'transform',
-                    translate: {
+                    translate: ($(selector).hasClass( 'reverse' ) ? null : {y: '+=100'}),
+                    /*translate: {
                         y: ($(selector).hasClass( 'reverse' ) ? '-=100' : '+=100')
-                    },
+                    },*/
+                    duration: duration,
                     order: [ 'translate' , 'rotateZ' ]
+                },
+                {
+                    type: 'opacity',
+                    value: ($(selector).hasClass( 'reverse' ) ? null : 0.1),
+                    duration: (duration * 2),
+                    easing: 'linear'
                 }
             ])
             .done(function() {
+                console.log(this[0]._hx);
                 $(this).toggleClass( 'reverse' );
                 //tests.t13();
             });
 
-            return;
-
-            if (!addListener) {
+            /*if (!addListener) {
                 return;
             }
 
@@ -1090,7 +1095,7 @@
                     e.preventDefault();
                     tests.t13( true );
                 });
-            });
+            });*/
         }
     };
 
