@@ -7,22 +7,27 @@ window.hxManager = (function() {
             return j;
         }
 
-        var nodes = [];
+        var that = this;
+        //var nodes = [];
 
-        j.each(function() {
+        /*j.each(function() {
             nodes.push(
                 hxManager.DomNodeFactory( this )
             );
+        });*/
+
+        j.each(function( i ) {
+            that[i] = hxManager.DomNodeFactory( j[i] );
         });
 
-        Object.defineProperty( this , 'length' , {
+        Object.defineProperty( that , 'length' , {
             get: function() {
-                return nodes.length;
+                return j.length;
             },
             configurable: true
         });
 
-        $.extend( this , nodes );
+        //$.extend( that , nodes );
     }
 
 

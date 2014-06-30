@@ -4,33 +4,33 @@ module.exports = function( grunt ) {
     var fs = require( 'fs-extra' );
 
 
-    var Scripts = [
+    var Script = [
         'js/hxManager.js',
         'js/hx.js',
         'js/shared/config.js',
         'js/shared/helper.js',
         'js/shared/vendorPatch.js',
-        'js/domNode/queue.js',
+        'js/domNode/cssProperty.js',
+        'js/domNode/transform.js',
+        'js/domNode/cssFactory.js',
         'js/domNode/componentMOJO.js',
         'js/domNode/transitionMOJO.js',
+        'js/domNode/queue.js',
         'js/domNode/domNodeFactory.js',
         'js/pod/easing.js',
         'js/pod/animator.js',
-        'js/pod/cssProperty.js',
-        'js/pod/transformProperty.js',
-        'js/pod/cssFactory.js',
         'js/pod/bean.js',
         'js/pod/podFactory.js'
     ];
 
 
-    var Libs = [
+    var Lib = [
         'js/lib/promise-0.1.1.min.js',
         'js/lib/mojo-0.1.0.min.js'
     ];
 
 
-    var All = Libs.concat( Scripts );
+    var All = Lib.concat( Script );
 
 
     grunt.initConfig({
@@ -38,7 +38,7 @@ module.exports = function( grunt ) {
         pkg: grunt.file.readJSON( 'package.json' ),
 
         jshint : {
-            all : [ 'Gruntfile.js' ].concat( Scripts )
+            all : [ 'Gruntfile.js' ].concat( Script )
         },
 
         clean: {

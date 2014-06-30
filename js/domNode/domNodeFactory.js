@@ -72,10 +72,9 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         },
 
         getComponents: function( type , property ) {
-            if (property) {
-                property = Config.getMappedProperties( property );
-            }
-            return this._hx.componentMOJO.getComponents( type , property );
+            property = Config.properties[property] || property;
+            var components = this._hx.componentMOJO.getComponents( type , property );
+            return components;
         },
 
         getOrder: function( type ) {

@@ -71,20 +71,12 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
     function getCompiledData( seed ) {
 
-        var type = seed.type;
-
-        var order = _getOrder( seed );
-
-        var options = _getOptions( seed );
-
-        var styles = _getStyles( seed );
-
         return {
-            type: type,
             seed: seed,
-            order: order,
-            options: options,
-            styles: styles
+            type: seed.type,
+            order: _getOrder( seed ),
+            options: _getOptions( seed ),
+            styles: _getStyles( seed )
         };
     }
 
@@ -100,7 +92,7 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
             .map( mapCallback );
 
         function mapCallback( key ) {
-            return Config.maps.property[key] || key;
+            return Config.properties[key] || key;
         }
 
         return {
@@ -112,7 +104,7 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
     function _getOptions( seed ) {
 
-        var defaults = Config.defaults.options;
+        var defaults = Config.defaults;
         var options = $.extend( {} , defaults , seed );
 
         for (var key in options) {

@@ -1,8 +1,8 @@
-hxManager.CSSFactory = (function( TransformKeys , Transform , CSSProperty ) {
+hxManager.CSSFactory = (function( TransformKeys , CSSProperty , Transform ) {
 
 
     function CSSFactory( mappedName , name , values , index ) {
-        
+
         if (TransformKeys.indexOf( mappedName ) >= 0) {
             return new Transform( mappedName , name , values , index );
         }
@@ -15,7 +15,7 @@ hxManager.CSSFactory = (function( TransformKeys , Transform , CSSProperty ) {
     return CSSFactory;
 
     
-}( hxManager.Config.keys.transform , hxManager.Transform , hxManager.CSSProperty ));
+}( hxManager.Config.keys.transform , hxManager.CSSProperty , hxManager.Transform ));
 
 
 

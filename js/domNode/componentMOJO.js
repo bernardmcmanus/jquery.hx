@@ -1,4 +1,4 @@
-hxManager.ComponentMOJO = (function( Config , Helper ) {
+hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
 
 
     function ComponentMOJO() {
@@ -45,50 +45,12 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
     };
 
 
-    /*ComponentMOJO_prototype._setComponent = function( type , newComponent ) {
-
-        var that = this;
-
-        var updated = {};
-        var keys = Object.keys( newComponent );
-        var defaults = Config.getDefaults( type , keys );
-
-        for (var property in newComponent) {
-            var value = newComponent[property];
-            if (Helper.compareArray( value , defaults[property] )) {
-                that.deleteComponent( type , property );
-            }
-            else {
-                updated[property] = value;
-            }
-        }
-
-        updated = $.extend( that.getComponents( type ) , updated );
-        that[type] = updated;
-    };*/
-
-
-    /*ComponentMOJO_prototype.deleteComponent = function( type , property ) {
-        
-        var that = this;
-
-        if (property) {
-            delete that[type][property];
-        }
-        else {
-            delete that[type];
-        }
-    };*/
-
-
     ComponentMOJO_prototype.updateComponent = function( bean ) {
-
-        var CSSFactory = hxManager.CSSFactory;
 
         var that = this;
         var styles = bean.styles;
         var component = (that[bean.type] = that[bean.type] || {});
-        var keyMap = Config.maps.property;
+        var keyMap = Config.properties;
         var key, mappedKey;
 
         for (key in styles) {
@@ -96,7 +58,7 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
             mappedKey = keyMap[key] || key;
 
             if (component[mappedKey] === undefined) {
-                component[mappedKey] = CSSFactory( key , mappedKey , styles[key] );
+                component[mappedKey] = CSSFactory( mappedKey , key , styles[key] );
             }
             else {
                 component[mappedKey].update( styles[mappedKey] );
@@ -159,7 +121,7 @@ hxManager.ComponentMOJO = (function( Config , Helper ) {
     return ComponentMOJO;
 
     
-}( hxManager.Config , hxManager.Helper ));
+}( hxManager.Config , hxManager.Helper , hxManager.CSSFactory ));
 
 
 

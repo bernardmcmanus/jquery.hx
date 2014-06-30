@@ -1071,10 +1071,13 @@
                 }
             ])
             .done(function() {
-                console.log(this[0]._hx);
-                $(this).toggleClass( 'reverse' );
+                console.log(
+                    $(this).hx( 'get' , 'transform' )
+                );
                 //tests.t13();
             });
+
+            $(selector).toggleClass( 'reverse' );
 
             /*if (!addListener) {
                 return;

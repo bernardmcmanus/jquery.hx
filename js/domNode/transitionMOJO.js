@@ -1,15 +1,14 @@
 hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch ) {
 
 
-    var Config_defaults_options = Config.defaults.options;
+    var Config_defaults = Config.defaults;
     var Helper_each = Helper.each;
 
 
-
     var transitionDefaults = {
-        duration: Config_defaults_options.duration,
-        easing: Config_defaults_options.easing,
-        delay: Config_defaults_options.delay
+        duration: Config_defaults.duration,
+        easing: Config_defaults.easing,
+        delay: Config_defaults.delay
     };
 
 
