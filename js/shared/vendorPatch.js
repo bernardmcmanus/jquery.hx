@@ -79,7 +79,7 @@ hxManager.VendorPatch = (function( Config ) {
             function( callback ) {
                 setTimeout( callback , ( 1000 / 60 ));
             }
-        );
+        ).bind( null );
     }
 
 

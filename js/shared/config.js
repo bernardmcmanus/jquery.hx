@@ -4,7 +4,7 @@ hxManager.Config = (function() {
     var Config = {
         
         keys: {
-            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'fallback' , 'order' ],
+            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
             transform: [ 'translate3d' , 'scale3d' , 'translate' , 'scale' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
         },
 
@@ -22,7 +22,6 @@ hxManager.Config = (function() {
             duration: 400,
             easing: 'ease',
             delay: 0,
-            fallback: true,
             done: function() {}
         },
 
@@ -59,13 +58,26 @@ hxManager.Config = (function() {
                 (/(\-{0})transition/g),
                 (/(\-{0})transform/g)
             ]
-        },
-
-        Animator: {
-            timeout: null,
-            buffer: 50
         }
     };
+
+
+    Object.defineProperty( Config.properties , 'inverse' , {
+
+        get: function() {
+
+            var that = this;
+            var key, i, val, out = {}, keys = Object.keys( that );
+            
+            for (i = 0; i < keys.length; i++) {
+                key = keys[i];
+                val = that[key];
+                out[val] = key;
+            }
+            
+            return out;
+        }
+    });
 
     
     return Config;

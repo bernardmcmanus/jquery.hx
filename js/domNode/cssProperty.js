@@ -21,6 +21,15 @@ hxManager.CSSProperty = (function( Helper ) {
             }
         });
 
+        /*Object_defineProperty( that , 'index' , {
+            get: function() {
+                return index;
+            },
+            set: function( value ) {
+                index = value;
+            }
+        });*/
+
         Object_defineProperty( that , 'defaults' , {
             get: function() {
                 return [ '' ];

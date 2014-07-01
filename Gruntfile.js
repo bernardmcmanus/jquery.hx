@@ -18,8 +18,11 @@ module.exports = function( grunt ) {
         'js/domNode/queue.js',
         'js/domNode/domNodeFactory.js',
         'js/pod/easing.js',
-        'js/pod/animator.js',
+        'js/pod/timingMOJO.js',
+        'js/pod/subscriber.js',
         'js/pod/bean.js',
+        'js/pod/animationPod.js',
+        'js/pod/promisePod.js',
         'js/pod/podFactory.js'
     ];
 
@@ -165,12 +168,15 @@ module.exports = function( grunt ) {
     });
 
 
-    grunt.loadNpmTasks( 'grunt-contrib-jshint' );
-    grunt.loadNpmTasks( 'grunt-contrib-clean' );
-    grunt.loadNpmTasks( 'grunt-replace' );
-    grunt.loadNpmTasks( 'grunt-contrib-concat' );
-    grunt.loadNpmTasks( 'grunt-contrib-uglify' );
-    grunt.loadNpmTasks( 'grunt-contrib-watch' );
+    [
+        'grunt-contrib-jshint',
+        'grunt-contrib-clean',
+        'grunt-replace',
+        'grunt-contrib-concat',
+        'grunt-contrib-uglify',
+        'grunt-contrib-watch'
+    ]
+    .forEach( grunt.loadNpmTasks );
 
 
     grunt.registerTask( 'createLive' , function() {

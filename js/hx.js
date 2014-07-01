@@ -24,7 +24,7 @@
             case 'object':
 
                 hxArgs = (hxArgs instanceof Array ? hxArgs : [ hxArgs ]);
-                out = hxm._addXformPod( hxArgs );
+                out = hxm._addAnimationPod( hxArgs );
 
             break;
         }

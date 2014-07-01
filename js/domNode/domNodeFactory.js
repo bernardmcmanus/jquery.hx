@@ -29,7 +29,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             var style = {}, property, string;
 
             if (type === undefined) {
-                type = $.extend( [] , Object.keys( that_hx.componentMOJO.order ));
+                type = Object.keys( that_hx.componentMOJO.getOrder() );
             }
             else {
                 type = (type instanceof Array ? type : [ type ]);
@@ -72,9 +72,53 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         },
 
         getComponents: function( type , property ) {
+
+            // TODO - clean up this method
+
+            var that_hx = this._hx;
+
+            var keyMap = Config.properties;
+            var keyMapInv = keyMap.inverse;
+            
             property = Config.properties[property] || property;
+            
             var components = this._hx.componentMOJO.getComponents( type , property );
-            return components;
+            var i, key, keyInv, keys = Object.keys( components );
+            var out = {};
+
+            if (property) {
+
+                out = components.values;
+
+                if (out.hasOwnProperty( 0 )) {
+                    out = out[0];
+                }
+            }
+            else if (type) {
+
+                for (i = 0; i < keys.length; i++) {
+                    
+                    key = keys[i];
+                    keyInv = keyMapInv[key] || key;
+                    out[keyInv] = components[key].values;
+
+                    if (out[keyInv].hasOwnProperty( 0 )) {
+                        out[keyInv] = out[keyInv][0];
+                    }
+                    else if (keyInv === 'value') {
+                        out = out.value;
+                    }
+                }
+            }
+            else {
+                key = true;
+                while (key) {
+                    key = components.nextKey( key );
+                    out[key] = that_hx.getComponents( key );
+                }
+            }
+
+            return out;
         },
 
         getOrder: function( type ) {
@@ -90,18 +134,15 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             var components = this._hx.componentMOJO;
 
             if (type) {
-                components.setOrder( type , [] );
+                components.setOrder( type );
                 delete components[type];
             }
             else {
                 var key = true;
                 while (key) {
                     key = components.nextKey( key );
-                    if (key === 'order') {
-                        continue;
-                    }
+                    components.setOrder( key );
                     delete components[key];
-                    components.setOrder( key , [] );
                 }
             }
         },
@@ -114,7 +155,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             return this._hx.transitionMOJO.getString();
         },
 
-        addXformPod: function( pod ) {
+        addAnimationPod: function( pod ) {
 
             var that = this;
 
@@ -122,7 +163,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             pod.when( 'beanComplete' , beanComplete , that );
             pod.when( 'clusterComplete' , clusterComplete , that );
             pod.when( 'podComplete' , podComplete , that );
-            pod.when( 'podCanceled' , xformCanceled , that );
+            pod.when( 'podCanceled' , animationCanceled , that );
 
             that._hx.queue.pushPod( pod );
         },
@@ -156,13 +197,13 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
 
     function beanStart( e , node , bean ) {
-        $(node).trigger( 'hx.xformStart' , bean.seed );
+        $(node).trigger( 'hx.start' , bean.seed );
     }
 
 
     function beanComplete( e , node , bean ) {
-        $(node).trigger( 'hx.xformComplete' , {
-            type: bean.type,
+        $(node).trigger( 'hx.end' , {
+            type: bean.type
         });
         bean.options.done.call( node );
     }
@@ -176,7 +217,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         node._hx.queue.next();
     }
 
-    function xformCanceled( e , node , pod ) {
+    function animationCanceled( e , node , pod ) {
         pod.dispel( 'beanComplete' );
         pod.dispel( 'clusterComplete' );
         pod.dispel( 'podComplete' );

@@ -21,14 +21,14 @@ hxManager.Transform = (function( CSSProperty ) {
             }
         });
 
-        Object_defineProperty( that , 'index' , {
+        /*Object_defineProperty( that , 'index' , {
             get: function() {
                 return index;
             },
             set: function( value ) {
                 index = value;
             }
-        });
+        });*/
 
         Object_defineProperty( that , 'defaults' , {
             get: function() {

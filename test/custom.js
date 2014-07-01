@@ -1,12 +1,12 @@
 (function() {
 
     
-    /*$('.tgt').on( 'hx.xformStart' , function( e , data ) {
+    /*$('.tgt').on( 'hx.start' , function( e , data ) {
         console.log(data);
     });*/
 
 
-    /*$('.tgt').on( 'hx.xformComplete' , function( e , data ) {
+    /*$('.tgt').on( 'hx.end' , function( e , data ) {
         console.log(data);
     });*/
 
@@ -58,11 +58,12 @@
                 }
             ])
             .then(function( resolve ) {
-                $(this).hx( 'reset' );
+                $(this)
+                .hx( 'reset' )
+                .paint( 'transform' );
                 console.log(this);
                 resolve();
             })
-            .paintSync( 'transform' )
             .done(function() {
                 console.log($(this).hx( 'get' , 'transform' , 'translate' ));
             });
@@ -1050,16 +1051,16 @@
             $(selector).hx([
                 {
                     type: 'transform',
-                    rotateZ: '+=180',
+                    rotateZ: ($(selector).hasClass( 'reverse' ) ? null : '+=180'),
                     duration: duration,
                     easing: 'easeOutBack'
                 },
                 {
                     type: 'transform',
                     translate: ($(selector).hasClass( 'reverse' ) ? null : {y: '+=100'}),
-                    /*translate: {
-                        y: ($(selector).hasClass( 'reverse' ) ? '-=100' : '+=100')
-                    },*/
+                    // translate: {
+                    //     y: ($(selector).hasClass( 'reverse' ) ? '-=100' : '+=100')
+                    // },
                     duration: duration,
                     order: [ 'translate' , 'rotateZ' ]
                 },
@@ -1071,9 +1072,18 @@
                 }
             ])
             .done(function() {
-                console.log(
+
+                console.log(this[0]._hx);
+                //console.log(this[0]._hx.componentMOJO);
+
+                $(this).on( 'click' , function() {
+                    $(this).hx( 'reset' , 'opacity' );
+                    console.log(this._hx.componentMOJO);
+                });
+
+                /*console.log(
                     $(this).hx( 'get' , 'transform' )
-                );
+                );*/
                 //tests.t13();
             });
 

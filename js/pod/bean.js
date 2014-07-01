@@ -1,4 +1,4 @@
-hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
+hxManager.Bean = (function( Config , Easing , Subscriber ) {
 
 
     var Object_defineProperty = Object.defineProperty;
@@ -12,17 +12,19 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
         var that = this;
 
+        that.subscriber = null;
+
         MOJO.Hoist( that );
 
-        Object_defineProperty( that , 'hasAnimator' , {
+        Object_defineProperty( that , 'subscribed' , {
             get: function() {
-                return (typeof that.animator !== 'undefined');
+                return (that.subscriber !== null);
             }
         });
 
         Object_defineProperty( that , 'complete' , {
             get: function() {
-                return (that.hasAnimator ? !that.animator.running : false);
+                return (that.subscriber === undefined);
             }
         });
 
@@ -33,29 +35,17 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
     var Bean_prototype = (Bean.prototype = new MOJO());
 
 
-    Bean_prototype.createAnimator = function( options ) {
+    Bean_prototype.subscribe = function() {
 
         var that = this;
 
-        if (!that.hasAnimator) {
+        that.subscriber = new Subscriber( that.options , function() {
+
+            console.log('unsubscribe');
             
-            $.extend( options , that.options );
-            that.animator = new Animator( options );
-
-            that.animator.when( 'animatorComplete' , function( e ) {
-                that.happen( 'beanComplete' , that );
-            });
-        }
-    };
-
-
-    Bean_prototype.startAnimator = function() {
-
-        var that = this;
-
-        if (that.hasAnimator && !that.animator.running) {
-            that.animator.start();
-        }
+            that.resolveBean();
+            that.happen( 'beanComplete' , that );
+        });
     };
 
 
@@ -63,9 +53,12 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
 
         var that = this;
 
-        if (that.hasAnimator && !that.complete) {
-            that.animator.destroy();
+        if (that.subscribed && !that.complete) {
+            that.subscriber.destroy();
+            delete that.subscriber;
         }
+
+        console.log(that);
     };
 
 
@@ -137,7 +130,7 @@ hxManager.Bean = (function( Config , Helper , Easing , Animator ) {
     return Bean;
 
     
-}( hxManager.Config , hxManager.Helper , hxManager.Easing , hxManager.Animator ));
+}( hxManager.Config , hxManager.Easing , hxManager.Subscriber ));
 
 
 

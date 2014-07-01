@@ -8,13 +8,6 @@ window.hxManager = (function() {
         }
 
         var that = this;
-        //var nodes = [];
-
-        /*j.each(function() {
-            nodes.push(
-                hxManager.DomNodeFactory( this )
-            );
-        });*/
 
         j.each(function( i ) {
             that[i] = hxManager.DomNodeFactory( j[i] );
@@ -23,24 +16,21 @@ window.hxManager = (function() {
         Object.defineProperty( that , 'length' , {
             get: function() {
                 return j.length;
-            },
-            configurable: true
+            }
         });
-
-        //$.extend( that , nodes );
     }
 
 
     var hxManager_prototype = (hxManager.prototype = Object.create( jQuery.prototype ));
 
 
-    hxManager_prototype._addXformPod = function( bundle ) {
+    hxManager_prototype._addAnimationPod = function( bundle ) {
 
         var that = this;
 
         that.each(function( i ) {
 
-            var pod = hxManager.PodFactory( that[i] , 'xform' );
+            var pod = hxManager.PodFactory( that[i] , 'animation' );
 
             bundle.forEach(function( seed ) {
 
@@ -49,7 +39,7 @@ window.hxManager = (function() {
 
             });
 
-            that[i]._hx.addXformPod( pod );
+            that[i]._hx.addAnimationPod( pod );
         });
 
         return that;
@@ -126,20 +116,7 @@ window.hxManager = (function() {
 
         return that;
     };
-
-
-    hxManager_prototype.paintSync = function( type ) {
-
-        var that = this;
-
-        function resolution( resolve ) {
-            that.paint( type );
-            resolve();
-        }
-
-        return that._addPromisePod( resolution );
-    };
-
+    
 
     hxManager_prototype.reset = function( type ) {
 

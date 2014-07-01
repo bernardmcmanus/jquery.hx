@@ -2,9 +2,17 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
 
 
     function ComponentMOJO() {
+
         var that = this;
-        that.order = {};
+        var order = {};
+
         MOJO.Hoist( that );
+
+        Object.defineProperty( that , 'order' , {
+            get: function() {
+                return order;
+            }
+        });
     }
 
 
@@ -16,13 +24,9 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
         var that = this;
         var order = that.getOrder( type );
 
-        //console.log(order);
-
         var arr = order.map(function( property ) {
             return that.getComponents( type , property ).string;
         });
-
-        //console.log(arr);
 
         return arr.join( ' ' );
     };
@@ -31,14 +35,15 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
     ComponentMOJO_prototype.getComponents = function( type , property ) {
 
         var that = this;
+        var _type, _property;
 
         if (type) {
-            that[type] = (that[type] = that[type] || {});
+            _type = (that[type] || {});
             if (property) {
-                that[type][property] = that[type][property] || [];
-                return that[type][property];
+                _property = _type[property] || [];
+                return _property;
             }
-            return that[type];
+            return _type;
         }
 
         return that;
@@ -49,7 +54,8 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
 
         var that = this;
         var styles = bean.styles;
-        var component = (that[bean.type] = that[bean.type] || {});
+        var type = bean.type;
+        var component = (that[type] = that[type] || {});
         var keyMap = Config.properties;
         var key, mappedKey;
 
@@ -66,6 +72,9 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
 
             if (component[mappedKey].isDefault()) {
                 delete component[mappedKey];
+                if (Object.keys( component ).length < 1) {
+                    delete that[type];
+                }
             }
         }
 
@@ -76,12 +85,10 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
     ComponentMOJO_prototype.getOrder = function( type ) {
 
         var that = this;
-
         var order = that.order;
 
         if (type) {
-            order[type] = (that.order[type] = that.order[type] || []);
-            return order[type];
+            return order[type] || [];
         }
 
         return order;
@@ -89,6 +96,7 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
 
 
     ComponentMOJO_prototype.setOrder = function( type , newOrder ) {
+
         if (newOrder) {
             this.order[type] = newOrder;
         }
