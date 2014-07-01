@@ -1,6 +1,9 @@
-hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMOJO , TransitionMOJO ) {
+hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , ComponentMOJO , TransitionMOJO ) {
 
     
+    var Helper_each = Helper.each;
+
+
     function DomNodeFactory( element ) {
 
         // if this is already an hx element, return it
@@ -53,12 +56,12 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         },
 
         resetTransition: function() {
+
             var transitionMOJO = this._hx.transitionMOJO;
-            var type = true;
-            while (type) {
-                type = transitionMOJO.nextKey( type );
+
+            Helper_each( transitionMOJO , function( val , type ) {
                 transitionMOJO.deleteTransition( type );
-            }
+            });
         },
 
         applyTransition: function() {
@@ -111,11 +114,9 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
                 }
             }
             else {
-                key = true;
-                while (key) {
-                    key = components.nextKey( key );
+                Helper_each( components , function( val , key ) {
                     out[key] = that_hx.getComponents( key );
-                }
+                });
             }
 
             return out;
@@ -131,19 +132,17 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
         resetComponents: function( type ) {
 
-            var components = this._hx.componentMOJO;
+            var componentMOJO = this._hx.componentMOJO;
 
             if (type) {
-                components.setOrder( type );
-                delete components[type];
+                componentMOJO.setOrder( type );
+                delete componentMOJO[type];
             }
             else {
-                var key = true;
-                while (key) {
-                    key = components.nextKey( key );
-                    components.setOrder( key );
-                    delete components[key];
-                }
+                Helper_each( componentMOJO , function( val , key ) {
+                    componentMOJO.setOrder( key );
+                    delete componentMOJO[key];
+                });
             }
         },
 
@@ -245,7 +244,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
     return DomNodeFactory;
 
     
-}( hxManager.Config , hxManager.VendorPatch , hxManager.Queue , hxManager.ComponentMOJO , hxManager.TransitionMOJO ));
+}( hxManager.Config , hxManager.Helper , hxManager.VendorPatch , hxManager.Queue , hxManager.ComponentMOJO , hxManager.TransitionMOJO ));
 
 
 

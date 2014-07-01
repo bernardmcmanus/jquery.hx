@@ -67,7 +67,7 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
                 component[mappedKey] = CSSFactory( mappedKey , key , styles[key] );
             }
             else {
-                component[mappedKey].update( styles[mappedKey] );
+                component[mappedKey].update( styles[key] );
             }
 
             if (component[mappedKey].isDefault()) {

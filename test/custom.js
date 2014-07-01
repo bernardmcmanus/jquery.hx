@@ -15,7 +15,7 @@
 
         $('#target').on( 'touchstart click' , function( e ) {
             e.preventDefault();
-            tests.t13( true );
+            tests.t13();
         });
 
         $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
@@ -315,40 +315,41 @@
                 incrementor = typeof incrementor === 'string' ? incrementor : '+=360';
                 order = Array.isArray( order ) ? order : [ '.tgt' , '.tgt2' , '.tgt3' ];
 
-                var tgt1 = $(order[0]).hx();
-                var tgt2 = $(order[1]).hx();
-                var tgt3 = $(order[2]).hx();
-
-                tgt1.hx({
+                $(order[0])
+                .hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt2.hx( 'defer' ).hx({
+                $(order[1])
+                .hx( 'defer' )
+                .hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt3.hx( 'defer' ).hx({
+                $(order[2])
+                .hx( 'defer' )
+                .hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt1.done(function() {
-                    tgt2.hx( 'resolve' );
+                $(order[0]).hx( 'done' , function() {
+                    $(order[1]).hx( 'resolve' );
                 });
 
-                tgt2.done(function() {
-                    tgt3.hx( 'resolve' );
+                $(order[1]).hx( 'done' , function() {
+                    $(order[2]).hx( 'resolve' );
                 });
 
-                tgt3.done(function() {
+                $(order[2]).hx( 'done' , function() {
                     incrementor = (incrementor === '+=360' ? '-=360' : '+=360');
                     order.reverse();
                     tests.t3.s0( incrementor , order );
@@ -363,25 +364,20 @@
 
                 var selector = order.join( ', ' );
 
-                if (this === $('#target').get( 0 )) {
+                if ($('#target').hasClass( 'break' )) {
+                    
+                    $('#target').removeClass( 'break' );
 
-                    if ($('#target').hasClass( 'break' )) {
-                        
-                        $('#target').removeClass( 'break' );
+                    $(selector)
+                    .hx( 'break' )
+                    .done(function() {
+                        console.log('woop woop!');
+                    });
 
-                        $(selector)
-
-                        .hx( 'break' )
-
-                        .done(function() {
-                            console.log('woop woop!');
-                        });
-
-                        return;
-                    }
-                    else {
-                        $('#target').addClass( 'break' );
-                    }
+                    return;
+                }
+                else {
+                    $('#target').addClass( 'break' );
                 }
 
                 $(order[0]).hx({
@@ -432,61 +428,58 @@
 
                 var selector = order.join( ', ' );
 
-                if (this === $('#target').get( 0 )) {
+                if ($('#target').hasClass( 'clear' )) {
+                    
+                    $('#target').removeClass( 'clear' );
 
-                    if ($('#target').hasClass( 'clear' )) {
-                        
-                        $('#target').removeClass( 'clear' );
+                    $(selector)
 
-                        $(selector)
+                    .hx( 'clear' )
 
-                        .hx( 'clear' )
+                    .done(function() {
+                        console.log('woop woop!');
+                    });
 
-                        .done(function() {
-                            console.log('woop woop!');
-                        });
-
-                        return;
-                    }
-                    else {
-                        $('#target').addClass( 'clear' );
-                    }
+                    return;
+                }
+                else {
+                    $('#target').addClass( 'clear' );
                 }
 
-                var tgt1 = $(order[0]).hx();
-                var tgt2 = $(order[1]).hx();
-                var tgt3 = $(order[2]).hx();
-
-                tgt1.hx({
+                $(order[0]).hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt2.hx( 'defer' ).hx({
+                $(order[1])
+                .hx( 'defer' )
+                .hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt3.hx( 'defer' ).hx({
+                $(order[2])
+                .hx( 'defer' )
+                .hx({
                     type: 'transform',
                     rotateZ: incrementor,
                     duration: 1200,
                     easing: 'easeOutBack'
                 });
 
-                tgt1.done(function() {
-                    tgt2.hx( 'resolve' );
+                $(order[0]).hx( 'done' , function() {
+                    $(order[1]).hx( 'resolve' );
                 });
 
-                tgt2.done(function() {
-                    tgt3.hx( 'resolve' );
+                $(order[1]).hx( 'done' , function() {
+                    $(order[2]).hx( 'resolve' );
                 });
 
-                tgt3.done(function() {
+                $(order[2]).hx( 'done' , function() {
                     incrementor = (incrementor === '+=360' ? '-=360' : '+=360');
                     order.reverse();
                     tests.t3.s2( incrementor , order );
@@ -635,10 +628,13 @@
 
             $('.tgt, .tgt2, .tgt3')
 
-            .css( 'opacity' , 0 )
-
-            .hx( 'defer' , 1000 )
-
+            .hx({
+                type: 'opacity',
+                value: 0,
+                duration: 10,
+                delay: 50
+            })
+            .defer( 1000 )
             .hx([
                 {
                     type: 'opacity',
@@ -658,7 +654,6 @@
                     translate: null
                 }
             ])
-
             .done(function() {
                 console.log('done');
             });
@@ -749,10 +744,15 @@
             var start, move, diff, target;
             var selector = '.tgt, .tgt2, .tgt3';
 
-            $(selector).hx( 'update' , {
+            /*$(selector).hx( 'update' , {
                 type: 'opacity',
                 value: 1
-            });
+            });*/
+
+            /*console.log($(selector).hx( 'get' ));
+            $(selector).hx( 'reset' )
+            console.log($(selector).hx( 'get' ));
+            return;*/
 
             function reset() {
                 start = {};
@@ -828,7 +828,7 @@
                 $(window).off( 'touchmove mousemove' , coolMove );
                 $(window).off( 'touchend mouseup' , coolEnd );
                 console.log($(target).hx( 'get' ));
-                console.log(target._hx);
+                //console.log(target._hx);
             }
 
             $(selector).on( 'touchstart mousedown' , coolStart );
@@ -1040,13 +1040,19 @@
         // test - request animation frame
         t13: function( addListener ) {
 
-            //var selector = '.tgt,.tgt2,.tgt3';
-            var selector = '.tgt';
+            var selector = '.tgt,.tgt2,.tgt3';
             var duration = 800;
 
             /*setTimeout(function() {
                 $('.tgt').hx( 'resolve' , true ).clear();
             },600);*/
+
+            if (!$(selector).hasClass( 'reverse' )) {
+                $(selector).hx( 'update' , {
+                    type: 'opacity',
+                    value: 1
+                });
+            }
 
             $(selector).hx([
                 {
@@ -1066,7 +1072,7 @@
                 },
                 {
                     type: 'opacity',
-                    value: ($(selector).hasClass( 'reverse' ) ? null : 0.1),
+                    value: ($(selector).hasClass( 'reverse' ) ? null : '-=0.9'),
                     duration: (duration * 2),
                     easing: 'linear'
                 }

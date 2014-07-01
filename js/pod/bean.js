@@ -41,7 +41,7 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
 
         that.subscriber = new Subscriber( that.options , function() {
 
-            console.log('unsubscribe');
+            //console.log('unsubscribe');
             
             that.resolveBean();
             that.happen( 'beanComplete' , that );
@@ -58,7 +58,7 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
             delete that.subscriber;
         }
 
-        console.log(that);
+        //console.log(that);
     };
 
 

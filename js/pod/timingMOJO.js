@@ -77,7 +77,7 @@ hxManager.TimingMOJO = (function( VendorPatch ) {
 
     TimingMOJO_prototype._step = function( timestamp ) {
 
-        console.log(timestamp);
+        //console.log(timestamp);
 
         var that = this;
 
