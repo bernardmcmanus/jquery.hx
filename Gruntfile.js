@@ -46,7 +46,7 @@ module.exports = function( grunt ) {
         },
 
         clean: {
-            build: [ 'hx-*-nightly*.js' ],
+            build: [ 'hx-*.js' ],
             live: [ 'live' ]
         },
 
@@ -56,7 +56,7 @@ module.exports = function( grunt ) {
                     patterns: [
                         {
                             match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                            replacement : '<script src=\"../hx-<%= pkg.version %>-nightly.js\"></script>'
+                            replacement : '<script src=\"../hx-<%= pkg.version %>.js\"></script>'
                         }
                     ]
                 },
@@ -70,7 +70,7 @@ module.exports = function( grunt ) {
                     patterns: [
                         {
                             match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                            replacement : '<script src=\"../hx-<%= pkg.version %>-nightly.min.js\"></script>'
+                            replacement : '<script src=\"../hx-<%= pkg.version %>.min.js\"></script>'
                         }
                     ]
                 },
@@ -120,7 +120,7 @@ module.exports = function( grunt ) {
                         },
                         {
                             match: /(\"main\")(.*?)(\")(.{1,}?)(\")/i,
-                            replacement: '\"main\": \"hx-<%= pkg.version %>-nightly.min.js\"'
+                            replacement: '\"main\": \"hx-<%= pkg.version %>.min.js\"'
                         }
                     ]
                 },
@@ -148,21 +148,21 @@ module.exports = function( grunt ) {
 
         concat: {
             options: {
-                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly build - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
             },
             build: {
                 src: All,
-                dest: 'hx-<%= pkg.version %>-nightly.js'
+                dest: 'hx-<%= pkg.version %>.js'
             }
         },
 
         uglify: {
             options: {
-                banner : '/*! <%= pkg.name %> - <%= pkg.version %> nightly build - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             release : {
                 files : {
-                    'hx-<%= pkg.version %>-nightly.min.js' : All
+                    'hx-<%= pkg.version %>.min.js' : All
                 }
             }
         }
