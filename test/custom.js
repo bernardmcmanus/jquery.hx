@@ -15,7 +15,7 @@
 
         $('#target').on( 'touchstart click' , function( e ) {
             e.preventDefault();
-            tests.t13();
+            tests.t14();
         });
 
         $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
@@ -1038,16 +1038,16 @@
         },
 
         // test - request animation frame
-        t13: function( addListener ) {
+        t13: function() {
 
             var selector = '.tgt,.tgt2,.tgt3';
             var duration = 800;
 
-            /*setTimeout(function() {
-                $('.tgt').hx( 'resolve' , true ).clear();
-            },600);*/
+            var opacity = $(selector).hx( 'get' , 'opacity' ).reduce(function( previous , current ) {
+                return (previous + (typeof current === 'number' ? current : Object.keys( current ).length));
+            } , 0 );
 
-            if (!$(selector).hasClass( 'reverse' )) {
+            if (!opacity) {
                 $(selector).hx( 'update' , {
                     type: 'opacity',
                     value: 1
@@ -1082,39 +1082,50 @@
                 console.log(this[0]._hx);
                 //console.log(this[0]._hx.componentMOJO);
 
-                $(this).on( 'click' , function() {
+                $(this).off( 'click' ).on( 'click' , function() {
                     $(this).hx( 'reset' , 'opacity' );
                     console.log(this._hx.componentMOJO);
                 });
-
-                /*console.log(
-                    $(this).hx( 'get' , 'transform' )
-                );*/
-                //tests.t13();
             });
 
             $(selector).toggleClass( 'reverse' );
+        },
 
-            /*if (!addListener) {
-                return;
-            }
+        // test - do
+        t14: function() {
 
-            $('#target')
-            .off( 'touchstart click' )
-            .on( 'touchstart click' , function ( e ) {
+            var selector = '.tgt,.tgt2,.tgt3';
 
-                e.preventDefault();
-
-                $(selector).hx( 'clear' );
-
-                $('#target')
-                .off( 'touchstart click' )
-                .on( 'touchstart click' , function( e ) {
-
-                    e.preventDefault();
-                    tests.t13( true );
+            $('.tgt').hx({
+                type: 'transform',
+                translate: {
+                    y: '+=100'
+                }
+            });
+            
+            $(selector)
+            .hx( 'do' , function( controller ) {
+                                
+                controller.do({
+                    type: 'transform',
+                    translate: {x: '+=200'}
                 });
-            });*/
+
+                controller.get( 2 ).do({
+                    type: 'transform',
+                    rotateZ: '+=30',
+                    duration: 500,
+                    delay: 200
+                });
+
+                controller.do({
+                    type: 'opacity',
+                    value: 0.5
+                });
+            })
+            .done(function() {
+                console.log('done');
+            });
         }
     };
 

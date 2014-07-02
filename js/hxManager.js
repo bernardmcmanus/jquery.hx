@@ -36,7 +36,6 @@ window.hxManager = (function() {
 
                 var bean = new hxManager.Bean( seed );
                 pod.addBean( bean );
-
             });
 
             that[i]._hx.addAnimationPod( pod );
@@ -78,7 +77,6 @@ window.hxManager = (function() {
 
             pods.push( pod );
             micro.push( microPromise );
-
         });
 
         // when the appropriate microPromises have been resolved, create the macroPromise
@@ -103,6 +101,28 @@ window.hxManager = (function() {
         });
 
         return that;
+    };
+
+
+    hxManager_prototype.do = function( func ) {
+
+        if (typeof func !== 'function') {
+            throw new TypeError( 'do requires a function.' );
+        }
+
+        var that = this;
+
+        return that._addPromisePod(function( resolve , reject ) {
+
+            var controller = new hxManager.Doer( that );
+            
+            controller.resolve = resolve;
+            controller.reject = reject;
+            
+            func( controller );
+            
+            controller.run();
+        });
     };
 
 
@@ -140,7 +160,7 @@ window.hxManager = (function() {
     };
 
 
-    hxManager_prototype.defer = function( time ) {        
+    hxManager_prototype.defer = function( time ) {
         return this._addPromisePod(function( resolve , reject ) {
             if (time) {
                 setTimeout( resolve , time );

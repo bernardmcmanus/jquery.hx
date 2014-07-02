@@ -19,12 +19,13 @@ module.exports = function( grunt ) {
         'js/domNode/domNodeFactory.js',
         'js/pod/easing.js',
         'js/pod/timingMOJO.js',
-        'js/pod/iterator.js',
         'js/pod/subscriber.js',
         'js/pod/bean.js',
         'js/pod/animationPod.js',
         'js/pod/promisePod.js',
-        'js/pod/podFactory.js'
+        'js/pod/podFactory.js',
+        'js/do/iteratorMOJO.js',
+        'js/do/doer.js'
     ];
 
 

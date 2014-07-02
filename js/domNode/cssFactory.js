@@ -1,13 +1,13 @@
 hxManager.CSSFactory = (function( TransformKeys , CSSProperty , Transform ) {
 
 
-    function CSSFactory( mappedName , name , values , index ) {
+    function CSSFactory( mappedName , values ) {
 
         if (TransformKeys.indexOf( mappedName ) >= 0) {
-            return new Transform( mappedName , name , values , index );
+            return new Transform( mappedName , values );
         }
         else {
-            return new CSSProperty( mappedName , name , values , index );
+            return new CSSProperty( mappedName , values );
         }
     }
 

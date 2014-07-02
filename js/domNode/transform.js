@@ -4,29 +4,14 @@ hxManager.Transform = (function( CSSProperty ) {
     var Object_defineProperty = Object.defineProperty;
 
 
-    function Transform( mappedName , name , values , index ) {
+    function Transform( mappedName , values ) {
 
         var that = this;
         var property = Properties[mappedName];
 
-        Object_defineProperty( that , 'mappedName' , {
+        /*Object_defineProperty( that , 'mappedName' , {
             get: function() {
                 return mappedName;
-            }
-        });
-
-        Object_defineProperty( that , 'name' , {
-            get: function() {
-                return name;
-            }
-        });
-
-        /*Object_defineProperty( that , 'index' , {
-            get: function() {
-                return index;
-            },
-            set: function( value ) {
-                index = value;
             }
         });*/
 

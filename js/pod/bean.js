@@ -39,10 +39,7 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
 
         var that = this;
 
-        that.subscriber = new Subscriber( that.options , function() {
-
-            //console.log('unsubscribe');
-            
+        that.subscriber = new Subscriber( that.options , function() {            
             that.resolveBean();
             that.happen( 'beanComplete' , that );
         });
@@ -57,8 +54,6 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
             that.subscriber.destroy();
             delete that.subscriber;
         }
-
-        //console.log(that);
     };
 
 
@@ -115,11 +110,14 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
     function _getStyles( seed ) {
 
         var optionKeys = Config.keys.options;
+        var keyMap = Config.properties;
         var styles = {};
+        var key, mappedKey;
 
-        for (var key in seed) {
-            if (optionKeys.indexOf( key ) < 0) {
-                styles[key] = seed[key];
+        for (key in seed) {
+            mappedKey = keyMap[key] || key;
+            if (optionKeys.indexOf( mappedKey ) < 0) {
+                styles[mappedKey] = seed[key];
             }
         }
 

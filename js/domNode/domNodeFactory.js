@@ -91,7 +91,7 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
 
             if (property) {
 
-                out = components.values;
+                out = components.values || {};
 
                 if (out.hasOwnProperty( 0 )) {
                     out = out[0];

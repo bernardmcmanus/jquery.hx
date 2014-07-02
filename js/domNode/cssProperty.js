@@ -5,28 +5,13 @@ hxManager.CSSProperty = (function( Helper ) {
     var Helper_compareArray = Helper.compareArray;
 
 
-    function CSSProperty( mappedName , name , values , index ) {
+    function CSSProperty( mappedName , values ) {
 
         var that = this;
 
-        Object_defineProperty( that , 'mappedName' , {
+        /*Object_defineProperty( that , 'mappedName' , {
             get: function() {
-                return name;
-            }
-        });
-
-        Object_defineProperty( that , 'name' , {
-            get: function() {
-                return name;
-            }
-        });
-
-        /*Object_defineProperty( that , 'index' , {
-            get: function() {
-                return index;
-            },
-            set: function( value ) {
-                index = value;
+                return mappedName;
             }
         });*/
 
