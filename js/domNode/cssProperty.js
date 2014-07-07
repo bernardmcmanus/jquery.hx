@@ -45,6 +45,12 @@ hxManager.CSSProperty = (function( Helper ) {
             }
         });
 
+        Object_defineProperty( that , 'clone' , {
+            get: function() {
+                return new CSSProperty( mappedName , that.values );
+            }
+        });
+
         that.defaults.forEach(function( val , i ) {
             that[i] = val;
         });

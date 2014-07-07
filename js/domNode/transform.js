@@ -50,6 +50,12 @@ hxManager.Transform = (function( CSSProperty ) {
             }
         });
 
+        Object_defineProperty( that , 'clone' , {
+            get: function() {
+                return new Transform( mappedName , that.values );
+            }
+        });
+
         that.defaults.forEach(function( val , i ) {
             that[i] = val;
         });

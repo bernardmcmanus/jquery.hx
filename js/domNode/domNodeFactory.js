@@ -12,7 +12,9 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
         }
 
         // otherwise, create a new hx element
-        var _hxModule = getScopedModule( hxModule , element );
+        var _hxModule = new MOJO(
+            getScopedModule( hxModule , element )
+        );
 
         _hxModule.queue = new Queue();
         _hxModule.componentMOJO = new ComponentMOJO();
@@ -74,52 +76,79 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
             $(that).css( property , string );
         },
 
-        getComponents: function( type , property ) {
+        getComponents: function( type , property , pretty ) {
 
             // TODO - clean up this method
-
-            var that_hx = this._hx;
-
-            var keyMap = Config.properties;
-            var keyMapInv = keyMap.inverse;
             
             property = Config.properties[property] || property;
+            pretty = (pretty !== undefined ? pretty : true);
             
-            var components = this._hx.componentMOJO.getComponents( type , property );
-            var i, key, keyInv, keys = Object.keys( components );
+            var that_hx = this._hx;
+            var components = that_hx.componentMOJO.getComponents( type , property );
+            var keys = Object.keys( components );
             var out = {};
 
-            if (property) {
+            if (pretty) {
 
-                out = components.values || {};
+                var keyMap = Config.properties;
+                var keyMapInv = keyMap.inverse;
+                var i, key, keyInv;
 
-                if (out.hasOwnProperty( 0 )) {
-                    out = out[0];
-                }
-            }
-            else if (type) {
+                if (property) {
 
-                for (i = 0; i < keys.length; i++) {
-                    
-                    key = keys[i];
-                    keyInv = keyMapInv[key] || key;
-                    out[keyInv] = components[key].values;
+                    out = components.values || {};
 
-                    if (out[keyInv].hasOwnProperty( 0 )) {
-                        out[keyInv] = out[keyInv][0];
-                    }
-                    else if (keyInv === 'value') {
-                        out = out.value;
+                    if (out.hasOwnProperty( 0 )) {
+                        out = out[0];
                     }
                 }
+                else if (type) {
+
+                    for (i = 0; i < keys.length; i++) {
+                        
+                        key = keys[i];
+                        keyInv = keyMapInv[key] || key;
+                        out[keyInv] = components[key].values;
+
+                        if (out[keyInv].hasOwnProperty( 0 )) {
+                            out[keyInv] = out[keyInv][0];
+                        }
+                        else if (keyInv === 'value') {
+                            out = out.value;
+                        }
+                    }
+                }
+                else {
+                    Helper_each( components , function( val , key ) {
+                        out[key] = that_hx.getComponents( key );
+                    });
+                }
+
+                return out;
             }
             else {
-                Helper_each( components , function( val , key ) {
-                    out[key] = that_hx.getComponents( key );
-                });
-            }
 
-            return out;
+                if (property) {
+
+                    out = components.clone || {};
+                }
+                else if (type) {
+
+                    Helper_each( components , function( val , key ) {
+                        out[key] = that_hx.getComponents( type , key , false );
+                    });
+
+                    /*for (i = 0; i < keys.length; i++) {
+                        
+                        out[keys[i]] = that_hx.getComponents( keys[i] );
+                    }*/
+                }
+                else {
+                    out = $.extend( true , {} , components );
+                }
+
+                return out;
+            }
         },
 
         getOrder: function( type ) {
@@ -177,6 +206,10 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
             that._hx.queue.pushPod( pod );
         },
 
+        next: function() {
+            return this._hx.queue.next();
+        },
+
         clearQueue: function( all ) {
             this._hx.queue.clear( all );
         },
@@ -213,18 +246,21 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
     }
 
     function podComplete( e , node , pod ) {
-        node._hx.queue.next();
+        node._hx.happen( 'podComplete' , node , pod );
+        node._hx.next();
     }
 
     function animationCanceled( e , node , pod ) {
         pod.dispel( 'beanComplete' );
         pod.dispel( 'clusterComplete' );
         pod.dispel( 'podComplete' );
+        node._hx.happen( 'animationCanceled' , node , pod );
         node._hx.resetTransition();
     }
 
     function promiseCanceled( e , node , pod ) {
         pod.dispel( 'podComplete' );
+        node._hx.happen( 'promiseCanceled' , node , pod );
     }
 
 

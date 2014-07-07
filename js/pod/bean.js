@@ -38,8 +38,11 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
     Bean_prototype.subscribe = function() {
 
         var that = this;
+        var options = that.options;
+        var duration = options.duration;
+        var delay = options.delay;
 
-        that.subscriber = new Subscriber( that.options , function() {            
+        that.subscriber = new Subscriber( duration , delay , function() {            
             that.resolveBean();
             that.happen( 'beanComplete' , that );
         });

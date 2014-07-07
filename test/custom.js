@@ -1096,32 +1096,33 @@
 
             var selector = '.tgt,.tgt2,.tgt3';
 
-            $('.tgt').hx({
+            $(selector)
+            //.hx( 'defer' , 1000 )
+            .hx({
                 type: 'transform',
                 translate: {
                     y: '+=100'
                 }
-            });
-            
-            $(selector)
-            .hx( 'do' , function( controller ) {
-                                
-                controller.do({
+            })
+            .do(function( controller ) {
+                
+                controller.get( 0 ).do({
                     type: 'transform',
-                    translate: {x: '+=200'}
+                    translate: {x: '+=100', y: '+=100'},
+                    duration: 1000
                 });
 
-                controller.get( 2 ).do({
+                /*controller.get( 0 ).do({
                     type: 'transform',
                     rotateZ: '+=30',
-                    duration: 500,
-                    delay: 200
-                });
+                    duration: 300,
+                    delay: 500
+                });*/
 
-                controller.do({
+                /*controller.do({
                     type: 'opacity',
                     value: 0.5
-                });
+                });*/
             })
             .done(function() {
                 console.log('done');

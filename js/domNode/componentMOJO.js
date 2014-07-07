@@ -40,7 +40,7 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
         if (type) {
             _type = (that[type] || {});
             if (property) {
-                _property = _type[property] || [];
+                _property = _type[property] || CSSFactory( property , null );
                 return _property;
             }
             return _type;

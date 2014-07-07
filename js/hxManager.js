@@ -104,6 +104,42 @@ window.hxManager = (function() {
     };
 
 
+    hxManager_prototype.when = function( e , handler ) {
+
+        var that = this;
+
+        that.each(function( i ) {
+            that[i]._hx.when( e , handler , that[i] );
+        });
+
+        return that;
+    };
+
+
+    hxManager_prototype.happen = function( e , args ) {
+
+        var that = this;
+
+        that.each(function( i ) {
+            that[i]._hx.happen( e , args );
+        });
+
+        return that;
+    };
+
+
+    hxManager_prototype.dispel = function( e , handler ) {
+
+        var that = this;
+
+        that.each(function( i ) {
+            that[i]._hx.dispel( e , handler );
+        });
+
+        return that;
+    };
+
+
     hxManager_prototype.do = function( func ) {
 
         if (typeof func !== 'function') {
@@ -155,15 +191,25 @@ window.hxManager = (function() {
     };
 
 
-    hxManager_prototype.race = function( func ) {        
+    hxManager_prototype.race = function( func ) {
         return this._addPromisePod( func , 'race' );
     };
 
 
     hxManager_prototype.defer = function( time ) {
-        return this._addPromisePod(function( resolve , reject ) {
+
+        var that = this;
+
+        return that._addPromisePod(function( resolve ) {
+            
             if (time) {
-                setTimeout( resolve , time );
+                
+                var subscriber = new hxManager.Subscriber( time , 0 , resolve );
+
+                that.when( 'podComplete' , function onResolve( e ) {
+                    that.dispel( 'podComplete' , onResolve );
+                    subscriber.destroy();
+                });
             }
         });
     };
@@ -265,14 +311,14 @@ window.hxManager = (function() {
 
 
     // !!! get does not return the hxManager instance
-    hxManager_prototype.get = function( type , property ) {
+    hxManager_prototype.get = function( type , property , pretty ) {
 
         var that = this;
         var components = [];
 
         that.each(function( i ) {
             components.push(
-                that[i]._hx.getComponents( type , property )
+                that[i]._hx.getComponents( type , property , pretty )
             );
         });
         

@@ -54,12 +54,10 @@ module.exports = function( grunt ) {
         replace: {
             dev: {
                 options: {
-                    patterns: [
-                        {
-                            match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                            replacement : '<script src=\"../hx-<%= pkg.version %>.js\"></script>'
-                        }
-                    ]
+                    patterns: [{
+                        match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
+                        replacement : '<script src=\"../hx-<%= pkg.version %>.js\"></script>'
+                    }]
                 },
                 files: [{
                     src: 'live/index.html',
@@ -68,12 +66,10 @@ module.exports = function( grunt ) {
             },
             prod: {
                 options: {
-                    patterns: [
-                        {
-                            match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                            replacement : '<script src=\"../hx-<%= pkg.version %>.min.js\"></script>'
-                        }
-                    ]
+                    patterns: [{
+                        match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
+                        replacement : '<script src=\"../hx-<%= pkg.version %>.min.js\"></script>'
+                    }]
                 },
                 files: [{
                     src: 'live/index.html',
@@ -82,18 +78,16 @@ module.exports = function( grunt ) {
             },
             live: {
                 options: {
-                    patterns: [
-                        {
-                            match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                            replacement: function() {
-                                var template = '<script src=\"../[src]\"></script>';
-                                return All.map(function( src , i ) {
-                                    return (i > 0 ? '\t\t' : '') + template.replace( /\[src\]/ , src );
-                                })
-                                .join( '\n' );
-                            }
+                    patterns: [{
+                        match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
+                        replacement: function() {
+                            var template = '<script src=\"../[src]\"></script>';
+                            return All.map(function( src , i ) {
+                                return (i > 0 ? '\t\t' : '') + template.replace( /\[src\]/ , src );
+                            })
+                            .join( '\n' );
                         }
-                    ]
+                    }]
                 },
                 files: [{
                     src: 'live/index.html',
@@ -149,7 +143,37 @@ module.exports = function( grunt ) {
 
         concat: {
             options: {
-                banner : '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n\n\n'
+                banner : (function() {
+                    var banner = '/*\n\n';
+                    banner += '<%= pkg.name %> v<%= pkg.version %> - ';
+                    banner += grunt.template.today( 'yyyy-mm-dd' );
+                    banner += '\n\n';
+                    banner += ('Copyright (c) ' + grunt.template.today( 'yyyy' ));
+                    banner += ' Bernard McManus and contributors\n\n';
+                    banner += '===============================================================================\n';
+                    banner += '===============================================================================\n';
+                    banner += '===============================================================================\n\n';
+                    banner += 'Permission is hereby granted, free of charge, to any person obtaining a copy of\n';
+                    banner += 'this software and associated documentation files (the "Software"), to deal in\n';
+                    banner += 'the Software without restriction, including without limitation the rights to\n';
+                    banner += 'use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\n';
+                    banner += 'of the Software, and to permit persons to whom the Software is furnished to do\n';
+                    banner += 'so, subject to the following conditions:\n\n';
+                    banner += 'The above copyright notice and this permission notice shall be included in all\n';
+                    banner += 'copies or substantial portions of the Software.\n\n';
+                    banner += 'THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n';
+                    banner += 'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n';
+                    banner += 'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n';
+                    banner += 'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n';
+                    banner += 'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n';
+                    banner += 'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n';
+                    banner += 'SOFTWARE.\n\n';
+                    banner += '===============================================================================\n';
+                    banner += '===============================================================================\n';
+                    banner += '===============================================================================\n';
+                    banner += '\n\n*/\n\n';
+                    return banner;
+                }())
             },
             build: {
                 src: All,
