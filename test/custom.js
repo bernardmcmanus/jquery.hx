@@ -1096,37 +1096,89 @@
 
             var selector = '.tgt,.tgt2,.tgt3';
 
-            $(selector)
-            //.hx( 'defer' , 1000 )
-            .hx({
-                type: 'transform',
-                translate: {
-                    y: '+=100'
-                }
-            })
-            .do(function( controller ) {
-                
+            $(selector).hx( 'do' , function( controller ) {
+
                 controller.get( 0 ).do({
                     type: 'transform',
-                    translate: {x: '+=100', y: '+=100'},
+                    translate: {x: '+=20', y: '+=100'},
                     duration: 1000
                 });
 
-                /*controller.get( 0 ).do({
+                controller.get( 0 ).do({
                     type: 'transform',
                     rotateZ: '+=30',
-                    duration: 300,
-                    delay: 500
-                });*/
+                    duration: 600,
+                    delay: 200,
+                    easing: 'easeOutElastic'
+                });
 
-                /*controller.do({
-                    type: 'opacity',
-                    value: 0.5
-                });*/
+                controller.get( 1 ).do({
+                    type: 'transform',
+                    translate: {x: '+=20', y: '+=100'},
+                    duration: 600,
+                    delay: 300
+                });
+
+                controller.get( 1 ).do({
+                    type: 'transform',
+                    rotateZ: '+=30',
+                    duration: 600,
+                    delay: 500,
+                    easing: 'easeOutElastic'
+                });
+
+                controller.get( 2 ).do({
+                    type: 'transform',
+                    translate: {x: '+=20', y: '+=100'},
+                    duration: 600,
+                    delay: 600
+                });
+
+                controller.get( 2 ).do({
+                    type: 'transform',
+                    rotateZ: '+=30',
+                    duration: 600,
+                    delay: 800,
+                    easing: 'easeOutElastic'
+                });
+            });
+
+            /*$(selector)
+            .hx( 'loop' , null , function( i ) {
+
+                $(this)
+                .hx( 'loop' , 3 , function( j ) {
+
+                    $(this)
+                    .hx( 'do' , function( controller ) {
+
+                        controller.do({
+                            type: 'transform',
+                            translate: {x: '+=20', y: '+=80'},
+                            duration: 1000
+                        });
+
+                        controller.do({
+                            type: 'transform',
+                            rotateZ: '+=30',
+                            duration: 600,
+                            delay: 200,
+                            easing: 'easeOutElastic'
+                        });
+                    });
+                })
+                .hx({
+                    type: 'transform',
+                    translate: null,
+                    rotateZ: null,
+                    duration: 1000
+                });
             })
             .done(function() {
-                console.log('done');
-            });
+                $('#target').off( 'click' ).on( 'click' , function() {
+                    $(selector).hx( 'clear' );
+                });
+            });*/
         }
     };
 

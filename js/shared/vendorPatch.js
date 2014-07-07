@@ -43,27 +43,19 @@ hxManager.VendorPatch = (function( Config ) {
             return str;
         },
 
-        getComputedMatrix: function( element ) {
+        /*getComputedMatrix: function( element ) {
             var vendor = this.vendor;
             var style = getComputedStyle( element );
             var transform = vendor !== 'other' ? (vendor + 'Transform') : 'transform';
             return style[transform] || style.transform;
-        },
+        },*/
 
         getBezierSupport: function() {
             if (_isAndroidNative( this.os )) {
                 return false;
             }
             return true;
-        },
-
-        getDuration: function( duration ) {
-            if (duration === 0 && _isAndroidNative( this.os )) {
-                return 1;
-            }
-            return duration;
         }
-        
     };
 
 

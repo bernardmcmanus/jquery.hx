@@ -1,4 +1,4 @@
-hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch ) {
+hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch , Easing ) {
 
 
     var Config_defaults = Config.defaults;
@@ -27,8 +27,7 @@ hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch ) {
 
         Helper_each( that , function( options , type ) {
 
-            // android native browser won't respond to zero duration when cancelling a transition
-            var duration = VendorPatch.getDuration( options.duration );
+            var duration = options.duration;
             var easing = options.easing;
             var delay = options.delay;
 
@@ -61,7 +60,7 @@ hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch ) {
         var options = bean.options;
         return {
             duration: options.duration,
-            easing: options.easing,
+            easing: Easing( options.easing ),
             delay: options.delay
         };
     }
@@ -75,7 +74,7 @@ hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch ) {
     return TransitionMOJO;
 
     
-}( hxManager.Config , hxManager.Helper , hxManager.VendorPatch ));
+}( hxManager.Config , hxManager.Helper , hxManager.VendorPatch , hxManager.Easing ));
 
 
 

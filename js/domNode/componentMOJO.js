@@ -19,6 +19,34 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
     var ComponentMOJO_prototype = (ComponentMOJO.prototype = new MOJO());
 
 
+    ComponentMOJO_prototype.ensure = function( propertyArray ) {
+
+        var that = this;
+
+        propertyArray = (propertyArray instanceof Array ? propertyArray : [ propertyArray ]);
+
+        propertyArray.forEach(function( property ) {
+
+            var type = that.getPropertyType( property );
+            var component = (that[type] = that[type] || {});
+            var order = (that.order[type] = that.order[type] || []);
+
+            if (component[property] === undefined) {
+                component[property] = CSSFactory( property , null );
+            }
+
+            if (order.indexOf( property ) < 0) {
+                order.push( property );
+            }
+        });
+    };
+
+
+    ComponentMOJO_prototype.getPropertyType = function( property ) {
+        return Config.keys.transform.indexOf( property ) >= 0 ? 'transform' : property;
+    };
+
+
     ComponentMOJO_prototype.getString = function( type ) {
 
         var that = this;
@@ -56,11 +84,14 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
         var styles = bean.styles;
         var type = bean.type;
         var component = (that[type] = that[type] || {});
+        var cssProperty;
 
         for (var key in styles) {
 
+            cssProperty = (key === 'value' ? type : key);
+
             if (component[key] === undefined) {
-                component[key] = CSSFactory( key , styles[key] );
+                component[key] = CSSFactory( cssProperty , styles[key] );
             }
             else {
                 component[key].update( styles[key] );

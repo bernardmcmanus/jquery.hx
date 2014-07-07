@@ -77,9 +77,27 @@ hxManager.Doer = (function( IteratorMOJO ) {
         run: function() {
 
             var master = this.master;
-            
+
             master.iterators.forEach(function( it ) {
                 it.run();
+            });
+        },
+
+        calculate: function( percent ) {
+
+            var master = this.master;
+
+            master.iterators.forEach(function( it ) {
+                it.calculate( percent );
+            });
+        },
+
+        destroy: function() {
+
+            var master = this.master;
+
+            master.iterators.forEach(function( it ) {
+                it.destroy();
             });
         },
 
@@ -88,6 +106,9 @@ hxManager.Doer = (function( IteratorMOJO ) {
             var master = this.master;
             
             if (master.complete) {
+                /*master.iterators.forEach(function( it ) {
+                    it.final();
+                });*/
                 master.resolve();
             }
         }

@@ -151,14 +151,43 @@ window.hxManager = (function() {
         return that._addPromisePod(function( resolve , reject ) {
 
             var controller = new hxManager.Doer( that );
+
+            function promiseAction( method ) {
+                controller.destroy();
+                method();
+            }
             
-            controller.resolve = resolve;
-            controller.reject = reject;
+            controller.resolve = promiseAction.bind( null , resolve );
+            controller.reject = promiseAction.bind( null , reject );
             
             func( controller );
-            
             controller.run();
         });
+    };
+
+
+    hxManager_prototype.loop = function( n , func , _it ) {
+
+        if (typeof func !== 'function') {
+            throw new TypeError( 'repeat requires a function.' );
+        }
+
+        var that = this;
+
+        _it = _it || 0;
+
+        for (var i = 0; i < (n || 1); i++) {
+            func.call( that , _it );
+            _it++;
+        }
+
+        if (!n) {
+            that.done(function() {
+                that.loop( null , func , _it );
+            });
+        }
+
+        return that;
     };
 
 

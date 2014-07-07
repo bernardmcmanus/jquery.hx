@@ -39,8 +39,6 @@ hxManager.Subscriber = (function( TimingMOJO ) {
             var that = this;
             var progress = that.getProgress( timestamp );
 
-            //console.log(that.elapsed);
-
             that.timingCallback( progress , timestamp );
             
             if (progress >= 1) {
@@ -61,7 +59,6 @@ hxManager.Subscriber = (function( TimingMOJO ) {
             }
 
             if (that.delay > that.elapsed) {
-                //console.log('delay');
                 return 0;
             }
 

@@ -1,4 +1,4 @@
-hxManager.Bean = (function( Config , Easing , Subscriber ) {
+hxManager.Bean = (function( Config , Subscriber ) {
 
 
     var Object_defineProperty = Object.defineProperty;
@@ -60,19 +60,22 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
     };
 
 
-    function getCompiledData( seed ) {
+    Bean_prototype.getOptions = function( seed ) {
 
-        return {
-            seed: seed,
-            type: seed.type,
-            order: _getOrder( seed ),
-            options: _getOptions( seed ),
-            styles: _getStyles( seed )
-        };
-    }
+        var defaults = Config.defaults;
+        var options = $.extend( {} , defaults , seed );
+
+        for (var key in options) {
+            if (!defaults.hasOwnProperty( key )) {
+                delete options[key];
+            }
+        }
+
+        return options;
+    };
 
 
-    function _getOrder( seed ) {
+    Bean_prototype.getOrder = function( seed ) {
 
         var passed = (seed.order || []).map( mapCallback );
         
@@ -90,27 +93,10 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
             passed: passed,
             computed: computed
         };
-    }
+    };
 
 
-    function _getOptions( seed ) {
-
-        var defaults = Config.defaults;
-        var options = $.extend( {} , defaults , seed );
-
-        for (var key in options) {
-            if (!defaults.hasOwnProperty( key )) {
-                delete options[key];
-            }
-        }
-
-        options.easing = Easing( options.easing );
-
-        return options;
-    }
-
-
-    function _getStyles( seed ) {
+    Bean_prototype.getStyles = function( seed ) {
 
         var optionKeys = Config.keys.options;
         var keyMap = Config.properties;
@@ -125,13 +111,29 @@ hxManager.Bean = (function( Config , Easing , Subscriber ) {
         }
 
         return styles;
+    };
+
+
+    function getCompiledData( seed ) {
+
+        var getOrder = Bean_prototype.getOrder;
+        var getOptions = Bean_prototype.getOptions;
+        var getStyles = Bean_prototype.getStyles;
+
+        return {
+            seed: seed,
+            type: seed.type,
+            order: getOrder( seed ),
+            options: getOptions( seed ),
+            styles: getStyles( seed )
+        };
     }
 
 
     return Bean;
 
     
-}( hxManager.Config , hxManager.Easing , hxManager.Subscriber ));
+}( hxManager.Config , hxManager.Subscriber ));
 
 
 

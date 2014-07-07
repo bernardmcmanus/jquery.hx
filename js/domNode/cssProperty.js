@@ -8,6 +8,7 @@ hxManager.CSSProperty = (function( Helper ) {
     function CSSProperty( mappedName , values ) {
 
         var that = this;
+        var property = Properties[mappedName] || Properties.other;
 
         /*Object_defineProperty( that , 'mappedName' , {
             get: function() {
@@ -17,13 +18,13 @@ hxManager.CSSProperty = (function( Helper ) {
 
         Object_defineProperty( that , 'defaults' , {
             get: function() {
-                return [ '' ];
+                return property.defaults;
             }
         });
 
         Object_defineProperty( that , 'keyMap' , {
             get: function() {
-                return [ 0 ];
+                return property.keyMap;
             }
         });
 
@@ -121,6 +122,20 @@ hxManager.CSSProperty = (function( Helper ) {
         
         return out;
     }
+
+
+    var Properties = {
+
+        opacity: {
+            defaults: [ 1 ],
+            keyMap: [ 0 ]
+        },
+
+        other: {
+            defaults: [ '' ],
+            keyMap: [ 0 ]
+        }
+    };
 
 
     return CSSProperty;
