@@ -1,4 +1,4 @@
-hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
+hxManager.ComponentMOJO = (function( Config , CSSFactory ) {
 
 
     function ComponentMOJO() {
@@ -19,7 +19,7 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
     var ComponentMOJO_prototype = (ComponentMOJO.prototype = new MOJO());
 
 
-    ComponentMOJO_prototype.ensure = function( propertyArray ) {
+    /*ComponentMOJO_prototype.ensure = function( propertyArray ) {
 
         var that = this;
 
@@ -39,12 +39,12 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
                 order.push( property );
             }
         });
-    };
+    };*/
 
 
-    ComponentMOJO_prototype.getPropertyType = function( property ) {
+    /*ComponentMOJO_prototype.getPropertyType = function( property ) {
         return Config.keys.transform.indexOf( property ) >= 0 ? 'transform' : property;
-    };
+    };*/
 
 
     ComponentMOJO_prototype.getString = function( type ) {
@@ -53,6 +53,8 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
         var order = that.getOrder( type );
 
         var arr = order.map(function( property ) {
+            /*var component = that.getComponents( type , property );
+            return component.isDefault() ? '' : component.string;*/
             return that.getComponents( type , property ).string;
         });
 
@@ -64,11 +66,12 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
 
         var that = this;
         var _type, _property;
+        var name = (property === 'value' ? type : property);
 
         if (type) {
             _type = (that[type] || {});
             if (property) {
-                _property = _type[property] || CSSFactory( property , null );
+                _property = _type[property] || CSSFactory( name , null );
                 return _property;
             }
             return _type;
@@ -133,6 +136,25 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
     };
 
 
+    /*ComponentMOJO_prototype.refreshOrder = function() {
+        
+        var that = this;
+        var order = that.getOrder();
+
+        MOJO.Each( order , function( propertyOrder , type ) {
+
+            var componentKeys = Object.keys( that.getComponents( type ));
+
+            var newOrder = propertyOrder.filter(function( property , i ) {
+                return componentKeys.indexOf( property ) >= 0;
+            });
+
+            newOrder = newOrder.length > 0 ? newOrder : null;
+            that.setOrder( type , newOrder );
+        });
+    };*/
+
+
     ComponentMOJO_prototype._updateOrder = function( bean ) {
         
         var that = this;
@@ -156,7 +178,7 @@ hxManager.ComponentMOJO = (function( Config , Helper , CSSFactory ) {
     return ComponentMOJO;
 
     
-}( hxManager.Config , hxManager.Helper , hxManager.CSSFactory ));
+}( hxManager.Config , hxManager.CSSFactory ));
 
 
 

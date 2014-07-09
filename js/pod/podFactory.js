@@ -1,4 +1,4 @@
-hxManager.PodFactory = (function( AnimationPod , PromisePod ) {
+hxManager.PodFactory = (function( AnimationPod , PrecisionPod , PromisePod ) {
 
 
     function PodFactory( node , type ) {
@@ -7,6 +7,9 @@ hxManager.PodFactory = (function( AnimationPod , PromisePod ) {
 
             case 'animation':
                 return new AnimationPod( node );
+
+            case 'precision':
+                return new PrecisionPod( node );
 
             case 'promise':
                 return new PromisePod();
@@ -17,4 +20,4 @@ hxManager.PodFactory = (function( AnimationPod , PromisePod ) {
     return PodFactory;
 
     
-}( hxManager.AnimationPod , hxManager.PromisePod ));
+}( hxManager.AnimationPod , hxManager.PrecisionPod , hxManager.PromisePod ));

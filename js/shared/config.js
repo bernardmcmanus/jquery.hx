@@ -56,7 +56,8 @@ hxManager.Config = (function() {
 
             prefix: [
                 (/(\-{0})transition/g),
-                (/(\-{0})transform/g)
+                (/(\-{0})transform/g),
+                (/(\-{0})filter/g)
             ]
         }
     };

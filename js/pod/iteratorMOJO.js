@@ -1,17 +1,16 @@
-hxManager.IteratorMOJO = (function( Config , Helper , Bean , Subscriber ) {
+hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
 
 
-    var Object_defineProperty = Object.defineProperty;
-    var Object_keys = Object.keys;
-    var Helper_each = Helper.each;
+    var MOJO_Each = MOJO.Each;
 
 
-    function IteratorMOJO( hxm , seed ) {
+    function IteratorMOJO( node , bean ) {
 
         var that = this;
-        var bean = (that.bean = new Bean( seed ));
+        var bean = (that.bean = bean);
         var bean_options = bean.options;
 
+        that.node = node;
         that.type = bean.type;
         that.styles = bean.styles;
         that.properties = bean.order.computed;
@@ -20,22 +19,7 @@ hxManager.IteratorMOJO = (function( Config , Helper , Bean , Subscriber ) {
         that.delay = bean_options.delay;
         that.easing = bean_options.easing;
 
-        hxm.each(function( i ) {
-            var componentMOJO = hxm[i]._hx.componentMOJO;
-            componentMOJO.ensure( that.properties );
-        });
-
-        that.current = that._getCurrent( hxm );
-        that.dest = that._getDest( that.current , that.styles );
-        that.diff = that._getDiff( hxm , that.current , that.dest );
-
         MOJO.Hoist( that );
-
-        Object_defineProperty( that , 'hxm' , {
-            get: function() {
-                return hxm;
-            }
-        });
     }
 
 
@@ -45,11 +29,15 @@ hxManager.IteratorMOJO = (function( Config , Helper , Bean , Subscriber ) {
     IteratorMOJO_prototype.run = function() {
         
         var that = this;
+        var node_hx = that.node._hx;
+
+        that.current = that._getCurrent( that.node );
+        that.dest = that._getDest( that.current , that.styles );
+        that.diff = that._getDiff( that.node , that.current , that.dest );
 
         function onComplete() {
-            that.subscriber.destroy();
-            that.complete = true;
-            that.happen( 'complete' );
+            that.paint( that.dest );
+            that.complete();
         }
 
         function timingCallback( progress ) {
@@ -62,37 +50,31 @@ hxManager.IteratorMOJO = (function( Config , Helper , Bean , Subscriber ) {
     };
 
 
-    /*IteratorMOJO_prototype.final = function() {
-        var that = this;
-        console.log(that);
-    };*/
-
-
     IteratorMOJO_prototype.calculate = function( percent ) {
 
         var that = this;
 
-        that.hxm.each(function( i ) {
+        MOJO_Each( that.diff , function( diff , key ) {
 
-            var componentMOJO = that.hxm[i]._hx.componentMOJO;
+            var current = that.current[key];
+            var dest = that.dest[key];
 
-            for (var key in that.diff[i]) {
+            diff.forEach(function( val , i ) {
 
-                var current = that.current[i][key];
-                var diff = that.diff[i][key];
-                var dest = that.dest[i][key];
-
-                for (var j = 0; j < diff.length; j++) {
-                    
-                    var value = diff[j] * (1 - percent);
-                    current[j] = dest[j] - value;
-                }
-
-                componentMOJO[that.type][key].update( that.current[i][key].values );
-            }
+                var value = val * (1 - percent);
+                current[i] = dest[i] - value;
+            });
         });
 
-        that.hxm.paint();
+        that.paint( that.current );
+    };
+
+
+    IteratorMOJO_prototype.complete = function() {
+        var that = this;
+        that.subscriber.destroy();
+        that.complete = true;
+        that.happen( 'complete' );
     };
 
 
@@ -100,6 +82,30 @@ hxManager.IteratorMOJO = (function( Config , Helper , Bean , Subscriber ) {
         var that = this;
         that.dispel( 'complete' );
         that.subscriber.destroy();
+    };
+
+
+    IteratorMOJO_prototype.paint = function( model ) {
+
+        var that = this;
+        var node_hx = that.node._hx;
+        var bean = that._updateBean( model );
+
+        node_hx.updateComponent( bean );
+        node_hx.paint( that.type );
+    };
+
+
+    IteratorMOJO_prototype._updateBean = function( model ) {
+
+        var that = this;
+        var bean = that.bean;
+
+        MOJO_Each( model , function( property , key ) {
+            bean.styles[key] = property;
+        });
+
+        return bean;
     };
 
 
@@ -119,67 +125,57 @@ hxManager.IteratorMOJO = (function( Config , Helper , Bean , Subscriber ) {
     };
 
 
-    IteratorMOJO_prototype._getCurrent = function( hxm ) {
+    IteratorMOJO_prototype._getCurrent = function( node ) {
 
         var that = this;
 
-        return hxm.toArray().map(function( node , i ) {
-            
-            var current = {};
-            var type = that.type;
-            var properties = that.properties;
+        var current = {};
+        var type = that.type;
+        var properties = that.properties;
 
-            properties.forEach(function( property ) {
-                current[property] = node._hx.getComponents( type , property , false );
-            });
-
-            return current;
+        properties.forEach(function( property ) {
+            current[property] = node._hx.getComponents( type , property , false );
         });
+
+        return current;
     };
 
 
     IteratorMOJO_prototype._getDest = function( current , styles ) {
 
         var that = this;
+        var newProperties = {};
 
-        return current.map(function( properties , i ) {
+        MOJO_Each( current , function( CSSProperty , key ) {
 
-            var newProperties = {};
-
-            Helper_each( properties , function( CSSProperty , key ) {
-
-                CSSProperty = CSSProperty.clone;
-                CSSProperty.update( styles[key] );
-                newProperties[key] = CSSProperty;
-            });
-
-            return newProperties;
+            CSSProperty = CSSProperty.clone;
+            CSSProperty.update( styles[key] );
+            newProperties[key] = CSSProperty;
         });
+
+        return newProperties;
     };
 
 
-    IteratorMOJO_prototype._getDiff = function( hxm , current , dest ) {
+    IteratorMOJO_prototype._getDiff = function( node , current , dest ) {
 
-        return hxm.toArray().map(function( node , i ) {
+        var diff = {};
+
+        MOJO_Each( current , function( property , key ) {
             
-            var diff = {};
-
-            Helper_each( current[i] , function( property , key ) {
-                
-                diff[key] = property.map(function( val , j ) {
-                    return dest[i][key][j] - val;
-                });
+            diff[key] = property.map(function( val , i ) {
+                return dest[key][i] - val;
             });
-
-            return diff;
         });
+
+        return diff;
     };
 
 
     return IteratorMOJO;
 
     
-}( hxManager.Config , hxManager.Helper , hxManager.Bean , hxManager.Subscriber ));
+}( hxManager.Config , hxManager.Bean , hxManager.Subscriber ));
 
 
 
@@ -219,6 +215,9 @@ hxManager.IteratorMOJO = (function( Config , Helper , Bean , Subscriber ) {
         var easing = {
 
             def: 'easeOutQuad',
+            linear: function (x, t, b, c, d) {
+                return t / d;
+            },
             swing: function (x, t, b, c, d) {
                 return easing[easing.def](x, t, b, c, d);
             },

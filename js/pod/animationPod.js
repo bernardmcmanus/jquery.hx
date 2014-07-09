@@ -1,7 +1,7 @@
-hxManager.AnimationPod = (function( Helper , VendorPatch ) {
+hxManager.AnimationPod = (function( VendorPatch ) {
 
 
-    var Helper_each = Helper.each;
+    var MOJO_Each = MOJO.Each;
     var Object_defineProperty = Object.defineProperty;
 
 
@@ -18,7 +18,7 @@ hxManager.AnimationPod = (function( Helper , VendorPatch ) {
         Object_defineProperty( that , 'sequence' , {
             get: function() {
                 var sequence = {};
-                Helper_each( that.beans , function( cluster , type ) {
+                MOJO_Each( that.beans , function( cluster , type ) {
                     if (cluster.length > 0) {
                         sequence[type] = cluster[0];
                     }
@@ -51,13 +51,11 @@ hxManager.AnimationPod = (function( Helper , VendorPatch ) {
         var that = this;
         var node = that.node;
 
-        Helper_each( that.sequence , function( bean , key ) {
+        MOJO_Each( that.sequence , function( bean , key ) {
             
-            if (bean.subscribed) {
-                return;
+            if (!bean.subscribed) {
+                that._runBean( node , bean );
             }
-
-            that._runBean( node , bean );
         });
 
         node._hx.applyTransition();
@@ -140,7 +138,7 @@ hxManager.AnimationPod = (function( Helper , VendorPatch ) {
 
         that.happen( 'podCanceled' , that );
 
-        Helper_each( that.beans , function( cluster , key ) {
+        MOJO_Each( that.beans , function( cluster , key ) {
             while (cluster.length > 0) {
                 cluster.shift().resolveBean();
             }
@@ -153,7 +151,7 @@ hxManager.AnimationPod = (function( Helper , VendorPatch ) {
         var that = this;
         var beans = that.beans;
 
-        Helper_each( beans , function( cluster , type ) {
+        MOJO_Each( beans , function( cluster , type ) {
             
             var lastBean = cluster.pop();
             delete beans[type];
@@ -171,7 +169,7 @@ hxManager.AnimationPod = (function( Helper , VendorPatch ) {
     return AnimationPod;
 
     
-}( hxManager.Helper , hxManager.VendorPatch ));
+}( hxManager.VendorPatch ));
 
 
 

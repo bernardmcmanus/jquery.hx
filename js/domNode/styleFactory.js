@@ -1,13 +1,15 @@
-hxManager.CSSFactory = (function( CSSProperty ) {
+hxManager.StyleFactory = (function() {
 
 
-    function CSSFactory( name , values ) {
-        var definition = Properties[name] || new StyleProperty( name );
-        return new CSSProperty( name , values , definition );
+    var Object_defineProperty = Object.defineProperty;
+
+
+    function StyleFactory( name ) {
+        return Properties[name] || new StyleProperty( name );
     }
 
 
-    var DefineProperty = (CSSFactory.defineProperty = function( name ) {
+    var DefineProperty = (StyleFactory.defineProperty = function( name ) {
         return (Properties[name] = new StyleProperty( name ));
     });
 
@@ -153,10 +155,10 @@ hxManager.CSSFactory = (function( CSSProperty ) {
         .setDefaults([ 1 ]);
 
 
-    return CSSFactory;
+    return StyleFactory;
 
     
-}( hxManager.CSSProperty ));
+}());
 
 
 

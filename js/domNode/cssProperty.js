@@ -2,35 +2,33 @@ hxManager.CSSProperty = (function( Helper ) {
 
 
     var Object_defineProperty = Object.defineProperty;
-    var Helper_compareArray = Helper.compareArray;
 
 
-    function CSSProperty( mappedName , values ) {
+    function CSSProperty( mappedName , values , definition ) {
 
         var that = this;
-        var property = Properties[mappedName] || Properties.other;
 
-        /*Object_defineProperty( that , 'mappedName' , {
+        Object_defineProperty( that , 'name' , {
             get: function() {
                 return mappedName;
             }
-        });*/
+        });
 
         Object_defineProperty( that , 'defaults' , {
             get: function() {
-                return property.defaults;
+                return definition.defaults;
             }
         });
 
         Object_defineProperty( that , 'keyMap' , {
             get: function() {
-                return property.keyMap;
+                return definition.keyMap;
             }
         });
 
         Object_defineProperty( that , 'string' , {
             get: function() {
-                return that[0];
+                return definition.toString( that );
             }
         });
 
@@ -42,13 +40,23 @@ hxManager.CSSProperty = (function( Helper ) {
 
         Object_defineProperty( that , 'values' , {
             get: function() {
-                return that[0];
+                if (that.length === 1) {
+                    return that[0];
+                }
+                else {
+                    var key, obj = {}, keyMap = that.keyMap;
+                    for (var i = 0; i < keyMap.length; i++) {
+                        key = keyMap[i];
+                        obj[key] = that[i];
+                    }
+                    return obj;
+                }
             }
         });
 
         Object_defineProperty( that , 'clone' , {
             get: function() {
-                return new CSSProperty( mappedName , that.values );
+                return new CSSProperty( mappedName , that.values , definition );
             }
         });
 
@@ -99,7 +107,7 @@ hxManager.CSSProperty = (function( Helper ) {
 
     CSSProperty_prototype.isDefault = function() {
         var that = this;
-        return Helper_compareArray( that , that.defaults );
+        return Helper.compareArray( that , that.defaults );
     };
 
 
@@ -122,20 +130,6 @@ hxManager.CSSProperty = (function( Helper ) {
         
         return out;
     }
-
-
-    var Properties = {
-
-        opacity: {
-            defaults: [ 1 ],
-            keyMap: [ 0 ]
-        },
-
-        other: {
-            defaults: [ '' ],
-            keyMap: [ 0 ]
-        }
-    };
 
 
     return CSSProperty;

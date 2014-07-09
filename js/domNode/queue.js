@@ -6,15 +6,24 @@ hxManager.Queue = (function() {
 
     function Queue() {
 
-        Object_defineProperty( this , 'current' , {
+        var that = this;
+
+        Object_defineProperty( that , 'current' , {
             get: function() {
-                return this[0] || false;
+                return that[0] || false;
             }
         });
 
-        Object_defineProperty( this , 'complete' , {
+        Object_defineProperty( that , 'last' , {
             get: function() {
-                return this.length === 0;
+                var l = that.length - 1;
+                return l >= 0 ? that[l] : false;
+            }
+        });
+
+        Object_defineProperty( that , 'complete' , {
+            get: function() {
+                return that.length === 0;
             }
         });
     }

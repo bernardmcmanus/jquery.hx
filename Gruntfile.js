@@ -11,8 +11,9 @@ module.exports = function( grunt ) {
         'js/shared/helper.js',
         'js/shared/vendorPatch.js',
         'js/shared/easing.js',
+        //'js/domNode/styleFactory.js',
         'js/domNode/cssProperty.js',
-        'js/domNode/transform.js',
+        //'js/domNode/transform.js',
         'js/domNode/cssFactory.js',
         'js/domNode/componentMOJO.js',
         'js/domNode/transitionMOJO.js',
@@ -21,17 +22,17 @@ module.exports = function( grunt ) {
         'js/pod/timingMOJO.js',
         'js/pod/subscriber.js',
         'js/pod/bean.js',
+        'js/pod/iteratorMOJO.js',
         'js/pod/animationPod.js',
+        'js/pod/precisionPod.js',
         'js/pod/promisePod.js',
-        'js/pod/podFactory.js',
-        'js/do/iteratorMOJO.js',
-        'js/do/doer.js'
+        'js/pod/podFactory.js'
     ];
 
 
     var Lib = [
         'js/lib/promise-0.1.1.min.js',
-        'js/lib/mojo-0.1.0.min.js'
+        'js/lib/mojo-0.1.1.min.js'
     ];
 
 

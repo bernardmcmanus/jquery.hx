@@ -1,4 +1,4 @@
-hxManager.Transform = (function( CSSProperty ) {
+hxManager.Transform = (function( StyleFactory , CSSProperty ) {
 
 
     var Object_defineProperty = Object.defineProperty;
@@ -7,13 +7,15 @@ hxManager.Transform = (function( CSSProperty ) {
     function Transform( mappedName , values ) {
 
         var that = this;
-        var property = Properties[mappedName];
+        //var property = Properties[mappedName];
 
-        /*Object_defineProperty( that , 'mappedName' , {
+        var property = StyleFactory( mappedName );
+
+        Object_defineProperty( that , 'name' , {
             get: function() {
                 return mappedName;
             }
-        });*/
+        });
 
         Object_defineProperty( that , 'defaults' , {
             get: function() {
@@ -29,7 +31,10 @@ hxManager.Transform = (function( CSSProperty ) {
 
         Object_defineProperty( that , 'string' , {
             get: function() {
-                return mappedName + '(' + that.join( property.join ) + property.append + ')';
+                var str = property.toString( that );
+                //console.log(str);
+                return str;
+                //return mappedName + '(' + that.join( property.join ) + property.append + ')';
             }
         });
 
@@ -67,7 +72,7 @@ hxManager.Transform = (function( CSSProperty ) {
     Transform.prototype = Object.create( CSSProperty.prototype );
 
 
-    var Properties = {
+    /*var Properties = {
 
         matrix3d: {
             defaults: [
@@ -148,13 +153,13 @@ hxManager.Transform = (function( CSSProperty ) {
             join: ',',
             append: ''
         }
-    };
+    };*/
 
 
     return Transform;
 
     
-}( hxManager.CSSProperty ));
+}( hxManager.StyleFactory , hxManager.CSSProperty ));
 
 
 

@@ -11,18 +11,25 @@
     });*/
 
 
+    function Main( e ) {
+        e.preventDefault();
+        tests.t14();
+    }
+
+
     $(document).on( 'ready' , function() {
 
-        $('#target').on( 'touchstart click' , function( e ) {
-            e.preventDefault();
-            tests.t14();
-        });
+        $('#target').on( 'touchstart click' , Main );
 
-        $('#target, .tgt, .tgt2, .tgt3').on( 'touchstart mousedown' , function() {
+        $('div').on( 'touchstart mousedown' , function( e ) {
+            e.preventDefault();
+            e.stopPropagation();
             $(this).addClass( 'indicate' );
         });
 
-        $('#target, .tgt, .tgt2, .tgt3').on( 'touchend mouseup' , function() {
+        $('div').on( 'touchend mouseup' , function( e ) {
+            e.preventDefault();
+            e.stopPropagation();
             $('.indicate').removeClass( 'indicate' );
         });
     });
@@ -1094,68 +1101,91 @@
         // test - do
         t14: function() {
 
-            var selector = '.tgt,.tgt2,.tgt3';
+            //var selector = '.tgt,.tgt2,.tgt3';
+            var selector = '.tgt';
 
-            $(selector).hx( 'do' , function( controller ) {
-
-                controller.get( 0 ).do({
+            $(selector)
+            .hx( 'animate' , [
+                {
                     type: 'transform',
-                    translate: {x: '+=20', y: '+=100'},
-                    duration: 1000
-                });
-
-                controller.get( 0 ).do({
+                    translate: {x: '+=80', y: '+=100'},
+                    duration: 1200
+                },
+                {
                     type: 'transform',
-                    rotateZ: '+=30',
-                    duration: 600,
-                    delay: 200,
+                    rotateZ: '+=90',
+                    duration: 800,
+                    delay: 400,
                     easing: 'easeOutElastic'
-                });
-
-                controller.get( 1 ).do({
+                },
+                {
                     type: 'transform',
-                    translate: {x: '+=20', y: '+=100'},
-                    duration: 600,
-                    delay: 300
-                });
-
-                controller.get( 1 ).do({
-                    type: 'transform',
-                    rotateZ: '+=30',
-                    duration: 600,
-                    delay: 500,
-                    easing: 'easeOutElastic'
-                });
-
-                controller.get( 2 ).do({
-                    type: 'transform',
-                    translate: {x: '+=20', y: '+=100'},
-                    duration: 600,
-                    delay: 600
-                });
-
-                controller.get( 2 ).do({
-                    type: 'transform',
-                    rotateZ: '+=30',
-                    duration: 600,
-                    delay: 800,
-                    easing: 'easeOutElastic'
-                });
+                    scale: {x: '+=0.5', y: '+=0.5'},
+                    duration: 800
+                },
+                {
+                    type: 'opacity',
+                    value: '-=0.25',
+                    delay: 400
+                }
+            ])
+            .done(function() {
+                console.log('done');
             });
 
             /*$(selector)
+            .hx( 'loop' , 4 , function( i ) {
+
+                $(this)
+                .hx( 'animate' , [
+                    {
+                        type: 'transform',
+                        translate: {x: '+=80', y: '+=100'},
+                        duration: 1200
+                    },
+                    {
+                        type: 'transform',
+                        rotateZ: '+=90',
+                        duration: 800,
+                        delay: 400,
+                        easing: 'easeOutElastic'
+                    },
+                    {
+                        type: 'transform',
+                        scale: {x: '+=0.5', y: '+=0.5'},
+                        duration: 800
+                    },
+                    {
+                        type: 'opacity',
+                        value: '-=0.25',
+                        delay: 400
+                    }
+                ]);
+            })
+            .done(function() {
+                console.log('done');
+                $(this).hx( 'reset' ).paint({
+
+                });
+                console.log(this[0]._hx);
+            });*/
+
+            return;
+
+            $(selector)
             .hx( 'loop' , null , function( i ) {
 
                 $(this)
                 .hx( 'loop' , 3 , function( j ) {
 
-                    $(this)
-                    .hx( 'do' , function( controller ) {
+                    /*$(this)
+                    .hx( 'animate' , function( controller ) {
 
                         controller.do({
                             type: 'transform',
                             translate: {x: '+=20', y: '+=80'},
-                            duration: 1000
+                            duration: 1000,
+                            easing: 'linear'
                         });
 
                         controller.do({
@@ -1165,7 +1195,7 @@
                             delay: 200,
                             easing: 'easeOutElastic'
                         });
-                    });
+                    });*/
                 })
                 .hx({
                     type: 'transform',
@@ -1173,12 +1203,27 @@
                     rotateZ: null,
                     duration: 1000
                 });
-            })
-            .done(function() {
-                $('#target').off( 'click' ).on( 'click' , function() {
-                    $(selector).hx( 'clear' );
+            });
+
+            $('#target')
+            .off( 'touchstart click' )
+            .on( 'touchstart click' , function( e ) {
+                
+                e.preventDefault();
+
+                $('#target')
+                .off( 'touchstart click' )
+                .on( 'touchstart click' , Main );
+
+                $(selector)
+                .hx( 'clear' )
+                .hx({
+                    type: 'transform',
+                    translate: null,
+                    rotateZ: null,
+                    duration: 1000
                 });
-            });*/
+            });
         }
     };
 

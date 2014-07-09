@@ -1,7 +1,7 @@
-hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , ComponentMOJO , TransitionMOJO ) {
+hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMOJO , TransitionMOJO ) {
 
     
-    var Helper_each = Helper.each;
+    var MOJO_Each = MOJO.Each;
 
 
     function DomNodeFactory( element ) {
@@ -61,7 +61,7 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
 
             var transitionMOJO = this._hx.transitionMOJO;
 
-            Helper_each( transitionMOJO , function( val , type ) {
+            MOJO_Each( transitionMOJO , function( val , type ) {
                 transitionMOJO.deleteTransition( type );
             });
         },
@@ -119,7 +119,7 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
                     }
                 }
                 else {
-                    Helper_each( components , function( val , key ) {
+                    MOJO_Each( components , function( val , key ) {
                         out[key] = that_hx.getComponents( key );
                     });
                 }
@@ -134,14 +134,9 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
                 }
                 else if (type) {
 
-                    Helper_each( components , function( val , key ) {
+                    MOJO_Each( components , function( val , key ) {
                         out[key] = that_hx.getComponents( type , key , false );
                     });
-
-                    /*for (i = 0; i < keys.length; i++) {
-                        
-                        out[keys[i]] = that_hx.getComponents( keys[i] );
-                    }*/
                 }
                 else {
                     out = $.extend( true , {} , components );
@@ -164,12 +159,13 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
             var componentMOJO = this._hx.componentMOJO;
 
             if (type) {
-                componentMOJO.setOrder( type );
+                console.log( componentMOJO );
+                //componentMOJO.setOrder( type );
                 delete componentMOJO[type];
             }
             else {
-                Helper_each( componentMOJO , function( val , key ) {
-                    componentMOJO.setOrder( key );
+                MOJO_Each( componentMOJO , function( val , key ) {
+                    //componentMOJO.setOrder( key );
                     delete componentMOJO[key];
                 });
             }
@@ -181,6 +177,18 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
 
         getTransitionString: function() {
             return this._hx.transitionMOJO.getString();
+        },
+
+        addPrecisionPod: function( pod ) {
+
+            var that = this;
+
+            pod.when( 'iteratorStart' , beanStart , that );
+            pod.when( 'iteratorComplete' , beanComplete , that );
+            pod.when( 'podComplete' , podComplete , that );
+            pod.when( 'podCanceled' , animationCanceled , that );
+
+            that._hx.queue.pushPod( pod );
         },
 
         addAnimationPod: function( pod ) {
@@ -218,6 +226,10 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
             return this._hx.queue.current;
         },
 
+        getLastPod: function() {
+            return this._hx.queue.last;
+        },
+
         getPodCount: function( type ) {
             return this._hx.queue.getPodCount( type );
         },
@@ -246,7 +258,7 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
     }
 
     function podComplete( e , node , pod ) {
-        node._hx.happen( 'podComplete' , node , pod );
+        //node._hx.happen( 'podComplete' , node , pod );
         node._hx.next();
     }
 
@@ -254,13 +266,13 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
         pod.dispel( 'beanComplete' );
         pod.dispel( 'clusterComplete' );
         pod.dispel( 'podComplete' );
-        node._hx.happen( 'animationCanceled' , node , pod );
+        //node._hx.happen( 'animationCanceled' , node , pod );
         node._hx.resetTransition();
     }
 
     function promiseCanceled( e , node , pod ) {
         pod.dispel( 'podComplete' );
-        node._hx.happen( 'promiseCanceled' , node , pod );
+        //node._hx.happen( 'promiseCanceled' , node , pod );
     }
 
 
@@ -280,7 +292,7 @@ hxManager.DomNodeFactory = (function( Config , Helper , VendorPatch , Queue , Co
     return DomNodeFactory;
 
     
-}( hxManager.Config , hxManager.Helper , hxManager.VendorPatch , hxManager.Queue , hxManager.ComponentMOJO , hxManager.TransitionMOJO ));
+}( hxManager.Config , hxManager.VendorPatch , hxManager.Queue , hxManager.ComponentMOJO , hxManager.TransitionMOJO ));
 
 
 

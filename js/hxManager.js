@@ -104,7 +104,7 @@ window.hxManager = (function() {
     };
 
 
-    hxManager_prototype.when = function( e , handler ) {
+    /*hxManager_prototype.when = function( e , handler ) {
 
         var that = this;
 
@@ -137,18 +137,39 @@ window.hxManager = (function() {
         });
 
         return that;
-    };
+    };*/
 
 
-    hxManager_prototype.do = function( func ) {
+    hxManager_prototype.animate = function( bundle ) {
 
-        if (typeof func !== 'function') {
-            throw new TypeError( 'do requires a function.' );
+        bundle = bundle instanceof Array ? bundle : [ bundle ];
+
+        var that = this;
+
+        that.each(function( i ) {
+
+            var pod = hxManager.PodFactory( that[i] , 'precision' );
+
+            bundle.forEach(function( seed ) {
+
+                var bean = new hxManager.Bean( seed );
+                var iterator = new hxManager.IteratorMOJO( that[i] , bean );
+
+                pod.addIterator( iterator );
+            });
+
+            that[i]._hx.addPrecisionPod( pod );
+        });
+
+        return that;
+
+        /*if (typeof func !== 'function') {
+            throw new TypeError( 'animate requires a function.' );
         }
 
         var that = this;
 
-        return that._addPromisePod(function( resolve , reject ) {
+        that._addPromisePod(function( resolve , reject ) {
 
             var controller = new hxManager.Doer( that );
 
@@ -162,11 +183,23 @@ window.hxManager = (function() {
             
             func( controller );
             controller.run();
-        });
+
+            that.each(function( i ) {
+                
+                var pod = that[i]._hx.getLastPod();
+
+                pod.when( 'podComplete podCanceled' , function onResolve( e ) {
+                    controller.destroy();
+                    pod.dispel( 'podComplete podCanceled' , onResolve );
+                });
+            });
+        });*/
+
+        return that;
     };
 
 
-    hxManager_prototype.loop = function( n , func , _it ) {
+    hxManager_prototype.loop = function( n , func , it ) {
 
         if (typeof func !== 'function') {
             throw new TypeError( 'repeat requires a function.' );
@@ -174,16 +207,16 @@ window.hxManager = (function() {
 
         var that = this;
 
-        _it = _it || 0;
+        it = it || 0;
 
         for (var i = 0; i < (n || 1); i++) {
-            func.call( that , _it );
-            _it++;
+            func.call( that , it );
+            it++;
         }
 
         if (!n) {
             that.done(function() {
-                that.loop( null , func , _it );
+                that.loop( null , func , it );
             });
         }
 
@@ -191,12 +224,26 @@ window.hxManager = (function() {
     };
 
 
-    hxManager_prototype.paint = function( type ) {
+    hxManager_prototype.paint = function( /*type ,*/ transition ) {
 
         var that = this;
+        var bean;
+
+        if (transition !== undefined) {
+            transition.type = transition.type || 'all';
+            bean = new hxManager.Bean( transition );
+        }
+
+        //debugger;
 
         that.each(function( i ) {
-            that[i]._hx.paint( type );
+
+            if (bean) {
+                that[i]._hx.setTransition( bean );
+                that[i]._hx.applyTransition();
+            }
+
+            that[i]._hx.paint( /*type*/ );
         });
 
         return that;
@@ -235,10 +282,21 @@ window.hxManager = (function() {
                 
                 var subscriber = new hxManager.Subscriber( time , 0 , resolve );
 
-                that.when( 'podComplete' , function onResolve( e ) {
+                var pods = that.toArray().map(function( node ) {
+                    return node._hx.getLastPod();
+                });
+
+                pods.forEach(function( pod ) {
+                    pod.when( 'podComplete' , function onResolve( e ) {
+                        pod.dispel( 'podComplete' , onResolve );
+                        subscriber.destroy();
+                    });
+                });
+
+                /*that.when( 'podComplete' , function onResolve( e ) {
                     that.dispel( 'podComplete' , onResolve );
                     subscriber.destroy();
-                });
+                });*/
             }
         });
     };
@@ -342,16 +400,20 @@ window.hxManager = (function() {
     // !!! get does not return the hxManager instance
     hxManager_prototype.get = function( type , property , pretty ) {
 
-        var that = this;
-        var components = [];
+        //var that = this;
+        //var components = [];
 
-        that.each(function( i ) {
+        return this.toArray().map(function( node ) {
+            return node._hx.getComponents( type , property , pretty );
+        });
+
+        /*that.each(function( i ) {
             components.push(
                 that[i]._hx.getComponents( type , property , pretty )
             );
         });
         
-        return components;
+        return components;*/
     };
 
 

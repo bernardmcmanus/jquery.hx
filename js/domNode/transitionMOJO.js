@@ -1,8 +1,8 @@
-hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch , Easing ) {
+hxManager.TransitionMOJO = (function( Config , VendorPatch , Easing ) {
 
 
     var Config_defaults = Config.defaults;
-    var Helper_each = Helper.each;
+    var MOJO_Each = MOJO.Each;
 
 
     var transitionDefaults = {
@@ -25,7 +25,7 @@ hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch , Easing ) {
         var that = this;
         var arr = [];
 
-        Helper_each( that , function( options , type ) {
+        MOJO_Each( that , function( options , type ) {
 
             var duration = options.duration;
             var easing = options.easing;
@@ -74,7 +74,7 @@ hxManager.TransitionMOJO = (function( Config , Helper , VendorPatch , Easing ) {
     return TransitionMOJO;
 
     
-}( hxManager.Config , hxManager.Helper , hxManager.VendorPatch , hxManager.Easing ));
+}( hxManager.Config , hxManager.VendorPatch , hxManager.Easing ));
 
 
 
