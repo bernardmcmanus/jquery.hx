@@ -46,14 +46,6 @@ hxManager.Config = (function() {
                 andNat  : (/(chrome|firefox)/i)
             },
 
-            events: {
-                webkit  : 'webkitTransitionEnd',
-                moz     : 'transitionend',
-                o       : 'oTransitionEnd',
-                ms      : 'transitionend',
-                other   : 'transitionend'
-            },
-
             prefix: [
                 (/(\-{0})transition/g),
                 (/(\-{0})transform/g),

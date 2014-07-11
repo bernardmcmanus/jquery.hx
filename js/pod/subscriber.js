@@ -14,15 +14,13 @@ hxManager.Subscriber = (function( TimingMOJO ) {
         that.timingCallback = timingCallback || function() {};
         that.startTime = null;
 
-        /*Object_defineProperty( that , 'total' , {
-            get: function() {
-                return (that.duration + that.delay);
-            }
-        });*/
+        that.paused = false;
+        that.buffer = 0;
+        that.bufferStart = 0;
 
         Object_defineProperty( that , 'elapsed' , {
             get: function() {
-                return that.startTime ? (that.time - that.startTime) : 0;
+                return that.startTime ? (that.time - that.startTime - that.buffer) : 0;
             }
         });
 
@@ -62,7 +60,24 @@ hxManager.Subscriber = (function( TimingMOJO ) {
                 return 0;
             }
 
-            return (timestamp - that.startTime - that.delay) / that.duration;
+            if (that.paused) {
+                that.buffer += (timestamp - that.bufferStart);
+                that.bufferStart = timestamp;
+            }
+
+            var progress = (timestamp - that.startTime - that.delay);
+
+            return (progress - that.buffer) / that.duration;
+        },
+
+        pause: function() {
+            var that = this;
+            that.paused = true;
+            that.bufferStart = that.time;
+        },
+
+        resume: function() {
+            this.paused = false;
         },
 
         destroy: function() {

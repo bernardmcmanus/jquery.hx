@@ -14,6 +14,26 @@ hxManager.PrecisionPod = (function() {
 
         MOJO.Hoist( that );
 
+        Object_defineProperty( that , 'progress' , {
+            get: function() {
+                
+                var iterators = that.iterators;
+                var len = iterators.length;
+                var progress = 1;
+
+                if (len === 1) {
+                    progress = iterators[0].progress;
+                }
+                else if (len > 1) {
+                    progress = iterators.reduce(function( p , c ) {
+                        return (typeof p === 'number' ? p : p.progress) + c.progress;
+                    });
+                }
+
+                return (progress / (len || 1));
+            }
+        });
+
         Object_defineProperty( that , 'resolved' , {
             get: function() {
                 return that.iterators.length === 0;
@@ -40,11 +60,35 @@ hxManager.PrecisionPod = (function() {
     PrecisionPod_prototype.run = function() {
 
         var that = this;
-        var node = that.node;
 
         that.iterators.forEach(function( iteratorMOJO ) {
-            that.happen( 'iteratorStart' , iteratorMOJO.bean );
-            iteratorMOJO.run();
+            if (iteratorMOJO.run()) {
+                that.happen( 'iteratorStart' , iteratorMOJO.bean );
+            }
+        });
+    };
+
+
+    PrecisionPod_prototype.pause = function() {
+
+        var that = this;
+
+        that.happen( 'podPaused' , that );
+
+        that.iterators.forEach(function( iteratorMOJO ) {
+            iteratorMOJO.pause();
+        });
+    };
+
+
+    PrecisionPod_prototype.resume = function() {
+
+        var that = this;
+
+        that.happen( 'podResumed' , that );
+
+        that.iterators.forEach(function( iteratorMOJO ) {
+            iteratorMOJO.resume();
         });
     };
 
@@ -54,11 +98,17 @@ hxManager.PrecisionPod = (function() {
         var that = this;
 
         if (!that.resolved) {
-            //that._forceResolve();
+
+            that.iterators.forEach(function( iteratorMOJO ) {
+                iteratorMOJO.destroy();
+                that.happen( 'iteratorComplete' , iteratorMOJO.bean );
+                iteratorMOJO.resolveIterator();
+            });
+
+            that.iterators = [];
         }
-        else {
-            that.happen( 'podComplete' , that );
-        }
+
+        that.happen( 'podComplete' , that );
     };
 
 

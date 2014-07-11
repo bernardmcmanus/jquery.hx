@@ -1,4 +1,4 @@
-hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
+hxManager.IteratorMOJO = (function( Bean , Subscriber ) {
 
 
     var MOJO_Each = MOJO.Each;
@@ -14,10 +14,20 @@ hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
         that.type = bean.type;
         that.styles = bean.styles;
         that.properties = bean.order.computed;
+        that.subscribed = false;
+        that.subscriber = null;
 
+        that.progress = 0;
         that.duration = bean_options.duration;
         that.delay = bean_options.delay;
         that.easing = bean_options.easing;
+
+        Object.defineProperty( that , 'paused' , {
+            get: function() {
+                var subscriber = that.subscriber;
+                return (subscriber ? subscriber.paused : false);
+            }
+        });
 
         MOJO.Hoist( that );
     }
@@ -31,22 +41,42 @@ hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
         var that = this;
         var node_hx = that.node._hx;
 
+        if (that.subscribed) {
+            return false;
+        }
+
+        that.subscribed = true;
         that.current = that._getCurrent( that.node );
         that.dest = that._getDest( that.current , that.styles );
         that.diff = that._getDiff( that.node , that.current , that.dest );
 
         function onComplete() {
-            that.paint( that.dest );
-            that.complete();
+            
+            if (!that.subscribed) {
+                return that.unsubscribe();
+            }
+
+            that.resolveIterator();
         }
 
         function timingCallback( progress ) {
+            
+            if (!that.subscribed) {
+                return that.unsubscribe();
+            }
+            
             that.progress = progress;
-            progress = that._ease( progress );
-            that.calculate( progress );
+
+            if (!that.paused) {
+                that.calculate(
+                    that._ease( progress )
+                );
+            }
         }
 
         that.subscriber = new Subscriber( that.duration , that.delay , onComplete , timingCallback );
+
+        return true;
     };
 
 
@@ -70,18 +100,43 @@ hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
     };
 
 
-    IteratorMOJO_prototype.complete = function() {
+    IteratorMOJO_prototype.pause = function() {
         var that = this;
-        that.subscriber.destroy();
-        that.complete = true;
+        if (that.subscribed) {
+            that.subscriber.pause();
+        }
+    };
+
+
+    IteratorMOJO_prototype.resume = function() {
+        var that = this;
+        if (that.subscribed) {
+            that.subscriber.resume();
+        }
+    };
+
+
+    IteratorMOJO_prototype.resolveIterator = function() {
+        var that = this;
         that.happen( 'complete' );
+        that.unsubscribe();
+        that.paint( that.dest );
     };
 
 
     IteratorMOJO_prototype.destroy = function() {
         var that = this;
         that.dispel( 'complete' );
-        that.subscriber.destroy();
+        that.unsubscribe();
+    };
+
+
+    IteratorMOJO_prototype.unsubscribe = function() {
+        var that = this;
+        if (that.subscribed) {
+            that.subscriber.destroy();
+        }
+        that.subscribed = false;
     };
 
 
@@ -118,7 +173,7 @@ hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
         var that = this;
         var subscriber = that.subscriber;
 
-        var time = subscriber.elapsed - subscriber.delay;
+        var time = (subscriber.duration * progress);
         var easeArgs = [ null , time , 0 , 1 , subscriber.duration ];
         
         return Easing( that.easing , easeArgs );
@@ -148,7 +203,7 @@ hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
 
         MOJO_Each( current , function( CSSProperty , key ) {
 
-            CSSProperty = CSSProperty.clone;
+            CSSProperty = CSSProperty.clone();
             CSSProperty.update( styles[key] );
             newProperties[key] = CSSProperty;
         });
@@ -175,7 +230,7 @@ hxManager.IteratorMOJO = (function( Config , Bean , Subscriber ) {
     return IteratorMOJO;
 
     
-}( hxManager.Config , hxManager.Bean , hxManager.Subscriber ));
+}( hxManager.Bean , hxManager.Subscriber ));
 
 
 

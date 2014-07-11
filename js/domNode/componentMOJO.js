@@ -1,4 +1,7 @@
-hxManager.ComponentMOJO = (function( Config , CSSFactory ) {
+hxManager.ComponentMOJO = (function( Config , VendorPatch , CSSFactory ) {
+
+
+    var Object_defineProperty = Object.defineProperty;
 
 
     function ComponentMOJO() {
@@ -19,44 +22,19 @@ hxManager.ComponentMOJO = (function( Config , CSSFactory ) {
     var ComponentMOJO_prototype = (ComponentMOJO.prototype = new MOJO());
 
 
-    /*ComponentMOJO_prototype.ensure = function( propertyArray ) {
-
-        var that = this;
-
-        propertyArray = (propertyArray instanceof Array ? propertyArray : [ propertyArray ]);
-
-        propertyArray.forEach(function( property ) {
-
-            var type = that.getPropertyType( property );
-            var component = (that[type] = that[type] || {});
-            var order = (that.order[type] = that.order[type] || []);
-
-            if (component[property] === undefined) {
-                component[property] = CSSFactory( property , null );
-            }
-
-            if (order.indexOf( property ) < 0) {
-                order.push( property );
-            }
-        });
-    };*/
-
-
-    /*ComponentMOJO_prototype.getPropertyType = function( property ) {
-        return Config.keys.transform.indexOf( property ) >= 0 ? 'transform' : property;
-    };*/
-
-
     ComponentMOJO_prototype.getString = function( type ) {
 
         var that = this;
         var order = that.getOrder( type );
 
-        var arr = order.map(function( property ) {
-            /*var component = that.getComponents( type , property );
-            return component.isDefault() ? '' : component.string;*/
-            return that.getComponents( type , property ).string;
-        });
+        var arr = order
+            .map(function( property ) {
+                var component = that.getComponents( type , property );
+                return component.isDefault() ? '' : component.string;
+            })
+            .filter(function( str ) {
+                return str !== '';
+            });
 
         return arr.join( ' ' );
     };
@@ -87,17 +65,16 @@ hxManager.ComponentMOJO = (function( Config , CSSFactory ) {
         var styles = bean.styles;
         var type = bean.type;
         var component = (that[type] = that[type] || {});
-        var cssProperty;
 
-        for (var key in styles) {
+        MOJO.Each( styles , function( property , key ) {
 
-            cssProperty = (key === 'value' ? type : key);
+            var name = (key === 'value' ? type : key);
 
             if (component[key] === undefined) {
-                component[key] = CSSFactory( cssProperty , styles[key] );
+                component[key] = CSSFactory( name , property );
             }
             else {
-                component[key].update( styles[key] );
+                component[key].update( property );
             }
 
             if (component[key].isDefault()) {
@@ -106,7 +83,7 @@ hxManager.ComponentMOJO = (function( Config , CSSFactory ) {
                     delete that[type];
                 }
             }
-        }
+        });
 
         that._updateOrder( bean );
     };
@@ -136,25 +113,6 @@ hxManager.ComponentMOJO = (function( Config , CSSFactory ) {
     };
 
 
-    /*ComponentMOJO_prototype.refreshOrder = function() {
-        
-        var that = this;
-        var order = that.getOrder();
-
-        MOJO.Each( order , function( propertyOrder , type ) {
-
-            var componentKeys = Object.keys( that.getComponents( type ));
-
-            var newOrder = propertyOrder.filter(function( property , i ) {
-                return componentKeys.indexOf( property ) >= 0;
-            });
-
-            newOrder = newOrder.length > 0 ? newOrder : null;
-            that.setOrder( type , newOrder );
-        });
-    };*/
-
-
     ComponentMOJO_prototype._updateOrder = function( bean ) {
         
         var that = this;
@@ -178,7 +136,7 @@ hxManager.ComponentMOJO = (function( Config , CSSFactory ) {
     return ComponentMOJO;
 
     
-}( hxManager.Config , hxManager.CSSFactory ));
+}( hxManager.Config , hxManager.VendorPatch , hxManager.CSSFactory ));
 
 
 

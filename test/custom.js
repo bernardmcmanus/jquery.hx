@@ -11,6 +11,16 @@
     });*/
 
 
+    /*$('.tgt').on( 'hx.pause' , function( e , data ) {
+        console.log(e.namespace,data);
+    });*/
+
+
+    /*$('.tgt').on( 'hx.resume' , function( e , data ) {
+        console.log(e.namespace,data);
+    });*/
+
+
     function Main( e ) {
         e.preventDefault();
         tests.t14();
@@ -1098,111 +1108,72 @@
             $(selector).toggleClass( 'reverse' );
         },
 
-        // test - do
+        // test - animate
         t14: function() {
 
-            //var selector = '.tgt,.tgt2,.tgt3';
-            var selector = '.tgt';
+            var selector = '.tgt,.tgt2,.tgt3';
+            //var selector = '.tgt';
 
             $(selector)
-            .hx( 'animate' , [
-                {
-                    type: 'transform',
-                    translate: {x: '+=80', y: '+=100'},
-                    duration: 1200
-                },
-                {
-                    type: 'transform',
-                    rotateZ: '+=90',
-                    duration: 800,
-                    delay: 400,
-                    easing: 'easeOutElastic'
-                },
-                {
-                    type: 'transform',
-                    scale: {x: '+=0.5', y: '+=0.5'},
-                    duration: 800
-                },
-                {
-                    type: 'opacity',
-                    value: '-=0.25',
-                    delay: 400
-                }
-            ])
-            .done(function() {
-                console.log('done');
-            });
+            .hx( 'loop' , function( i ) {
 
-            /*$(selector)
-            .hx( 'loop' , 4 , function( i ) {
-
-                $(this)
+                $(selector)
                 .hx( 'animate' , [
                     {
                         type: 'transform',
-                        translate: {x: '+=80', y: '+=100'},
-                        duration: 1200
+                        translate: {x: '+=120', y: '+=160'},
+                        duration: 1600
                     },
                     {
                         type: 'transform',
                         rotateZ: '+=90',
-                        duration: 800,
+                        duration: 1600,
                         delay: 400,
                         easing: 'easeOutElastic'
                     },
                     {
                         type: 'transform',
-                        scale: {x: '+=0.5', y: '+=0.5'},
-                        duration: 800
+                        scale: {x: '+=1', y: '+=1'},
+                        duration: 1200
                     },
                     {
                         type: 'opacity',
-                        value: '-=0.25',
+                        value: '-=0.5',
+                        duration: 800,
                         delay: 400
                     }
-                ]);
-            })
-            .done(function() {
-                console.log('done');
-                $(this).hx( 'reset' ).paint({
-
-                });
-                console.log(this[0]._hx);
-            });*/
-
-            return;
-
-            $(selector)
-            .hx( 'loop' , null , function( i ) {
-
-                $(this)
-                .hx( 'loop' , 3 , function( j ) {
-
-                    /*$(this)
-                    .hx( 'animate' , function( controller ) {
-
-                        controller.do({
-                            type: 'transform',
-                            translate: {x: '+=20', y: '+=80'},
-                            duration: 1000,
-                            easing: 'linear'
-                        });
-
-                        controller.do({
-                            type: 'transform',
-                            rotateZ: '+=30',
-                            duration: 600,
-                            delay: 200,
-                            easing: 'easeOutElastic'
-                        });
-                    });*/
+                ])
+                .then(function( resolve ) {
+                    $(this).hx( 'reset' );
+                    resolve();
                 })
-                .hx({
-                    type: 'transform',
-                    translate: null,
-                    rotateZ: null,
-                    duration: 1000
+                .hx([
+                    {
+                        type: 'transform'
+                    },
+                    {
+                        type: 'opacity'
+                    }
+                ])
+                .done(function() {
+                    console.log('done');
                 });
+
+                setTimeout(function() {
+                    $(selector).hx( 'pause' );
+                }, 400);
+
+                setTimeout(function() {
+                    $(selector).hx( 'resume' );
+                }, 800);
+
+                setTimeout(function() {
+                    $(selector).hx( 'pause' );
+                }, 1200);
+
+                setTimeout(function() {
+                    $(selector).hx( 'resume' );
+                }, 1600);
             });
 
             $('#target')
@@ -1217,12 +1188,15 @@
 
                 $(selector)
                 .hx( 'clear' )
-                .hx({
-                    type: 'transform',
-                    translate: null,
-                    rotateZ: null,
-                    duration: 1000
-                });
+                .hx( 'reset' )
+                .hx([
+                    {
+                        type: 'transform'
+                    },
+                    {
+                        type: 'opacity'
+                    }
+                ]);
             });
         }
     };

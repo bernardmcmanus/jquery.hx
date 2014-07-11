@@ -12,12 +12,6 @@ hxManager.VendorPatch = (function( Config ) {
         that.os = _getOS();
         that.isMobile = _isMobile();
         that.RAF = _getRequestAnimationFrame();
-
-        Object.defineProperty( that , 'eventType' , {
-            get: function() {
-                return Config.events[ that.vendor ];
-            }
-        });
     }
 
 
@@ -42,13 +36,6 @@ hxManager.VendorPatch = (function( Config ) {
 
             return str;
         },
-
-        /*getComputedMatrix: function( element ) {
-            var vendor = this.vendor;
-            var style = getComputedStyle( element );
-            var transform = vendor !== 'other' ? (vendor + 'Transform') : 'transform';
-            return style[transform] || style.transform;
-        },*/
 
         getBezierSupport: function() {
             if (_isAndroidNative( this.os )) {

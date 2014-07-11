@@ -58,15 +58,14 @@ hxManager.AnimationPod = (function( VendorPatch ) {
             }
         });
 
-        node._hx.applyTransition();
-        node._hx.paint();
+        /*node._hx.applyTransition();
+        node._hx.paint();*/
     };
 
 
     AnimationPod_prototype._runBean = function( node , bean ) {
 
         var that = this;
-        var type = bean.type;
 
         node._hx.updateComponent( bean );
         node._hx.setTransition( bean );
@@ -76,6 +75,9 @@ hxManager.AnimationPod = (function( VendorPatch ) {
         });
 
         bean.subscribe();
+
+        node._hx.applyTransition();
+        node._hx.paint( bean.type );
 
         that.happen( 'beanStart' , bean );
     };

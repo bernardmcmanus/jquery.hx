@@ -1,22 +1,33 @@
-hxManager.CSSProperty = (function( Helper ) {
+hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
 
 
     var Object_defineProperty = Object.defineProperty;
 
 
-    function CSSProperty( mappedName , values , definition ) {
+    function CSSProperty( name , values ) {
 
         var that = this;
+        var definition = StyleDefinition.retrieve( name );
+        var isNull;
 
         Object_defineProperty( that , 'name' , {
             get: function() {
-                return mappedName;
+                return name;
             }
         });
 
         Object_defineProperty( that , 'defaults' , {
             get: function() {
                 return definition.defaults;
+            }
+        });
+
+        Object_defineProperty( that , 'isNull' , {
+            get: function() {
+                return isNull;
+            },
+            set: function( value ) {
+                isNull = value;
             }
         });
 
@@ -54,12 +65,6 @@ hxManager.CSSProperty = (function( Helper ) {
             }
         });
 
-        Object_defineProperty( that , 'clone' , {
-            get: function() {
-                return new CSSProperty( mappedName , that.values , definition );
-            }
-        });
-
         that.defaults.forEach(function( val , i ) {
             that[i] = val;
         });
@@ -71,11 +76,20 @@ hxManager.CSSProperty = (function( Helper ) {
     var CSSProperty_prototype = (CSSProperty.prototype = Object.create( Array.prototype ));
 
 
+    CSSProperty_prototype.clone = function( cloneDefaults ) {
+        var that = this;
+        var subject = (cloneDefaults ? that.defaults : that.values);
+        return new CSSProperty( that.name , subject );
+    };
+
+
     CSSProperty_prototype.update = function( values ) {
 
         var that = this;
         var keyMap = that.keyMap;
         var key, i;
+
+        that.isNull = (values === null);
 
         values = (( values || values === 0 ) ? values : that.defaults );
 
@@ -107,7 +121,7 @@ hxManager.CSSProperty = (function( Helper ) {
 
     CSSProperty_prototype.isDefault = function() {
         var that = this;
-        return Helper.compareArray( that , that.defaults );
+        return that.isNull && Helper.compareArray( that , that.defaults );
     };
 
 
@@ -135,7 +149,7 @@ hxManager.CSSProperty = (function( Helper ) {
     return CSSProperty;
 
     
-}( hxManager.Helper ));
+}( hxManager.Helper , hxManager.StyleDefinition ));
 
 
 

@@ -130,7 +130,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
                 if (property) {
 
-                    out = components.clone || {};
+                    out = (components ? components.clone() : {});
                 }
                 else if (type) {
 
@@ -159,14 +159,11 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             var componentMOJO = this._hx.componentMOJO;
 
             if (type) {
-                console.log( componentMOJO );
-                //componentMOJO.setOrder( type );
-                delete componentMOJO[type];
+                componentMOJO.remove( type );
             }
             else {
-                MOJO_Each( componentMOJO , function( val , key ) {
-                    //componentMOJO.setOrder( key );
-                    delete componentMOJO[key];
+                componentMOJO.each(function( val , key ) {
+                    componentMOJO.remove( key );
                 });
             }
         },
@@ -185,6 +182,8 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
             pod.when( 'iteratorStart' , beanStart , that );
             pod.when( 'iteratorComplete' , beanComplete , that );
+            pod.when( 'podPaused' , podPaused , that );
+            pod.when( 'podResumed' , podResumed , that );
             pod.when( 'podComplete' , podComplete , that );
             pod.when( 'podCanceled' , animationCanceled , that );
 
@@ -254,11 +253,22 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
     function clusterComplete( e , node , type ) {
         node._hx.deleteTransition( type );
-        node._hx.applyTransition( type );
+        node._hx.applyTransition();
+    }
+
+    function podPaused( e , node , pod ) {
+        $(node).trigger( 'hx.pause' , {
+            progress: pod.progress
+        });
+    }
+
+    function podResumed( e , node , pod ) {
+        $(node).trigger( 'hx.resume' , {
+            progress: pod.progress
+        });
     }
 
     function podComplete( e , node , pod ) {
-        //node._hx.happen( 'podComplete' , node , pod );
         node._hx.next();
     }
 
@@ -266,13 +276,11 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         pod.dispel( 'beanComplete' );
         pod.dispel( 'clusterComplete' );
         pod.dispel( 'podComplete' );
-        //node._hx.happen( 'animationCanceled' , node , pod );
         node._hx.resetTransition();
     }
 
     function promiseCanceled( e , node , pod ) {
         pod.dispel( 'podComplete' );
-        //node._hx.happen( 'promiseCanceled' , node , pod );
     }
 
 
