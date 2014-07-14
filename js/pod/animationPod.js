@@ -35,137 +35,130 @@ hxManager.AnimationPod = (function( VendorPatch ) {
     }
 
 
-    var AnimationPod_prototype = (AnimationPod.prototype = new MOJO());
+    AnimationPod.prototype = new MOJO({
 
+        addBean: function( bean ) {
+            var that = this;
+            var type = bean.type;
+            var cluster = (that.beans[type] = that.beans[type] || []);
+            cluster.push( bean );
+        },
 
-    AnimationPod_prototype.addBean = function( bean ) {
-        var that = this;
-        var type = bean.type;
-        var cluster = (that.beans[type] = that.beans[type] || []);
-        cluster.push( bean );
-    };
+        run: function() {
 
+            var that = this;
+            var node = that.node;
 
-    AnimationPod_prototype.run = function() {
+            MOJO_Each( that.sequence , function( bean , key ) {
+                
+                if (!bean.subscribed) {
+                    that._runBean( node , bean );
+                }
+            });
 
-        var that = this;
-        var node = that.node;
+            /*node._hx.applyTransition();
+            node._hx.paint();*/
+        },
 
-        MOJO_Each( that.sequence , function( bean , key ) {
-            
-            if (!bean.subscribed) {
-                that._runBean( node , bean );
+        _runBean: function( node , bean ) {
+
+            var that = this;
+
+            node._hx.updateComponent( bean );
+            node._hx.setTransition( bean );
+
+            bean.when( 'beanComplete' , function( e , bean ) {
+                that._beanComplete( bean );
+            });
+
+            bean.subscribe();
+
+            node._hx.applyTransition();
+            node._hx.paint( bean.type );
+
+            that.happen( 'beanStart' , bean );
+        },
+
+        _beanComplete: function( bean ) {
+
+            var that = this;
+            var type = bean.type;
+            var cluster = that.beans[type];
+
+            // if cluster is undefined, the pod must have been force resolved
+            /*if (!cluster) {
+                return;
+            }*/
+
+            that.happen( 'beanComplete' , bean );
+
+            cluster.shift();
+
+            if (cluster.length > 0) {
+                that.run();
             }
-        });
+            else {
+                that._clusterComplete( type );
+            }
+        },
 
-        /*node._hx.applyTransition();
-        node._hx.paint();*/
-    };
+        _clusterComplete: function( type ) {
 
+            var that = this;
 
-    AnimationPod_prototype._runBean = function( node , bean ) {
+            delete that.beans[type];
 
-        var that = this;
+            that.happen( 'clusterComplete' , type );
 
-        node._hx.updateComponent( bean );
-        node._hx.setTransition( bean );
+            if (that.resolved) {
+                that.resolvePod();
+            }
+        },
 
-        bean.when( 'beanComplete' , function( e , bean ) {
-            that._beanComplete( bean );
-        });
+        resolvePod: function() {
 
-        bean.subscribe();
+            var that = this;
 
-        node._hx.applyTransition();
-        node._hx.paint( bean.type );
+            if (!that.resolved) {
+                that._forceResolve();
+            }
+            else {
+                that.happen( 'podComplete' , that );
+            }
+        },
 
-        that.happen( 'beanStart' , bean );
-    };
+        cancel: function() {
 
+            var that = this;
 
-    AnimationPod_prototype._beanComplete = function( bean ) {
+            that.happen( 'podCanceled' , that );
 
-        var that = this;
-        var type = bean.type;
-        var cluster = that.beans[type];
+            MOJO_Each( that.beans , function( cluster , key ) {
+                while (cluster.length > 0) {
+                    cluster.shift().resolveBean();
+                }
+            });
+        },
 
-        // if cluster is undefined, the pod must have been force resolved
-        /*if (!cluster) {
-            return;
-        }*/
+        _forceResolve: function() {
 
-        that.happen( 'beanComplete' , bean );
+            var that = this;
+            var beans = that.beans;
 
-        cluster.shift();
+            MOJO_Each( beans , function( cluster , type ) {
+                
+                var lastBean = cluster.pop();
+                delete beans[type];
 
-        if (cluster.length > 0) {
-            that.run();
-        }
-        else {
-            that._clusterComplete( type );
-        }
-    };
+                lastBean.resolveBean();
 
+                that.happen( 'beanComplete' , lastBean );
+                that.happen( 'clusterComplete' , lastBean.type );
+            });
 
-    AnimationPod_prototype._clusterComplete = function( type ) {
-
-        var that = this;
-
-        delete that.beans[type];
-
-        that.happen( 'clusterComplete' , type );
-
-        if (that.resolved) {
-            that.resolvePod();
-        }
-    };
-
-
-    AnimationPod_prototype.resolvePod = function() {
-
-        var that = this;
-
-        if (!that.resolved) {
-            that._forceResolve();
-        }
-        else {
             that.happen( 'podComplete' , that );
         }
-    };
-
-
-    AnimationPod_prototype.cancel = function() {
-
-        var that = this;
-
-        that.happen( 'podCanceled' , that );
-
-        MOJO_Each( that.beans , function( cluster , key ) {
-            while (cluster.length > 0) {
-                cluster.shift().resolveBean();
-            }
-        });
-    };
-
-
-    AnimationPod_prototype._forceResolve = function() {
-
-        var that = this;
-        var beans = that.beans;
-
-        MOJO_Each( beans , function( cluster , type ) {
-            
-            var lastBean = cluster.pop();
-            delete beans[type];
-
-            lastBean.resolveBean();
-
-            that.happen( 'beanComplete' , lastBean );
-            that.happen( 'clusterComplete' , lastBean.type );
-        });
-
-        that.happen( 'podComplete' , that );
-    };
+    });
 
 
     return AnimationPod;

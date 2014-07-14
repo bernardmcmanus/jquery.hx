@@ -7,9 +7,9 @@ hxManager.IteratorMOJO = (function( Bean , Subscriber ) {
     function IteratorMOJO( node , bean ) {
 
         var that = this;
-        var bean = (that.bean = bean);
         var bean_options = bean.options;
 
+        that.bean = bean;
         that.node = node;
         that.type = bean.type;
         that.styles = bean.styles;
@@ -22,209 +22,197 @@ hxManager.IteratorMOJO = (function( Bean , Subscriber ) {
         that.delay = bean_options.delay;
         that.easing = bean_options.easing;
 
+        MOJO.Hoist( that );
+
         Object.defineProperty( that , 'paused' , {
             get: function() {
                 var subscriber = that.subscriber;
                 return (subscriber ? subscriber.paused : false);
             }
         });
-
-        MOJO.Hoist( that );
     }
 
 
-    var IteratorMOJO_prototype = (IteratorMOJO.prototype = new MOJO());
+    IteratorMOJO.prototype = new MOJO({
 
-
-    IteratorMOJO_prototype.run = function() {
-        
-        var that = this;
-        var node_hx = that.node._hx;
-
-        if (that.subscribed) {
-            return false;
-        }
-
-        that.subscribed = true;
-        that.current = that._getCurrent( that.node );
-        that.dest = that._getDest( that.current , that.styles );
-        that.diff = that._getDiff( that.node , that.current , that.dest );
-
-        function onComplete() {
+        run: function() {
             
-            if (!that.subscribed) {
-                return that.unsubscribe();
+            var that = this;
+            var node_hx = that.node._hx;
+
+            if (that.subscribed) {
+                return false;
             }
 
-            that.resolveIterator();
-        }
+            that.subscribed = true;
+            that.current = that._getCurrent( that.node );
+            that.dest = that._getDest( that.current , that.styles );
+            that.diff = that._getDiff( that.node , that.current , that.dest );
 
-        function timingCallback( progress ) {
-            
-            if (!that.subscribed) {
-                return that.unsubscribe();
+            function onComplete() {
+                
+                if (!that.subscribed) {
+                    return that.unsubscribe();
+                }
+
+                that.resolveIterator();
             }
-            
-            that.progress = progress;
 
-            if (!that.paused) {
-                that.calculate(
-                    that._ease( progress )
-                );
+            function timingCallback( progress ) {
+                
+                if (!that.subscribed) {
+                    return that.unsubscribe();
+                }
+                
+                that.progress = progress;
+
+                if (!that.paused) {
+                    that.calculate(
+                        that._ease( progress )
+                    );
+                }
             }
-        }
 
-        that.subscriber = new Subscriber( that.duration , that.delay , onComplete , timingCallback );
+            that.subscriber = new Subscriber( that.duration , that.delay , onComplete , timingCallback );
 
-        return true;
-    };
+            return true;
+        },
 
+        calculate: function( percent ) {
 
-    IteratorMOJO_prototype.calculate = function( percent ) {
+            var that = this;
 
-        var that = this;
+            MOJO_Each( that.diff , function( diff , key ) {
 
-        MOJO_Each( that.diff , function( diff , key ) {
+                var current = that.current[key];
+                var dest = that.dest[key];
 
-            var current = that.current[key];
-            var dest = that.dest[key];
+                diff.forEach(function( val , i ) {
 
-            diff.forEach(function( val , i ) {
-
-                var value = val * (1 - percent);
-                current[i] = dest[i] - value;
+                    var value = val * (1 - percent);
+                    current[i] = dest[i] - value;
+                });
             });
-        });
 
-        that.paint( that.current );
-    };
+            that.paint( that.current );
+        },
 
+        pause: function() {
+            var that = this;
+            if (that.subscribed) {
+                that.subscriber.pause();
+            }
+        },
 
-    IteratorMOJO_prototype.pause = function() {
-        var that = this;
-        if (that.subscribed) {
-            that.subscriber.pause();
-        }
-    };
+        resume: function() {
+            var that = this;
+            if (that.subscribed) {
+                that.subscriber.resume();
+            }
+        },
 
+        resolveIterator: function() {
+            var that = this;
+            that.happen( 'complete' );
+            that.unsubscribe();
+            that.paint( that.dest );
+        },
 
-    IteratorMOJO_prototype.resume = function() {
-        var that = this;
-        if (that.subscribed) {
-            that.subscriber.resume();
-        }
-    };
+        destroy: function() {
+            var that = this;
+            that.dispel( 'complete' );
+            that.unsubscribe();
+        },
 
+        unsubscribe: function() {
+            var that = this;
+            if (that.subscribed) {
+                that.subscriber.destroy();
+            }
+            that.subscribed = false;
+        },
 
-    IteratorMOJO_prototype.resolveIterator = function() {
-        var that = this;
-        that.happen( 'complete' );
-        that.unsubscribe();
-        that.paint( that.dest );
-    };
+        paint: function( model ) {
 
+            var that = this;
+            var node_hx = that.node._hx;
+            var bean = that._updateBean( model );
 
-    IteratorMOJO_prototype.destroy = function() {
-        var that = this;
-        that.dispel( 'complete' );
-        that.unsubscribe();
-    };
+            node_hx.updateComponent( bean );
+            node_hx.paint( that.type );
+        },
 
+        _updateBean: function( model ) {
 
-    IteratorMOJO_prototype.unsubscribe = function() {
-        var that = this;
-        if (that.subscribed) {
-            that.subscriber.destroy();
-        }
-        that.subscribed = false;
-    };
+            var that = this;
+            var bean = that.bean;
 
-
-    IteratorMOJO_prototype.paint = function( model ) {
-
-        var that = this;
-        var node_hx = that.node._hx;
-        var bean = that._updateBean( model );
-
-        node_hx.updateComponent( bean );
-        node_hx.paint( that.type );
-    };
-
-
-    IteratorMOJO_prototype._updateBean = function( model ) {
-
-        var that = this;
-        var bean = that.bean;
-
-        MOJO_Each( model , function( property , key ) {
-            bean.styles[key] = property;
-        });
-
-        return bean;
-    };
-
-
-    IteratorMOJO_prototype._ease = function( progress ) {
-
-        if (progress === 0) {
-            return 0;
-        }
-
-        var that = this;
-        var subscriber = that.subscriber;
-
-        var time = (subscriber.duration * progress);
-        var easeArgs = [ null , time , 0 , 1 , subscriber.duration ];
-        
-        return Easing( that.easing , easeArgs );
-    };
-
-
-    IteratorMOJO_prototype._getCurrent = function( node ) {
-
-        var that = this;
-
-        var current = {};
-        var type = that.type;
-        var properties = that.properties;
-
-        properties.forEach(function( property ) {
-            current[property] = node._hx.getComponents( type , property , false );
-        });
-
-        return current;
-    };
-
-
-    IteratorMOJO_prototype._getDest = function( current , styles ) {
-
-        var that = this;
-        var newProperties = {};
-
-        MOJO_Each( current , function( CSSProperty , key ) {
-
-            CSSProperty = CSSProperty.clone();
-            CSSProperty.update( styles[key] );
-            newProperties[key] = CSSProperty;
-        });
-
-        return newProperties;
-    };
-
-
-    IteratorMOJO_prototype._getDiff = function( node , current , dest ) {
-
-        var diff = {};
-
-        MOJO_Each( current , function( property , key ) {
-            
-            diff[key] = property.map(function( val , i ) {
-                return dest[key][i] - val;
+            MOJO_Each( model , function( property , key ) {
+                bean.styles[key] = property;
             });
-        });
 
-        return diff;
-    };
+            return bean;
+        },
+
+        _ease: function( progress ) {
+
+            if (progress === 0) {
+                return 0;
+            }
+
+            var that = this;
+            var subscriber = that.subscriber;
+
+            var time = (subscriber.duration * progress);
+            var easeArgs = [ null , time , 0 , 1 , subscriber.duration ];
+            
+            return Easing( that.easing , easeArgs );
+        },
+
+        _getCurrent: function( node ) {
+
+            var that = this;
+
+            var current = {};
+            var type = that.type;
+            var properties = that.properties;
+
+            properties.forEach(function( property ) {
+                current[property] = node._hx.getComponents( type , property , false );
+            });
+
+            return current;
+        },
+
+        _getDest: function( current , styles ) {
+
+            var that = this;
+            var newProperties = {};
+
+            MOJO_Each( current , function( CSSProperty , key ) {
+
+                CSSProperty = CSSProperty.clone();
+                CSSProperty.update( styles[key] );
+                newProperties[key] = CSSProperty;
+            });
+
+            return newProperties;
+        },
+
+        _getDiff: function( node , current , dest ) {
+
+            var diff = {};
+
+            MOJO_Each( current , function( property , key ) {
+                
+                diff[key] = property.map(function( val , i ) {
+                    return dest[key][i] - val;
+                });
+            });
+
+            return diff;
+        }
+    });
 
 
     return IteratorMOJO;

@@ -2,6 +2,8 @@ hxManager.Bean = (function( Config , Subscriber ) {
 
 
     var Object_defineProperty = Object.defineProperty;
+    var OptionKeys = Config.optionKeys;
+    var PropertyMap = Config.properties;
 
 
     function Bean( seed ) {
@@ -32,86 +34,80 @@ hxManager.Bean = (function( Config , Subscriber ) {
     }
 
 
-    var Bean_prototype = (Bean.prototype = new MOJO());
+    var Bean_prototype = Bean.prototype = new MOJO({
 
+        subscribe: function() {
 
-    Bean_prototype.subscribe = function() {
+            var that = this;
+            var options = that.options;
+            var duration = options.duration;
+            var delay = options.delay;
 
-        var that = this;
-        var options = that.options;
-        var duration = options.duration;
-        var delay = options.delay;
+            that.subscriber = new Subscriber( duration , delay , function() {            
+                that.resolveBean();
+                that.happen( 'beanComplete' , that );
+            });
+        },
 
-        that.subscriber = new Subscriber( duration , delay , function() {            
-            that.resolveBean();
-            that.happen( 'beanComplete' , that );
-        });
-    };
+        resolveBean: function() {
 
+            var that = this;
 
-    Bean_prototype.resolveBean = function() {
-
-        var that = this;
-
-        if (that.subscribed && !that.complete) {
-            that.subscriber.destroy();
-            delete that.subscriber;
-        }
-    };
-
-
-    Bean_prototype.getOptions = function( seed ) {
-
-        var defaults = Config.defaults;
-        var options = $.extend( {} , defaults , seed );
-
-        for (var key in options) {
-            if (!defaults.hasOwnProperty( key )) {
-                delete options[key];
+            if (that.subscribed && !that.complete) {
+                that.subscriber.destroy();
+                delete that.subscriber;
             }
-        }
+        },
 
-        return options;
-    };
+        getOptions: function( seed ) {
 
+            var defaults = Config.defaults;
+            var options = $.extend( {} , defaults , seed );
 
-    Bean_prototype.getOrder = function( seed ) {
-
-        var passed = (seed.order || []).map( mapCallback );
-        
-        var computed = Object.keys( seed )
-            .filter(function( key , i ) {
-                return Config.keys.options.indexOf( key ) < 0;
-            })
-            .map( mapCallback );
-
-        function mapCallback( key ) {
-            return Config.properties[key] || key;
-        }
-
-        return {
-            passed: passed,
-            computed: computed
-        };
-    };
-
-
-    Bean_prototype.getStyles = function( seed ) {
-
-        var optionKeys = Config.keys.options;
-        var keyMap = Config.properties;
-        var styles = {};
-        var key, mappedKey;
-
-        for (key in seed) {
-            mappedKey = keyMap[key] || key;
-            if (optionKeys.indexOf( mappedKey ) < 0) {
-                styles[mappedKey] = seed[key];
+            for (var key in options) {
+                if (!defaults.hasOwnProperty( key )) {
+                    delete options[key];
+                }
             }
-        }
 
-        return styles;
-    };
+            return options;
+        },
+
+        getOrder: function( seed ) {
+
+            var passed = (seed.order || []).map( mapCallback );
+            
+            var computed = Object.keys( seed )
+                .filter(function( key , i ) {
+                    return OptionKeys.indexOf( key ) < 0;
+                })
+                .map( mapCallback );
+
+            function mapCallback( key ) {
+                return PropertyMap[key] || key;
+            }
+
+            return {
+                passed: passed,
+                computed: computed
+            };
+        },
+
+        getStyles: function( seed ) {
+
+            var styles = {};
+            var key, mappedKey;
+
+            for (key in seed) {
+                mappedKey = PropertyMap[key] || key;
+                if (OptionKeys.indexOf( mappedKey ) < 0) {
+                    styles[mappedKey] = seed[key];
+                }
+            }
+
+            return styles;
+        }        
+    });
 
 
     function getCompiledData( seed ) {

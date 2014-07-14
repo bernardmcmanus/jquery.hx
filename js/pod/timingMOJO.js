@@ -12,6 +12,8 @@ hxManager.TimingMOJO = (function( VendorPatch ) {
 
         var frameEvent = (that.frameEvent = 'animationFrame');
 
+        that.step = that._step.bind( that );
+
         MOJO.Hoist( that );
 
         Object_defineProperty( that , 'subscribers' , {
@@ -22,71 +24,59 @@ hxManager.TimingMOJO = (function( VendorPatch ) {
     }
 
 
-    var TimingMOJO_prototype = (TimingMOJO.prototype = new MOJO());
+    TimingMOJO.prototype = new MOJO({
 
+        subscribe: function( subscriber ) {
 
-    TimingMOJO_prototype.subscribe = function( subscriber ) {
+            var that = this;
 
-        var that = this;
+            that.when( that.frameEvent , subscriber.handle );
 
-        that.when( that.frameEvent , subscriber.handle );
+            if (!that.shouldLoop) {
+                that._start();
+            }
+        },
 
-        if (!that.shouldLoop) {
-            that._start();
-        }
-    };
+        unsubscribe: function( subscriber ) {
 
+            var that = this;
+            that.dispel( that.frameEvent , subscriber.handle );
+        },
 
-    TimingMOJO_prototype.unsubscribe = function( subscriber ) {
+        _start: function() {
 
-        var that = this;
-        that.dispel( that.frameEvent , subscriber.handle );
-    };
+            var that = this;
 
-
-    TimingMOJO_prototype._start = function() {
-
-        var that = this;
-
-        that.shouldLoop = true;
-        that._animationLoop();
-    };
-
-
-    TimingMOJO_prototype._stop = function() {
-        this.shouldLoop = false;
-    };
-
-
-    TimingMOJO_prototype._checkSubscribers = function() {
-
-        var that = this;
-
-        if (that.subscribers < 1) {
-            that._stop();
-        }
-    };
-
-
-    TimingMOJO_prototype._animationLoop = function() {
-        var that = this;
-        that.step = that._step.bind( that );
-        VendorPatch.RAF( that.step );
-    };
-
-
-    TimingMOJO_prototype._step = function( timestamp ) {
-
-        var that = this;
-
-        that.happen( that.frameEvent , timestamp );
-
-        that._checkSubscribers();
-
-        if (that.shouldLoop) {
+            that.shouldLoop = true;
             VendorPatch.RAF( that.step );
+        },
+
+        _stop: function() {
+            this.shouldLoop = false;
+        },
+
+        _checkSubscribers: function() {
+
+            var that = this;
+
+            if (that.subscribers < 1) {
+                that._stop();
+            }
+        },
+
+        _step: function( timestamp ) {
+
+            var that = this;
+
+            that.happen( that.frameEvent , timestamp );
+
+            that._checkSubscribers();
+
+            if (that.shouldLoop) {
+                VendorPatch.RAF( that.step );
+            }
         }
-    };
+    });
 
 
     return new TimingMOJO();

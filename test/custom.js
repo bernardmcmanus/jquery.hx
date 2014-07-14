@@ -21,6 +21,29 @@
     });*/
 
 
+    /*$(window).on( 'hx.error' , function( e , err ) {
+        console.log(err);
+    });*/
+
+
+    /*$(window).on( 'hx.ready' , function( e ) {
+        console.log(e);
+    });*/
+
+
+    /*$.hx.defineProperty( 'blur' )
+        .setDefaults( 0 )
+        .setStringGetter(function( name , CSSProperty ) {
+            return name + '(' + CSSProperty[0] + 'px)';
+        });
+
+    $.hx.defineProperty( 'opacity' )
+        .setDefaults( 100 )
+        .setStringGetter(function( name , CSSProperty ) {
+            return name + '(' + CSSProperty[0] + '%)';
+        });*/
+
+
     function Main( e ) {
         e.preventDefault();
         tests.t14();
@@ -1111,8 +1134,20 @@
         // test - animate
         t14: function() {
 
-            var selector = '.tgt,.tgt2,.tgt3';
-            //var selector = '.tgt';
+            //var selector = '.tgt,.tgt2,.tgt3';
+            var selector = '.tgt';
+
+            /*$(selector)
+            .hx( 'defer' , 1000 )
+            .hx({
+                type: 'transform',
+                translate: {x: '+=100'}
+            })
+            .done(function() {
+                console.log(this[0]._hx);
+            });
+
+            return;*/
 
             $(selector)
             .hx( 'loop' , function( i ) {
@@ -1159,7 +1194,7 @@
                     console.log('done');
                 });
 
-                setTimeout(function() {
+                /*setTimeout(function() {
                     $(selector).hx( 'pause' );
                 }, 400);
 
@@ -1173,7 +1208,7 @@
 
                 setTimeout(function() {
                     $(selector).hx( 'resume' );
-                }, 1600);
+                }, 1600);*/
             });
 
             $('#target')

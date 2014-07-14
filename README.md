@@ -126,7 +126,7 @@ The following diagram illustrates how the queues for each element in the previou
 
 ### Promises
 
-hx is bundled with the latest promises <a href="http://s3.amazonaws.com/es6-promises/promise-0.1.1.min.js" target="_blank">polyfill</a>, so it will work even in browsers that have not yet implemented promises. If you're not familiar with the concept of promises, you may find these resources helpful:
+hx is bundled with the latest promises <a href="http://s3.amazonaws.com/es6-promises/promise-1.0.0.min.js" target="_blank">polyfill</a>, so it will work even in browsers that have not yet implemented promises. If you're not familiar with the concept of promises, you may find these resources helpful:
 * <a href="http://www.html5rocks.com/en/tutorials/es6/promises/" target="_blank">Intro to Promises</a>
 * <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">MDN Promises Documentation</a>
 

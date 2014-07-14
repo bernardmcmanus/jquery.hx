@@ -17,10 +17,13 @@ hxManager.StyleDefinition = (function() {
 
 
     StyleDefinition.define = function( name ) {
+        
         if (Properties[name] !== undefined) {
             throw new Error( name + ' is already defined' );
         }
-        return (Properties[name] = new StyleDefinition( name ));
+        
+        Properties[name] = new StyleDefinition( name );
+        return Properties[name];
     };
 
 
@@ -33,13 +36,13 @@ hxManager.StyleDefinition = (function() {
 
         setDefaults: function( defaults ) {
             var that = this;
-            that.defaults = defaults;
+            that.defaults = (defaults instanceof Array ? defaults : [ defaults ]);
             return that;
         },
 
         setKeymap: function( keyMap ) {
             var that = this;
-            that.keyMap = keyMap;
+            that.keyMap = (keyMap instanceof Array ? keyMap : [ keyMap ]);
             return that;
         },
 

@@ -42,100 +42,94 @@ hxManager.PrecisionPod = (function() {
     }
 
 
-    var PrecisionPod_prototype = (PrecisionPod.prototype = new MOJO());
+    PrecisionPod.prototype = new MOJO({
 
+        addIterator: function( iteratorMOJO ) {
 
-    PrecisionPod_prototype.addIterator = function( iteratorMOJO ) {
+            var that = this;
 
-        var that = this;
+            iteratorMOJO.when( 'complete' , function( e ) {
+                that._iteratorComplete( iteratorMOJO );
+            });
 
-        iteratorMOJO.when( 'complete' , function( e ) {
-            that._iteratorComplete( iteratorMOJO );
-        });
+            that.iterators.push( iteratorMOJO );
+        },
 
-        that.iterators.push( iteratorMOJO );
-    };
+        run: function() {
 
+            var that = this;
 
-    PrecisionPod_prototype.run = function() {
+            that.iterators.forEach(function( iteratorMOJO ) {
+                if (iteratorMOJO.run()) {
+                    that.happen( 'iteratorStart' , iteratorMOJO.bean );
+                }
+            });
+        },
 
-        var that = this;
+        pause: function() {
 
-        that.iterators.forEach(function( iteratorMOJO ) {
-            if (iteratorMOJO.run()) {
-                that.happen( 'iteratorStart' , iteratorMOJO.bean );
+            var that = this;
+
+            that.happen( 'podPaused' , that );
+
+            that.iterators.forEach(function( iteratorMOJO ) {
+                iteratorMOJO.pause();
+            });
+        },
+
+        resume: function() {
+
+            var that = this;
+
+            that.happen( 'podResumed' , that );
+
+            that.iterators.forEach(function( iteratorMOJO ) {
+                iteratorMOJO.resume();
+            });
+        },
+
+        resolvePod: function() {
+
+            var that = this;
+
+            if (!that.resolved) {
+
+                that.iterators.forEach(function( iteratorMOJO ) {
+                    iteratorMOJO.destroy();
+                    that.happen( 'iteratorComplete' , iteratorMOJO.bean );
+                    iteratorMOJO.resolveIterator();
+                });
+
+                that.iterators = [];
             }
-        });
-    };
 
+            that.happen( 'podComplete' , that );
+        },
 
-    PrecisionPod_prototype.pause = function() {
+        cancel: function() {
 
-        var that = this;
+            var that = this;
 
-        that.happen( 'podPaused' , that );
-
-        that.iterators.forEach(function( iteratorMOJO ) {
-            iteratorMOJO.pause();
-        });
-    };
-
-
-    PrecisionPod_prototype.resume = function() {
-
-        var that = this;
-
-        that.happen( 'podResumed' , that );
-
-        that.iterators.forEach(function( iteratorMOJO ) {
-            iteratorMOJO.resume();
-        });
-    };
-
-
-    PrecisionPod_prototype.resolvePod = function() {
-
-        var that = this;
-
-        if (!that.resolved) {
+            that.happen( 'podCanceled' , that );
 
             that.iterators.forEach(function( iteratorMOJO ) {
                 iteratorMOJO.destroy();
-                that.happen( 'iteratorComplete' , iteratorMOJO.bean );
-                iteratorMOJO.resolveIterator();
             });
+        },
 
-            that.iterators = [];
+        _iteratorComplete: function( iteratorMOJO ) {
+
+            var that = this;
+            var i = that.iterators.indexOf( iteratorMOJO );
+
+            that.happen( 'iteratorComplete' , iteratorMOJO.bean );
+            that.iterators.splice( i , 1 );
+            
+            if (that.resolved) {
+                that.resolvePod();
+            }
         }
-
-        that.happen( 'podComplete' , that );
-    };
-
-
-    PrecisionPod_prototype.cancel = function() {
-
-        var that = this;
-
-        that.happen( 'podCanceled' , that );
-
-        that.iterators.forEach(function( iteratorMOJO ) {
-            iteratorMOJO.destroy();
-        });
-    };
-
-
-    PrecisionPod_prototype._iteratorComplete = function( iteratorMOJO ) {
-
-        var that = this;
-        var i = that.iterators.indexOf( iteratorMOJO );
-
-        that.happen( 'iteratorComplete' , iteratorMOJO.bean );
-        that.iterators.splice( i , 1 );
-        
-        if (that.resolved) {
-            that.resolvePod();
-        }
-    };
+    });
 
 
     return PrecisionPod;

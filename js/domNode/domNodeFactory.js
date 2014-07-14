@@ -2,6 +2,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
     
     var MOJO_Each = MOJO.Each;
+    var PropertyMap = Config.properties;
 
 
     function DomNodeFactory( element ) {
@@ -34,7 +35,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             var style = {}, property, string;
 
             if (type === undefined) {
-                type = Object.keys( that_hx.componentMOJO.getOrder() );
+                type = Object.keys( that_hx.getOrder() );
             }
             else {
                 type = (type instanceof Array ? type : [ type ]);
@@ -80,7 +81,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
             // TODO - clean up this method
             
-            property = Config.properties[property] || property;
+            property = PropertyMap[property] || property;
             pretty = (pretty !== undefined ? pretty : true);
             
             var that_hx = this._hx;
@@ -90,8 +91,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
             if (pretty) {
 
-                var keyMap = Config.properties;
-                var keyMapInv = keyMap.inverse;
+                var PropertyMapInv = PropertyMap.inverse;
                 var i, key, keyInv;
 
                 if (property) {
@@ -107,7 +107,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
                     for (i = 0; i < keys.length; i++) {
                         
                         key = keys[i];
-                        keyInv = keyMapInv[key] || key;
+                        keyInv = PropertyMapInv[key] || key;
                         out[keyInv] = components[key].values;
 
                         if (out[keyInv].hasOwnProperty( 0 )) {
@@ -213,8 +213,8 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             that._hx.queue.pushPod( pod );
         },
 
-        next: function() {
-            return this._hx.queue.next();
+        proceed: function() {
+            return this._hx.queue.proceed();
         },
 
         clearQueue: function( all ) {
@@ -225,15 +225,15 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             return this._hx.queue.current;
         },
 
-        getLastPod: function() {
+        /*getLastPod: function() {
             return this._hx.queue.last;
-        },
+        },*/
 
-        getPodCount: function( type ) {
+        /*getPodCount: function( type ) {
             return this._hx.queue.getPodCount( type );
-        },
+        },*/
 
-        cleanup: function() {
+        clean: function() {
             delete this._hx;
         }
     };
@@ -269,7 +269,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
     }
 
     function podComplete( e , node , pod ) {
-        node._hx.next();
+        node._hx.proceed();
     }
 
     function animationCanceled( e , node , pod ) {

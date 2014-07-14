@@ -8,29 +8,26 @@ hxManager.PromisePod = (function() {
     }
 
 
-    var PromisePod_prototype = (PromisePod.prototype = new MOJO());
+    PromisePod.prototype = new MOJO({
 
+        run: function() {
+            this.happen( 'promiseMade' );
+        },
 
-    PromisePod_prototype.run = function() {
-        this.happen( 'promiseMade' );
-    };
+        resolvePromise: function() {
+            this.happen( 'promiseResolved' );
+        },
 
+        resolvePod: function() {
+            var that = this;
+            that.happen( 'podComplete' , that );
+        },
 
-    PromisePod_prototype.resolvePromise = function() {
-        this.happen( 'promiseResolved' );
-    };
-
-
-    PromisePod_prototype.resolvePod = function() {
-        var that = this;
-        that.happen( 'podComplete' , that );
-    };
-
-
-    PromisePod_prototype.cancel = function() {
-        var that = this;
-        that.happen( 'podCanceled' , that );
-    };
+        cancel: function() {
+            var that = this;
+            that.happen( 'podCanceled' , that );
+        }
+    });
 
 
     return PromisePod;

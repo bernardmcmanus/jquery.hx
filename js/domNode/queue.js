@@ -34,20 +34,30 @@ hxManager.Queue = (function() {
 
     Queue_prototype.pushPod = function( pod ) {
 
-        this.push( pod );
+        var that = this;
 
-        if (this.length === 1) {
-            this.current.run();
+        that.push( pod );
+
+        if (that.length === 1) {
+            that.current.run();
         }
     };
 
 
     Queue_prototype.next = function() {
 
-        this.shift();
+        var that = this;
+    };
 
-        if (!this.complete) {
-            this.current.run();
+
+    Queue_prototype.proceed = function() {
+
+        var that = this;
+
+        that.shift();
+
+        if (!that.complete) {
+            that.current.run();
             return true;
         }
 
@@ -60,24 +70,22 @@ hxManager.Queue = (function() {
         // all controls whether all pods or all but the current pod will be cleared
         all = (typeof all !== 'undefined' ? all : true);
 
-        while (this.length > (all ? 0 : 1)) {
-            this.pop().cancel();
+        var that = this;
+
+        while (that.length > (all ? 0 : 1)) {
+            that.pop().cancel();
         }
     };
 
 
-    Queue_prototype.getPodCount = function( type ) {
+    /*Queue_prototype.getPodCount = function( type ) {
 
-        var count = 0;
-
-        this.forEach(function( pod ) {
-            if (!type || pod.type === type) {
-                count++;
-            }
-        });
-
-        return count;
-    };
+        return this
+            .filter(function( pod ) {
+                return (!type || pod.type === type);
+            })
+            .length;
+    };*/
 
 
     return Queue;

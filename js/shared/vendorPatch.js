@@ -25,12 +25,25 @@ hxManager.VendorPatch = (function( Config ) {
                 return str;
             }
 
-            Config.prefix.forEach(function( re ) {
+            Config.prefix.forEach(function( pfx ) {
 
-                var match = re.exec( str );
-                
-                if (match) {
-                    str = str.replace( re , ('-' + vendor + '-' + match[0]) );
+                var re, exclude = [];
+
+                if (pfx instanceof RegExp) {
+                    re = pfx;
+                }
+                else {
+                    re = pfx.regexp;
+                    exclude = pfx.exclude || exclude;
+                }
+
+                if (exclude.indexOf( vendor ) < 0) {
+
+                    var match = re.exec( str );
+                    
+                    if (match) {
+                        str = str.replace( re , ('-' + vendor + '-' + match[0]) );
+                    }
                 }
             });
 
@@ -47,8 +60,15 @@ hxManager.VendorPatch = (function( Config ) {
 
 
     function _getRequestAnimationFrame() {
+        
         var W = window;
         var name = 'equestAnimationFrame';
+        var initTime = Date.now();
+
+        function now() {
+            return Date.now() - initTime;
+        }
+        
         return (
             W['r' + name] ||
             W['webkitR' + name] ||
@@ -56,7 +76,9 @@ hxManager.VendorPatch = (function( Config ) {
             W['oR' + name] ||
             W['msR' + name] ||
             function( callback ) {
-                setTimeout( callback , ( 1000 / 60 ));
+                setTimeout(function() {
+                    callback( now() );
+                }, ( 1000 / 60 ));
             }
         ).bind( null );
     }

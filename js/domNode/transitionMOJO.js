@@ -17,43 +17,41 @@ hxManager.TransitionMOJO = (function( Config , VendorPatch , Easing ) {
     }
 
 
-    var TransitionMOJO_prototype = (TransitionMOJO.prototype = new MOJO());
+    TransitionMOJO.prototype = new MOJO({
 
+        getString: function() {
 
-    TransitionMOJO_prototype.getString = function() {
+            var that = this;
+            var arr = [];
 
-        var that = this;
-        var arr = [];
+            MOJO_Each( that , function( options , type ) {
 
-        MOJO_Each( that , function( options , type ) {
+                var duration = options.duration;
+                var easing = options.easing;
+                var delay = options.delay;
 
-            var duration = options.duration;
-            var easing = options.easing;
-            var delay = options.delay;
+                // don't add a component for transitions with duration and delay of 0
+                if (duration < 1 && delay < 1) {
+                    return;
+                }
 
-            // don't add a component for transitions with duration and delay of 0
-            if (duration < 1 && delay < 1) {
-                return;
-            }
+                var str = getTransitionString( type , duration , easing , delay );
+                arr.push( str );
+            });
+            
+            return VendorPatch.getPrefixed(
+                arr.join( ', ' )
+            );
+        },
 
-            var str = getTransitionString( type , duration , easing , delay );
-            arr.push( str );
-        });
-        
-        return VendorPatch.getPrefixed(
-            arr.join( ', ' )
-        );
-    };
+        setTransition: function( bean ) {
+            this.set( bean.type , getTransitionObject( bean ));
+        },
 
-
-    TransitionMOJO_prototype.setTransition = function( bean ) {
-        this.set( bean.type , getTransitionObject( bean ));
-    };
-
-
-    TransitionMOJO_prototype.deleteTransition = function( type ) {
-        this.remove( type );
-    };
+        deleteTransition: function( type ) {
+            this.remove( type );
+        }
+    });
 
 
     function getTransitionObject( bean ) {

@@ -2,11 +2,8 @@ hxManager.Config = (function() {
 
 
     var Config = {
-        
-        keys: {
-            options: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
-            transform: [ 'translate3d' , 'scale3d' , 'translate' , 'scale' , 'rotate3d' , 'rotateX' , 'rotateY' , 'rotateZ' , 'matrix' , 'matrix3d' ]
-        },
+
+        optionKeys: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
 
         properties: {
             translate: 'translate3d',
@@ -49,7 +46,10 @@ hxManager.Config = (function() {
             prefix: [
                 (/(\-{0})transition/g),
                 (/(\-{0})transform/g),
-                (/(\-{0})filter/g)
+                {
+                    regexp: (/(\-{0})filter/g),
+                    exclude: [ 'ms' ]
+                }
             ]
         }
     };

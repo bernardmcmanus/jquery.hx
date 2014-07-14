@@ -1,13 +1,23 @@
-hxManager.CSSFactory = (function( StyleDefinition , CSSProperty ) {
+(function( VendorPatch , DefineProperty ) {
 
 
-    var DefineProperty = StyleDefinition.define;
+    // Do some important stuff when hx is loaded
+
+    var Win = window;
+    var Doc = document;
 
 
-    function CSSFactory( name , values ) {
-        return new CSSProperty( name , values );
-    }
-
+    $.hx = {
+        defineProperty: DefineProperty,
+        error: function( error ) {
+            $(Doc).trigger( 'hx.error' , error );
+            try {
+                console.error( error.stack );
+            }
+            catch( err ) {}
+        }
+    };
+    
 
     DefineProperty( 'matrix3d' )
         .setDefaults([
@@ -52,21 +62,21 @@ hxManager.CSSFactory = (function( StyleDefinition , CSSProperty ) {
 
 
     DefineProperty( 'rotateX' )
-        .setDefaults([ 0 ])
+        .setDefaults( 0 )
         .setStringGetter(function( name , CSSProperty ) {
             return name + '(' + CSSProperty[0] + 'deg)';
         });
 
 
     DefineProperty( 'rotateY' )
-        .setDefaults([ 0 ])
+        .setDefaults( 0 )
         .setStringGetter(function( name , CSSProperty ) {
             return name + '(' + CSSProperty[0] + 'deg)';
         });
 
 
     DefineProperty( 'rotateZ' )
-        .setDefaults([ 0 ])
+        .setDefaults( 0 )
         .setStringGetter(function( name , CSSProperty ) {
             return name + '(' + CSSProperty[0] + 'deg)';
         });
@@ -97,13 +107,23 @@ hxManager.CSSFactory = (function( StyleDefinition , CSSProperty ) {
 
 
     DefineProperty( 'opacity' )
-        .setDefaults([ 1 ]);
+        .setDefaults( 1 );
 
 
-    return CSSFactory;
+    function hxReady() {
+        $(Win).off( 'load' , hxReady );
+        $(Doc).trigger( 'hx.ready' );
+    }
 
-    
-}( hxManager.StyleDefinition , hxManager.CSSProperty ));
+    if (Doc.readyState !== 'complete') {
+        $(Win).on( 'load' , hxReady );
+    }
+    else {
+        hxReady();
+    }
+
+
+}( hxManager.VendorPatch , hxManager.StyleDefinition.define ));
 
 
 
