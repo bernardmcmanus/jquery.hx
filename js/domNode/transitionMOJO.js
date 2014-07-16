@@ -58,7 +58,7 @@ hxManager.TransitionMOJO = (function( Config , VendorPatch , Easing ) {
         var options = bean.options;
         return {
             duration: options.duration,
-            easing: Easing( options.easing ),
+            easing: Easing( options.easing ).string,
             delay: options.delay
         };
     }

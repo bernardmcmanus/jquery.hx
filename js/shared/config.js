@@ -59,15 +59,12 @@ hxManager.Config = (function() {
 
         get: function() {
 
-            var that = this;
-            var key, i, val, out = {}, keys = Object.keys( that );
-            
-            for (i = 0; i < keys.length; i++) {
-                key = keys[i];
-                val = that[key];
+            var out = {};
+
+            MOJO.Each( this , function( val , key ) {
                 out[val] = key;
-            }
-            
+            });
+
             return out;
         }
     });

@@ -10,6 +10,7 @@ module.exports = function( grunt ) {
         'js/shared/config.js',
         'js/shared/helper.js',
         'js/shared/vendorPatch.js',
+        'js/shared/bezier.js',
         'js/shared/easing.js',
         'js/domNode/styleDefinition.js',
         'js/domNode/cssProperty.js',
@@ -31,7 +32,8 @@ module.exports = function( grunt ) {
 
     var Lib = [
         'js/lib/promise-1.0.0.min.js',
-        'js/lib/mojo-0.1.1.min.js'
+        'js/lib/mojo-0.1.1.min.js',
+        'js/lib/bezier-easing-0.4.1.js'
     ];
 
 

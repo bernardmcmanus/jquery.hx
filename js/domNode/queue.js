@@ -44,10 +44,26 @@ hxManager.Queue = (function() {
     };
 
 
-    Queue_prototype.next = function() {
+    /*Queue_prototype.nextOfType = function( type ) {
 
         var that = this;
-    };
+        var pod = false;
+
+        for (var i = 0; i < that.length; i++) {
+            if (that[i].type === type) {
+                pod = that[i];
+                break;
+            }
+        }
+
+        return pod;
+    };*/
+
+
+    /*Queue_prototype.next = function() {
+
+        var that = this;
+    };*/
 
 
     Queue_prototype.proceed = function() {

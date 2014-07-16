@@ -225,6 +225,10 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             return this._hx.queue.current;
         },
 
+        /*nextOfType: function( type ) {
+            return this._hx.queue.nextOfType( type );
+        },*/
+
         /*getLastPod: function() {
             return this._hx.queue.last;
         },*/

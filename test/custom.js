@@ -46,7 +46,7 @@
 
     function Main( e ) {
         e.preventDefault();
-        tests.t14();
+        tests.t15();
     }
 
 
@@ -1134,105 +1134,115 @@
         // test - animate
         t14: function() {
 
-            //var selector = '.tgt,.tgt2,.tgt3';
-            var selector = '.tgt';
+            var selector = '.tgt,.tgt2,.tgt3';
+            //var selector = '.tgt';
+            var duration = 400;
+            var initial = true;
 
-            /*$(selector)
-            .hx( 'defer' , 1000 )
-            .hx({
-                type: 'transform',
-                translate: {x: '+=100'}
-            })
-            .done(function() {
-                console.log(this[0]._hx);
-            });
+            $(selector).each(function( i ) {
 
-            return;*/
+                $(this).hx( 'loop' , function( j ) {
 
-            $(selector)
-            .hx( 'loop' , function( i ) {
-
-                $(selector)
-                .hx( 'animate' , [
-                    {
+                    $(this).hx( 'animate' , {
                         type: 'transform',
-                        translate: {x: '+=120', y: '+=160'},
-                        duration: 1600
-                    },
-                    {
-                        type: 'transform',
-                        rotateZ: '+=90',
-                        duration: 1600,
-                        delay: 400,
-                        easing: 'easeOutElastic'
-                    },
-                    {
-                        type: 'transform',
-                        scale: {x: '+=1', y: '+=1'},
-                        duration: 1200
-                    },
-                    {
-                        type: 'opacity',
-                        value: '-=0.5',
-                        duration: 800,
-                        delay: 400
-                    }
-                ])
-                .then(function( resolve ) {
-                    $(this).hx( 'reset' );
-                    resolve();
-                })
-                .hx([
-                    {
-                        type: 'transform'
-                    },
-                    {
-                        type: 'opacity'
-                    }
-                ])
-                .done(function() {
-                    console.log('done');
+                        translate: ($(this).hasClass( 'reverse' ) ? null : {y: '+=300'}),
+                        duration: duration,
+                        delay: (initial ? (i * 50) : 0),
+                        easing: ($(this).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown')
+                    });
+
+                    $(this).toggleClass( 'reverse' );
                 });
-
-                /*setTimeout(function() {
-                    $(selector).hx( 'pause' );
-                }, 400);
-
-                setTimeout(function() {
-                    $(selector).hx( 'resume' );
-                }, 800);
-
-                setTimeout(function() {
-                    $(selector).hx( 'pause' );
-                }, 1200);
-
-                setTimeout(function() {
-                    $(selector).hx( 'resume' );
-                }, 1600);*/
             });
 
-            $('#target')
-            .off( 'touchstart click' )
-            .on( 'touchstart click' , function( e ) {
-                
-                e.preventDefault();
+            initial = false;
+            toggleAction();
 
+            function toggleAction( current ) {
+                var action = (current === pause ? resume : pause);
                 $('#target')
+                .html( action.name )
                 .off( 'touchstart click' )
-                .on( 'touchstart click' , Main );
+                .on( 'touchstart click' , action );
+            }
 
-                $(selector)
-                .hx( 'clear' )
-                .hx( 'reset' )
-                .hx([
-                    {
-                        type: 'transform'
-                    },
-                    {
-                        type: 'opacity'
-                    }
-                ]);
+            function pause( e ) {
+                e.preventDefault();
+                $(selector).hx( 'pause' );
+                toggleAction( pause );
+            }
+
+            function resume( e ) {
+                e.preventDefault();
+                $(selector).hx( 'resume' );
+                toggleAction( resume );
+            }
+
+            return;
+        },
+
+        // test - pause / resume on non-precision pods
+        t15: function() {
+
+            var selector = '.tgt,.tgt2,.tgt3';
+            //var selector = '.tgt';
+            var duration = 400;
+            var initial = true;
+
+            $(selector).each(function( i ) {
+
+                $(this).hx( 'loop' , function( j ) {
+
+                    $(this).hx( 'animate' , {
+                        type: 'transform',
+                        translate: ($(this).hasClass( 'reverse' ) ? null : {y: '+=300'}),
+                        duration: duration,
+                        delay: (initial ? (i * 50) : 0),
+                        easing: ($(this).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown')
+                    })
+                    .then(function( resolve ) {
+                        resolve();
+                    })
+                    .then(function( resolve ) {
+                        resolve();
+                    })
+                    .then(function( resolve ) {
+                        resolve();
+                    });
+
+                    $(this).toggleClass( 'reverse' );
+                });
             });
+
+            $(selector).get( 0 )._hx.getCurrentPod().when( 'podComplete' , pause );
+
+            initial = false;
+
+            toggleAction();
+
+            function toggleAction( current ) {
+                var action = (current === pause ? resume : pause);
+                $('#target')
+                .html( action.name )
+                .off( 'touchstart click' )
+                .on( 'touchstart click' , action );
+            }
+
+            function pause( e ) {
+                if (e) {
+                    e.preventDefault();
+                }
+                $(selector).hx( 'pause' );
+                toggleAction( pause );
+            }
+
+            function resume( e ) {
+                if (e) {
+                    e.preventDefault();
+                }
+                $(selector).hx( 'resume' );
+                toggleAction( resume );
+            }
         }
     };
 

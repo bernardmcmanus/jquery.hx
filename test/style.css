@@ -16,11 +16,14 @@ body {
 
 #target {
     cursor: pointer;
+    text-align: center;
+    color: #fff;
     position: absolute;
     top: 10px;
     left: 10px;
     width: 80px;
     height: 80px;
+    line-height: 80px;
     background-color: navy;
     z-index: 2;
     overflow: hidden;

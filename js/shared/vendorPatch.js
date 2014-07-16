@@ -65,7 +65,7 @@ hxManager.VendorPatch = (function( Config ) {
         var name = 'equestAnimationFrame';
         var initTime = Date.now();
 
-        function now() {
+        function timestamp() {
             return Date.now() - initTime;
         }
         
@@ -77,7 +77,7 @@ hxManager.VendorPatch = (function( Config ) {
             W['msR' + name] ||
             function( callback ) {
                 setTimeout(function() {
-                    callback( now() );
+                    callback( timestamp() );
                 }, ( 1000 / 60 ));
             }
         ).bind( null );

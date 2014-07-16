@@ -43,10 +43,11 @@ hxManager.Bean = (function( Config , Subscriber ) {
             var duration = options.duration;
             var delay = options.delay;
 
-            that.subscriber = new Subscriber( duration , delay , function() {            
+            that.subscriber = new Subscriber( duration , delay , function() {
                 that.resolveBean();
                 that.happen( 'beanComplete' , that );
-            });
+            })
+            .subscribe();
         },
 
         resolveBean: function() {

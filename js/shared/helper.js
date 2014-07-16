@@ -1,5 +1,8 @@
 hxManager.Helper = (function() {
-    
+
+
+    var Array_prototype = Array.prototype;
+
 
     function compareArray( subject , array ) {
         
@@ -26,8 +29,20 @@ hxManager.Helper = (function() {
     }
 
 
+    function shift( subject ) {
+        return Array_prototype.shift.call( subject );
+    }
+
+
+    function pop( subject ) {
+        return Array_prototype.pop.call( subject );
+    }
+
+
     return {
-        compareArray: compareArray
+        compareArray: compareArray,
+        shift: shift,
+        pop: pop
     };
 
 

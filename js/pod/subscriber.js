@@ -25,8 +25,6 @@ hxManager.Subscriber = (function( TimingMOJO ) {
         });
 
         that.handle = that._handle.bind( that );
-
-        TimingMOJO.subscribe( that );
     }
 
 
@@ -37,12 +35,34 @@ hxManager.Subscriber = (function( TimingMOJO ) {
             var that = this;
             var progress = that.getProgress( timestamp );
 
+            //console.log(progress);
+
             that.timingCallback( progress , timestamp );
             
             if (progress >= 1) {
                 that.onComplete();
                 that.destroy();
             }
+        },
+
+        subscribe: function() {
+            var that = this;
+            TimingMOJO.subscribe( that );
+            return that;
+        },
+
+        pause: function() {
+            var that = this;
+            that.paused = true;
+            that.bufferStart = that.time;
+        },
+
+        resume: function() {
+            this.paused = false;
+        },
+
+        destroy: function() {
+            TimingMOJO.unsubscribe( this );
         },
 
         getProgress: function( timestamp ) {
@@ -61,27 +81,13 @@ hxManager.Subscriber = (function( TimingMOJO ) {
             }
 
             if (that.paused) {
-                that.buffer += (timestamp - that.bufferStart);
+                var b = (that.buffer + timestamp - that.bufferStart);
+                that.buffer = isNaN( b ) ? 0 : b;
                 that.bufferStart = timestamp;
             }
 
-            var progress = (timestamp - that.startTime - that.delay);
-
-            return (progress - that.buffer) / that.duration;
-        },
-
-        pause: function() {
-            var that = this;
-            that.paused = true;
-            that.bufferStart = that.time;
-        },
-
-        resume: function() {
-            this.paused = false;
-        },
-
-        destroy: function() {
-            TimingMOJO.unsubscribe( this );
+            var progress = ((timestamp - that.startTime - that.delay) - that.buffer) / that.duration;
+            return isFinite( progress ) ? progress : 1;
         }
     };
 
