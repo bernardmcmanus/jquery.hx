@@ -26,7 +26,7 @@ module.exports = function( grunt ) {
         'js/pod/precisionPod.js',
         'js/pod/promisePod.js',
         'js/pod/podFactory.js',
-        'js//init/init.js'
+        'js/init/init.js'
     ];
 
 
