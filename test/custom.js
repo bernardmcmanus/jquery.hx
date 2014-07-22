@@ -1,52 +1,45 @@
 (function() {
 
     
-    /*$('.tgt').on( 'hx.start' , function( e , data ) {
-        console.log(data);
-    });*/
+    (function( selector ) {
 
+        return;
 
-    /*$('.tgt').on( 'hx.end' , function( e , data ) {
-        console.log(data);
-    });*/
-
-
-    /*$('.tgt').on( 'hx.pause' , function( e , data ) {
-        console.log(e.namespace,data);
-    });*/
-
-
-    /*$('.tgt').on( 'hx.resume' , function( e , data ) {
-        console.log(e.namespace,data);
-    });*/
-
-
-    /*$(window).on( 'hx.error' , function( e , err ) {
-        console.log(err);
-    });*/
-
-
-    /*$(window).on( 'hx.ready' , function( e ) {
-        console.log(e);
-    });*/
-
-
-    /*$.hx.defineProperty( 'blur' )
-        .setDefaults( 0 )
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty[0] + 'px)';
+        $(selector).on( 'hx.start' , function( e , data ) {
+            console.log(data);
         });
 
-    $.hx.defineProperty( 'opacity' )
-        .setDefaults( 100 )
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty[0] + '%)';
-        });*/
+
+        $(selector).on( 'hx.end' , function( e , data ) {
+            console.log(data);
+        });
+
+
+        $(selector).on( 'hx.pause' , function( e , data ) {
+            console.log(e.namespace,data);
+        });
+
+
+        $(selector).on( 'hx.resume' , function( e , data ) {
+            console.log(e.namespace,data);
+        });
+
+
+        $(window).on( 'hx.error' , function( e , err ) {
+            console.log(err);
+        });
+
+
+        $(window).on( 'hx.ready' , function( e ) {
+            console.log(e);
+        });
+
+    }( '.tgt' ));
 
 
     function Main( e ) {
         e.preventDefault();
-        tests.t15();
+        tests.t14();
     }
 
 
@@ -56,14 +49,16 @@
 
         $('div').on( 'touchstart mousedown' , function( e ) {
             e.preventDefault();
-            e.stopPropagation();
-            $(this).addClass( 'indicate' );
+            if (this === e.target) {
+                $(this).addClass( 'indicate' );
+            }
         });
 
         $('div').on( 'touchend mouseup' , function( e ) {
             e.preventDefault();
-            e.stopPropagation();
-            $('.indicate').removeClass( 'indicate' );
+            if (this === e.target) {
+                $('.indicate').removeClass( 'indicate' );
+            }
         });
     });
 
@@ -781,45 +776,28 @@
         // test - zero duration
         t7: function() {
 
-            var start, move, diff, target;
+            var start, move, diff, origin, target;
             var selector = '.tgt, .tgt2, .tgt3';
-
-            /*$(selector).hx( 'update' , {
-                type: 'opacity',
-                value: 1
-            });*/
-
-            /*console.log($(selector).hx( 'get' ));
-            $(selector).hx( 'reset' )
-            console.log($(selector).hx( 'get' ));
-            return;*/
 
             function reset() {
                 start = {};
                 move = {now:{},last:{}};
                 diff = {total:{},inst:{}};
+                origin = $(target).hx( 'get' , 'transform' , 'translate' )[0];
             }
 
             function coolStart( e ) {
 
-                e.preventDefault();
                 e = e.originalEvent;
 
+                target = this;
                 reset();
 
-                if (e.type === 'touchstart') {
-                    start.x = e.touches[0].clientX;
-                    start.y = e.touches[0].clientY;
-                }
-                else if (e.type === 'mousedown') {
-                    start.x = e.clientX;
-                    start.y = e.clientY;
-                }
+                start.x = e.touches[0].clientX;
+                start.y = e.touches[0].clientY;
 
-                target = this;
-
-                $(window).on( 'touchmove mousemove' , coolMove );
-                $(window).on( 'touchend mouseup' , coolEnd );
+                $(window).on( 'touchmove' , coolMove );
+                $(window).on( 'touchend' , coolEnd );
             }
 
             function coolMove( e ) {
@@ -830,48 +808,41 @@
                 move.last.x = move.now.x || start.x;
                 move.last.y = move.now.y || start.y;
 
-                if (e.type === 'touchmove') {
-                    move.now.x = e.touches[0].clientX;
-                    move.now.y = e.touches[0].clientY;
-                }
-                else if (e.type === 'mousemove') {
-                    move.now.x = e.clientX;
-                    move.now.y = e.clientY;
-                }
+                move.now.x = e.touches[0].clientX;
+                move.now.y = e.touches[0].clientY;
 
                 diff.total.x = move.now.x - start.x;
                 diff.total.y = move.now.y - start.y;
 
-                diff.inst.x = move.now.x - move.last.x;
-                diff.inst.y = move.now.y - move.last.y;
+                var x = origin.x + diff.total.x;
+                var y = origin.y + diff.total.y;
 
                 $(target).hx( 'zero' , [
-                    {
+                    /*{
                         type: 'opacity',
-                        value: ('+=' + ((diff.inst.x - diff.inst.y)/100))
-                    },
+                        value: ('+=' + ((x - y)/100))
+                    },*/
                     {
                         type: 'transform',
                         translate: {
-                            x: ('+=' + diff.inst.x),
-                            y: ('+=' + diff.inst.y)
+                            x: x,
+                            y: y
                         },
                         scale: {
-                            x: ('+=' + (diff.inst.x/100)),
-                            y: ('+=' + (diff.inst.y/100))
+                            x: ((x / 100) >= 1 ? (x / 100) : 1),
+                            y: ((y / 100) >= 1 ? (y / 100) : 1)
                         }
                     }
                 ]);
             }
 
             function coolEnd( e ) {
-                $(window).off( 'touchmove mousemove' , coolMove );
-                $(window).off( 'touchend mouseup' , coolEnd );
+                $(window).off( 'touchmove' , coolMove );
+                $(window).off( 'touchend' , coolEnd );
                 console.log($(target).hx( 'get' ));
-                //console.log(target._hx);
             }
 
-            $(selector).on( 'touchstart mousedown' , coolStart );
+            $(selector).on( 'touchstart' , coolStart );
         },
 
         // test - persistent transforms
@@ -1137,25 +1108,26 @@
             var selector = '.tgt,.tgt2,.tgt3';
             //var selector = '.tgt';
             var duration = 400;
-            var initial = true;
 
-            $(selector).each(function( i ) {
+            function bounce( initial ) {
 
-                $(this).hx( 'loop' , function( j ) {
+                $(selector).each(function( i ) {
 
-                    $(this).hx( 'animate' , {
+                    $(this)
+                    .hx( 'animate' , {
                         type: 'transform',
                         translate: ($(this).hasClass( 'reverse' ) ? null : {y: '+=300'}),
                         duration: duration,
                         delay: (initial ? (i * 50) : 0),
                         easing: ($(this).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown')
-                    });
+                    })
+                    .done( bounce );
 
                     $(this).toggleClass( 'reverse' );
                 });
-            });
+            }
 
-            initial = false;
+            bounce( true );
             toggleAction();
 
             function toggleAction( current ) {
@@ -1187,13 +1159,13 @@
             var selector = '.tgt,.tgt2,.tgt3';
             //var selector = '.tgt';
             var duration = 400;
-            var initial = true;
 
-            $(selector).each(function( i ) {
+            function bounce( initial ) {
 
-                $(this).hx( 'loop' , function( j ) {
+                $(selector).each(function( i ) {
 
-                    $(this).hx( 'animate' , {
+                    $(this)
+                    .hx( 'animate' , {
                         type: 'transform',
                         translate: ($(this).hasClass( 'reverse' ) ? null : {y: '+=300'}),
                         duration: duration,
@@ -1208,17 +1180,17 @@
                     })
                     .then(function( resolve ) {
                         resolve();
-                    });
+                    })
+                    .done( bounce );
 
                     $(this).toggleClass( 'reverse' );
                 });
-            });
+            }
+
+            bounce( true );
+            toggleAction();
 
             $(selector).get( 0 )._hx.getCurrentPod().when( 'podComplete' , pause );
-
-            initial = false;
-
-            toggleAction();
 
             function toggleAction( current ) {
                 var action = (current === pause ? resume : pause);
@@ -1243,6 +1215,40 @@
                 $(selector).hx( 'resume' );
                 toggleAction( resume );
             }
+        },
+
+        // test - css filters
+        t16: function() {
+
+            $.hx.defineProperty( 'blur' )
+                .setDefaults( 0 )
+                .setStringGetter(function( name , CSSProperty ) {
+                    return name + '(' + CSSProperty[0] + 'px)';
+                });
+
+            $.hx.defineProperty( 'opacity' )
+                .setDefaults( 100 )
+                .setStringGetter(function( name , CSSProperty ) {
+                    return name + '(' + CSSProperty[0] + '%)';
+                });
+
+            var selector = '.tgt,.tgt2,.tgt3';
+            //var selector = '.tgt';
+
+            $(selector)
+            .hx({
+                type: 'filter',
+                blur: 3,
+                opacity: 75,
+                duration: 600
+            })
+            .done(function() {
+                console.log(
+                    this.toArray().map(function( node ) {
+                        return node._hx.componentMOJO;
+                    })
+                );
+            });
         }
     };
 

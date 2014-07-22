@@ -13,7 +13,7 @@ hxManager.AnimationPod = (function( VendorPatch ) {
         that.node = node;
         that.beans = {};
 
-        MOJO.Hoist( that );
+        MOJO.Construct( that );
 
         Object_defineProperty( that , 'sequence' , {
             get: function() {
@@ -35,7 +35,7 @@ hxManager.AnimationPod = (function( VendorPatch ) {
     }
 
 
-    AnimationPod.prototype = new MOJO({
+    AnimationPod.prototype = MOJO.Create({
 
         addBean: function( bean ) {
             var that = this;

@@ -4,11 +4,11 @@ hxManager.PromisePod = (function() {
     function PromisePod() {
         var that = this;
         that.type = 'promise';
-        MOJO.Hoist( that );
+        MOJO.Construct( that );
     }
 
 
-    PromisePod.prototype = new MOJO({
+    PromisePod.prototype = MOJO.Create({
 
         run: function() {
             this.happen( 'promiseMade' );

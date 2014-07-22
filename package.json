@@ -10,6 +10,7 @@
         "grunt-contrib-concat": ">=0.4.0",
         "grunt-contrib-uglify": ">=0.2.2",
         "grunt-contrib-clean": ">=0.4.1",
+        "grunt-git-describe": "~2.0.2",
         "grunt-replace": ">=0.7.7",
         "grunt-contrib-watch": ">=0.6.1"
     },
@@ -21,7 +22,11 @@
         "jquery",
         "animation"
     ],
-    "author": "Bernard McManus <bernard.mcmanus.iv@gmail.com> (http://github.com/elnarddogg/)",
+    "author": {
+        "name": "Bernard McManus",
+        "email": "bernard.mcmanus.iv@gmail.com",
+        "url": "http://github.com/elnarddogg"
+    },
     "license": {
         "type": "MIT",
         "url": "https://github.com/millennialmedia/jquery.hx/blob/master/LICENSE.txt"

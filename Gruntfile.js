@@ -32,7 +32,7 @@ module.exports = function( grunt ) {
 
     var Lib = [
         'js/lib/promise-1.0.0.min.js',
-        'js/lib/mojo-0.1.1.min.js',
+        'js/lib/mojo-0.1.2.min.js',
         'js/lib/bezier-easing-0.4.1.js'
     ];
 
@@ -43,6 +43,13 @@ module.exports = function( grunt ) {
     grunt.initConfig({
 
         pkg: grunt.file.readJSON( 'package.json' ),
+
+        'git-describe': {
+            'options': {
+                prop: 'git-version'
+            },
+            dist : {}
+        },
 
         jshint: {
             all: [ 'Gruntfile.js' ].concat( Script )
@@ -147,7 +154,7 @@ module.exports = function( grunt ) {
             options: {
                 banner: (function() {
                     var banner = '/*\n\n';
-                    banner += '<%= pkg.name %> - <%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>';
+                    banner += '<%= pkg.name %> - <%= pkg.version %> - <%= grunt.config.get( \'git-hash\' ) %> - <%= grunt.template.today("yyyy-mm-dd") %>';
                     banner += '\n\n';
                     banner += fs.readFileSync( 'LICENSE.txt' , 'utf8' );
                     banner += '\n\n*/\n\n';
@@ -162,7 +169,7 @@ module.exports = function( grunt ) {
 
         uglify: {
             options: {
-                banner: '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner: '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.get( \'git-hash\' ) %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             release: {
                 files: {
@@ -176,6 +183,7 @@ module.exports = function( grunt ) {
     [
         'grunt-contrib-jshint',
         'grunt-contrib-clean',
+        'grunt-git-describe',
         'grunt-replace',
         'grunt-contrib-concat',
         'grunt-contrib-uglify',
@@ -191,8 +199,32 @@ module.exports = function( grunt ) {
     });
 
 
+    grunt.registerTask( 'createHash' , function() {
+
+        grunt.task.requires( 'git-describe' );
+
+        var rev = grunt.config.get( 'git-version' );
+        var matches = rev.match( /(\-{0,1})+([A-Za-z0-9]{7})+(\-{0,1})/ );
+
+        var hash = matches
+            .filter(function( match ) {
+                return match.length === 7;
+            })
+            .pop();
+
+        if (matches && matches.length > 1) {
+            grunt.config.set( 'git-hash' , hash );
+        }
+        else{
+            grunt.config.set( 'git-hash' , rev );
+        }
+    });
+
+
     grunt.registerTask( 'default' , [
         'jshint',
+        'git-describe',
+        'createHash',
         'clean',
         'replace:bower',
         'uglify'
@@ -201,6 +233,8 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'dev' , [
         'jshint',
+        'git-describe',
+        'createHash',
         'clean',
         'createLive',
         'replace:dev',

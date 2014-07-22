@@ -180,12 +180,12 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
             var that = this;
 
-            pod.when( 'iteratorStart' , beanStart , that );
-            pod.when( 'iteratorComplete' , beanComplete , that );
-            pod.when( 'podPaused' , podPaused , that );
-            pod.when( 'podResumed' , podResumed , that );
-            pod.when( 'podComplete' , podComplete , that );
-            pod.when( 'podCanceled' , animationCanceled , that );
+            pod.when( 'iteratorStart' , that , beanStart );
+            pod.when( 'iteratorComplete' , that , beanComplete );
+            pod.when( 'podPaused' , that , podPaused );
+            pod.when( 'podResumed' , that , podResumed );
+            pod.when( 'podComplete' , that , podComplete );
+            pod.when( 'podCanceled' , that , animationCanceled );
 
             that._hx.queue.pushPod( pod );
         },
@@ -194,11 +194,11 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
             var that = this;
 
-            pod.when( 'beanStart' , beanStart , that );
-            pod.when( 'beanComplete' , beanComplete , that );
-            pod.when( 'clusterComplete' , clusterComplete , that );
-            pod.when( 'podComplete' , podComplete , that );
-            pod.when( 'podCanceled' , animationCanceled , that );
+            pod.when( 'beanStart' , that , beanStart );
+            pod.when( 'beanComplete' , that , beanComplete );
+            pod.when( 'clusterComplete' , that , clusterComplete );
+            pod.when( 'podComplete' , that , podComplete );
+            pod.when( 'podCanceled' , that , animationCanceled );
 
             that._hx.queue.pushPod( pod );
         },
@@ -207,8 +207,8 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
             var that = this;
 
-            pod.when( 'podComplete' , podComplete , that );
-            pod.when( 'podCanceled' , promiseCanceled , that );
+            pod.when( 'podComplete' , that , podComplete );
+            pod.when( 'podCanceled' , that , promiseCanceled );
 
             that._hx.queue.pushPod( pod );
         },

@@ -30,11 +30,11 @@ window.hxManager = (function() {
 
         that.each(function( i ) {
 
-            var pod = hxManager.PodFactory( that[i] , 'animation' );
+            var pod = PodFactory( that[i] , 'animation' );
 
             ensureBundle( bundle ).forEach(function( seed ) {
 
-                var bean = new hxManager.Bean( seed );
+                var bean = Bean( seed );
                 pod.addBean( bean );
             });
 
@@ -61,7 +61,7 @@ window.hxManager = (function() {
         that.eachNode(function( node , node_hx ) {
 
             // create a promisePod for each dom node
-            var pod = hxManager.PodFactory( node , 'promise' );
+            var pod = PodFactory( node , 'promise' );
 
             // when the pod reaches its turn in the queue, resolve its promise
             pod.when( 'promiseMade' , function() {
@@ -121,11 +121,11 @@ window.hxManager = (function() {
 
         that.eachNode(function( node , node_hx ) {
 
-            var pod = hxManager.PodFactory( node , 'precision' );
+            var pod = PodFactory( node , 'precision' );
 
             ensureBundle( bundle ).forEach(function( seed ) {
 
-                var bean = new hxManager.Bean( seed );
+                var bean = Bean( seed );
                 var iterator = new hxManager.IteratorMOJO( node , bean );
 
                 pod.addIterator( iterator );
@@ -170,26 +170,6 @@ window.hxManager = (function() {
                 pod[ method ]();
             });
         }
-
-        return that;
-    };
-
-
-    hxManager_prototype.loop = function( func , it ) {
-
-        if (typeof func !== 'function') {
-            throw new TypeError( 'loop requires a function.' );
-        }
-
-        var that = this;
-
-        it = it || 0;
-        func.call( that , it );
-        it++;
-
-        that.done(function() {
-            that.loop( func , it );
-        });
 
         return that;
     };
@@ -248,7 +228,7 @@ window.hxManager = (function() {
 
             that.eachNode(function( node , node_hx ) {
 
-                var bean = new hxManager.Bean( seed );
+                var bean = Bean( seed );
                 node_hx.updateComponent( bean );
             });
         });
@@ -309,7 +289,15 @@ window.hxManager = (function() {
 
         var that = this;
 
+        // update the stored components
         that.update( hxArgs );
+
+        // remove any stored transitions
+        that.eachNode(function( node , node_hx ) {
+            node_hx.resetTransition();
+        });
+
+        // run paint
         return that.paint();
     };
 
@@ -344,6 +332,16 @@ window.hxManager = (function() {
             node_hx.clean();
         });
     };
+
+
+    function Bean( seed ) {
+        return new hxManager.Bean( seed );
+    }
+
+
+    function PodFactory( node , type ) {
+        return hxManager.PodFactory( node , type );
+    }
 
 
     function ensureBundle( bundle ) {

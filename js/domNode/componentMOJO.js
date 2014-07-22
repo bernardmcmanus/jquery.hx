@@ -9,7 +9,7 @@ hxManager.ComponentMOJO = (function( CSSProperty ) {
         var that = this;
         var order = {};
 
-        MOJO.Hoist( that );
+        MOJO.Construct( that );
 
         Object.defineProperty( that , 'order' , {
             get: function() {
@@ -19,7 +19,7 @@ hxManager.ComponentMOJO = (function( CSSProperty ) {
     }
 
 
-    ComponentMOJO.prototype = new MOJO({
+    ComponentMOJO.prototype = MOJO.Create({
 
         getString: function( type ) {
 

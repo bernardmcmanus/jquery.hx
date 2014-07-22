@@ -16,7 +16,7 @@ hxManager.Bean = (function( Config , Subscriber ) {
 
         that.subscriber = null;
 
-        MOJO.Hoist( that );
+        MOJO.Construct( that );
 
         Object_defineProperty( that , 'subscribed' , {
             get: function() {
@@ -34,7 +34,7 @@ hxManager.Bean = (function( Config , Subscriber ) {
     }
 
 
-    var Bean_prototype = Bean.prototype = new MOJO({
+    var Bean_prototype = Bean.prototype = MOJO.Create({
 
         subscribe: function() {
 

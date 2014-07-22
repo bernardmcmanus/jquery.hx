@@ -1,11 +1,11 @@
 {
     "name": "jquery.hx",
     "version": "1.0.3",
-    "homepage": "https://github.com/millennialmedia/jquery.hx",
+    "homepage": "https://github.com/millennialmedia/jquery.hx.git",
     "authors": [
         "Bernard McManus"
     ],
-    "description": "Hardware-Accelerated Animation Library",
+    "description": "A hardware-accelerated animation library for mobile and desktop.",
     "main": "hx-1.0.3.min.js",
     "keywords": [
         "jquery",

@@ -14,7 +14,7 @@ hxManager.TimingMOJO = (function( VendorPatch ) {
 
         that.step = that._step.bind( that );
 
-        MOJO.Hoist( that );
+        MOJO.Construct( that );
 
         Object_defineProperty( that , 'subscribers' , {
             get: function() {
@@ -24,7 +24,7 @@ hxManager.TimingMOJO = (function( VendorPatch ) {
     }
 
 
-    TimingMOJO.prototype = new MOJO({
+    TimingMOJO.prototype = MOJO.Create({
 
         subscribe: function( subscriber ) {
 

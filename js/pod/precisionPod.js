@@ -12,7 +12,7 @@ hxManager.PrecisionPod = (function() {
         that.node = node;
         that.iterators = [];
 
-        MOJO.Hoist( that );
+        MOJO.Construct( that );
 
         Object_defineProperty( that , 'progress' , {
             get: function() {
@@ -42,7 +42,7 @@ hxManager.PrecisionPod = (function() {
     }
 
 
-    PrecisionPod.prototype = new MOJO({
+    PrecisionPod.prototype = MOJO.Create({
 
         addIterator: function( iteratorMOJO ) {
 

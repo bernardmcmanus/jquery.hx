@@ -1,4 +1,4 @@
-hxManager.StyleDefinition = (function() {
+hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
 
     function StyleDefinition( name ) {
@@ -16,12 +16,20 @@ hxManager.StyleDefinition = (function() {
     }
 
 
-    StyleDefinition.define = function( name ) {
+    StyleDefinition.define = function() {
+
+        var args = arguments;
+        var name = Helper.pop( args );
+        var mappedName = args[0] || name;
         
-        if (Properties[name] !== undefined) {
+        if (Properties[name]) {
             throw new Error( name + ' is already defined' );
         }
-        
+
+        if (name !== mappedName) {
+            PropertyMap[mappedName] = name;
+        }
+
         Properties[name] = new StyleDefinition( name );
         return Properties[name];
     };
@@ -70,7 +78,7 @@ hxManager.StyleDefinition = (function() {
     return StyleDefinition;
 
     
-}());
+}( hxManager.Config.properties , hxManager.Helper ));
 
 
 

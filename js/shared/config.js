@@ -5,15 +5,7 @@ hxManager.Config = (function() {
 
         optionKeys: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
 
-        properties: {
-            translate: 'translate3d',
-            scale: 'scale3d',
-            rotate: 'rotate3d',
-            translate2d: 'translate',
-            scale2d: 'scale',
-            matrix: 'matrix3d',
-            matrix2d: 'matrix'
-        },
+        properties: {},
 
         defaults: {
             duration: 400,

@@ -13,11 +13,11 @@ hxManager.TransitionMOJO = (function( Config , VendorPatch , Easing ) {
 
 
     function TransitionMOJO() {
-        MOJO.Hoist( this );
+        MOJO.Construct( this );
     }
 
 
-    TransitionMOJO.prototype = new MOJO({
+    TransitionMOJO.prototype = MOJO.Create({
 
         getString: function() {
 
@@ -32,7 +32,7 @@ hxManager.TransitionMOJO = (function( Config , VendorPatch , Easing ) {
 
                 // don't add a component for transitions with duration and delay of 0
                 if (duration < 1 && delay < 1) {
-                    return;
+                    return '';
                 }
 
                 var str = getTransitionString( type , duration , easing , delay );

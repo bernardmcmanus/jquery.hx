@@ -9,7 +9,7 @@
 
     $.hx = {
         defineProperty: DefineProperty,
-        DefineBezier: DefineBezier,
+        defineBezier: DefineBezier,
         subscribe: function( duration , callback ) {
             return new Subscriber( duration , 0 , callback ).subscribe();
         },
@@ -23,7 +23,7 @@
     };
     
 
-    DefineProperty( 'matrix3d' )
+    DefineProperty( 'matrix' , 'matrix3d' )
         .setDefaults([
             1, 0, 0, 0,
             0, 1, 0, 0,
@@ -41,7 +41,7 @@
         });
 
 
-    DefineProperty( 'translate3d' )
+    DefineProperty( 'translate' , 'translate3d' )
         .setDefaults([ 0 , 0 , 0 ])
         .setKeymap([ 'x' , 'y' , 'z' ])
         .setStringGetter(function( name , CSSProperty ) {
@@ -49,7 +49,7 @@
         });
 
 
-    DefineProperty( 'scale3d' )
+    DefineProperty( 'scale' , 'scale3d' )
         .setDefaults([ 1 , 1 , 1 ])
         .setKeymap([ 'x' , 'y' , 'z' ])
         .setStringGetter(function( name , CSSProperty ) {
@@ -57,7 +57,7 @@
         });
 
 
-    DefineProperty( 'rotate3d' )
+    DefineProperty( 'rotate' , 'rotate3d' )
         .setDefaults([ 0 , 0 , 0 , 0 ])
         .setKeymap([ 'x' , 'y' , 'z' , 'a' ])
         .setStringGetter(function( name , CSSProperty ) {
@@ -86,7 +86,7 @@
         });
 
 
-    DefineProperty( 'matrix' )
+    DefineProperty( 'matrix2d' , 'matrix' )
         .setDefaults([ 1 , 0 , 0 , 1 , 0 , 0 ])
         .setKeymap([ 'a1' , 'b1' , 'c1' , 'd1' , 'a4' , 'b4' ])
         .setStringGetter(function( name , CSSProperty ) {
@@ -94,7 +94,7 @@
         });
 
 
-    DefineProperty( 'translate' )
+    DefineProperty( 'translate2d' , 'translate' )
         .setDefaults([ 0 , 0 ])
         .setKeymap([ 'x' , 'y' ])
         .setStringGetter(function( name , CSSProperty ) {
@@ -102,7 +102,7 @@
         });
 
 
-    DefineProperty( 'scale' )
+    DefineProperty( 'scale2d' , 'scale' )
         .setDefaults([ 1 , 1 ])
         .setKeymap([ 'x' , 'y' ])
         .setStringGetter(function( name , CSSProperty ) {

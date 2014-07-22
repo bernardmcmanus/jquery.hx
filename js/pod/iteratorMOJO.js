@@ -26,7 +26,7 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean , Subscriber ) {
 
         that.subscriber = that._createSubscriber( bean_options.duration , bean_options.delay );
 
-        MOJO.Hoist( that );
+        MOJO.Construct( that );
 
         Object.defineProperty( that , 'paused' , {
             get: function() {
@@ -37,7 +37,7 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean , Subscriber ) {
     }
 
 
-    IteratorMOJO.prototype = new MOJO({
+    IteratorMOJO.prototype = MOJO.Create({
 
         run: function() {
             
