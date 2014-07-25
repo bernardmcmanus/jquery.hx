@@ -47,7 +47,7 @@ hxManager.Subscriber = (function( TimingMOJO ) {
 
         subscribe: function() {
             var that = this;
-            TimingMOJO.subscribe( that );
+            TimingMOJO.subscribe( that.handle );
             return that;
         },
 
@@ -62,7 +62,7 @@ hxManager.Subscriber = (function( TimingMOJO ) {
         },
 
         destroy: function() {
-            TimingMOJO.unsubscribe( this );
+            TimingMOJO.unsubscribe( this.handle );
         },
 
         getProgress: function( timestamp ) {

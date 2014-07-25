@@ -1,4 +1,4 @@
-hxManager.IteratorMOJO = (function( RetrieveBezier , Bean , Subscriber ) {
+hxManager.IteratorMOJO = (function( RetrieveBezier , Bean ) {
 
 
     var MOJO_Each = MOJO.Each;
@@ -14,49 +14,18 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean , Subscriber ) {
         that.type = bean.type;
         that.styles = bean.styles;
         that.properties = bean.order.computed;
-        that.subscribed = false;
-        //that.subscriber = null;
 
-        that.progress = 0;
-        //that.duration = bean_options.duration;
-        //that.delay = bean_options.delay;
-        //that.easing = bean_options.easing;
-
+        that.duration = bean_options.duration;
+        that.delay = bean_options.delay;
         that.easing = RetrieveBezier( bean_options.easing );
-
-        that.subscriber = that._createSubscriber( bean_options.duration , bean_options.delay );
 
         MOJO.Construct( that );
 
-        Object.defineProperty( that , 'paused' , {
-            get: function() {
-                var subscriber = that.subscriber;
-                return (subscriber ? subscriber.paused : false);
-            }
-        });
+        that.handle = that._handle.bind( that );
     }
 
 
     IteratorMOJO.prototype = MOJO.Create({
-
-        run: function() {
-            
-            var that = this;
-            var node_hx = that.node._hx;
-
-            if (that.subscribed) {
-                return false;
-            }
-
-            that.subscribed = true;
-            that.current = that._getCurrent( that.node );
-            that.dest = that._getDest( that.current , that.styles );
-            that.diff = that._getDiff( that.node , that.current , that.dest );
-
-            that.subscriber.subscribe();
-
-            return true;
-        },
 
         calculate: function( percent ) {
 
@@ -77,41 +46,6 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean , Subscriber ) {
             that.paint( that.current );
         },
 
-        pause: function() {
-            var that = this;
-            if (that.subscribed) {
-                that.subscriber.pause();
-            }
-        },
-
-        resume: function() {
-            var that = this;
-            if (that.subscribed) {
-                that.subscriber.resume();
-            }
-        },
-
-        resolveIterator: function() {
-            var that = this;
-            that.happen( 'complete' );
-            that.unsubscribe();
-            that.paint( that.dest );
-        },
-
-        destroy: function() {
-            var that = this;
-            that.dispel( 'complete' );
-            that.unsubscribe();
-        },
-
-        unsubscribe: function() {
-            var that = this;
-            if (that.subscribed) {
-                that.subscriber.destroy();
-            }
-            that.subscribed = false;
-        },
-
         paint: function( model ) {
 
             var that = this;
@@ -122,35 +56,74 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean , Subscriber ) {
             node_hx.paint( that.type );
         },
 
-        _createSubscriber: function( duration , delay ) {
+        complete: function( model ) {
+            var that = this;
+            that.happen( 'iteratorComplete' );
+            that.paint( model );
+        },
+
+        _handle: function( e ) {
+            
+            var that = this;
+            var args = arguments;
+
+            switch (e.type) {
+
+                case 'init':
+                    that._init();
+                break;
+
+                case 'timing':
+                    that._timing.apply( that , args );
+                break;
+
+                case 'podComplete':
+                    that.complete( that.dest );
+                break;
+
+                case 'podCanceled':
+                    that.complete( that.current );
+                break;
+            }
+        },
+
+        _init: function( e ) {
+            var that = this;
+            that.current = that._getCurrent( that.node );
+            that.dest = that._getDest( that.current , that.styles );
+            that.diff = that._getDiff( that.node , that.current , that.dest );
+        },
+
+        _timing: function( e , elapsed ) {
 
             var that = this;
+            var progress = that._calcProgress( elapsed );
 
-            function onComplete() {
-                
-                if (!that.subscribed) {
-                    return that.unsubscribe();
-                }
-
-                that.resolveIterator();
+            that.happen( 'progress' , [ progress ]);
+            
+            if (progress < 1) {
+                //console.log(progress);
+                that.calculate(
+                    that.easing.function( progress )
+                );
             }
-
-            function timingCallback( progress ) {
-                
-                if (!that.subscribed) {
-                    return that.unsubscribe();
-                }
-                
-                that.progress = progress;
-
-                if (!that.paused) {
-                    that.calculate(
-                        that.easing.function( progress )
-                    );
-                }
+            else {
+                that.complete( that.dest );
             }
+        },
 
-            return new Subscriber( duration , delay , onComplete , timingCallback );
+        _calcProgress: function( elapsed ) {
+            
+            var that = this;
+
+            /*if (!elapsed || elapsed <= that.delay) {
+                return 0;
+            }*/
+
+            elapsed = elapsed - that.delay;
+            elapsed = elapsed < 0 ? 0 : elapsed;
+
+            return (elapsed / that.duration);
         },
 
         _updateBean: function( model ) {
@@ -214,7 +187,7 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean , Subscriber ) {
     return IteratorMOJO;
 
     
-}( hxManager.Bezier.retrieve , hxManager.Bean , hxManager.Subscriber ));
+}( hxManager.Bezier.retrieve , hxManager.Bean ));
 
 
 

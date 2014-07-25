@@ -1,4 +1,10 @@
-hxManager.PrecisionPod = (function() {
+hxManager.PrecisionPod = (function( SubscriberMOJO ) {
+
+
+    var TIMING_EVENT = 'timing';
+    var SHARED_EVENTS = [ 'podComplete' , 'podCanceled' ];
+    var POD_EVENTS = [ 'subscribe' ].concat( SHARED_EVENTS );
+    var ITERATOR_EVENTS = [ 'init' ].concat( SHARED_EVENTS );
 
 
     var Object_defineProperty = Object.defineProperty;
@@ -9,124 +15,138 @@ hxManager.PrecisionPod = (function() {
         var that = this;
 
         that.type = 'precision';
-        that.node = node;
-        that.iterators = [];
+        that.progress = [];
+        that.paused = false;
+        that.buffer = 0;
 
         MOJO.Construct( that );
 
-        Object_defineProperty( that , 'progress' , {
+        Object_defineProperty( that , 'subscribers' , {
             get: function() {
-                
-                var iterators = that.iterators;
-                var len = iterators.length;
-                var progress = 1;
-
-                if (len === 1) {
-                    progress = iterators[0].progress;
-                }
-                else if (len > 1) {
-                    progress = iterators.reduce(function( p , c ) {
-                        return (typeof p === 'number' ? p : p.progress) + c.progress;
-                    });
-                }
-
-                return (progress / (len || 1));
+                return (that.handlers[ TIMING_EVENT ] || []).length;
             }
         });
 
-        Object_defineProperty( that , 'resolved' , {
+        Object_defineProperty( that , 'complete' , {
             get: function() {
-                return that.iterators.length === 0;
+                return that.subscribers === 0;
             }
         });
+
+        that.handle = that._handle.bind( that );
+
+        that._init( that.handle );
     }
 
 
     PrecisionPod.prototype = MOJO.Create({
 
-        addIterator: function( iteratorMOJO ) {
+        _init: function( handle ) {
 
             var that = this;
+            var subscriber = new SubscriberMOJO();
 
-            iteratorMOJO.when( 'complete' , function( e ) {
-                that._iteratorComplete( iteratorMOJO );
-            });
+            subscriber.when( TIMING_EVENT , handle );
 
-            that.iterators.push( iteratorMOJO );
+            that.once( POD_EVENTS.join( ' ' ) , [ subscriber , handle ] , handle );
+        },
+
+        addBean: function( iteratorMOJO ) {
+
+            var that = this;
+            var podHandle = that.handle;
+            var iteratorHandle = iteratorMOJO.handle;
+            var index = that.subscribers;
+
+            that.when( TIMING_EVENT , iteratorHandle );
+            that.once( ITERATOR_EVENTS.join( ' ' ) , iteratorHandle );
+
+            iteratorMOJO.when( 'progress' , [ index ] , podHandle );
+            iteratorMOJO.once( 'iteratorComplete' , iteratorHandle , podHandle );
         },
 
         run: function() {
-
-            var that = this;
-
-            that.iterators.forEach(function( iteratorMOJO ) {
-                if (iteratorMOJO.run()) {
-                    that.happen( 'iteratorStart' , iteratorMOJO.bean );
-                }
-            });
+            this.happen( ITERATOR_EVENTS[0] + ' ' + POD_EVENTS[0] );
         },
 
         pause: function() {
-
             var that = this;
-
+            that.paused = true;
             that.happen( 'podPaused' , that );
-
-            that.iterators.forEach(function( iteratorMOJO ) {
-                iteratorMOJO.pause();
-            });
         },
 
         resume: function() {
-
             var that = this;
-
+            that.paused = false;
             that.happen( 'podResumed' , that );
-
-            that.iterators.forEach(function( iteratorMOJO ) {
-                iteratorMOJO.resume();
-            });
         },
 
         resolvePod: function() {
-
             var that = this;
-
-            if (!that.resolved) {
-
-                that.iterators.forEach(function( iteratorMOJO ) {
-                    iteratorMOJO.destroy();
-                    that.happen( 'iteratorComplete' , iteratorMOJO.bean );
-                    iteratorMOJO.resolveIterator();
-                });
-
-                that.iterators = [];
-            }
-
-            that.happen( 'podComplete' , that );
+            that.happen( SHARED_EVENTS[0] , that );
         },
 
         cancel: function() {
-
             var that = this;
-
-            that.happen( 'podCanceled' , that );
-
-            that.iterators.forEach(function( iteratorMOJO ) {
-                iteratorMOJO.destroy();
-            });
+            that.happen( SHARED_EVENTS[1] , that );
         },
 
-        _iteratorComplete: function( iteratorMOJO ) {
+        _handle: function( e ) {
 
             var that = this;
-            var i = that.iterators.indexOf( iteratorMOJO );
+            var args = arguments;
 
-            that.happen( 'iteratorComplete' , iteratorMOJO.bean );
-            that.iterators.splice( i , 1 );
-            
-            if (that.resolved) {
-                that.resolvePod();
+            switch (e.type) {
+
+                case TIMING_EVENT:
+                    that._timing.apply( that , args );
+                break;
+
+                case POD_EVENTS[0]: // subscribe
+                    // args[1] === subscriber
+                    args[1].subscribe();
+                break;
+
+                case POD_EVENTS[1]: // podComplete
+                case POD_EVENTS[2]: // podCanceled
+                    // args[1] === subscriber
+                    // args[2] === that.handle
+                    args[1].dispel( TIMING_EVENT , args[2] );
+                    // !!! this is preventing podComplete from being run
+                    // !! in DomNodeFactory - there may be a bug in MOJO
+                    //that.dispel( POD_EVENTS.join( ' ' ) , args[2] );
+                    //console.log(that.handlers);
+                break;
+
+                case 'progress':
+                    // args[1] === index
+                    // args[2] === progress
+                    that.progress[args[1]] = args[2] > 1 ? 1 : args[2];
+                break;
+
+                case 'iteratorComplete':
+                    // args[1] === iterator.handle
+                    //console.log('iterator complete');
+                    //console.log(that.handlers);
+                    that.dispel( 'timing ' + ITERATOR_EVENTS.join( ' ' ) , args[1] );
+
+                    if (that.complete) {
+                        //console.log('pod complete');
+                        that.resolvePod();
+                    }
+                break;
+            }
+        },
+
+        _timing: function( e , elapsed , diff ) {
+
+            var that = this;
+
+            if (that.paused) {
+                that.buffer += diff;
+            }
+            else {
+                that.happen( TIMING_EVENT , [( elapsed - that.buffer )]);
             }
         }
     });
@@ -135,7 +155,7 @@ hxManager.PrecisionPod = (function() {
     return PrecisionPod;
 
     
-}());
+}( hxManager.SubscriberMOJO ));
 
 
 

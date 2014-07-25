@@ -1,6 +1,9 @@
 hxManager.TimingMOJO = (function( VendorPatch ) {
 
 
+    var TIMING_EVENT = 'timing';
+
+
     var Object_defineProperty = Object.defineProperty;
 
 
@@ -10,37 +13,37 @@ hxManager.TimingMOJO = (function( VendorPatch ) {
 
         that.shouldLoop = false;
 
-        var frameEvent = (that.frameEvent = 'animationFrame');
-
-        that.step = that._step.bind( that );
+        //var frameEvent = (that.frameEvent = 'animationFrame');
 
         MOJO.Construct( that );
 
         Object_defineProperty( that , 'subscribers' , {
             get: function() {
-                return (that.handlers[frameEvent] || []).length;
+                return (that.handlers[ TIMING_EVENT ] || []).length;
             }
         });
+
+        that.step = that._step.bind( that );
     }
 
 
     TimingMOJO.prototype = MOJO.Create({
 
-        subscribe: function( subscriber ) {
+        subscribe: function( callback ) {
 
             var that = this;
 
-            that.when( that.frameEvent , subscriber.handle );
+            that.when( TIMING_EVENT , callback );
 
             if (!that.shouldLoop) {
                 that._start();
             }
         },
 
-        unsubscribe: function( subscriber ) {
+        unsubscribe: function( callback ) {
 
             var that = this;
-            that.dispel( that.frameEvent , subscriber.handle );
+            that.dispel( TIMING_EVENT , callback );
         },
 
         _start: function() {
@@ -51,28 +54,30 @@ hxManager.TimingMOJO = (function( VendorPatch ) {
             VendorPatch.RAF( that.step );
         },
 
-        _stop: function() {
+        /*_stop: function() {
             this.shouldLoop = false;
-        },
+        },*/
 
-        _checkSubscribers: function() {
+        /*_checkSubscribers: function() {
 
             var that = this;
 
             if (that.subscribers < 1) {
                 that._stop();
             }
-        },
+        },*/
 
         _step: function( timestamp ) {
 
             var that = this;
 
-            that.happen( that.frameEvent , timestamp );
+            that.happen( TIMING_EVENT , timestamp );
 
-            that._checkSubscribers();
-
-            if (that.shouldLoop) {
+            //that._checkSubscribers();
+            if (that.subscribers < 1) {
+                that.shouldLoop = false;
+            }
+            else if (that.shouldLoop) {
                 VendorPatch.RAF( that.step );
             }
         }

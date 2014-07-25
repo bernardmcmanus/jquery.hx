@@ -115,7 +115,7 @@ hxManager.ComponentMOJO = (function( CSSProperty ) {
             var storedOrder = that.getOrder( type );
             var passedOrder = bean.order.passed;
             var computedOrder = bean.order.computed;
-            var newOrder = (passedOrder.concat( storedOrder )).concat( computedOrder );
+            var newOrder = passedOrder.concat( storedOrder , computedOrder );
 
             var componentKeys = Object.keys( that.getComponents( type ));
 

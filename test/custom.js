@@ -37,6 +37,72 @@
     }( '.tgt' ));
 
 
+    (function() {
+
+        $.hx.defineProperty( 'blur' )
+            .setDefaults( 0 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + 'px)';
+            });
+
+        $.hx.defineProperty( 'brightness' )
+            .setDefaults( 100 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + '%)';
+            });
+
+        $.hx.defineProperty( 'contrast' )
+            .setDefaults( 100 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + '%)';
+            });
+
+        $.hx.defineProperty( 'dropshadow' , 'drop-shadow' )
+            .setDefaults([ 0 , 0 , 0 , 'transparent' ])
+            .setKeymap([ 'x' , 'y' , 'blur' , 'color' ])
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( 'px ' ) + ')';
+            });
+
+        $.hx.defineProperty( 'grayscale' )
+            .setDefaults( 0 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + '%)';
+            });
+
+        $.hx.defineProperty( 'hueRotate' , 'hue-rotate' )
+            .setDefaults( 0 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + 'deg)';
+            });
+
+        $.hx.defineProperty( 'invert' )
+            .setDefaults( 0 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + '%)';
+            });
+
+        /*$.hx.defineProperty( 'opacity' )
+            .setDefaults( 100 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + '%)';
+            });*/
+
+        $.hx.defineProperty( 'saturate' )
+            .setDefaults( 0 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + '%)';
+            });
+
+        $.hx.defineProperty( 'sepia' )
+            .setDefaults( 0 )
+            .setStringGetter(function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + '%)';
+            });
+
+    }());
+
+
     function Main( e ) {
         e.preventDefault();
         tests.t14();
@@ -1107,24 +1173,25 @@
 
             var selector = '.tgt,.tgt2,.tgt3';
             //var selector = '.tgt';
-            var duration = 400;
+            var duration = 600;
 
             function bounce( initial ) {
 
-                $(selector).each(function( i ) {
+                //$(selector).each(function( i ) {
 
-                    $(this)
+                    $(selector)
                     .hx( 'animate' , {
                         type: 'transform',
-                        translate: ($(this).hasClass( 'reverse' ) ? null : {y: '+=300'}),
+                        translate: ($(selector).hasClass( 'reverse' ) ? null : {y: '+=300'}),
+                        //scale: ($(selector).hasClass( 'reverse' ) ? null : {x: '+=0.3', y: '+=0.3'}),
                         duration: duration,
-                        delay: (initial ? (i * 50) : 0),
-                        easing: ($(this).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown')
+                        //delay: (initial ? (i * 50) : 0),
+                        easing: ($(selector).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown')
                     })
                     .done( bounce );
 
-                    $(this).toggleClass( 'reverse' );
-                });
+                    $(selector).toggleClass( 'reverse' );
+                //});
             }
 
             bounce( true );
@@ -1149,8 +1216,6 @@
                 $(selector).hx( 'resume' );
                 toggleAction( resume );
             }
-
-            return;
         },
 
         // test - pause / resume on non-precision pods
@@ -1220,26 +1285,20 @@
         // test - css filters
         t16: function() {
 
-            $.hx.defineProperty( 'blur' )
-                .setDefaults( 0 )
-                .setStringGetter(function( name , CSSProperty ) {
-                    return name + '(' + CSSProperty[0] + 'px)';
-                });
-
-            $.hx.defineProperty( 'opacity' )
-                .setDefaults( 100 )
-                .setStringGetter(function( name , CSSProperty ) {
-                    return name + '(' + CSSProperty[0] + '%)';
-                });
-
             var selector = '.tgt,.tgt2,.tgt3';
             //var selector = '.tgt';
 
             $(selector)
             .hx({
                 type: 'filter',
-                blur: 3,
-                opacity: 75,
+                hueRotate: '+=90',
+                /*dropshadow: {
+                    x: '+=10',
+                    y: '+=10',
+                    blur: 10,
+                    color: 'blue'
+                },
+                blur: '+=1',*/
                 duration: 600
             })
             .done(function() {
