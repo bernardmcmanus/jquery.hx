@@ -56,8 +56,8 @@ hxManager.AnimationPod = (function( VendorPatch ) {
                 }
             });
 
-            /*node._hx.applyTransition();
-            node._hx.paint();*/
+            node._hx.applyTransition();
+            node._hx.paint();
         },
 
         _runBean: function( node , bean ) {
@@ -73,8 +73,8 @@ hxManager.AnimationPod = (function( VendorPatch ) {
 
             bean.subscribe();
 
-            node._hx.applyTransition();
-            node._hx.paint( bean.type );
+            /*node._hx.applyTransition();
+            node._hx.paint( bean.type );*/
 
             that.happen( 'beanStart' , bean );
         },
@@ -84,11 +84,6 @@ hxManager.AnimationPod = (function( VendorPatch ) {
             var that = this;
             var type = bean.type;
             var cluster = that.beans[type];
-
-            // if cluster is undefined, the pod must have been force resolved
-            /*if (!cluster) {
-                return;
-            }*/
 
             that.happen( 'beanComplete' , bean );
 

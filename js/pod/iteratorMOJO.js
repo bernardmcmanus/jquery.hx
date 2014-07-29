@@ -1,4 +1,7 @@
-hxManager.IteratorMOJO = (function( RetrieveBezier , Bean ) {
+hxManager.IteratorMOJO = (function( RetrieveBezier ) {
+
+
+    var TOLERANCE = ( 1000 / 120 );
 
 
     var MOJO_Each = MOJO.Each;
@@ -58,7 +61,7 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean ) {
 
         complete: function( model ) {
             var that = this;
-            that.happen( 'iteratorComplete' );
+            that.happen( 'iteratorComplete' , that );
             that.paint( model );
         },
 
@@ -92,38 +95,27 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean ) {
             that.current = that._getCurrent( that.node );
             that.dest = that._getDest( that.current , that.styles );
             that.diff = that._getDiff( that.node , that.current , that.dest );
+            that.happen( 'iteratorStart' );
         },
 
         _timing: function( e , elapsed ) {
 
             var that = this;
-            var progress = that._calcProgress( elapsed );
+            var duration = that.duration;
+            var delay = that.delay;
+            var progress = calcProgress( elapsed , duration , delay );
 
-            that.happen( 'progress' , [ progress ]);
-            
-            if (progress < 1) {
+            that.happen( 'progress' , progress );
+
+            if (isWithinTolerance( progress , 1 , duration )) {
+                that.complete( that.dest );
+            }
+            else {
                 //console.log(progress);
                 that.calculate(
                     that.easing.function( progress )
                 );
             }
-            else {
-                that.complete( that.dest );
-            }
-        },
-
-        _calcProgress: function( elapsed ) {
-            
-            var that = this;
-
-            /*if (!elapsed || elapsed <= that.delay) {
-                return 0;
-            }*/
-
-            elapsed = elapsed - that.delay;
-            elapsed = elapsed < 0 ? 0 : elapsed;
-
-            return (elapsed / that.duration);
         },
 
         _updateBean: function( model ) {
@@ -184,10 +176,23 @@ hxManager.IteratorMOJO = (function( RetrieveBezier , Bean ) {
     });
 
 
+    function calcProgress( elapsed , duration , delay ) {
+        elapsed = elapsed - delay;
+        elapsed = elapsed < 0 ? 0 : elapsed;
+        return (elapsed / duration);
+    }
+
+
+    function isWithinTolerance( subject , target , duration ) {
+        var pctTolerance = ( TOLERANCE / duration );
+        return Math.abs( subject - target ) <= pctTolerance;
+    }
+
+
     return IteratorMOJO;
 
     
-}( hxManager.Bezier.retrieve , hxManager.Bean ));
+}( hxManager.Bezier.retrieve ));
 
 
 

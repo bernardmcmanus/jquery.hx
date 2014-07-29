@@ -622,7 +622,7 @@
 
                 $(selector)
 
-                .off( 'hx.xformComplete' ).on( 'hx.xformComplete' , function( e , data ) {
+                .off( 'hx.end' ).on( 'hx.end' , function( e , data ) {
                     if (!winner) {
                         var winnerName = (this.className).replace( /\sreverse/i , '' );
                         console.log(winnerName + ' wins!');
@@ -1175,23 +1175,46 @@
             //var selector = '.tgt';
             var duration = 600;
 
-            function bounce( initial ) {
+            function bounce( initial , element ) {
 
-                //$(selector).each(function( i ) {
+                var target = element || selector;
 
-                    $(selector)
-                    .hx( 'animate' , {
+                $(target)
+                .hx( 'animate' , [
+                    {
+                        type: 'opacity',
+                        value: $(target).hasClass( 'reverse' ) ? null : '-=0.5',
+                        duration: Math.round(duration/2),
+                        delay: Math.round(duration/2),
+                        //easing: $(target).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown'
+                    },
+                    {
                         type: 'transform',
-                        translate: ($(selector).hasClass( 'reverse' ) ? null : {y: '+=300'}),
-                        //scale: ($(selector).hasClass( 'reverse' ) ? null : {x: '+=0.3', y: '+=0.3'}),
+                        translate: ($(target).hasClass( 'reverse' ) ? null : {y: '+=300'}),
+                        scale: ($(target).hasClass( 'reverse' ) ? null : {x: '+=0.3', y: '+=0.3'}),
                         duration: duration,
-                        //delay: (initial ? (i * 50) : 0),
-                        easing: ($(selector).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown')
-                    })
-                    .done( bounce );
+                        delay: function( element , i ) {
+                            return initial ? (i * 50) : 0;
+                        },
+                        easing: $(target).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown',
+                        // done: function( element , i ) {
+                        //     bounce( true , element );
+                        // }
+                    },
+                    function( time , progress ) {
+                        //console.log(progress[0]);
+                    }
+                ])
+                .race(function( resolve ) {
+                    // var queueLength = $(this).toArray().map(function( node ) {
+                    //     return node._hx.queue.length;
+                    // });
+                    // console.log(queueLength);
+                    bounce();
+                    resolve();
+                });
 
-                    $(selector).toggleClass( 'reverse' );
-                //});
+                $(target).toggleClass( 'reverse' );
             }
 
             bounce( true );
@@ -1308,7 +1331,77 @@
                     })
                 );
             });
-        }
+        },
+
+        // test - hx.get
+        t17: function() {
+
+            var selector = '.tgt,.tgt2,.tgt3';
+            //var selector = '.tgt';
+
+            $(selector).hx( 'update' , [
+                {
+                    type: 'opacity',
+                    value: 0.99
+                },
+                {
+                    type: 'transform',
+                    translate: {y: '+=300'},
+                    scale: {x: '+=0.3', y: '+=0.3'}
+                }
+            ]);
+            
+            console.log($(selector).hx( 'get' , 'transform' , 'translate' , true ));
+            // console.log($(selector).hx( 'get' , null , null , false ));
+            // console.log($(selector).hx( 'get' , 'opacity' , 'value' , true ));
+
+            // $(selector).hx( 'reset' );
+            // console.log($(selector).hx( 'get' , null , null , false ));
+        },
+
+        // test - SubscriberMOJO
+        t18: function() {
+
+            var selector = '.tgt,.tgt2,.tgt3';
+            //var selector = '.tgt';
+            var duration = 600;
+
+            function bounce( initial , element ) {
+
+                var target = element || selector;
+
+                $(target)
+                .hx([
+                    {
+                        type: 'opacity',
+                        value: $(target).hasClass( 'reverse' ) ? null : '-=0.5',
+                        duration: duration,
+                        easing: $(target).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown'
+                    },
+                    {
+                        type: 'transform',
+                        translate: ($(target).hasClass( 'reverse' ) ? null : {y: '+=300'}),
+                        scale: ($(target).hasClass( 'reverse' ) ? null : {x: '+=0.3', y: '+=0.3'}),
+                        duration: duration,
+                        delay: function( element , i ) {
+                            return initial ? (i * 50) : 0;
+                        },
+                        easing: $(target).hasClass( 'reverse' ) ? 'gravityUp' : 'gravityDown',
+                    },
+                    /*function( time , progress ) {
+                        //console.log(time);
+                    }*/
+                ])
+                .race(function( resolve ) {
+                    bounce();
+                    resolve();
+                });
+
+                $(target).toggleClass( 'reverse' );
+            }
+
+            bounce( true );
+        },
     };
 
 }());

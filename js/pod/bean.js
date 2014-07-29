@@ -1,12 +1,16 @@
-hxManager.Bean = (function( Config , Subscriber ) {
+hxManager.Bean = (function( Config , SubscriberMOJO ) {
 
 
+    var TIMING = 'timing';
+
+
+    var MOJO_Each = MOJO.Each;
     var Object_defineProperty = Object.defineProperty;
     var OptionKeys = Config.optionKeys;
     var PropertyMap = Config.properties;
 
 
-    function Bean( seed ) {
+    function Bean( seed , node , index ) {
 
         if (!seed.type) {
             throw new TypeError( 'Bean type is required.' );
@@ -30,7 +34,7 @@ hxManager.Bean = (function( Config , Subscriber ) {
             }
         });
 
-        $.extend( that , getCompiledData( seed ));
+        $.extend( that , getCompiledData( seed , node , index ));
     }
 
 
@@ -43,11 +47,16 @@ hxManager.Bean = (function( Config , Subscriber ) {
             var duration = options.duration;
             var delay = options.delay;
 
-            that.subscriber = new Subscriber( duration , delay , function() {
-                that.resolveBean();
-                that.happen( 'beanComplete' , that );
-            })
-            .subscribe();
+            var subscriber = that.subscriber = new SubscriberMOJO();
+
+            subscriber.when( TIMING , function timing( e , elapsed , diff ) {
+                if (elapsed >= (duration + delay)) {
+                    that.resolveBean();
+                    that.happen( 'beanComplete' , that );
+                }
+            });
+
+            subscriber.subscribe();
         },
 
         resolveBean: function() {
@@ -58,20 +67,6 @@ hxManager.Bean = (function( Config , Subscriber ) {
                 that.subscriber.destroy();
                 delete that.subscriber;
             }
-        },
-
-        getOptions: function( seed ) {
-
-            var defaults = Config.defaults;
-            var options = $.extend( {} , defaults , seed );
-
-            for (var key in options) {
-                if (!defaults.hasOwnProperty( key )) {
-                    delete options[key];
-                }
-            }
-
-            return options;
         },
 
         getOrder: function( seed ) {
@@ -94,24 +89,49 @@ hxManager.Bean = (function( Config , Subscriber ) {
             };
         },
 
-        getStyles: function( seed ) {
+        getOptions: function( seed , node , index ) {
+
+            var defaults = Config.defaults;
+            var options = $.extend( {} , defaults , seed );
+
+            MOJO_Each( options , function( val , key ) {
+                if (!defaults.hasOwnProperty( key )) {
+                    delete options[key];
+                }
+                else if (key === 'done') {
+                    // make sure we don't execute the done function just yet
+                    options[key] = val.bind( null , node , index );
+                }
+                else {
+                    options[key] = getBeanProperty( val , node , index );
+                }
+            });
+
+            return options;
+        },
+
+        getStyles: function( seed , node , index ) {
 
             var styles = {};
-            var key, mappedKey;
 
-            for (key in seed) {
-                mappedKey = PropertyMap[key] || key;
+            MOJO_Each( seed , function( val , key ) {
+                var mappedKey = PropertyMap[key] || key;
                 if (OptionKeys.indexOf( mappedKey ) < 0) {
-                    styles[mappedKey] = seed[key];
+                    styles[mappedKey] = getBeanProperty( val , node , index );
                 }
-            }
+            });
 
             return styles;
-        }        
+        }
     });
 
 
-    function getCompiledData( seed ) {
+    function getBeanProperty( property , node , index ) {
+        return (typeof property === 'function' ? property( node , index ) : property);
+    }
+
+
+    function getCompiledData( seed , node , index ) {
 
         var getOrder = Bean_prototype.getOrder;
         var getOptions = Bean_prototype.getOptions;
@@ -121,8 +141,8 @@ hxManager.Bean = (function( Config , Subscriber ) {
             seed: seed,
             type: seed.type,
             order: getOrder( seed ),
-            options: getOptions( seed ),
-            styles: getStyles( seed )
+            options: getOptions( seed , node , index ),
+            styles: getStyles( seed , node , index )
         };
     }
 
@@ -130,7 +150,7 @@ hxManager.Bean = (function( Config , Subscriber ) {
     return Bean;
 
     
-}( hxManager.Config , hxManager.Subscriber ));
+}( hxManager.Config , hxManager.SubscriberMOJO ));
 
 
 

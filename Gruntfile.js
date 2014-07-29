@@ -6,7 +6,6 @@ module.exports = function( grunt ) {
 
     var Script = [
         'js/hxManager.js',
-        'js/hx.js',
         'js/shared/config.js',
         'js/shared/helper.js',
         'js/shared/vendorPatch.js',
@@ -19,7 +18,6 @@ module.exports = function( grunt ) {
         'js/domNode/queue.js',
         'js/domNode/domNodeFactory.js',
         'js/pod/timingMOJO.js',
-        'js/pod/subscriber.js',
         'js/pod/subscriberMOJO.js',
         'js/pod/bean.js',
         'js/pod/iteratorMOJO.js',
@@ -27,13 +25,14 @@ module.exports = function( grunt ) {
         'js/pod/precisionPod.js',
         'js/pod/promisePod.js',
         'js/pod/podFactory.js',
+        'js/hx.js',
         'js/init/init.js'
     ];
 
 
     var Lib = [
         'js/lib/promise-1.0.0.min.js',
-        'js/lib/mojo-0.1.2.min.js',
+        'js/lib/mojo-0.1.3.min.js',
         'js/lib/bezier-easing-0.4.1.js'
     ];
 

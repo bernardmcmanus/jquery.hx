@@ -1,12 +1,15 @@
 hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
 
-    function StyleDefinition( name ) {
+    function StyleDefinition() {
 
         var that = this;
+        var args = arguments;
         var other = Properties.other;
 
-        that.name = name;
+        that.name = Helper.shift( args );
+        that.pName = args[0] || that.name;
+
         that.defaults = other.defaults;
         that.keyMap = other.keyMap;
 
@@ -20,17 +23,17 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
         var args = arguments;
         var name = Helper.pop( args );
-        var mappedName = args[0] || name;
+        var prettyName = args[0] || name;
         
         if (Properties[name]) {
             throw new Error( name + ' is already defined' );
         }
 
-        if (name !== mappedName) {
-            PropertyMap[mappedName] = name;
+        if (name !== prettyName) {
+            PropertyMap[prettyName] = name;
         }
 
-        Properties[name] = new StyleDefinition( name );
+        Properties[name] = new StyleDefinition( name , prettyName );
         return Properties[name];
     };
 

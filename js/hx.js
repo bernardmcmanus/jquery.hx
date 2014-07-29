@@ -1,38 +1,30 @@
-(function( $ , hxManager ) {
+(function( $ , hxManager , shift ) {
 
     
-    $.fn.hx = function( hxArgs ) {
+    $.fn.hx = function() {
 
-        var shift = hxManager.Helper.shift;
+        var args = arguments;
         var hxm = new hxManager( this );
-        var out;
 
-        switch (typeof hxArgs) {
+        switch (typeof args[0]) {
 
             case 'string':
 
-                var method = shift( arguments );
+                var method = shift( args );
 
                 if (typeof hxm[method] !== 'function') {
                     throw new TypeError( method + ' is not a function.' );
                 }
 
-                out = hxm[method].apply( hxm , arguments );
-
-            break;
+                return hxm[method].apply( hxm , args );
 
             case 'object':
-
-                out = hxm._addAnimationPod( hxArgs );
-
-            break;
+                return hxm._addAnimationPod( args[0] );
         }
-
-        return out;
     };
 
  
-}( jQuery , hxManager ));
+}( jQuery , hxManager , hxManager.Helper.shift ));
 
 
 

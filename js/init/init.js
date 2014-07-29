@@ -1,4 +1,4 @@
-(function( VendorPatch , DefineProperty , DefineBezier , Subscriber ) {
+(function( VendorPatch , DefineProperty , DefineBezier , TimingMOJO ) {
 
 
     // Do some important stuff when hx is loaded
@@ -10,8 +10,20 @@
     $.hx = {
         defineProperty: DefineProperty,
         defineBezier: DefineBezier,
-        subscribe: function( duration , callback ) {
-            return new Subscriber( duration , 0 , callback ).subscribe();
+        subscribe: function( callback ) {
+
+            var startTime = null;
+
+            TimingMOJO.subscribe( timingCallback );
+
+            function timingCallback( e , timestamp ) {
+                startTime = (startTime === null ? timestamp : startTime);
+                callback(( timestamp - startTime ) , unsubscribe );
+            }
+
+            function unsubscribe() {
+                TimingMOJO.unsubscribe( timingCallback );
+            }
         },
         error: function( error ) {
             $(Doc).trigger( 'hx.error' , error );
@@ -174,7 +186,7 @@
     }
 
 
-}( hxManager.VendorPatch , hxManager.StyleDefinition.define , hxManager.Bezier.define , hxManager.Subscriber ));
+}( hxManager.VendorPatch , hxManager.StyleDefinition.define , hxManager.Bezier.define , hxManager.TimingMOJO ));
 
 
 

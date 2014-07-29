@@ -1,7 +1,7 @@
 hxManager.SubscriberMOJO = (function( TimingMOJO ) {
 
 
-    var TIMING_EVENT = 'timing';
+    var TIMING = 'timing';
 
 
     var Object_defineProperty = Object.defineProperty;
@@ -18,7 +18,7 @@ hxManager.SubscriberMOJO = (function( TimingMOJO ) {
 
         Object_defineProperty( that , 'subscribers' , {
             get: function() {
-                return (that.handlers[ TIMING_EVENT ] || []).length;
+                return (that.handlers[ TIMING ] || []).length;
             }
         });
 
@@ -41,7 +41,7 @@ hxManager.SubscriberMOJO = (function( TimingMOJO ) {
 
             var elapsed = timestamp - that.startTime;
 
-            that.happen( TIMING_EVENT , [ elapsed , diff ]);
+            that.happen( TIMING , [ elapsed , diff ]);
 
             if (that.subscribers < 1) {
                 that.destroy();
@@ -51,14 +51,6 @@ hxManager.SubscriberMOJO = (function( TimingMOJO ) {
         subscribe: function() {
             TimingMOJO.subscribe( this.timing );
         },
-
-        /*pause: function() {
-            this.happen( 'pause' );
-        },
-
-        resume: function() {
-            this.happen( 'resume' );
-        },*/
 
         destroy: function() {
             TimingMOJO.unsubscribe( this.timing );

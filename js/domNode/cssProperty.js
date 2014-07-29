@@ -1,7 +1,12 @@
 hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
 
 
-    var Object_defineProperty = Object.defineProperty;
+    function createDescriptor( getter , setter ) {
+        return {
+            get: getter,
+            set: setter
+        };
+    }
 
 
     function CSSProperty( name , values ) {
@@ -10,47 +15,42 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
         var definition = StyleDefinition.retrieve( name );
         var isNull;
 
-        Object_defineProperty( that , 'name' , {
-            get: function() {
+        Object.defineProperties( that , {
+
+            name: createDescriptor(function() {
                 return name;
-            }
-        });
+            }),
 
-        Object_defineProperty( that , 'defaults' , {
-            get: function() {
+            pName: createDescriptor(function() {
+                return definition.pName;
+            }),
+
+            defaults: createDescriptor(function() {
                 return definition.defaults;
-            }
-        });
+            }),
 
-        Object_defineProperty( that , 'isNull' , {
-            get: function() {
-                return isNull;
-            },
-            set: function( value ) {
-                isNull = value;
-            }
-        });
+            isNull: createDescriptor(
+                function() {
+                    return isNull;
+                },
+                function( value ) {
+                    isNull = value;
+                }
+            ),
 
-        Object_defineProperty( that , 'keyMap' , {
-            get: function() {
+            keyMap: createDescriptor(function() {
                 return definition.keyMap;
-            }
-        });
+            }),
 
-        Object_defineProperty( that , 'string' , {
-            get: function() {
+            string: createDescriptor(function() {
                 return definition.toString( that );
-            }
-        });
+            }),
 
-        Object_defineProperty( that , 'length' , {
-            get: function() {
+            length: createDescriptor(function() {
                 return Object.keys( that ).length;
-            }
-        });
+            }),
 
-        Object_defineProperty( that , 'values' , {
-            get: function() {
+            values: createDescriptor(function() {
                 if (that.length === 1) {
                     return that[0];
                 }
@@ -62,7 +62,7 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
                     }
                     return obj;
                 }
-            }
+            })
         });
 
         that.defaults.forEach(function( val , i ) {

@@ -1,5 +1,10 @@
 hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMOJO , TransitionMOJO ) {
 
+
+    var UNDEFINED;
+    var POD_COMPLETE = 'podComplete';
+    var POD_CANCELED = 'podCanceled';
+
     
     var MOJO_Each = MOJO.Each;
     var PropertyMap = Config.properties;
@@ -8,7 +13,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
     function DomNodeFactory( element ) {
 
         // if this is already an hx element, return it
-        if (typeof element._hx !== 'undefined') {
+        if (element._hx !== UNDEFINED) {
             return element;
         }
 
@@ -34,7 +39,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             var that_hx = this._hx;
             var style = {}, property, string;
 
-            if (type === undefined) {
+            if (type === UNDEFINED) {
                 type = Object.keys( that_hx.getOrder() );
             }
             else {
@@ -78,72 +83,56 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         },
 
         getComponents: function( type , property , pretty ) {
-
-            // TODO - clean up this method
             
             property = PropertyMap[property] || property;
-            pretty = (pretty !== undefined ? pretty : true);
+            pretty = (pretty !== UNDEFINED ? pretty : true);
             
             var that_hx = this._hx;
             var components = that_hx.componentMOJO.getComponents( type , property );
-            var keys = Object.keys( components );
+            var pairArray = [];
             var out = {};
 
-            if (pretty) {
+            function getKeyValuePair( name , CSSProperty , pretty ) {
 
-                var PropertyMapInv = PropertyMap.inverse;
-                var i, key, keyInv;
+                var key = ( pretty ? CSSProperty.pName : ( name === 'value' ? name : CSSProperty.name ));
+                var val = ( pretty ? CSSProperty.values : CSSProperty.clone() );
+                                
+                return {
+                    key: key,
+                    val: val
+                };
+            }
 
-                if (property) {
+            function getOut( out , type , property , pretty ) {
+                return (pretty && out[type] !== UNDEFINED) ? out[type] : ((!pretty && property) ? out[property] : out);
+            }
 
-                    out = components.values || {};
+            if (property) {
 
-                    if (out.hasOwnProperty( 0 )) {
-                        out = out[0];
-                    }
-                }
-                else if (type) {
+                pairArray.push(
+                    getKeyValuePair( property , components , pretty )
+                );
+            }
+            else if (type) {
 
-                    for (i = 0; i < keys.length; i++) {
-                        
-                        key = keys[i];
-                        keyInv = PropertyMapInv[key] || key;
-                        out[keyInv] = components[key].values;
-
-                        if (out[keyInv].hasOwnProperty( 0 )) {
-                            out[keyInv] = out[keyInv][0];
-                        }
-                        else if (keyInv === 'value') {
-                            out = out.value;
-                        }
-                    }
-                }
-                else {
-                    MOJO_Each( components , function( val , key ) {
-                        out[key] = that_hx.getComponents( key );
-                    });
-                }
-
-                return out;
+                MOJO_Each( components , function( CSSProperty , key ) {
+                    pairArray.push(
+                        getKeyValuePair( key , CSSProperty , pretty )
+                    );
+                });
             }
             else {
 
-                if (property) {
-
-                    out = (components ? components.clone() : {});
-                }
-                else if (type) {
-
-                    MOJO_Each( components , function( val , key ) {
-                        out[key] = that_hx.getComponents( type , key , false );
-                    });
-                }
-                else {
-                    out = $.extend( true , {} , components );
-                }
-
-                return out;
+                MOJO_Each( components , function( val , key ) {
+                    out[key] = that_hx.getComponents( key , null , pretty );
+                });
             }
+
+            pairArray.forEach(function( pair ) {
+                out[pair.key] = pair.val;
+            });
+
+            return getOut( out , type , property , pretty );
         },
 
         getOrder: function( type ) {
@@ -184,8 +173,8 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             pod.when( 'iteratorComplete' , that , beanComplete );
             pod.when( 'podPaused' , that , podPaused );
             pod.when( 'podResumed' , that , podResumed );
-            pod.when( 'podComplete' , that , podComplete );
-            pod.when( 'podCanceled' , that , animationCanceled );
+            pod.when( POD_COMPLETE , that , podComplete );
+            pod.when( POD_CANCELED , that , animationCanceled );
 
             that._hx.queue.pushPod( pod );
         },
@@ -197,8 +186,8 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
             pod.when( 'beanStart' , that , beanStart );
             pod.when( 'beanComplete' , that , beanComplete );
             pod.when( 'clusterComplete' , that , clusterComplete );
-            pod.when( 'podComplete' , that , podComplete );
-            pod.when( 'podCanceled' , that , animationCanceled );
+            pod.when( POD_COMPLETE , that , podComplete );
+            pod.when( POD_CANCELED , that , animationCanceled );
 
             that._hx.queue.pushPod( pod );
         },
@@ -207,8 +196,8 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
 
             var that = this;
 
-            pod.when( 'podComplete' , that , podComplete );
-            pod.when( 'podCanceled' , that , promiseCanceled );
+            pod.when( POD_COMPLETE , that , podComplete );
+            pod.when( POD_CANCELED , that , promiseCanceled );
 
             that._hx.queue.pushPod( pod );
         },
@@ -252,7 +241,7 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
         $(node).trigger( 'hx.end' , {
             type: bean.type
         });
-        bean.options.done.call( node );
+        bean.options.done();
     }
 
     function clusterComplete( e , node , type ) {
@@ -279,12 +268,12 @@ hxManager.DomNodeFactory = (function( Config , VendorPatch , Queue , ComponentMO
     function animationCanceled( e , node , pod ) {
         pod.dispel( 'beanComplete' );
         pod.dispel( 'clusterComplete' );
-        pod.dispel( 'podComplete' );
+        pod.dispel( POD_COMPLETE );
         node._hx.resetTransition();
     }
 
     function promiseCanceled( e , node , pod ) {
-        pod.dispel( 'podComplete' );
+        pod.dispel( POD_COMPLETE );
     }
 
 
