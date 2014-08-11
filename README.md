@@ -433,7 +433,7 @@ $('selector').hx({
 | `realName` | `String` | The actual name of the CSS property | NO |
 
 * Defines a new style property, or throws an error if `name` already exists.
-* Returns a new [StyleDefinition](js/domNode/StyleDefinition.js) instance:
+* Returns a new [StyleDefinition](js/domNode/styleDefinition.js) instance:
 
 | Method | Defaults |
 | ------ | -------- |
