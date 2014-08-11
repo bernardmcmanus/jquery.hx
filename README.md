@@ -143,22 +143,22 @@ hx is bundled with the latest promises <a href="http://s3.amazonaws.com/es6-prom
 Every hx animation bean will fall into one of two categories:
 
 1. Style types with a single value (like opacity)
-```javascript
-{
-    type: String
-    value: Variant
-}
-```
+   ```javascript
+   {
+       type: String
+       value: Variant
+   }
+   ```
 
 2. Style types with multiple components (like transform or filter)
-```javascript
-{
-    type: String
-    component1: Variant
-    component2: Variant
-    ...
-}
-```
+   ```javascript
+   {
+       type: String
+       component1: Variant
+       component2: Variant
+       ...
+   }
+   ```
 
 #### Pods
 
@@ -282,18 +282,18 @@ $('selector').hx([
 | _transform_ | __scale2d__ | `{x: 1, y: 1}` | NO |
 | _opacity_ | __n/a__ | `1` | NO |
 
-* Additional properties can be defined using [$.hx.defineProperty](#hx-defineProperty).
+* Additional properties can be defined using [$.hx.defineProperty](#hxdefineproperty-name---realname-).
 
 ### animate vs. iterate
 
-As of __v1.0.3__, hx includes two animation methods: [__.animate()__](#animate) and [__.iterate()__](#iterate). __animate is the default animation method__ - whenever `$('selector').hx({ ... })` is called, the animation will be performed using the animate method.
+As of __v1.0.3__, hx includes two animation methods: [__.animate()__](#animate-obj-) and [__.iterate()__](#iterate-obj-). __animate is the default animation method__ - whenever `$('selector').hx({ ... })` is called, the animation will be performed using the animate method.
 
 __animate__ uses CSS transitions, making it much lighter but subject to the same constraints as CSS animations.
 
 __iterate__ updates the DOM at 60 fps, making it heavier but free of CSS animation constraints. For example, an element can be translated and scaled simultaneously with different durations and easings.
 
-|   | animate | iterate |
-| - | ------- | ------- |
+|     | animate | iterate |
+| --- | ------- | ------- |
 | __Core__ | CSS Transitions | requestAnimationFrame |
 | __Bean Execution__ | Beans of the same type are synchronous | _ALL_ beans are asynchronous |
 | __Resource Consumption__ | Low | High |
@@ -393,7 +393,7 @@ $('selector').hx({
 <sup>*Bezier curves with values above 1 or below 0 are not compatible on all devices. See <a href="https://bugs.webkit.org/show_bug.cgi?id=45761" target="_blank">WebKit Bug 45761</a>.</sup>
 
 * hx will check unclamped bezier compatibility and clamp the points between 0 and 1 if necessary.
-* Custom easing can be defined when the page loads using [$.hx.defineBezier](#hx-defineBezier), or passed directly as an array of four points:
+* Custom easing can be defined when the page loads using [$.hx.defineBezier](#hxdefinebezier-name--points-), or passed directly as an array of four points:
 
 ```javascript
 $('selector').hx({
@@ -409,34 +409,23 @@ $('selector').hx({
 
 ### Overview
 
-hx methods can be called in two ways:
-1. Inline, chained to another hx call, or
-2. Standalone, by passing the method name as the first argument of an hx call
+#### .hx([ method ] , args )
+* Invokes `.animate()` if the first argument is a __bean__ or __pod__, or calls another method if the first argument is a string.
+* `.hx()` is the only method available to jquery, so in order call another hx method (like defer), you must either create a new hx instance first or pass the name of the method as the first argument of `.hx()`. The following examples both show valid ways to call `.defer( 1000 )`:
 
-The following snippets are functionally equivalent:
+1. Chaining to an hx instance
+   ```javascript
+   $('selector').hx().defer( 1000 );
+   ```
 
-```javascript
-$('selector').hx({
-    ...
-})
-.done(function() {
-    // it's done!
-});
-```
-
-```javascript
-$('selector').hx({
-    ...
-});
-
-$('selector').hx( 'done' , function() {
-    // it's done!
-});
-```
+2. Calling the method directly
+   ```javascript
+   $('selector').hx( 'defer' , 1000 );
+   ```
 
 ### Static Methods
 
-#### $.hx.defineProperty( name , [ realName ])<a id="hx-defineProperty"></a>
+#### $.hx.defineProperty( name , [ realName ])
 
 | Parameter | Type | Description | Required |
 | --------- | ---- | ----------- | -------- |
@@ -476,7 +465,7 @@ $('selector').hx({
 });
 ```
 
-#### $.hx.defineBezier( name , points )<a id="hx-defineBezier"></a>
+#### $.hx.defineBezier( name , points )
 
 | Parameter | Type | Description | Required |
 | --------- | ---- | ----------- | -------- |
@@ -489,7 +478,7 @@ $('selector').hx({
 $.hx.defineBezier( 'someEasing' , [ 0.25 , 0.1 , 0.25 , 1 ]);
 ```
 
-#### $.hx.subscribe( callback )<a id="hx-subscribe"></a>
+#### $.hx.subscribe( callback )
 
 | Parameter | Type | Description | Required |
 | --------- | ---- | ----------- | -------- |
@@ -508,7 +497,7 @@ var unsubscribe = $.hx.subscribe(function( elapsed ) {
 });
 ```
 
-#### $.hx.error( error )<a id="hx-error"></a>
+#### $.hx.error( error )
 
 | Parameter | Type | Description | Required |
 | --------- | ---- | ----------- | -------- |
@@ -533,9 +522,6 @@ $.hx.error = function( error ) {
 ```
 
 ### Synchronous Methods
-
-#### .hx([ method ] , args )
-* Invokes `.animate()` if the first argument is a __bean__ or __pod__, or calls another method if the first argument is a string.
 
 #### .animate( obj )
 
@@ -853,7 +839,7 @@ $(target).on( 'hx.namespace' , function( e , [ data ]) {
 | `end` | `element` | `{type: String}` | Triggered on __bean__ end. |
 | `pause` | `element` | `{progress: Array}` | Triggered when an iteration __pod__ is paused. |
 | `resume` | `element` | `{progress: Array}` | Triggered when an iteration __pod__ is resumed. |
-| `error` | `document` | `error` | Triggered by [$.hx.error](#hx-error) when an error is encountered within a promise function. |
+| `error` | `document` | `error` | Triggered by [$.hx.error](#hxerror-error-) when an error is encountered within a promise function. |
 
 =====
 
