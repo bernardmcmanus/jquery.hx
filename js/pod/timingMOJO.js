@@ -56,7 +56,7 @@ hxManager.TimingMOJO = (function( Object , MOJO , VendorPatch ) {
 
             var that = this;
 
-            console.log(timestamp);
+            //console.log(timestamp);
 
             that.happen( TIMING , timestamp );
 

@@ -77,7 +77,7 @@ hxManager.DomNodeFactory = (function(
             var args = arguments;
             var type, bean, pod;
 
-            console.log(e.type);
+            //console.log(e.type);
 
             switch (e.type) {
 

@@ -40,69 +40,69 @@
     (function() {
 
         /*$.hx.defineProperty( 'translateX' )
-            .setDefaults( 0 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 0 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + 'px)';
             });*/
 
         $.hx.defineProperty( 'blur' )
-            .setDefaults( 0 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 0 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + 'px)';
             });
 
         $.hx.defineProperty( 'brightness' )
-            .setDefaults( 100 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 100 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + '%)';
             });
 
         $.hx.defineProperty( 'contrast' )
-            .setDefaults( 100 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 100 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + '%)';
             });
 
         $.hx.defineProperty( 'dropshadow' , 'drop-shadow' )
-            .setDefaults([ 0 , 0 , 0 , 'transparent' ])
-            .setKeymap([ 'x' , 'y' , 'blur' , 'color' ])
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , [ 0 , 0 , 0 , 'transparent' ])
+            .set( 'keymap' , [ 'x' , 'y' , 'blur' , 'color' ])
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty.join( 'px ' ) + ')';
             });
 
         $.hx.defineProperty( 'grayscale' )
-            .setDefaults( 0 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 0 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + '%)';
             });
 
         $.hx.defineProperty( 'hueRotate' , 'hue-rotate' )
-            .setDefaults( 0 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 0 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + 'deg)';
             });
 
         $.hx.defineProperty( 'invert' )
-            .setDefaults( 0 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 0 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + '%)';
             });
 
         /*$.hx.defineProperty( 'opacity' )
-            .setDefaults( 100 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 100 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + '%)';
             });*/
 
         $.hx.defineProperty( 'saturate' )
-            .setDefaults( 0 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 0 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + '%)';
             });
 
         $.hx.defineProperty( 'sepia' )
-            .setDefaults( 0 )
-            .setStringGetter(function( name , CSSProperty ) {
+            .set( 'defaults' , 0 )
+            .set( 'stringGetter' , function( name , CSSProperty ) {
                 return name + '(' + CSSProperty[0] + '%)';
             });
 
@@ -821,8 +821,8 @@
             // test - resolve
             s5: function() {
 
-                //var method = 'iterate';
-                var method = 'animate';
+                var method = 'iterate';
+                //var method = 'animate';
                 var incrementor = '+=360';
                 var order = [ '.tgt' , '.tgt2' , '.tgt3' ];
                 var current = null;

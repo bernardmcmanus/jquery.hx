@@ -133,12 +133,13 @@
 
         var property = DefineProperty.apply( NULL , definition[0] );
 
-        [ 'setDefaults' , 'setKeymap' , 'setStringGetter' ]
-        .forEach(function( method , i ) {
+        [ 'defaults' , 'keymap' , 'stringGetter' ]
+        .forEach(function( key , i ) {
 
             var args = definition[i+1];
+            
             if (args !== NULL) {
-                property[method]( args );
+                property.set( key , args );
             }
         });
     });

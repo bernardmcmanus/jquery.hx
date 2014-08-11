@@ -14,9 +14,9 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
         that.pName = args[0] || that.name;
 
         that.defaults = other.defaults;
-        that.keyMap = other.keyMap;
+        that.keymap = other.keymap;
 
-        that._stringGetter = function( name , CSSProperty ) {
+        that.stringGetter = function( name , CSSProperty ) {
             return CSSProperty[0];
         };
     }
@@ -48,26 +48,17 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
     StyleDefinition.prototype = {
 
-        setDefaults: function( defaults ) {
+        set: function( key , value ) {
             var that = this;
-            that.defaults = EnsureArray( defaults );
-            return that;
-        },
-
-        setKeymap: function( keyMap ) {
-            var that = this;
-            that.keyMap = EnsureArray( keyMap );
-            return that;
-        },
-
-        setStringGetter: function( stringGetter ) {
-            var that = this;
-            that._stringGetter = stringGetter;
+            if (key === 'defaults' || key === 'keymap') {
+                value = EnsureArray( value );
+            }
+            that[key] = value;
             return that;
         },
 
         toString: function( CSSProperty ) {
-            return this._stringGetter( CSSProperty.name , CSSProperty );
+            return this.stringGetter( CSSProperty.name , CSSProperty );
         }
     };
 
@@ -76,7 +67,7 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
         other: {
             defaults: [ '' ],
-            keyMap: [ 0 ]
+            keymap: [ 0 ]
         }
     };
 

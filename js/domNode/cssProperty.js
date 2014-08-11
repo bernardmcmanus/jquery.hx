@@ -33,8 +33,8 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
                 }
             ),
 
-            keyMap: Descriptor(function() {
-                return definition.keyMap;
+            keymap: Descriptor(function() {
+                return definition.keymap;
             }),
 
             string: Descriptor(function() {
@@ -50,9 +50,9 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
                     return that[0];
                 }
                 else {
-                    var key, obj = {}, keyMap = that.keyMap;
-                    for (var i = 0; i < keyMap.length; i++) {
-                        key = keyMap[i];
+                    var key, obj = {}, keymap = that.keymap;
+                    for (var i = 0; i < keymap.length; i++) {
+                        key = keymap[i];
                         obj[key] = that[i];
                     }
                     return obj;
@@ -81,7 +81,7 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
     CSSProperty_prototype.update = function( values ) {
 
         var that = this;
-        var keyMap = that.keyMap;
+        var keymap = that.keymap;
         var key, i;
 
         that.isNull = (values === null);
@@ -92,13 +92,13 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
             values = [ values ];
         }
 
-        for (i = 0; i < keyMap.length; i++) {
+        for (i = 0; i < keymap.length; i++) {
 
             if (values instanceof Array) {
                 key = i;
             }
             else {
-                key = keyMap[i];
+                key = keymap[i];
             }
 
             if (values[key] !== undefined) {
