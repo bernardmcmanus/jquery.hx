@@ -1,7 +1,7 @@
-hxManager.IteratorMOJO = (function( RetrieveBezier ) {
+hxManager.IteratorMOJO = (function( MOJO , Easing ) {
 
 
-    var TOLERANCE = ( 1000 / 120 );
+    var TOLERANCE = ( 1000 / 240 );
 
 
     var MOJO_Each = MOJO.Each;
@@ -20,11 +20,9 @@ hxManager.IteratorMOJO = (function( RetrieveBezier ) {
 
         that.duration = bean_options.duration;
         that.delay = bean_options.delay;
-        that.easing = RetrieveBezier( bean_options.easing );
+        that.easing = Easing( bean_options.easing );
 
         MOJO.Construct( that );
-
-        that.handle = that._handle.bind( that );
     }
 
 
@@ -61,11 +59,11 @@ hxManager.IteratorMOJO = (function( RetrieveBezier ) {
 
         complete: function( model ) {
             var that = this;
-            that.happen( 'iteratorComplete' , that );
             that.paint( model );
+            that.happen( 'beanComplete' , that );
         },
 
-        _handle: function( e ) {
+        handleMOJO: function( e ) {
             
             var that = this;
             var args = arguments;
@@ -81,21 +79,25 @@ hxManager.IteratorMOJO = (function( RetrieveBezier ) {
                 break;
 
                 case 'podComplete':
-                    that.complete( that.dest );
+                    that.paint( that.dest );
                 break;
 
                 case 'podCanceled':
-                    that.complete( that.current );
+                    //that.paint( that.current );
                 break;
             }
         },
 
-        _init: function( e ) {
+        _init: function() {
             var that = this;
-            that.current = that._getCurrent( that.node );
-            that.dest = that._getDest( that.current , that.styles );
-            that.diff = that._getDiff( that.node , that.current , that.dest );
-            that.happen( 'iteratorStart' );
+            var node = that.node;
+            var node_hx = node._hx;
+            var current = that.current = that._getCurrent( node );
+            that.dest = that._getDest( current , that.styles );
+            that.diff = that._getDiff( node , current , that.dest );
+            node_hx.deleteTransition( that.type );
+            node_hx.applyTransition();
+            that.happen( 'beanStart' );
         },
 
         _timing: function( e , elapsed ) {
@@ -107,11 +109,10 @@ hxManager.IteratorMOJO = (function( RetrieveBezier ) {
 
             that.happen( 'progress' , progress );
 
-            if (isWithinTolerance( progress , 1 , duration )) {
+            if (isWithinTolerance( progress , 1 , TOLERANCE , duration )) {
                 that.complete( that.dest );
             }
             else {
-                //console.log(progress);
                 that.calculate(
                     that.easing.function( progress )
                 );
@@ -183,16 +184,15 @@ hxManager.IteratorMOJO = (function( RetrieveBezier ) {
     }
 
 
-    function isWithinTolerance( subject , target , duration ) {
-        var pctTolerance = ( TOLERANCE / duration );
-        return Math.abs( subject - target ) <= pctTolerance;
+    function isWithinTolerance( subject , target , tolerance , duration ) {
+        return (target - subject) <= (tolerance / duration);
     }
 
 
     return IteratorMOJO;
 
     
-}( hxManager.Bezier.retrieve ));
+}( MOJO , hxManager.Easing ));
 
 
 

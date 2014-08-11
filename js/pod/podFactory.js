@@ -9,7 +9,7 @@ hxManager.PodFactory = (function( AnimationPod , PrecisionPod , PromisePod ) {
                 return new AnimationPod( node );
 
             case 'precision':
-                return new PrecisionPod( node );
+                return new PrecisionPod();
 
             case 'promise':
                 return new PromisePod();

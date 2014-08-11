@@ -1,4 +1,4 @@
-hxManager.VendorPatch = (function( Config ) {
+hxManager.VendorPatch = (function( navigator , Config ) {
 
 
     var navigator_userAgent = navigator.userAgent;
@@ -119,7 +119,7 @@ hxManager.VendorPatch = (function( Config ) {
     return new VendorPatch();
 
     
-}( hxManager.Config.VendorPatch ));
+}( navigator , hxManager.Config.VendorPatch ));
 
 
 

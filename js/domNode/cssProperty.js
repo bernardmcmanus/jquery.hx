@@ -1,12 +1,7 @@
 hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
 
 
-    function createDescriptor( getter , setter ) {
-        return {
-            get: getter,
-            set: setter
-        };
-    }
+    var Descriptor = Helper.descriptor;
 
 
     function CSSProperty( name , values ) {
@@ -17,19 +12,19 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
 
         Object.defineProperties( that , {
 
-            name: createDescriptor(function() {
+            name: Descriptor(function() {
                 return name;
             }),
 
-            pName: createDescriptor(function() {
+            pName: Descriptor(function() {
                 return definition.pName;
             }),
 
-            defaults: createDescriptor(function() {
+            defaults: Descriptor(function() {
                 return definition.defaults;
             }),
 
-            isNull: createDescriptor(
+            isNull: Descriptor(
                 function() {
                     return isNull;
                 },
@@ -38,19 +33,19 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
                 }
             ),
 
-            keyMap: createDescriptor(function() {
+            keyMap: Descriptor(function() {
                 return definition.keyMap;
             }),
 
-            string: createDescriptor(function() {
+            string: Descriptor(function() {
                 return definition.toString( that );
             }),
 
-            length: createDescriptor(function() {
+            length: Descriptor(function() {
                 return Object.keys( that ).length;
             }),
 
-            values: createDescriptor(function() {
+            values: Descriptor(function() {
                 if (that.length === 1) {
                     return that[0];
                 }

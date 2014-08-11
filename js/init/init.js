@@ -1,7 +1,14 @@
-(function( VendorPatch , DefineProperty , DefineBezier , TimingMOJO ) {
+(function( MOJO , Helper , VendorPatch , DefineProperty , DefineBezier , TimingMOJO ) {
 
 
     // Do some important stuff when hx is loaded
+
+
+    var NULL = null;
+
+
+    var EnsureArray = Helper.ensureArray;
+
 
     var Win = window;
     var Doc = document;
@@ -12,118 +19,129 @@
         defineBezier: DefineBezier,
         subscribe: function( callback ) {
 
-            var startTime = null;
+            var startTime = NULL;
 
             TimingMOJO.subscribe( timingCallback );
 
             function timingCallback( e , timestamp ) {
-                startTime = (startTime === null ? timestamp : startTime);
-                callback(( timestamp - startTime ) , unsubscribe );
+                startTime = (startTime === NULL ? timestamp : startTime);
+                callback(( timestamp - startTime ));
             }
 
-            function unsubscribe() {
+            return function() {
                 TimingMOJO.unsubscribe( timingCallback );
-            }
+            };
         },
         error: function( error ) {
             $(Doc).trigger( 'hx.error' , error );
-            try {
-                console.error( error.stack );
-            }
+            try { console.error( error.stack ); }
             catch( err ) {}
         }
     };
-    
 
-    DefineProperty( 'matrix' , 'matrix3d' )
-        .setDefaults([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1
-        ])
-        .setKeymap([
-            'a1', 'b1', 'c1', 'd1',
-            'a2', 'b2', 'c2', 'd2',
-            'a3', 'b3', 'c3', 'd3',
-            'a4', 'b4', 'c4', 'd4'
-        ])
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty.join( ',' ) + ')';
+
+    // define a bunch of properties
+    [
+        [
+            [ 'matrix' , 'matrix3d' ],
+            [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],
+            [ 'a1', 'b1', 'c1', 'd1', 'a2', 'b2', 'c2', 'd2', 'a3', 'b3', 'c3', 'd3', 'a4', 'b4', 'c4', 'd4' ],
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( ',' ) + ')';
+            }
+        ],
+        [
+            [ 'translate' , 'translate3d' ],
+            [ 0 , 0 , 0 ],
+            [ 'x' , 'y' , 'z' ],
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( 'px,' ) + 'px)';
+            }
+        ],
+        [
+            [ 'scale' , 'scale3d' ],
+            [ 1 , 1 , 1 ],
+            [ 'x' , 'y' , 'z' ],
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( ',' ) + ')';
+            }
+        ],
+        [
+            [ 'rotate' , 'rotate3d' ],
+            [ 0 , 0 , 0 , 0 ],
+            [ 'x' , 'y' , 'z' ],
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( ',' ) + 'deg)';
+            }
+        ],
+        [
+            [ 'rotateX' ],
+            0,
+            NULL,
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + 'deg)';
+            }
+        ],
+        [
+            [ 'rotateY' ],
+            0,
+            NULL,
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + 'deg)';
+            }
+        ],
+        [
+            [ 'rotateZ' ],
+            0,
+            NULL,
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty[0] + 'deg)';
+            }
+        ],
+        [
+            [ 'matrix2d' , 'matrix' ],
+            [ 1 , 0 , 0 , 1 , 0 , 0 ],
+            [ 'a1' , 'b1' , 'c1' , 'd1' , 'a4' , 'b4' ],
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( ',' ) + ')';
+            }
+        ],
+        [
+            [ 'translate2d' , 'translate' ],
+            [ 0 , 0 ],
+            [ 'x' , 'y' ],
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( 'px,' ) + 'px)';
+            }
+        ],
+        [
+            [ 'scale2d' , 'scale' ],
+            [ 1 , 1 ],
+            [ 'x' , 'y' ],
+            function( name , CSSProperty ) {
+                return name + '(' + CSSProperty.join( ',' ) + ')';
+            }
+        ],
+        [
+            [ 'opacity' ],
+            1,
+            NULL,
+            NULL
+        ]
+    ]
+    .forEach(function( definition ) {
+
+        var property = DefineProperty.apply( NULL , definition[0] );
+
+        [ 'setDefaults' , 'setKeymap' , 'setStringGetter' ]
+        .forEach(function( method , i ) {
+
+            var args = definition[i+1];
+            if (args !== NULL) {
+                property[method]( args );
+            }
         });
-
-
-    DefineProperty( 'translate' , 'translate3d' )
-        .setDefaults([ 0 , 0 , 0 ])
-        .setKeymap([ 'x' , 'y' , 'z' ])
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty.join( 'px,' ) + 'px)';
-        });
-
-
-    DefineProperty( 'scale' , 'scale3d' )
-        .setDefaults([ 1 , 1 , 1 ])
-        .setKeymap([ 'x' , 'y' , 'z' ])
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty.join( ',' ) + ')';
-        });
-
-
-    DefineProperty( 'rotate' , 'rotate3d' )
-        .setDefaults([ 0 , 0 , 0 , 0 ])
-        .setKeymap([ 'x' , 'y' , 'z' , 'a' ])
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty.join( ',' ) + 'deg)';
-        });
-
-
-    DefineProperty( 'rotateX' )
-        .setDefaults( 0 )
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty[0] + 'deg)';
-        });
-
-
-    DefineProperty( 'rotateY' )
-        .setDefaults( 0 )
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty[0] + 'deg)';
-        });
-
-
-    DefineProperty( 'rotateZ' )
-        .setDefaults( 0 )
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty[0] + 'deg)';
-        });
-
-
-    DefineProperty( 'matrix2d' , 'matrix' )
-        .setDefaults([ 1 , 0 , 0 , 1 , 0 , 0 ])
-        .setKeymap([ 'a1' , 'b1' , 'c1' , 'd1' , 'a4' , 'b4' ])
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty.join( ',' ) + ')';
-        });
-
-
-    DefineProperty( 'translate2d' , 'translate' )
-        .setDefaults([ 0 , 0 ])
-        .setKeymap([ 'x' , 'y' ])
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty.join( 'px,' ) + 'px)';
-        });
-
-
-    DefineProperty( 'scale2d' , 'scale' )
-        .setDefaults([ 1 , 1 ])
-        .setKeymap([ 'x' , 'y' ])
-        .setStringGetter(function( name , CSSProperty ) {
-            return name + '(' + CSSProperty.join( ',' ) + ')';
-        });
-
-
-    DefineProperty( 'opacity' )
-        .setDefaults( 1 );
+    });
 
 
     /*
@@ -168,8 +186,7 @@
 
 
     MOJO.Each( beziers , function( points , name ) {
-        var args = [ name ].concat( points );
-        DefineBezier.apply( null , args );
+        DefineBezier( name , points );
     });
 
 
@@ -186,7 +203,14 @@
     }
 
 
-}( hxManager.VendorPatch , hxManager.StyleDefinition.define , hxManager.Bezier.define , hxManager.TimingMOJO ));
+}(
+    MOJO,
+    hxManager.Helper,
+    hxManager.VendorPatch,
+    hxManager.StyleDefinition.define,
+    hxManager.Bezier.define,
+    hxManager.TimingMOJO
+));
 
 
 

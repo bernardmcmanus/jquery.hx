@@ -1,7 +1,7 @@
-hxManager.ComponentMOJO = (function( CSSProperty ) {
+hxManager.ComponentMOJO = (function( Object , MOJO , CSSProperty ) {
 
 
-    var Object_defineProperty = Object.defineProperty;
+    var UNDEFINED;
 
 
     function ComponentMOJO() {
@@ -67,7 +67,7 @@ hxManager.ComponentMOJO = (function( CSSProperty ) {
 
                 var name = (key === 'value' ? type : key);
 
-                if (component[key] === undefined) {
+                if (component[key] === UNDEFINED) {
                     component[key] = new CSSProperty( name , property );
                 }
                 else {
@@ -131,7 +131,7 @@ hxManager.ComponentMOJO = (function( CSSProperty ) {
     return ComponentMOJO;
 
     
-}( hxManager.CSSProperty ));
+}( Object , MOJO , hxManager.CSSProperty ));
 
 
 

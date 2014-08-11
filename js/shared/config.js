@@ -1,4 +1,4 @@
-hxManager.Config = (function() {
+hxManager.Config = (function( Object ) {
 
 
     var Config = {
@@ -65,7 +65,7 @@ hxManager.Config = (function() {
     return Config;
 
     
-}());
+}( Object ));
 
 
 

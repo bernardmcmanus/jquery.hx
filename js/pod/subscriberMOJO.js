@@ -1,4 +1,4 @@
-hxManager.SubscriberMOJO = (function( TimingMOJO ) {
+hxManager.SubscriberMOJO = (function( MOJO , TimingMOJO ) {
 
 
     var TIMING = 'timing';
@@ -61,7 +61,7 @@ hxManager.SubscriberMOJO = (function( TimingMOJO ) {
     return SubscriberMOJO;
 
     
-}( hxManager.TimingMOJO ));
+}( MOJO , hxManager.TimingMOJO ));
 
 
 

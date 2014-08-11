@@ -5,22 +5,30 @@
 
         var args = arguments;
         var hxm = new hxManager( this );
+        var out;
 
         switch (typeof args[0]) {
 
             case 'string':
-
                 var method = shift( args );
 
                 if (typeof hxm[method] !== 'function') {
                     throw new TypeError( method + ' is not a function.' );
                 }
 
-                return hxm[method].apply( hxm , args );
+                out = hxm[method].apply( hxm , args );
+            break;
 
             case 'object':
-                return hxm._addAnimationPod( args[0] );
+                out = hxm.animate( args[0] );
+            break;
+
+            default:
+                out = hxm;
+            break;
         }
+
+        return out;
     };
 
  

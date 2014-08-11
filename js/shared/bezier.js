@@ -39,11 +39,7 @@ hxManager.Bezier = (function( BezierEasing , Helper , VendorPatch ) {
     }
 
 
-    Bezier.define = function() {
-
-        var args = arguments;
-        var name = Helper.shift( args );
-        var points = args;
+    Bezier.define = function( name , points ) {
 
         if (Definitions[name] !== undefined) {
             throw new Error( name + ' is already defined' );

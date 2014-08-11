@@ -1,0 +1,37 @@
+1.0.3
+=====
+- Fixed [issue #3](https://github.com/millennialmedia/jquery.hx/issues/3)
+- Implemented `window.requestAnimationFrame`
+- Added the ability to define custom style properties and easing curves
+- Added methods:
+    - `iterate`
+    - `pause`
+    - `resume`
+    - `paint`
+    - `reset`
+    - `get`
+    - `clean`
+- Added static methods:
+    - `$.hx.defineProperty`
+    - `$.hx.defineBezier`
+    - `$.hx.subscribe`
+    - `$.hx.error`
+- Added events:
+    - `hx.start`
+    - `hx.end`
+    - `hx.pause`
+    - `hx.resume`
+    - `hx.ready`
+    - `hx.error`
+
+1.0.2
+=====
+- Fixed a bug related to clearing the queue
+
+1.0.1
+=====
+- Added support for zero-duration transforms
+
+1.0.0
+=====
+- Implemented promises

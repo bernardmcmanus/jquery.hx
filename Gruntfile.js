@@ -32,7 +32,7 @@ module.exports = function( grunt ) {
 
     var Lib = [
         'js/lib/promise-1.0.0.min.js',
-        'js/lib/mojo-0.1.3.min.js',
+        'js/lib/mojo-0.1.4.min.js',
         'js/lib/bezier-easing-0.4.1.js'
     ];
 

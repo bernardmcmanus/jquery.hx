@@ -1,31 +1,43 @@
-hxManager.Helper = (function() {
+hxManager.Helper = (function( Function , Object , Array ) {
 
 
+    var T = true;
+    var F = false;
     var Array_prototype = Array.prototype;
 
 
     function compareArray( subject , array ) {
         
         if (!subject || !array) {
-            return false;
+            return F;
         }
 
-        if (subject.length != array.length) {
-            return false;
+        if (length( subject ) != length( array )) {
+            return F;
         }
 
-        for (var i = 0, l = subject.length; i < l; i++) {
-            if (subject[i] instanceof Array && array[i] instanceof Array) {
+        for (var i = 0, l = length( subject ); i < l; i++) {
+            if (isArr( subject[i] ) && isArr( array[i] )) {
                 if (!compareArray( subject[i] , array[i] )) {
-                    return false;
+                    return F;
                 }
             }
             else if (subject[i] !== array[i]) {
-                return false;
+                return F;
             }
         }
 
-        return true;
+        return T;
+    }
+
+
+    function ensureArray( subject ) {
+        return (isArr( subject ) ? subject : [ subject ]);
+    }
+
+
+    function length( subject ) {
+        return subject.length;
     }
 
 
@@ -39,14 +51,55 @@ hxManager.Helper = (function() {
     }
 
 
+    function descriptor( getter , setter ) {
+        return {
+            get: getter,
+            set: setter
+        };
+    }
+
+
+    function del( subject , key ) {
+        delete subject[key];
+    }
+
+
+    function instOf( subject , constructor ) {
+        return (subject instanceof constructor);
+    }
+
+
+    function isFunc( subject ) {
+        return instOf( subject , Function );
+    }
+
+
+    function isObj( subject ) {
+        return instOf( subject , Object );
+    }
+
+
+    function isArr( subject ) {
+        return instOf( subject , Array );
+    }
+
+
     return {
         compareArray: compareArray,
+        ensureArray: ensureArray,
+        length: length,
         shift: shift,
-        pop: pop
+        pop: pop,
+        descriptor: descriptor,
+        del: del,
+        instOf: instOf,
+        isFunc: isFunc,
+        isObj: isObj,
+        isArr: isArr
     };
 
 
-}());
+}( Function , Object , Array ));
 
 
 

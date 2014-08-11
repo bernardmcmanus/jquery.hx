@@ -1,4 +1,4 @@
-hxManager.PrecisionPod = (function( SubscriberMOJO ) {
+hxManager.PrecisionPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
 
 
     var TIMING = 'timing';
@@ -7,15 +7,15 @@ hxManager.PrecisionPod = (function( SubscriberMOJO ) {
     var POD_CANCELED = 'podCanceled';
     var SUBSCRIBE = 'subscribe';
     var INIT = 'init';
-    var ITERATOR_START = 'iteratorStart';
-    var ITERATOR_COMPLETE = 'iteratorComplete';
+    var BEAN_START = 'beanStart';
+    var BEAN_COMPLETE = 'beanComplete';
     var PROGRESS = 'progress';
 
 
-    var Object_defineProperty = Object.defineProperty;
+    var Descriptor = Helper.descriptor;
 
 
-    function PrecisionPod( node ) {
+    function PrecisionPod() {
 
         var that = this;
 
@@ -26,48 +26,43 @@ hxManager.PrecisionPod = (function( SubscriberMOJO ) {
 
         MOJO.Construct( that );
 
-        Object_defineProperty( that , 'subscribers' , {
-            get: function() {
+        Object.defineProperties( that , {
+
+            subscribers: Descriptor(function() {
                 return (that.handlers[ TIMING ] || []).length;
-            }
-        });
-
-        Object_defineProperty( that , 'complete' , {
-            get: function() {
+            }),
+            
+            complete: Descriptor(function() {
                 return that.subscribers === 0;
-            }
+            })
         });
 
-        that.handle = that._handle.bind( that );
-
-        that._init( that.handle );
+        that._init();
     }
 
 
     PrecisionPod.prototype = MOJO.Create({
 
-        _init: function( handle ) {
+        _init: function() {
 
             var that = this;
             var subscriber = new SubscriberMOJO();
 
-            subscriber.when( TIMING , handle );
+            subscriber.when( TIMING , that );
 
-            that.once([ SUBSCRIBE , POD_COMPLETE , POD_CANCELED ] , [ subscriber , handle ] , handle );
+            that.once([ SUBSCRIBE , POD_COMPLETE , POD_CANCELED ] , subscriber , that );
         },
 
         addBean: function( iteratorMOJO ) {
 
             var that = this;
-            var podHandle = that.handle;
-            var iteratorHandle = iteratorMOJO.handle;
             var index = that.subscribers;
 
-            that.when( TIMING , iteratorHandle );
-            that.once([ INIT , POD_COMPLETE , POD_CANCELED ] , iteratorHandle );
+            that.when( TIMING , iteratorMOJO );
+            that.once([ INIT , POD_COMPLETE , POD_CANCELED ] , iteratorMOJO );
 
-            iteratorMOJO.when( PROGRESS , index , podHandle );
-            iteratorMOJO.once([ ITERATOR_START , ITERATOR_COMPLETE ] , iteratorHandle , podHandle );
+            iteratorMOJO.when( PROGRESS , index , that );
+            iteratorMOJO.once([ BEAN_START , BEAN_COMPLETE ] , that );
         },
 
         addCallback: function( callback ) {
@@ -103,11 +98,11 @@ hxManager.PrecisionPod = (function( SubscriberMOJO ) {
             that.happen( POD_CANCELED , that );
         },
 
-        _handle: function( e ) {
+        handleMOJO: function( e ) {
 
             var that = this;
             var args = arguments;
-            var subscriber, podHandle, index, progress, iteratorMOJO, iteratorHandle;
+            var subscriber, index, progress, iteratorMOJO;
 
             switch (e.type) {
 
@@ -124,10 +119,9 @@ hxManager.PrecisionPod = (function( SubscriberMOJO ) {
                 case POD_CANCELED:
 
                     subscriber = args[1];
-                    podHandle = args[2];
 
-                    subscriber.dispel( TIMING , podHandle );
-                    that.dispel([ SUBSCRIBE , POD_COMPLETE , POD_CANCELED ] , podHandle );
+                    subscriber.dispel( TIMING , that );
+                    that.dispel([ SUBSCRIBE , POD_COMPLETE , POD_CANCELED ] , that );
                 break;
 
                 case PROGRESS:
@@ -136,23 +130,19 @@ hxManager.PrecisionPod = (function( SubscriberMOJO ) {
                     that[PROGRESS][index] = progress > 1 ? 1 : progress;
                 break;
 
-                case ITERATOR_START:
+                case BEAN_START:
                     iteratorMOJO = e.target;
-                    that.happen( ITERATOR_START, iteratorMOJO.bean );
+                    that.happen( BEAN_START, iteratorMOJO.bean );
                 break;
 
-                case ITERATOR_COMPLETE:
+                case BEAN_COMPLETE:
 
                     iteratorMOJO = e.target;
-                    iteratorHandle = args[1];
 
-                    that.happen( ITERATOR_COMPLETE , iteratorMOJO.bean );
-                    that.dispel([ TIMING , INIT , POD_COMPLETE , POD_CANCELED ] , iteratorHandle );
-
-                    //console.log('iterator complete');
+                    that.happen( BEAN_COMPLETE , iteratorMOJO.bean );
+                    that.dispel([ TIMING , INIT , POD_COMPLETE , POD_CANCELED ] , iteratorMOJO );
 
                     if (that.complete) {
-                        //console.log('pod complete');
                         that.resolvePod();
                     }
                 break;
@@ -176,7 +166,7 @@ hxManager.PrecisionPod = (function( SubscriberMOJO ) {
     return PrecisionPod;
 
     
-}( hxManager.SubscriberMOJO ));
+}( Object , MOJO , hxManager.Helper , hxManager.SubscriberMOJO ));
 
 
 

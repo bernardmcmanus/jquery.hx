@@ -1,13 +1,14 @@
-hxManager.Bean = (function( Config , SubscriberMOJO ) {
+hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
 
 
-    var TIMING = 'timing';
+    var TOLERANCE = ( 1000 / 240 );
 
 
     var MOJO_Each = MOJO.Each;
-    var Object_defineProperty = Object.defineProperty;
     var OptionKeys = Config.optionKeys;
     var PropertyMap = Config.properties;
+    var isFunction = Helper.isFunc;
+    var Del = Helper.del;
 
 
     function Bean( seed , node , index ) {
@@ -18,21 +19,13 @@ hxManager.Bean = (function( Config , SubscriberMOJO ) {
 
         var that = this;
 
-        that.subscriber = null;
+        that.running = false;
+        that.buffer = 0;
+        that.progress = 0;
 
         MOJO.Construct( that );
-
-        Object_defineProperty( that , 'subscribed' , {
-            get: function() {
-                return (that.subscriber !== null);
-            }
-        });
-
-        Object_defineProperty( that , 'complete' , {
-            get: function() {
-                return (that.subscriber === undefined);
-            }
-        });
+        
+        that.run = that._run.bind( that , node._hx );
 
         $.extend( that , getCompiledData( seed , node , index ));
     }
@@ -40,32 +33,56 @@ hxManager.Bean = (function( Config , SubscriberMOJO ) {
 
     var Bean_prototype = Bean.prototype = MOJO.Create({
 
-        subscribe: function() {
+        _run: function( node_hx ) {
 
             var that = this;
-            var options = that.options;
-            var duration = options.duration;
-            var delay = options.delay;
 
-            var subscriber = that.subscriber = new SubscriberMOJO();
+            if (that.running) {
+                return false;
+            }
 
-            subscriber.when( TIMING , function timing( e , elapsed , diff ) {
-                if (elapsed >= (duration + delay)) {
-                    that.resolveBean();
-                    that.happen( 'beanComplete' , that );
-                }
-            });
+            that.running = true;
 
-            subscriber.subscribe();
+            node_hx.updateComponent( that );
+            node_hx.setTransition( that );
+
+            that.happen( 'beanStart' );
+            return true;
         },
 
-        resolveBean: function() {
+        handleMOJO: function( e ) {
+            
+            var that = this;
+            var args = arguments;
+
+            switch (e.type) {
+
+                case 'timing':
+                    that._timing.apply( that , args );
+                break;
+            }
+        },
+
+        _timing: function( e , elapsed , diff ) {
 
             var that = this;
+            var duration = that.options.duration;
+            var delay = that.options.delay;
 
-            if (that.subscribed && !that.complete) {
-                that.subscriber.destroy();
-                delete that.subscriber;
+            if (!that.running) {
+                that.buffer += diff;
+            }
+
+            var progress = calcProgress(( elapsed - that.buffer) , duration , delay );
+
+            if (isWithinTolerance( progress , 1 , TOLERANCE , duration )) {
+                progress = 1;
+            }
+
+            that.happen( 'progress' , progress );
+
+            if (progress === 1) {
+                that.happen( 'beanComplete' );
             }
         },
 
@@ -96,7 +113,7 @@ hxManager.Bean = (function( Config , SubscriberMOJO ) {
 
             MOJO_Each( options , function( val , key ) {
                 if (!defaults.hasOwnProperty( key )) {
-                    delete options[key];
+                    Del( options , key );
                 }
                 else if (key === 'done') {
                     // make sure we don't execute the done function just yet
@@ -127,7 +144,7 @@ hxManager.Bean = (function( Config , SubscriberMOJO ) {
 
 
     function getBeanProperty( property , node , index ) {
-        return (typeof property === 'function' ? property( node , index ) : property);
+        return (isFunction( property ) ? property( node , index ) : property);
     }
 
 
@@ -147,10 +164,32 @@ hxManager.Bean = (function( Config , SubscriberMOJO ) {
     }
 
 
+
+
+    function calcProgress( elapsed , duration , delay ) {
+        elapsed = elapsed - delay;
+        elapsed = elapsed < 0 ? 0 : elapsed;
+        return (elapsed / duration);
+    }
+
+
+    function isWithinTolerance( subject , target , tolerance , duration ) {
+        return (target - subject) <= (tolerance / duration);
+    }
+
+
+
+
     return Bean;
 
     
-}( hxManager.Config , hxManager.SubscriberMOJO ));
+}(
+    Object,
+    MOJO,
+    hxManager.Config,
+    hxManager.Helper,
+    hxManager.SubscriberMOJO
+));
 
 
 

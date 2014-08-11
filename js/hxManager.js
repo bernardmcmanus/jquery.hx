@@ -1,4 +1,4 @@
-window.hxManager = (function() {
+window.hxManager = (function( Promise ) {
 
 
     function hxManager( j ) {
@@ -15,7 +15,7 @@ window.hxManager = (function() {
 
         Object.defineProperty( that , 'length' , {
             get: function() {
-                return j.length;
+                return length( j );
             }
         });
     }
@@ -24,7 +24,7 @@ window.hxManager = (function() {
     var hxManager_prototype = (hxManager.prototype = Object.create( jQuery.prototype ));
 
 
-    hxManager_prototype._addAnimationPod = function( bundle ) {
+    hxManager_prototype.animate = function( bundle ) {
 
         var that = this;
 
@@ -32,10 +32,17 @@ window.hxManager = (function() {
 
             var pod = PodFactory( node , 'animation' );
 
-            ensureBundle( bundle ).forEach(function( seed ) {
+            ensureArray( bundle ).forEach(function( seed ) {
 
-                var bean = Bean( seed , node , i );
-                pod.addBean( bean );
+                if (typeof seed === 'function') {
+                    pod.addCallback(
+                        bind( that , seed )
+                    );
+                }
+                else {
+                    var bean = Bean( seed , node , i );
+                    pod.addBean( bean );
+                }
             });
 
             node_hx.addAnimationPod( pod );
@@ -45,7 +52,36 @@ window.hxManager = (function() {
     };
 
 
-    hxManager_prototype._addPromisePod = function( func , method ) {
+    hxManager_prototype.iterate = function( bundle ) {
+
+        var that = this;
+
+        that.eachNode(function( node_hx , node , i ) {
+
+            var pod = PodFactory( node , 'precision' );
+
+            ensureArray( bundle ).forEach(function( seed ) {
+
+                if (typeof seed === 'function') {
+                    pod.addCallback(
+                        bind( that , seed )
+                    );
+                }
+                else {
+                    var bean = Bean( seed , node , i );
+                    var iterator = new hxManager.IteratorMOJO( node , bean );
+                    pod.addBean( iterator );
+                }
+            });
+
+            node_hx.addAnimationPod( pod );
+        });
+
+        return that;
+    };
+
+
+    hxManager_prototype.promise = function( func , method ) {
 
         /*if (typeof func !== 'function') {
             throw new TypeError( 'PromisePod requires a function.' );
@@ -56,7 +92,7 @@ window.hxManager = (function() {
         var that = this;
         var micro = [];
         var pods = [];
-        var _func = func.bind( that );
+        //var _func = func.bind( that );
 
         that.eachNode(function( node_hx , node ) {
 
@@ -84,7 +120,9 @@ window.hxManager = (function() {
         // when the appropriate microPromises have been resolved, create the macroPromise
         Promise[ method ]( micro ).then(function() {
 
-            var macroPromise = new Promise( _func );
+            var macroPromise = new Promise(
+                bind( that , func )
+            );
 
             // if the macroPromise is resolved, resolve the pods
             macroPromise.then(function() {
@@ -115,33 +153,6 @@ window.hxManager = (function() {
     };
 
 
-    hxManager_prototype.animate = function( bundle ) {
-
-        var that = this;
-
-        that.eachNode(function( node_hx , node , i ) {
-
-            var pod = PodFactory( node , 'precision' );
-
-            ensureBundle( bundle ).forEach(function( seed ) {
-
-                if (typeof seed === 'function') {
-                    pod.addCallback( seed );
-                }
-                else {
-                    var bean = Bean( seed , node , i );
-                    var iterator = new hxManager.IteratorMOJO( node , bean );
-                    pod.addBean( iterator );
-                }
-            });
-
-            node_hx.addPrecisionPod( pod );
-        });
-
-        return that;
-    };
-
-
     hxManager_prototype.pause = function() {
         return this._precisionPodAction( 'pause' );
     };
@@ -166,13 +177,11 @@ window.hxManager = (function() {
                 return pod.type === 'precision';
             });
 
-        if (pods.length !== that.length && attempts < 10) {
-            $.hx.subscribe(function( elapsed , unsubscribe ) {
+        if (length( pods ) !== length( that ) && attempts < 10) {
+            var unsubscribe = subscribe(function() {
                 attempts++;
-                if (elapsed >= 0) {
-                    unsubscribe();
-                    that._precisionPodAction( method , attempts );
-                }
+                unsubscribe();
+                that._precisionPodAction( method , attempts );
             });
         }
         else {
@@ -210,19 +219,19 @@ window.hxManager = (function() {
 
 
     hxManager_prototype.then = function( func ) {
-        return this._addPromisePod( func );
+        return this.promise( func );
     };
 
 
     hxManager_prototype.race = function( func ) {
-        return this._addPromisePod( func , 'race' );
+        return this.promise( func , 'race' );
     };
 
 
     hxManager_prototype.defer = function( time ) {
-        return this._addPromisePod(function( resolve ) {
+        return this.promise(function( resolve ) {
             if (time) {
-                $.hx.subscribe(function( elapsed , unsubscribe ) {
+                var unsubscribe = subscribe(function( elapsed ) {
                     if (elapsed >= time) {
                         unsubscribe();
                         resolve();
@@ -239,7 +248,7 @@ window.hxManager = (function() {
 
         var that = this;
 
-        ensureBundle( bundle ).forEach(function( seed ) {
+        ensureArray( bundle ).forEach(function( seed ) {
 
             that.eachNode(function( node_hx , node , i ) {
 
@@ -322,7 +331,7 @@ window.hxManager = (function() {
 
         var that = this;
 
-        that._addPromisePod(function( resolve ) {
+        that.promise(function( resolve ) {
             (func || function() {}).call( that );
             resolve();
         });
@@ -331,7 +340,6 @@ window.hxManager = (function() {
 
     // !!! get does not return the hxManager instance
     hxManager_prototype.get = function( type , property , pretty ) {
-
         return toArray( this ).map(function( node ) {
             return node._hx.getComponents( type , property , pretty );
         });
@@ -339,10 +347,10 @@ window.hxManager = (function() {
 
 
     // !!! clean does not return the hxManager instance
-    hxManager_prototype.clean = function() {
+    hxManager_prototype.cleanup = function() {
 
         this.eachNode(function( node_hx ) {
-            node_hx.clean();
+            node_hx.cleanup();
         });
     };
 
@@ -357,20 +365,35 @@ window.hxManager = (function() {
     }
 
 
+    function subscribe( callback ) {
+        return $.hx.subscribe( callback );
+    }
+
+
+    function bind( hxm , func ) {
+        return func.bind( hxm );
+    }
+
+
     function toArray( hxm ) {
         return hxm.toArray();
     }
 
 
-    function ensureBundle( bundle ) {
-        return (bundle instanceof Array ? bundle : [ bundle ]);
+    function ensureArray( bundle ) {
+        return hxManager.Helper.ensureArray( bundle );
+    }
+
+
+    function length( subject ) {
+        return hxManager.Helper.length( subject );
     }
 
 
     return hxManager;
 
     
-}());
+}( Promise ));
 
 
 

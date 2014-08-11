@@ -1,6 +1,9 @@
 hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
 
+    var EnsureArray = Helper.ensureArray;
+
+
     function StyleDefinition() {
 
         var that = this;
@@ -47,13 +50,13 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
         setDefaults: function( defaults ) {
             var that = this;
-            that.defaults = (defaults instanceof Array ? defaults : [ defaults ]);
+            that.defaults = EnsureArray( defaults );
             return that;
         },
 
         setKeymap: function( keyMap ) {
             var that = this;
-            that.keyMap = (keyMap instanceof Array ? keyMap : [ keyMap ]);
+            that.keyMap = EnsureArray( keyMap );
             return that;
         },
 

@@ -36,22 +36,47 @@ body {
     transform-style: preserve-3d;
 }
 
+.tgt-container {
+    position: absolute;
+    left: 0;
+    top: 90px;
+    width: 280px;
+    padding-bottom: 10px;
+    pointer-events: none;
+}
+
 .tgt,
 .tgt2,
 .tgt3
 {
     text-align: center;
+    /*float: left;
+    margin-left: 10px;
+    margin-top: 10px;*/
     position: absolute;
-    top: 100px;
+    top: 10px;
     width: 80px;
     height: 80px;
     line-height: 80px;
+    pointer-events: auto;
     -webkit-perspective: 1000px;
     -webkit-transform-style: preserve-3d;
     -moz-transform-style: preserve-3d;
     -o-transform-style: preserve-3d;
     -ms-transform-style: preserve-3d;
     transform-style: preserve-3d;
+}
+
+.tgt {
+    left: 10px;
+}
+
+.tgt2 {
+    left: 100px;
+}
+
+.tgt3 {
+    left: 190px;
 }
 
 .tgt {
@@ -67,27 +92,6 @@ body {
 .tgt3 {
     z-index: 1;
     background-color: rgb(244,174,41);
-}
-
-.tgt-container .tgt:nth-child(1),
-.tgt-container .tgt2:nth-child(1),
-.tgt-container .tgt3:nth-child(1)
-{
-    left: 10px;
-}
-
-.tgt-container .tgt:nth-child(2),
-.tgt-container .tgt2:nth-child(2),
-.tgt-container .tgt3:nth-child(2)
-{
-    left: 100px;
-}
-
-.tgt-container .tgt:nth-child(3),
-.tgt-container .tgt2:nth-child(3),
-.tgt-container .tgt3:nth-child(3)
-{
-    left: 190px;
 }
 
 .indicate {

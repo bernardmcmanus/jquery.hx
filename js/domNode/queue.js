@@ -1,30 +1,32 @@
-hxManager.Queue = (function() {
+hxManager.Queue = (function( Object , Array , Helper ) {
 
 
-    var Object_defineProperty = Object.defineProperty;
+    var UNDEFINED;
+
+
+    var Descriptor = Helper.descriptor;
+    var EnsureArray = Helper.ensureArray;
+    var Length = Helper.length;
 
 
     function Queue() {
 
         var that = this;
 
-        Object_defineProperty( that , 'current' , {
-            get: function() {
+        Object.defineProperties( that , {
+
+            current: Descriptor(function() {
                 return that[0] || false;
-            }
-        });
+            }),
 
-        Object_defineProperty( that , 'last' , {
-            get: function() {
-                var l = that.length - 1;
+            last: Descriptor(function() {
+                var l = Length( that ) - 1;
                 return l >= 0 ? that[l] : false;
-            }
-        });
+            }),
 
-        Object_defineProperty( that , 'complete' , {
-            get: function() {
-                return that.length === 0;
-            }
+            complete: Descriptor(function() {
+                return !Length( that );
+            })
         });
     }
 
@@ -38,7 +40,7 @@ hxManager.Queue = (function() {
 
         that.push( pod );
 
-        if (that.length === 1) {
+        if (Length( that ) === 1) {
             that.current.run();
         }
     };
@@ -49,7 +51,7 @@ hxManager.Queue = (function() {
         var that = this;
         var pod = false;
 
-        for (var i = 0; i < that.length; i++) {
+        for (var i = 0; i < Length( that ); i++) {
             if (that[i].type === type) {
                 pod = that[i];
                 break;
@@ -84,30 +86,32 @@ hxManager.Queue = (function() {
     Queue_prototype.clear = function( all ) {
 
         // all controls whether all pods or all but the current pod will be cleared
-        all = (typeof all !== 'undefined' ? all : true);
+        all = (all !== UNDEFINED ? all : true);
 
         var that = this;
 
-        while (that.length > (all ? 0 : 1)) {
+        while (Length( that ) > (all ? 0 : 1)) {
             that.pop().cancel();
         }
     };
 
 
-    /*Queue_prototype.getPodCount = function( type ) {
+    Queue_prototype.getPodCount = function( type ) {
 
-        return this
-            .filter(function( pod ) {
-                return (!type || pod.type === type);
+        type = EnsureArray( type );
+
+        return Length(
+            this.filter(function( pod ) {
+                return type.indexOf( pod.type ) >= 0;
             })
-            .length;
-    };*/
+        );
+    };
 
 
     return Queue;
 
     
-}());
+}( Object , Array , hxManager.Helper ));
 
 
 
