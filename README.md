@@ -435,25 +435,25 @@ $('selector').hx({
 * Defines a new style property, or throws an error if `name` already exists.
 * Returns a new [StyleDefinition](js/domNode/styleDefinition.js) instance:
 
-| Method | Defaults |
-| ------ | -------- |
-| `setDefaults` | `[ '' ]` |
-| `setKeymap` | `[ 0 ]` |
-| `setStringGetter` | `function( name , CSSProperty ) { return CSSProperty[0] }` |
+| Property | Defaults |
+| -------- | -------- |
+| `defaults` | `[ '' ]` |
+| `keymap` | `[ 0 ]` |
+| `stringGetter` | `function( name , CSSProperty ) { return CSSProperty[0] }` |
 
 ```javascript
 // define some style properties for CSS filter
 
 $.hx.defineProperty( 'blur' )
-    .setDefaults( 0 )
-    .setStringGetter(function( name , CSSProperty ) {
+    .set( 'defaults' , 0 )
+    .set( 'stringGetter' , function( name , CSSProperty ) {
         return name + '(' + CSSProperty[0] + 'px)';
     });
 
 $.hx.defineProperty( 'dropShadow' , 'drop-shadow' )
-    .setDefaults([ 0 , 0 , 0 , 'transparent' ])
-    .setKeymap([ 'x' , 'y' , 'blur' , 'color' ])
-    .setStringGetter(function( name , CSSProperty ) {
+    .set( 'defaults' , [ 0 , 0 , 0 , 'transparent' ])
+    .set( 'keymap' , [ 'x' , 'y' , 'blur' , 'color' ])
+    .set( 'stringGetter' , function( name , CSSProperty ) {
         return name + '(' + CSSProperty.join( 'px ' ) + ')';
     });
 
