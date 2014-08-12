@@ -1,7 +1,14 @@
-hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
+hxManager.CSSProperty = (function( Object , Array , Helper , StyleDefinition ) {
+
+
+    var NULL = null;
+    var PROTOTYPE = 'prototype';
 
 
     var Descriptor = Helper.descriptor;
+    var Length = Helper.length;
+    var isArr = Helper.isArr;
+    var isUndef = Helper.isUndef;
 
 
     function CSSProperty( name , values ) {
@@ -42,16 +49,18 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
             }),
 
             length: Descriptor(function() {
-                return Object.keys( that ).length;
+                return Length(
+                    Object.keys( that )
+                );
             }),
 
             values: Descriptor(function() {
-                if (that.length === 1) {
+                if (Length( that ) === 1) {
                     return that[0];
                 }
                 else {
                     var key, obj = {}, keymap = that.keymap;
-                    for (var i = 0; i < keymap.length; i++) {
+                    for (var i = 0; i < Length( keymap ); i++) {
                         key = keymap[i];
                         obj[key] = that[i];
                     }
@@ -68,7 +77,7 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
     }
 
 
-    var CSSProperty_prototype = (CSSProperty.prototype = Object.create( Array.prototype ));
+    var CSSProperty_prototype = (CSSProperty[PROTOTYPE] = Object.create( Array[PROTOTYPE] ));
 
 
     CSSProperty_prototype.clone = function( cloneDefaults ) {
@@ -84,7 +93,7 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
         var keymap = that.keymap;
         var key, i;
 
-        that.isNull = (values === null);
+        that.isNull = (values === NULL);
 
         values = (( values || values === 0 ) ? values : that.defaults );
 
@@ -92,16 +101,16 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
             values = [ values ];
         }
 
-        for (i = 0; i < keymap.length; i++) {
+        for (i = 0; i < Length( keymap ); i++) {
 
-            if (values instanceof Array) {
+            if (isArr( values )) {
                 key = i;
             }
             else {
                 key = keymap[i];
             }
 
-            if (values[key] !== undefined) {
+            if (!isUndef( values[key] )) {
                 that[i] = mergeUpdates( that[i] , values[key] );
             }
         }
@@ -123,7 +132,7 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
     function parseExpression( exp ) {
 
         var re = /(\+|\-|\*|\/|\%)\=/;
-        var out = {op: null, val: 0};
+        var out = {op: NULL, val: 0};
         var match = re.exec( exp );
 
         if (match) {
@@ -144,7 +153,7 @@ hxManager.CSSProperty = (function( Helper , StyleDefinition ) {
     return CSSProperty;
 
     
-}( hxManager.Helper , hxManager.StyleDefinition ));
+}( Object , Array , hxManager.Helper , hxManager.StyleDefinition ));
 
 
 

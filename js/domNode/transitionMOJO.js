@@ -1,15 +1,4 @@
-hxManager.TransitionMOJO = (function( Object , Config , VendorPatch , Easing ) {
-
-
-    var Config_defaults = Config.defaults;
-    var MOJO_Each = MOJO.Each;
-
-
-    var transitionDefaults = {
-        duration: Config_defaults.duration,
-        easing: Config_defaults.easing,
-        delay: Config_defaults.delay
-    };
+hxManager.TransitionMOJO = (function( MOJO , VendorPatch , Easing ) {
 
 
     function TransitionMOJO() {
@@ -24,22 +13,17 @@ hxManager.TransitionMOJO = (function( Object , Config , VendorPatch , Easing ) {
             var that = this;
             var arr = [];
 
-            MOJO_Each( that , function( options , type ) {
+            that.each(function( options , type ) {
 
                 var duration = options.duration;
                 var easing = options.easing;
                 var delay = options.delay;
-
-                // don't add a component for transitions with duration and delay of 0
-                if (duration < 1 && delay < 1) {
-                    return '';
-                }
-
                 var str = getTransitionString( type , duration , easing , delay );
+
                 arr.push( str );
             });
             
-            return VendorPatch.getPrefixed(
+            return VendorPatch.prefix(
                 arr.join( ', ' )
             );
         },
@@ -72,12 +56,7 @@ hxManager.TransitionMOJO = (function( Object , Config , VendorPatch , Easing ) {
     return TransitionMOJO;
 
     
-}(
-    Object,
-    hxManager.Config,
-    hxManager.VendorPatch,
-    hxManager.Easing
-));
+}( MOJO , hxManager.VendorPatch , hxManager.Easing ));
 
 
 

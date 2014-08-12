@@ -1,7 +1,17 @@
-hxManager.ComponentMOJO = (function( Object , MOJO , CSSProperty ) {
+hxManager.ComponentMOJO = (function(
+    Object,
+    MOJO,
+    Helper,
+    StyleDefinition,
+    CSSProperty
+) {
 
 
     var UNDEFINED;
+
+
+    var TreeSearch = Helper.treeSearch;
+    var isUndef = Helper.isUndef;
 
 
     function ComponentMOJO() {
@@ -12,9 +22,7 @@ hxManager.ComponentMOJO = (function( Object , MOJO , CSSProperty ) {
         MOJO.Construct( that );
 
         Object.defineProperty( that , 'order' , {
-            get: function() {
-                return order;
-            }
+            value: order
         });
     }
 
@@ -28,7 +36,7 @@ hxManager.ComponentMOJO = (function( Object , MOJO , CSSProperty ) {
 
             var arr = order
                 .map(function( property ) {
-                    var component = that.getComponents( type , property );
+                    var component = that.getComponents( property );
                     return component.isDefault() ? '' : component.string;
                 })
                 .filter(function( str ) {
@@ -38,22 +46,20 @@ hxManager.ComponentMOJO = (function( Object , MOJO , CSSProperty ) {
             return arr.join( ' ' );
         },
 
-        getComponents: function( type , property ) {
+        getComponents: function( find ) {
 
             var that = this;
-            var _type, _property;
-            var name = (property === 'value' ? type : property);
+            var out = that;
 
-            if (type) {
-                _type = (that[type] || {});
-                if (property) {
-                    _property = _type[property] || new CSSProperty( name , null );
-                    return _property;
-                }
-                return _type;
+            if (find) {
+                out = TreeSearch( that , find );
             }
 
-            return that;
+            if (isUndef( out )) {
+                out = StyleDefinition.isDefined( find ) ? new CSSProperty( find , null ) : {};
+            }
+
+            return out;
         },
 
         updateComponent: function( bean ) {
@@ -67,7 +73,7 @@ hxManager.ComponentMOJO = (function( Object , MOJO , CSSProperty ) {
 
                 var name = (key === 'value' ? type : key);
 
-                if (component[key] === UNDEFINED) {
+                if (isUndef( component[key] )) {
                     component[key] = new CSSProperty( name , property );
                 }
                 else {
@@ -131,7 +137,13 @@ hxManager.ComponentMOJO = (function( Object , MOJO , CSSProperty ) {
     return ComponentMOJO;
 
     
-}( Object , MOJO , hxManager.CSSProperty ));
+}(
+    Object,
+    MOJO,
+    hxManager.Helper,
+    hxManager.StyleDefinition,
+    hxManager.CSSProperty
+));
 
 
 

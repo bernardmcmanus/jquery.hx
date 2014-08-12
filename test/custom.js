@@ -827,30 +827,14 @@
                 var order = [ '.tgt' , '.tgt2' , '.tgt3' ];
                 var current = null;
 
-                /*setTimeout(function() {
-                    $('#target').trigger( 'click' );
-                }, 1);*/
-
                 $('#target')
                 .off( 'touchstart click' )
                 .on( 'touchstart click' , function() {
                     if (current) {
-                        //$(current).hx( 'resolve' , true );
-                        $(current).hx( 'clear' );
-
-                        setTimeout(function() {
-                            $(current).hx({
-                                type: 'transform',
-                                translate: {y: '+=100'},
-                                duration: 800
-                            });
-                        }, 100);
-                        //$(current).hx( 'break' );
-                        /*.hx({
-                            type: 'transform',
-                            translate: {y: '+=100'},
-                            duration: 800
-                        });*/
+                        if (method === 'iterate') {
+                            $(current).hx().pause();
+                        }
+                        $(current).hx().resolve( true );
                     }
                 });
 
@@ -880,15 +864,25 @@
                         type: 'transform',
                         translate: {x: '+=100'},
                         order: [ 'translate' , 'rotateZ' ],
+                        delay: (method === 'iterate' ? 400 : 0),
                         done: function() {
                             console.log('done 0-transform-1');
                         }
+                    },
+                    function( elapsed , progress ) {
+                        /*progress = progress.map(function( pct ) {
+                            return Math.round( pct * 1000 ) / 1000;
+                        });
+                        console.log(progress);*/
                     }
                 ])
                 .then(function( resolve ) {
                     console.log('.order[0] next');
-                    console.log(this[0]._hx);
+                    //console.log(this[0]._hx);
                     resolve();
+                })
+                .done(function() {
+                    $(order[1]).hx( 'resolve' );
                 });
 
                 $(order[1])
@@ -918,6 +912,7 @@
                         type: 'transform',
                         translate: {x: '+=100'},
                         order: [ 'translate' , 'rotateZ' ],
+                        delay: (method === 'iterate' ? 400 : 0),
                         done: function() {
                             console.log('done 1-transform-1');
                         }
@@ -925,8 +920,11 @@
                 ])
                 .then(function( resolve ) {
                     console.log('.order[1] next');
-                    console.log(this[0]._hx);
+                    //console.log(this[0]._hx);
                     resolve();
+                })
+                .done(function() {
+                    $(order[2]).hx( 'resolve' );
                 });
 
                 $(order[2])
@@ -956,6 +954,7 @@
                         type: 'transform',
                         translate: {x: '+=100'},
                         order: [ 'translate' , 'rotateZ' ],
+                        delay: (method === 'iterate' ? 400 : 0),
                         done: function() {
                             console.log('done 2-transform-1');
                         }
@@ -963,19 +962,10 @@
                 ])
                 .then(function( resolve ) {
                     console.log('.order[2] next');
-                    console.log(this[0]._hx);
+                    //console.log(this[0]._hx);
                     resolve();
-                });
-
-                $(order[0]).hx( 'done' , function() {
-                    $(order[1]).hx( 'resolve' );
-                });
-
-                $(order[1]).hx( 'done' , function() {
-                    $(order[2]).hx( 'resolve' );
-                });
-
-                $(order[2]).hx( 'done' , function() {
+                })
+                .done(function() {
                     current = null;
                     $('#target')
                     .off( 'touchstart click' )

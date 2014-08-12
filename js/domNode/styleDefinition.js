@@ -2,6 +2,9 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
 
     var EnsureArray = Helper.ensureArray;
+    var Pop = Helper.pop;
+    var Shift = Helper.shift;
+    var isUndef = Helper.isUndef;
 
 
     function StyleDefinition() {
@@ -10,7 +13,7 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
         var args = arguments;
         var other = Properties.other;
 
-        that.name = Helper.shift( args );
+        that.name = Shift( args );
         that.pName = args[0] || that.name;
 
         that.defaults = other.defaults;
@@ -25,7 +28,7 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
     StyleDefinition.define = function() {
 
         var args = arguments;
-        var name = Helper.pop( args );
+        var name = Pop( args );
         var prettyName = args[0] || name;
         
         if (Properties[name]) {
@@ -38,6 +41,11 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
 
         Properties[name] = new StyleDefinition( name , prettyName );
         return Properties[name];
+    };
+
+
+    StyleDefinition.isDefined = function( name ) {
+        return !isUndef( Properties[name] );
     };
 
 

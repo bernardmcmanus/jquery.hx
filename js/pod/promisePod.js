@@ -1,4 +1,4 @@
-hxManager.PromisePod = (function() {
+hxManager.PromisePod = (function( MOJO ) {
 
 
     function PromisePod() {
@@ -33,4 +33,4 @@ hxManager.PromisePod = (function() {
     return PromisePod;
 
     
-}());
+}( MOJO ));

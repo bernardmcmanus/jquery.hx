@@ -1,17 +1,20 @@
-(function( MOJO , Helper , VendorPatch , DefineProperty , DefineBezier , TimingMOJO ) {
+(function(
+    window,
+    document,
+    MOJO,
+    Helper,
+    VendorPatch,
+    DefineProperty,
+    DefineBezier,
+    TimingMOJO
+) {
 
 
     // Do some important stuff when hx is loaded
 
 
     var NULL = null;
-
-
     var EnsureArray = Helper.ensureArray;
-
-
-    var Win = window;
-    var Doc = document;
 
 
     $.hx = {
@@ -33,7 +36,7 @@
             };
         },
         error: function( error ) {
-            $(Doc).trigger( 'hx.error' , error );
+            $(document).trigger( 'hx.error' , error );
             try { console.error( error.stack ); }
             catch( err ) {}
         }
@@ -192,12 +195,12 @@
 
 
     function hxReady() {
-        $(Win).off( 'load' , hxReady );
-        $(Doc).trigger( 'hx.ready' );
+        $(window).off( 'load' , hxReady );
+        $(document).trigger( 'hx.ready' );
     }
 
-    if (Doc.readyState !== 'complete') {
-        $(Win).on( 'load' , hxReady );
+    if (document.readyState !== 'complete') {
+        $(window).on( 'load' , hxReady );
     }
     else {
         hxReady();
@@ -205,6 +208,8 @@
 
 
 }(
+    window,
+    document,
     MOJO,
     hxManager.Helper,
     hxManager.VendorPatch,

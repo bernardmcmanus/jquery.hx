@@ -1,4 +1,7 @@
-hxManager.Config = (function( Object ) {
+hxManager.Config = (function( Object , Helper ) {
+
+
+    var Descriptor = Helper.descriptor;
 
 
     var Config = {
@@ -31,7 +34,7 @@ hxManager.Config = (function( Object ) {
             },
 
             tests: {
-                mobile  : (/mobile/i),
+                //mobile  : (/mobile/i),
                 andNat  : (/(chrome|firefox)/i)
             },
 
@@ -39,33 +42,30 @@ hxManager.Config = (function( Object ) {
                 (/(\-{0})transition/g),
                 (/(\-{0})transform/g),
                 {
-                    regexp: (/(\-{0})filter/g),
-                    exclude: [ 'ms' ]
+                    regx: (/(\-{0})filter/g),
+                    omit: [ 'ms' ]
                 }
             ]
         }
     };
 
 
-    Object.defineProperty( Config.properties , 'inverse' , {
+    Object.defineProperties( Config.properties , {
 
-        get: function() {
-
+        inverse: Descriptor(function() {
             var out = {};
-
             MOJO.Each( this , function( val , key ) {
                 out[val] = key;
             });
-
             return out;
-        }
+        })
     });
 
     
     return Config;
 
     
-}( Object ));
+}( Object , hxManager.Helper ));
 
 
 

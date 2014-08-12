@@ -1,8 +1,10 @@
-hxManager.Bezier = (function( BezierEasing , Helper , VendorPatch ) {
+hxManager.Bezier = (function( Object , Array , BezierEasing , Helper , VendorPatch ) {
 
 
-    var Object_defineProperty = Object.defineProperty;
-    var UnclampedSupport = VendorPatch.getBezierSupport();
+    var UNDEFINED;
+    var NULL = null;
+    var Descriptor = Helper.descriptor;
+    var Unclamped = VendorPatch.unclamped();
 
 
     function Bezier( name , points ) {
@@ -13,35 +15,28 @@ hxManager.Bezier = (function( BezierEasing , Helper , VendorPatch ) {
             that.push( points[i] );
         }
 
-        if (!UnclampedSupport) {
+        if (!Unclamped) {
             that.clamp();
         }
 
-        Object_defineProperty( that , 'name' , {
-            get: function() {
-                return name;
-            }
-        });
+        var easeFunction = BezierEasing.apply( NULL , that );
 
-        Object_defineProperty( that , 'string' , {
-            get: function() {
+        Object.defineProperties( that , {
+
+            name: {value: name},
+
+            string: Descriptor(function() {
                 return 'cubic-bezier(' + that.join( ',' ) + ')';
-            }
-        });
+            }),
 
-        var easeFunction = BezierEasing.apply( null , that );
-
-        Object_defineProperty( that , 'function' , {
-            get: function() {
-                return easeFunction;
-            }
+            function: {value: easeFunction},
         });
     }
 
 
     Bezier.define = function( name , points ) {
 
-        if (Definitions[name] !== undefined) {
+        if (Definitions[name] !== UNDEFINED) {
             throw new Error( name + ' is already defined' );
         }
         
@@ -74,7 +69,7 @@ hxManager.Bezier = (function( BezierEasing , Helper , VendorPatch ) {
     return Bezier;
 
     
-}( BezierEasing , hxManager.Helper , hxManager.VendorPatch ));
+}( Object , Array , BezierEasing , hxManager.Helper , hxManager.VendorPatch ));
 
 
 

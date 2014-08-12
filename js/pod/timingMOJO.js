@@ -2,9 +2,8 @@ hxManager.TimingMOJO = (function( Object , MOJO , VendorPatch ) {
 
 
     var TIMING = 'timing';
-
-
-    //var Object_defineProperty = Object.defineProperty;
+    var SUBSCRIBERS = 'subscribers';
+    var RAF = VendorPatch.RAF;
 
 
     function TimingMOJO() {
@@ -15,7 +14,7 @@ hxManager.TimingMOJO = (function( Object , MOJO , VendorPatch ) {
 
         MOJO.Construct( that );
 
-        Object.defineProperty( that , 'subscribers' , {
+        Object.defineProperty( that , SUBSCRIBERS , {
             get: function() {
                 return (that.handlers[ TIMING ] || []).length;
             }
@@ -49,7 +48,7 @@ hxManager.TimingMOJO = (function( Object , MOJO , VendorPatch ) {
             var that = this;
 
             that.shouldLoop = true;
-            VendorPatch.RAF( that.step );
+            RAF( that.step );
         },
 
         _step: function( timestamp ) {
@@ -60,11 +59,11 @@ hxManager.TimingMOJO = (function( Object , MOJO , VendorPatch ) {
 
             that.happen( TIMING , timestamp );
 
-            if (that.subscribers < 1) {
+            if (that[SUBSCRIBERS] < 1) {
                 that.shouldLoop = false;
             }
             else if (that.shouldLoop) {
-                VendorPatch.RAF( that.step );
+                RAF( that.step );
             }
         }
     });

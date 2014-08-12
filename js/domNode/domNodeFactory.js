@@ -5,6 +5,7 @@ hxManager.DomNodeFactory = (function(
     Helper,
     VendorPatch,
     Queue,
+    CSSProperty,
     ComponentMOJO,
     TransitionMOJO
 ) {
@@ -23,6 +24,9 @@ hxManager.DomNodeFactory = (function(
     var MOJO_Each = MOJO.Each;
     var PropertyMap = Config.properties;
     var EnsureArray = Helper.ensureArray;
+    var isUndef = Helper.isUndef;
+    var instOf = Helper.instOf;
+    var Prefix = VendorPatch.prefix;
 
 
     function DomNodeFactory( element ) {
@@ -49,25 +53,26 @@ hxManager.DomNodeFactory = (function(
 
     var hxModule = {
 
-        paint: function( type ) {
+        paint: function( typeArray ) {
 
-            var that_hx = this._hx;
-            var style = {}, property, string;
+            var that = this;
+            var that_hx = that._hx;
+            var style = {};
 
-            if (type === UNDEFINED) {
-                type = Object.keys( that_hx.getOrder() );
+            if (typeArray === UNDEFINED) {
+                typeArray = Object.keys( that_hx.getOrder() );
             }
             else {
-                type = EnsureArray( type );
+                typeArray = EnsureArray( typeArray );
             }
 
-            for (var i = 0; i < type.length; i++) {
-                property = VendorPatch.getPrefixed( type[i] );
-                string = that_hx.getStyleString( type[i] );
+            typeArray.forEach(function( type ) {
+                var property = Prefix( type );
+                var string = that_hx.getStyleString( type );
                 style[property] = string;
-            }
+            });
 
-            $(this).css( style );
+            $(that).css( style );
         },
 
         handleMOJO: function( e ) {
@@ -156,7 +161,7 @@ hxManager.DomNodeFactory = (function(
 
         applyTransition: function() {
             var that = this;
-            var property = VendorPatch.getPrefixed( 'transition' );
+            var property = Prefix( 'transition' );
             var string = that._hx.getTransitionString();
             if (that.style.transition === string) {
                 return;
@@ -164,63 +169,48 @@ hxManager.DomNodeFactory = (function(
             $(that).css( property , string );
         },
 
-        getComponents: function( type , property , pretty ) {
+        getComponents: function( find , pretty ) {
 
-            property = PropertyMap[property] || property;
-            pretty = (pretty !== UNDEFINED ? pretty : true);
+            find = PropertyMap[find] || find;
+            pretty = (!isUndef( pretty ) ? pretty : true);
             
             var that_hx = this._hx;
-            var components = that_hx.componentMOJO.getComponents( type , property );
-            var prettyProperty = PropertyMap.inverse[ property ] || property;
-            var pairArray = [];
+            var components = that_hx.componentMOJO.getComponents( find );
             var out = {};
 
-            function getKeyValuePair( name , CSSProperty , pretty ) {
-
-                var key = ( pretty ? CSSProperty.pName : ( name === 'value' ? name : CSSProperty.name ));
-                var val = ( pretty ? CSSProperty.values : CSSProperty.clone() );
-                                
-                return {
-                    key: key,
-                    val: val
-                };
-            }
-
-            function getOut( out , type , property , pretty ) {
-                if (pretty) {
-                    return out[type] !== UNDEFINED ? out[type] : (property ? out[prettyProperty] : out);
-                }
-                else {
-                    return property ? out[property] : out;
-                }
-            }
-
-            if (property) {
-
-                pairArray.push(
-                    getKeyValuePair( property , components , pretty )
-                );
-            }
-            else if (type) {
-
-                MOJO_Each( components , function( CSSProperty , key ) {
-                    pairArray.push(
-                        getKeyValuePair( key , CSSProperty , pretty )
-                    );
+            if (instOf( components , ComponentMOJO )) {
+                components.each(function( styleObj , key ) {
+                    out[key] = that_hx.getComponents( key , pretty );
                 });
             }
-            else {
+            else if (instOf( components , CSSProperty )) {
+                out = getProperty( components );
+            }
+            else if (!isUndef( components )) {
 
-                MOJO_Each( components , function( val , key ) {
-                    out[key] = that_hx.getComponents( key , null , pretty );
+                MOJO_Each( components , function( property , key ) {
+                    
+                    key = getKey( key );
+                    property = getProperty( property );
+                    
+                    if (key === 'value') {
+                        out = property;
+                    }
+                    else {
+                        out[key] = property;
+                    }
                 });
             }
 
-            pairArray.forEach(function( pair ) {
-                out[pair.key] = pair.val;
-            });
+            function getProperty( property ) {
+                return (pretty ? property.values : property.clone());
+            }
 
-            return getOut( out , type , property , pretty );
+            function getKey( key ) {
+                return (pretty ? (PropertyMap.inverse[ key ] || key) : key);
+            }
+
+            return out;
         },
 
         getOrder: function( type ) {
@@ -253,7 +243,7 @@ hxManager.DomNodeFactory = (function(
             return this._hx.transitionMOJO.getString();
         },
 
-        addAnimationPod: function( pod ) {
+        addPod: function( pod ) {
 
             var that_hx = this._hx;
 
@@ -263,21 +253,6 @@ hxManager.DomNodeFactory = (function(
                 CLUSTER_COMPLETE,
                 POD_PAUSED,
                 POD_RESUMED,
-                POD_COMPLETE,
-                POD_CANCELED
-            ]
-            .forEach(function( evt ) {
-                pod.when( evt , that_hx );
-            });
-
-            that_hx.queue.pushPod( pod );
-        },
-
-        addPromisePod: function( pod ) {
-
-            var that_hx = this._hx;
-
-            [
                 POD_COMPLETE,
                 POD_CANCELED
             ]
@@ -341,6 +316,7 @@ hxManager.DomNodeFactory = (function(
     hxManager.Helper,
     hxManager.VendorPatch,
     hxManager.Queue,
+    hxManager.CSSProperty,
     hxManager.ComponentMOJO,
     hxManager.TransitionMOJO
 ));

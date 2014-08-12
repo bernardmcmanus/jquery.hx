@@ -1,46 +1,58 @@
-hxManager.VendorPatch = (function( navigator , Config ) {
+hxManager.VendorPatch = (function(
+    window,
+    navigator,
+    Date,
+    RegExp,
+    Config,
+    Helper
+) {
+
+
+    var OTHER = 'other';
 
 
     var navigator_userAgent = navigator.userAgent;
+    var Vendors = Config.vendors;
+    var OS = Config.os;
+    var Tests = Config.tests;
+    var InstOf = Helper.instOf;
+    var Test = Helper.test;
 
 
     function VendorPatch() {
 
         var that = this;
+        var vendor = UA_RegExp( Vendors );
+        var os = UA_RegExp( OS );
 
-        that.vendor = _getUserAgent();
-        that.os = _getOS();
-        that.isMobile = _isMobile();
-        that.RAF = _getRequestAnimationFrame();
+        that.RAF = getRequestAnimationFrame();
+        that.prefix = that.prefix.bind( that , vendor );
+        that.unclamped = that.unclamped.bind( that , os );
     }
 
 
     VendorPatch.prototype = {
 
-        getPrefixed: function( str ) {
+        prefix: function( vendor , str ) {
 
-            var vendor = this.vendor;
-
-            if (vendor === 'other') {
+            if (vendor === OTHER) {
                 return str;
             }
 
             Config.prefix.forEach(function( pfx ) {
 
-                var re, exclude = [];
+                var re, omit = [];
 
-                if (pfx instanceof RegExp) {
+                if (InstOf( pfx , RegExp )) {
                     re = pfx;
                 }
                 else {
-                    re = pfx.regexp;
-                    exclude = pfx.exclude || exclude;
+                    re = pfx.regx;
+                    omit = pfx.omit || omit;
                 }
 
-                if (exclude.indexOf( vendor ) < 0) {
-
+                if (omit.indexOf( vendor ) < 0) {
                     var match = re.exec( str );
-                    
                     if (match) {
                         str = str.replace( re , ('-' + vendor + '-' + match[0]) );
                     }
@@ -50,18 +62,14 @@ hxManager.VendorPatch = (function( navigator , Config ) {
             return str;
         },
 
-        getBezierSupport: function() {
-            if (_isAndroidNative( this.os )) {
-                return false;
-            }
-            return true;
+        unclamped: function( os ) {
+            return isAndroidNative( os ) === false;
         }
     };
 
 
-    function _getRequestAnimationFrame() {
+    function getRequestAnimationFrame() {
         
-        var W = window;
         var name = 'equestAnimationFrame';
         var initTime = Date.now();
 
@@ -70,56 +78,47 @@ hxManager.VendorPatch = (function( navigator , Config ) {
         }
         
         return (
-            W['r' + name] ||
-            W['webkitR' + name] ||
-            W['mozR' + name] ||
-            W['oR' + name] ||
-            W['msR' + name] ||
+            window['r' + name] ||
+            window['webkitR' + name] ||
+            window['mozR' + name] ||
+            window['oR' + name] ||
+            window['msR' + name] ||
             function( callback ) {
-                setTimeout(function() {
+                var timeout = setTimeout(function() {
                     callback( timestamp() );
+                    clearTimeout( timeout );
                 }, ( 1000 / 60 ));
             }
         ).bind( null );
     }
 
 
-    function _getUserAgent() {
-        var uaString = navigator_userAgent;
-        for (var key in Config.vendors) {
-            if (Config.vendors[key].test( uaString )) {
+    function UA_RegExp( search ) {
+        for (var key in search) {
+            if (Test( search[key] , navigator_userAgent )) {
                 return key;
             }
         }
-        return 'other';
+        return OTHER;
     }
 
 
-    function _getOS() {
-        var uaString = navigator_userAgent;
-        for (var key in Config.os) {
-            if (Config.os[key].test( uaString )) {
-                return key;
-            }
-        }
-        return 'other';
-    }
-
-
-    function _isMobile() {
-        return Config.tests.mobile.test( navigator_userAgent );
-    }
-
-
-    function _isAndroidNative( os ) {
-        return (os === 'android' && !Config.tests.andNat.test( navigator_userAgent ));
+    function isAndroidNative( os ) {
+        return (os === 'android' && !Test( Tests.andNat , navigator_userAgent ));
     }
 
 
     return new VendorPatch();
 
     
-}( navigator , hxManager.Config.VendorPatch ));
+}(
+    window,
+    navigator,
+    Date,
+    RegExp,
+    hxManager.Config.VendorPatch,
+    hxManager.Helper
+));
 
 
 

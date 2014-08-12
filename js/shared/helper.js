@@ -3,6 +3,8 @@ hxManager.Helper = (function( Function , Object , Array ) {
 
     var T = true;
     var F = false;
+    var UNDEFINED;
+    var NULL = null;
     var Array_prototype = Array.prototype;
 
 
@@ -84,6 +86,33 @@ hxManager.Helper = (function( Function , Object , Array ) {
     }
 
 
+    function isNull( subject ) {
+        return subject === NULL;
+    }
+
+
+    function isUndef( subject ) {
+        return subject === UNDEFINED;
+    }
+
+
+    function test( subject , testval ) {
+        return subject.test( testval );
+    }
+
+
+    function treeSearch( branch , find ) {
+        for (var key in branch) {
+            if (key === find) {
+                return branch[key];
+            }
+            else if (find in branch[key]) {
+                return treeSearch( branch[key] , find );
+            }
+        }
+    }
+
+
     return {
         compareArray: compareArray,
         ensureArray: ensureArray,
@@ -95,7 +124,11 @@ hxManager.Helper = (function( Function , Object , Array ) {
         instOf: instOf,
         isFunc: isFunc,
         isObj: isObj,
-        isArr: isArr
+        isArr: isArr,
+        isNull: isNull,
+        isUndef: isUndef,
+        test: test,
+        treeSearch: treeSearch
     };
 
 

@@ -1,4 +1,8 @@
-window.hxManager = (function( Promise ) {
+window.hxManager = (function( Object , jQuery , Promise ) {
+
+
+    var PROTOTYPE = 'prototype';
+    var PROMISE = 'promise';
 
 
     function hxManager( j ) {
@@ -21,7 +25,7 @@ window.hxManager = (function( Promise ) {
     }
 
 
-    var hxManager_prototype = (hxManager.prototype = Object.create( jQuery.prototype ));
+    var hxManager_prototype = (hxManager[PROTOTYPE] = Object.create( jQuery[PROTOTYPE] ));
 
 
     hxManager_prototype.animate = function( bundle ) {
@@ -34,7 +38,7 @@ window.hxManager = (function( Promise ) {
 
             ensureArray( bundle ).forEach(function( seed ) {
 
-                if (typeof seed === 'function') {
+                if (isFunc( seed )) {
                     pod.addCallback(
                         bind( that , seed )
                     );
@@ -45,7 +49,7 @@ window.hxManager = (function( Promise ) {
                 }
             });
 
-            node_hx.addAnimationPod( pod );
+            node_hx.addPod( pod );
         });
 
         return that;
@@ -62,7 +66,7 @@ window.hxManager = (function( Promise ) {
 
             ensureArray( bundle ).forEach(function( seed ) {
 
-                if (typeof seed === 'function') {
+                if (isFunc( seed )) {
                     pod.addCallback(
                         bind( that , seed )
                     );
@@ -74,7 +78,7 @@ window.hxManager = (function( Promise ) {
                 }
             });
 
-            node_hx.addAnimationPod( pod );
+            node_hx.addPod( pod );
         });
 
         return that;
@@ -83,21 +87,16 @@ window.hxManager = (function( Promise ) {
 
     hxManager_prototype.promise = function( func , method ) {
 
-        /*if (typeof func !== 'function') {
-            throw new TypeError( 'PromisePod requires a function.' );
-        }*/
-
         method = method || 'all';
 
         var that = this;
         var micro = [];
         var pods = [];
-        //var _func = func.bind( that );
 
         that.eachNode(function( node_hx , node ) {
 
             // create a promisePod for each dom node
-            var pod = PodFactory( node , 'promise' );
+            var pod = PodFactory( node , PROMISE );
 
             // when the pod reaches its turn in the queue, resolve its promise
             pod.when( 'promiseMade' , function() {
@@ -111,7 +110,7 @@ window.hxManager = (function( Promise ) {
             });
 
             // add the promise to the dom node queue
-            node_hx.addPromisePod( pod );
+            node_hx.addPod( pod );
 
             pods.push( pod );
             micro.push( microPromise );
@@ -266,14 +265,14 @@ window.hxManager = (function( Promise ) {
         var that = this;
 
         // all controls whether all pod types or only promise pods will be resolved
-        all = (typeof all !== 'undefined' ? all : false);
+        all = (!isUndef( all ) ? all : false);
 
         // force resolve the current pod in each queue
         that.eachNode(function( node_hx ) {
 
             var pod = node_hx.getCurrentPod();
 
-            if (pod && (all || (!all && pod.type === 'promise'))) {
+            if (pod && (all || (!all && pod.type === PROMISE))) {
                 pod.resolvePod();
             }
         });
@@ -339,9 +338,9 @@ window.hxManager = (function( Promise ) {
 
 
     // !!! get does not return the hxManager instance
-    hxManager_prototype.get = function( type , property , pretty ) {
+    hxManager_prototype.get = function( find , pretty ) {
         return toArray( this ).map(function( node ) {
-            return node._hx.getComponents( type , property , pretty );
+            return node._hx.getComponents( find , pretty );
         });
     };
 
@@ -380,20 +379,35 @@ window.hxManager = (function( Promise ) {
     }
 
 
+    function Helper() {
+        return hxManager.Helper;
+    }
+
+
     function ensureArray( bundle ) {
-        return hxManager.Helper.ensureArray( bundle );
+        return Helper().ensureArray( bundle );
+    }
+
+
+    function isFunc( subject ) {
+        return Helper().isFunc( subject );
+    }
+
+
+    function isUndef( subject ) {
+        return Helper().isUndef( subject );
     }
 
 
     function length( subject ) {
-        return hxManager.Helper.length( subject );
+        return Helper().length( subject );
     }
 
 
     return hxManager;
 
     
-}( Promise ));
+}( Object , jQuery , Promise ));
 
 
 

@@ -15,6 +15,7 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
         that.bean = bean;
         that.node = node;
         that.type = bean.type;
+        that.running = false;
         that.styles = bean.styles;
         that.properties = bean.order.computed;
 
@@ -57,7 +58,7 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
             node_hx.paint( that.type );
         },
 
-        complete: function( model ) {
+        resolve: function( model ) {
             var that = this;
             that.paint( model );
             that.happen( 'beanComplete' , that );
@@ -67,6 +68,7 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
             
             var that = this;
             var args = arguments;
+            var progress;
 
             switch (e.type) {
 
@@ -78,12 +80,18 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
                     that._timing.apply( that , args );
                 break;
 
-                case 'podComplete':
-                    that.paint( that.dest );
+                case 'progress':
+                    progress = args[1];
+                    if (!that.running && progress > 0) {
+                        that.running = true;
+                        that.dispel( 'progress' , that );
+                    }
                 break;
 
                 case 'podCanceled':
-                    //that.paint( that.current );
+                    if (!that.running) {
+                        that.happen( 'beanCanceled' );
+                    }
                 break;
             }
         },
@@ -97,6 +105,7 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
             that.diff = that._getDiff( node , current , that.dest );
             node_hx.deleteTransition( that.type );
             node_hx.applyTransition();
+            that.when( 'progress' , that );
             that.happen( 'beanStart' );
         },
 
@@ -107,10 +116,14 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
             var delay = that.delay;
             var progress = calcProgress( elapsed , duration , delay );
 
+            if (isWithinTolerance( progress , 1 , TOLERANCE , duration )) {
+                progress = 1;
+            }
+
             that.happen( 'progress' , progress );
 
-            if (isWithinTolerance( progress , 1 , TOLERANCE , duration )) {
-                that.complete( that.dest );
+            if (progress === 1) {
+                that.resolve( that.dest );
             }
             else {
                 that.calculate(
@@ -140,7 +153,8 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
             var properties = that.properties;
 
             properties.forEach(function( property ) {
-                current[property] = node._hx.getComponents( type , property , false );
+                var find = (property === 'value' ? type : property);
+                current[property] = node._hx.getComponents( find , false );
             });
 
             return current;
