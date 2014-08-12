@@ -667,7 +667,7 @@ $('selector1, selector2')
         return (1000 * Math.random());
     }
 })
-.done() {
+.done(function() {
     // it's done!
 });
 ```
