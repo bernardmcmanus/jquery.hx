@@ -757,23 +757,21 @@ $('selector').hx( 'update' , {
 $('selector').hx( 'reset' );
 ```
 
-#### .get([ type , property ])
+#### .get([ search ])
 
 | Parameter | Type | Description | Required |
 | --------- | ---- | ----------- | -------- |
-| `type` | `String` | The style type to be retrieved. | NO |
-| `property` | `String` | The style property to be retrieved. | NO |
+| `search` | `String` | The style component to be retrieved. | NO |
 
 * __Chainable:__ _NO_
 * Returns an array containing stored style information for each selected element.
-* If both parameters are omitted, an object containing all stored style information is returned.
-* If only `type` is passed:
-    * For single-value types (like opacity), the value is returned.
-    * For multi-value types (like transform), an object containing each property for that type is returned.
-    * For ALL types, if no stored properties are found, an empty object is returned.
-* If `type` and `property` are passed:
-    * If the property is found, its values are returned.
-    * If the property is NOT found, its default values are returned.
+* If `search` is omitted, an object containing all stored style information is returned.
+* If `search` is a multi-value type (like transform):
+    * An object containing each stored property for that type (if any) is returned.
+* If `search` is a property (like translate) or a single-value type (like opacity):
+    * If the property is found, it's values are returned.
+    * If the property is defined but NOT found, its defaults are returned.
+    * If the property is NOT defined, an empty object is returned.
 * Detailed example <a href="http://codepen.io/elnarddogg/pen/Gehyk/left/?editors=001" target="_blank">here</a>.
 
 ```javascript
