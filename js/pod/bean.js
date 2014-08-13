@@ -2,6 +2,11 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
 
 
     var TOLERANCE = ( 1000 / 240 );
+    var TIMING = 'timing';
+    var PROGRESS = 'progress';
+    var BEAN_START = 'beanStart';
+    var BEAN_PAINT = 'beanPaint';
+    var BEAN_COMPLETE = 'beanComplete';
 
 
     var MOJO_Each = MOJO.Each;
@@ -25,15 +30,13 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
 
         MOJO.Construct( that );
         
-        that.run = that._run.bind( that , node._hx );
-
         $.extend( that , getCompiledData( seed , node , index ));
     }
 
 
     var Bean_prototype = Bean.prototype = MOJO.Create({
 
-        _run: function( node_hx ) {
+        run: function( node_hx ) {
 
             var that = this;
 
@@ -43,10 +46,10 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
 
             that.running = true;
 
-            node_hx.updateComponent( that );
-            node_hx.setTransition( that );
+            that.when( PROGRESS , that );
+            that.once( BEAN_PAINT , node_hx , that );
+            that.happen( BEAN_START );
 
-            that.happen( 'beanStart' );
             return true;
         },
 
@@ -54,11 +57,26 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
             
             var that = this;
             var args = arguments;
+            var progress, node_hx;
 
             switch (e.type) {
 
-                case 'timing':
+                case TIMING:
                     that._timing.apply( that , args );
+                break;
+
+                case PROGRESS:
+                    progress = args[1];
+                    if (that.running && progress > 0) {
+                        that.dispel( PROGRESS , that );
+                        that.happen( BEAN_PAINT );
+                    }
+                break;
+
+                case BEAN_PAINT:
+                    node_hx = args[1];
+                    node_hx.setTransition( that );
+                    node_hx.updateComponent( that );
                 break;
             }
         },
@@ -79,10 +97,10 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
                 progress = 1;
             }
 
-            that.happen( 'progress' , progress );
+            that.happen( PROGRESS , progress );
 
             if (progress === 1) {
-                that.happen( 'beanComplete' );
+                that.happen( BEAN_COMPLETE );
             }
         },
 

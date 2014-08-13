@@ -17,8 +17,8 @@ hxManager.TransitionMOJO = (function( MOJO , VendorPatch , Easing ) {
 
                 var duration = options.duration;
                 var easing = options.easing;
-                var delay = options.delay;
-                var str = getTransitionString( type , duration , easing , delay );
+                //var delay = options.delay;
+                var str = getTransitionString( type , duration , easing , 0 );
 
                 arr.push( str );
             });
@@ -42,8 +42,8 @@ hxManager.TransitionMOJO = (function( MOJO , VendorPatch , Easing ) {
         var options = bean.options;
         return {
             duration: options.duration,
-            easing: Easing( options.easing ).string,
-            delay: options.delay
+            easing: Easing( options.easing ).string
+            //delay: options.delay
         };
     }
 

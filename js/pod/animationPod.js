@@ -9,11 +9,13 @@ hxManager.AnimationPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
     var POD_FORCED = 'forceResolve';
     var SUBSCRIBE = 'subscribe';
     var BEAN_START = 'beanStart';
+    var BEAN_PAINT = 'beanPaint';
     var BEAN_COMPLETE = 'beanComplete';
     var CLUSTER_COMPLETE = 'clusterComplete';
     var PROGRESS = 'progress';
 
 
+    var Length = Helper.length;
     var Descriptor = Helper.descriptor;
     var MOJO_Each = MOJO.Each;
 
@@ -38,7 +40,7 @@ hxManager.AnimationPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
             sequence: Descriptor(function() {
                 var sequence = {};
                 MOJO_Each( that.beans , function( cluster , type ) {
-                    if (cluster.length > 0) {
+                    if (Length( cluster ) > 0) {
                         sequence[type] = cluster[0];
                     }
                 });
@@ -46,7 +48,7 @@ hxManager.AnimationPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
             }),
 
             subscribers: Descriptor(function() {
-                return (that.handlers[ TIMING ] || []).length;
+                return Length( that.handlers[ TIMING ] || [] );
             }),
 
             complete: Descriptor(function() {
@@ -101,23 +103,22 @@ hxManager.AnimationPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
 
             var that = this;
             var node_hx = that.node._hx;
-            var paintTypes = [];
 
             MOJO_Each( that.sequence , function( bean , type ) {
-                if (bean.run()) {
-                    paintTypes.push( type );
+                if (bean.run( node_hx )) {
+                    bean.once( BEAN_PAINT , function( e ) {
+                        node_hx.applyTransition();
+                        node_hx.paint( bean.type );
+                    });
                 }
             });
-
-            node_hx.applyTransition();
-            node_hx.paint( paintTypes );
         },
 
         _next: function( type ) {
             var that = this;
             var cluster = that._getBeans( type );
             cluster.shift();
-            return cluster.length > 0;
+            return Length( cluster ) > 0;
         },
 
         _getBeans: function( type ) {

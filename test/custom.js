@@ -1,5 +1,54 @@
 (function() {
 
+
+    /*$('.tgt').hx()
+    .defer( 1000 )
+    .animate({
+        type: "transform",
+        translate: {x: '+=200'},
+        duration: 1000,
+        easing: 'linear'
+    })
+    .animate({
+        type: 'transform',
+        translate: null,
+        duration: 0
+    });*/
+
+    $('.tgt').hx()
+    .animate([
+        {
+            type: 'opacity',
+            value: '-=0.5',
+            duration: 2000,
+            easing: 'linear',
+            delay: 1000
+        },
+        {
+            type: "transform",
+            translate: {x: '+=200'},
+            duration: 1000,
+            easing: 'linear',
+            delay: 1000
+        },
+        {
+            type: "transform",
+            translate: {y: '+=200'},
+            duration: 1000,
+            easing: 'linear'
+        }
+    ])
+    .done(function() {
+        console.log('done');
+    });
+
+    $('#target').on( 'click' , function() {
+        $('.tgt').hx().clear();
+    });
+
+    return;
+
+
     
     (function( selector ) {
 
@@ -821,8 +870,8 @@
             // test - resolve
             s5: function() {
 
-                var method = 'iterate';
-                //var method = 'animate';
+                //var method = 'iterate';
+                var method = 'animate';
                 var incrementor = '+=360';
                 var order = [ '.tgt' , '.tgt2' , '.tgt3' ];
                 var current = null;
