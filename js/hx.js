@@ -1,47 +1,44 @@
-(function( window , $ , hx , Helper , Get ) {
+(function( TypeError , $ , hxManager ) {
+
+
+    var Helper = hxManager.Helper;
+
+
+    var Shift = Helper.shift;
 
     
-    $.fn.hx = function( hxArgs ) {
+    $.fn.hx = function() {
 
-        var hxm = new hx( this );
+        var args = arguments;
+        var hxm = new hxManager( this );
+        var out;
 
-        switch (typeof hxArgs) {
+        switch (typeof args[0]) {
 
             case 'string':
+                var method = Shift( args );
 
-                var method = Array.prototype.splice.call( arguments , 0 , 1 );
-
-                try {
-                    hxm[method].apply( hxm , arguments );
+                if (typeof hxm[method] !== 'function') {
+                    throw new TypeError( method + ' is not a function.' );
                 }
-                catch( err ) {}
 
+                out = hxm[method].apply( hxm , args );
             break;
 
             case 'object':
+                out = hxm.animate( args[0] );
+            break;
 
-                if (Array.isArray( hxArgs )) {
-                    // make sure transform seeds are placed first in the bundle
-                    hxArgs = Get.orderedBundle( hxArgs );
-                }
-                else {
-                    hxArgs = [hxArgs];
-                }
-
-                hxArgs.forEach(function( a ) {
-                    a.order = Get.seedOrder( a );
-                });
-
-                hxm._addXformPod( hxArgs );
-
+            default:
+                out = hxm;
             break;
         }
 
-        return hxm;
+        return out;
     };
 
  
-}( window , jQuery , hxManager , hxManager.helper , hxManager.get ));
+}( TypeError , jQuery , hxManager ));
 
 
 

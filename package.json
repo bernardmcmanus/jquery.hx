@@ -1,17 +1,38 @@
 {
     "name": "jquery.hx",
-    "description": "Hardware-Accelerated Animation Library",
-    "version": "1.0.2",
-    "author": "Bernard McManus",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/elnarddogg/jquery.hx.git"
-    },
+    "version": "1.0.3",
+    "description": "A hardware-accelerated animation library for mobile and desktop.",
+    "main": "hx-1.0.3.min.js",
     "devDependencies": {
         "grunt": "~0.4.2",
+        "fs-extra": "0.9.1",
         "grunt-contrib-jshint": "~0.6.3",
         "grunt-contrib-concat": ">=0.4.0",
         "grunt-contrib-uglify": ">=0.2.2",
-        "grunt-contrib-clean": ">=0.4.1"
-    }
+        "grunt-contrib-clean": ">=0.4.1",
+        "grunt-git-describe": "~2.0.2",
+        "grunt-replace": ">=0.7.7",
+        "grunt-contrib-watch": ">=0.6.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/millennialmedia/jquery.hx.git"
+    },
+    "keywords": [
+        "jquery",
+        "animation"
+    ],
+    "author": {
+        "name": "Bernard McManus",
+        "email": "bernard.mcmanus.iv@gmail.com",
+        "url": "http://github.com/elnarddogg"
+    },
+    "license": {
+        "type": "MIT",
+        "url": "https://github.com/millennialmedia/jquery.hx/blob/master/LICENSE.txt"
+    },
+    "bugs": {
+        "url": "https://github.com/millennialmedia/jquery.hx/issues"
+    },
+    "homepage": "https://github.com/millennialmedia/jquery.hx"
 }
