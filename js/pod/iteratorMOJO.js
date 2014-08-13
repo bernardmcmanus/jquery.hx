@@ -167,9 +167,9 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
 
             MOJO_Each( current , function( CSSProperty , key ) {
 
-                CSSProperty = CSSProperty.clone();
-                CSSProperty.update( styles[key] );
-                newProperties[key] = CSSProperty;
+                var clone = CSSProperty.clone();
+                clone.update( styles[key] );
+                newProperties[key] = clone;
             });
 
             return newProperties;

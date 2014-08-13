@@ -7,6 +7,7 @@ hxManager.CSSProperty = (function( Object , Array , Helper , StyleDefinition ) {
 
     var Descriptor = Helper.descriptor;
     var Length = Helper.length;
+    var instOf = Helper.instOf;
     var isArr = Helper.isArr;
     var isUndef = Helper.isUndef;
 
@@ -88,6 +89,8 @@ hxManager.CSSProperty = (function( Object , Array , Helper , StyleDefinition ) {
 
 
     CSSProperty_prototype.update = function( values ) {
+
+        values = (instOf( values , CSSProperty ) && values.isNull ? NULL : values);
 
         var that = this;
         var keymap = that.keymap;
