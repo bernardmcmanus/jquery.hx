@@ -1,4 +1,7 @@
-hxManager.Easing = (function( Bezier ) {
+hxManager.Easing = (function( hxManager ) {
+
+
+    var Bezier = hxManager.Bezier;
 
     
     function Easing( definition ) {
@@ -17,4 +20,4 @@ hxManager.Easing = (function( Bezier ) {
     return Easing;
 
 
-}( hxManager.Bezier ));
+}( hxManager ));

@@ -1,7 +1,10 @@
-hxManager.IteratorMOJO = (function( MOJO , Easing ) {
+hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
 
 
     var TOLERANCE = ( 1000 / 240 );
+
+
+    var Easing = hxManager.Easing;
 
 
     var MOJO_Each = MOJO.Each;
@@ -206,7 +209,7 @@ hxManager.IteratorMOJO = (function( MOJO , Easing ) {
     return IteratorMOJO;
 
     
-}( MOJO , hxManager.Easing ));
+}( MOJO , hxManager ));
 
 
 

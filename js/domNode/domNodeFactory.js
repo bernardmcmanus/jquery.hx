@@ -1,14 +1,4 @@
-hxManager.DomNodeFactory = (function(
-    Object,
-    MOJO,
-    Config,
-    Helper,
-    VendorPatch,
-    Queue,
-    CSSProperty,
-    ComponentMOJO,
-    TransitionMOJO
-) {
+hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
 
 
     var UNDEFINED;
@@ -19,6 +9,15 @@ hxManager.DomNodeFactory = (function(
     var POD_RESUMED = 'podResumed';
     var POD_COMPLETE = 'podComplete';
     var POD_CANCELED = 'podCanceled';
+
+
+    var Config = hxManager.Config;
+    var Helper = hxManager.Helper;
+    var VendorPatch = hxManager.VendorPatch;
+    var Queue = hxManager.Queue;
+    var CSSProperty = hxManager.CSSProperty;
+    var ComponentMOJO = hxManager.ComponentMOJO;
+    var TransitionMOJO = hxManager.TransitionMOJO;
 
     
     var MOJO_Each = MOJO.Each;
@@ -309,17 +308,7 @@ hxManager.DomNodeFactory = (function(
     return DomNodeFactory;
 
     
-}(
-    Object,
-    MOJO,
-    hxManager.Config,
-    hxManager.Helper,
-    hxManager.VendorPatch,
-    hxManager.Queue,
-    hxManager.CSSProperty,
-    hxManager.ComponentMOJO,
-    hxManager.TransitionMOJO
-));
+}( Object , jQuery , MOJO , hxManager ));
 
 
 

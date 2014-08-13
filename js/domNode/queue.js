@@ -1,7 +1,10 @@
-hxManager.Queue = (function( Object , Array , Helper ) {
+hxManager.Queue = (function( Object , Array , hxManager ) {
 
 
     var UNDEFINED;
+
+
+    var Helper = hxManager.Helper;
 
 
     var Descriptor = Helper.descriptor;
@@ -111,7 +114,7 @@ hxManager.Queue = (function( Object , Array , Helper ) {
     return Queue;
 
     
-}( Object , Array , hxManager.Helper ));
+}( Object , Array , hxManager ));
 
 
 

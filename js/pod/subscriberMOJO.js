@@ -1,9 +1,12 @@
-hxManager.SubscriberMOJO = (function( Object , MOJO , TimingMOJO ) {
+hxManager.SubscriberMOJO = (function( Object , MOJO , hxManager ) {
 
 
     var NULL = null;
     var TIMING = 'timing';
     var SUBSCRIBERS = 'subscribers';
+
+
+    var TimingMOJO = hxManager.TimingMOJO;
 
 
     function SubscriberMOJO() {
@@ -60,7 +63,7 @@ hxManager.SubscriberMOJO = (function( Object , MOJO , TimingMOJO ) {
     return SubscriberMOJO;
 
     
-}( Object , MOJO , hxManager.TimingMOJO ));
+}( Object , MOJO , hxManager ));
 
 
 

@@ -1,11 +1,11 @@
 hxManager.Helper = (function( Function , Object , Array ) {
 
 
-    var T = true;
-    var F = false;
     var UNDEFINED;
     var NULL = null;
-    var Array_prototype = Array.prototype;
+    var T = true;
+    var F = false;
+    var PROTOTYPE = 'prototype';
 
 
     function compareArray( subject , array ) {
@@ -44,12 +44,12 @@ hxManager.Helper = (function( Function , Object , Array ) {
 
 
     function shift( subject ) {
-        return Array_prototype.shift.call( subject );
+        return Array[PROTOTYPE].shift.call( subject );
     }
 
 
     function pop( subject ) {
-        return Array_prototype.pop.call( subject );
+        return Array[PROTOTYPE].pop.call( subject );
     }
 
 

@@ -1,6 +1,11 @@
-hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
+hxManager.StyleDefinition = (function( Error , hxManager ) {
 
 
+    var Config = hxManager.Config;
+    var Helper = hxManager.Helper;
+
+
+    var PropertyMap = Config.properties;
     var EnsureArray = Helper.ensureArray;
     var Pop = Helper.pop;
     var Shift = Helper.shift;
@@ -83,7 +88,7 @@ hxManager.StyleDefinition = (function( PropertyMap , Helper ) {
     return StyleDefinition;
 
     
-}( hxManager.Config.properties , hxManager.Helper ));
+}( Error , hxManager ));
 
 
 

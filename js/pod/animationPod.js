@@ -1,4 +1,4 @@
-hxManager.AnimationPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
+hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
 
 
     var NULL = null;
@@ -13,6 +13,10 @@ hxManager.AnimationPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
     var BEAN_COMPLETE = 'beanComplete';
     var CLUSTER_COMPLETE = 'clusterComplete';
     var PROGRESS = 'progress';
+
+
+    var Helper = hxManager.Helper;
+    var SubscriberMOJO = hxManager.SubscriberMOJO;
 
 
     var Length = Helper.length;
@@ -256,7 +260,7 @@ hxManager.AnimationPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
     return AnimationPod;
 
     
-}( Object , MOJO , hxManager.Helper , hxManager.SubscriberMOJO ));
+}( Object , MOJO , hxManager ));
 
 
 

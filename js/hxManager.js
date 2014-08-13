@@ -1,4 +1,4 @@
-window.hxManager = (function( Object , jQuery , Promise ) {
+window.hxManager = (function( Object , Error , $ , Promise ) {
 
 
     var PROTOTYPE = 'prototype';
@@ -7,7 +7,7 @@ window.hxManager = (function( Object , jQuery , Promise ) {
 
     function hxManager( j ) {
 
-        if (j instanceof hxManager) {
+        if (instOf( j , hxManager )) {
             return j;
         }
 
@@ -25,7 +25,7 @@ window.hxManager = (function( Object , jQuery , Promise ) {
     }
 
 
-    var hxManager_prototype = (hxManager[PROTOTYPE] = Object.create( jQuery[PROTOTYPE] ));
+    var hxManager_prototype = (hxManager[PROTOTYPE] = Object.create( $[PROTOTYPE] ));
 
 
     hxManager_prototype.animate = function( bundle ) {
@@ -133,7 +133,7 @@ window.hxManager = (function( Object , jQuery , Promise ) {
             // otherwise, clear the queue so we can start again
             macroPromise.catch(function( err ) {
                 that.clear();
-                if (err instanceof Error) {
+                if (instOf( err , Error )) {
                     $.hx.error( err );
                 }
             });
@@ -389,6 +389,11 @@ window.hxManager = (function( Object , jQuery , Promise ) {
     }
 
 
+    function instOf( subject , constructor ) {
+        return Helper().instOf( subject , constructor );
+    }
+
+
     function isFunc( subject ) {
         return Helper().isFunc( subject );
     }
@@ -407,7 +412,7 @@ window.hxManager = (function( Object , jQuery , Promise ) {
     return hxManager;
 
     
-}( Object , jQuery , Promise ));
+}( Object , Error , jQuery , Promise ));
 
 
 

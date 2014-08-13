@@ -1,10 +1,15 @@
-hxManager.Bezier = (function( Object , Array , BezierEasing , Helper , VendorPatch ) {
+hxManager.Bezier = (function( Object , Array , Error , BezierEasing , hxManager ) {
 
 
     var UNDEFINED;
     var NULL = null;
+
+
+    var Helper = hxManager.Helper;
+    var VendorPatch = hxManager.VendorPatch;
+
+
     var Descriptor = Helper.descriptor;
-    var Unclamped = VendorPatch.unclamped();
 
 
     function Bezier( name , points ) {
@@ -15,7 +20,7 @@ hxManager.Bezier = (function( Object , Array , BezierEasing , Helper , VendorPat
             that.push( points[i] );
         }
 
-        if (!Unclamped) {
+        if (!VendorPatch.unclamped()) {
             that.clamp();
         }
 
@@ -69,7 +74,7 @@ hxManager.Bezier = (function( Object , Array , BezierEasing , Helper , VendorPat
     return Bezier;
 
     
-}( Object , Array , BezierEasing , hxManager.Helper , hxManager.VendorPatch ));
+}( Object , Array , Error , BezierEasing , hxManager ));
 
 
 

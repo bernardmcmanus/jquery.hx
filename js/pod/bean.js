@@ -1,4 +1,4 @@
-hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
+hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
 
 
     var TOLERANCE = ( 1000 / 240 );
@@ -7,6 +7,11 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
     var BEAN_START = 'beanStart';
     var BEAN_PAINT = 'beanPaint';
     var BEAN_COMPLETE = 'beanComplete';
+
+
+    var Config = hxManager.Config;
+    var Helper = hxManager.Helper;
+    var SubscriberMOJO = hxManager.SubscriberMOJO;
 
 
     var MOJO_Each = MOJO.Each;
@@ -19,7 +24,7 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
     function Bean( seed , node , index ) {
 
         if (!seed.type) {
-            throw new TypeError( 'Bean type is required.' );
+            throw new Error( 'Bean type is required.' );
         }
 
         var that = this;
@@ -182,8 +187,6 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
     }
 
 
-
-
     function calcProgress( elapsed , duration , delay ) {
         elapsed = elapsed - delay;
         elapsed = elapsed < 0 ? 0 : elapsed;
@@ -196,18 +199,10 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
     }
 
 
-
-
     return Bean;
 
     
-}(
-    Object,
-    MOJO,
-    hxManager.Config,
-    hxManager.Helper,
-    hxManager.SubscriberMOJO
-));
+}( Object , Error , jQuery , MOJO , hxManager ));
 
 
 

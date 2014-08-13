@@ -1,4 +1,7 @@
-hxManager.Config = (function( Object , Helper ) {
+hxManager.Config = (function( Object , MOJO , hxManager ) {
+
+
+    var Helper = hxManager.Helper;
 
 
     var Descriptor = Helper.descriptor;
@@ -65,7 +68,7 @@ hxManager.Config = (function( Object , Helper ) {
     return Config;
 
     
-}( Object , hxManager.Helper ));
+}( Object , MOJO , hxManager ));
 
 
 

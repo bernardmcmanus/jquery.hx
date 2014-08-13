@@ -1,13 +1,12 @@
-hxManager.ComponentMOJO = (function(
-    Object,
-    MOJO,
-    Helper,
-    StyleDefinition,
-    CSSProperty
-) {
+hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
 
 
     var UNDEFINED;
+
+
+    var Helper = hxManager.Helper;
+    var StyleDefinition = hxManager.StyleDefinition;
+    var CSSProperty = hxManager.CSSProperty;
 
 
     var TreeSearch = Helper.treeSearch;
@@ -141,13 +140,7 @@ hxManager.ComponentMOJO = (function(
     return ComponentMOJO;
 
     
-}(
-    Object,
-    MOJO,
-    hxManager.Helper,
-    hxManager.StyleDefinition,
-    hxManager.CSSProperty
-));
+}( Object , MOJO , hxManager ));
 
 
 

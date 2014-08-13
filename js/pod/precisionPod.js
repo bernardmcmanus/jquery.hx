@@ -1,4 +1,4 @@
-hxManager.PrecisionPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
+hxManager.PrecisionPod = (function( Object , MOJO , hxManager ) {
 
 
     var NULL = null;
@@ -15,6 +15,10 @@ hxManager.PrecisionPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
     var BEAN_COMPLETE = 'beanComplete';
     var BEAN_CANCELED = 'beanCanceled';
     var PROGRESS = 'progress';
+
+
+    var Helper = hxManager.Helper;
+    var SubscriberMOJO = hxManager.SubscriberMOJO;
 
 
     var Descriptor = Helper.descriptor;
@@ -204,7 +208,7 @@ hxManager.PrecisionPod = (function( Object , MOJO , Helper , SubscriberMOJO ) {
     return PrecisionPod;
 
     
-}( Object , MOJO , hxManager.Helper , hxManager.SubscriberMOJO ));
+}( Object , MOJO , hxManager ));
 
 
 

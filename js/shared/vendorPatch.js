@@ -1,20 +1,18 @@
-hxManager.VendorPatch = (function(
-    window,
-    navigator,
-    Date,
-    RegExp,
-    Config,
-    Helper
-) {
+hxManager.VendorPatch = (function( window , navigator , Date , RegExp , hxManager ) {
 
 
     var OTHER = 'other';
 
 
-    var navigator_userAgent = navigator.userAgent;
-    var Vendors = Config.vendors;
-    var OS = Config.os;
-    var Tests = Config.tests;
+    var Config = hxManager.Config;
+    var Helper = hxManager.Helper;
+
+
+    var UserAgent = navigator.userAgent;
+    var VPConfig = Config.VendorPatch;
+    var Vendors = VPConfig.vendors;
+    var OS = VPConfig.os;
+    var Tests = VPConfig.tests;
     var InstOf = Helper.instOf;
     var Test = Helper.test;
 
@@ -39,7 +37,7 @@ hxManager.VendorPatch = (function(
                 return str;
             }
 
-            Config.prefix.forEach(function( pfx ) {
+            VPConfig.prefix.forEach(function( pfx ) {
 
                 var re, omit = [];
 
@@ -95,7 +93,7 @@ hxManager.VendorPatch = (function(
 
     function UA_RegExp( search ) {
         for (var key in search) {
-            if (Test( search[key] , navigator_userAgent )) {
+            if (Test( search[key] , UserAgent )) {
                 return key;
             }
         }
@@ -104,21 +102,14 @@ hxManager.VendorPatch = (function(
 
 
     function isAndroidNative( os ) {
-        return (os === 'android' && !Test( Tests.andNat , navigator_userAgent ));
+        return (os === 'android' && !Test( Tests.andNat , UserAgent ));
     }
 
 
     return new VendorPatch();
 
     
-}(
-    window,
-    navigator,
-    Date,
-    RegExp,
-    hxManager.Config.VendorPatch,
-    hxManager.Helper
-));
+}( window , navigator , Date , RegExp , hxManager ));
 
 
 

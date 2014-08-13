@@ -1,8 +1,13 @@
-hxManager.TimingMOJO = (function( Object , MOJO , VendorPatch ) {
+hxManager.TimingMOJO = (function( Object , MOJO , hxManager ) {
 
 
     var TIMING = 'timing';
     var SUBSCRIBERS = 'subscribers';
+
+
+    var VendorPatch = hxManager.VendorPatch;
+
+
     var RAF = VendorPatch.RAF;
 
 
@@ -72,7 +77,7 @@ hxManager.TimingMOJO = (function( Object , MOJO , VendorPatch ) {
     return new TimingMOJO();
 
     
-}( Object , MOJO , hxManager.VendorPatch ));
+}( Object , MOJO , hxManager ));
 
 
 

@@ -1,4 +1,10 @@
-(function( $ , hxManager , shift ) {
+(function( TypeError , $ , hxManager ) {
+
+
+    var Helper = hxManager.Helper;
+
+
+    var Shift = Helper.shift;
 
     
     $.fn.hx = function() {
@@ -10,7 +16,7 @@
         switch (typeof args[0]) {
 
             case 'string':
-                var method = shift( args );
+                var method = Shift( args );
 
                 if (typeof hxm[method] !== 'function') {
                     throw new TypeError( method + ' is not a function.' );
@@ -32,7 +38,7 @@
     };
 
  
-}( jQuery , hxManager , hxManager.Helper.shift ));
+}( TypeError , jQuery , hxManager ));
 
 
 

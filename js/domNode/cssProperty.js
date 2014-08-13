@@ -1,8 +1,12 @@
-hxManager.CSSProperty = (function( Object , Array , Helper , StyleDefinition ) {
+hxManager.CSSProperty = (function( Object , Array , hxManager ) {
 
 
     var NULL = null;
     var PROTOTYPE = 'prototype';
+
+
+    var Helper = hxManager.Helper;
+    var StyleDefinition = hxManager.StyleDefinition;
 
 
     var Descriptor = Helper.descriptor;
@@ -156,7 +160,7 @@ hxManager.CSSProperty = (function( Object , Array , Helper , StyleDefinition ) {
     return CSSProperty;
 
     
-}( Object , Array , hxManager.Helper , hxManager.StyleDefinition ));
+}( Object , Array , hxManager ));
 
 
 

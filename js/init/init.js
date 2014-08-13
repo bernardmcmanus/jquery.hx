@@ -1,20 +1,22 @@
-(function(
-    window,
-    document,
-    MOJO,
-    Helper,
-    VendorPatch,
-    DefineProperty,
-    DefineBezier,
-    TimingMOJO
-) {
-
-
-    // Do some important stuff when hx is loaded
+(function( window , document , $ , MOJO , hxManager ) {
 
 
     var NULL = null;
+
+
+    var Helper = hxManager.Helper;
+    var VendorPatch = hxManager.VendorPatch;
+    var StyleDefinition = hxManager.StyleDefinition;
+    var Bezier = hxManager.Bezier;
+    var TimingMOJO = hxManager.TimingMOJO;
+
+
+    var DefineProperty = StyleDefinition.define;
+    var DefineBezier = Bezier.define;
     var EnsureArray = Helper.ensureArray;
+
+
+    // Do some important stuff when hx is loaded
 
 
     $.hx = {
@@ -207,16 +209,7 @@
     }
 
 
-}(
-    window,
-    document,
-    MOJO,
-    hxManager.Helper,
-    hxManager.VendorPatch,
-    hxManager.StyleDefinition.define,
-    hxManager.Bezier.define,
-    hxManager.TimingMOJO
-));
+}( window , document , jQuery , MOJO , hxManager ));
 
 
 
