@@ -10,7 +10,7 @@
     - `paint`
     - `reset`
     - `get`
-    - `clean`
+    - `cleanup`
 - Added static methods:
     - `$.hx.defineProperty`
     - `$.hx.defineBezier`
