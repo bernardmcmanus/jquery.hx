@@ -187,7 +187,7 @@ hxManager.Bean = (function( Object , MOJO , Config , Helper , SubscriberMOJO ) {
     function calcProgress( elapsed , duration , delay ) {
         elapsed = elapsed - delay;
         elapsed = elapsed < 0 ? 0 : elapsed;
-        return (elapsed / duration);
+        return duration > 0 ? (elapsed / duration) : 1;
     }
 
 

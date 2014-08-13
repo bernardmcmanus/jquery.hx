@@ -11,6 +11,7 @@ hxManager.ComponentMOJO = (function(
 
 
     var TreeSearch = Helper.treeSearch;
+    var Del = Helper.del;
     var isUndef = Helper.isUndef;
 
 
@@ -81,9 +82,9 @@ hxManager.ComponentMOJO = (function(
                 }
 
                 if (component[key].isDefault()) {
-                    delete component[key];
+                    Del( component , key );
                     if (Object.keys( component ).length < 1) {
-                        delete that[type];
+                        Del( that , type );
                     }
                 }
             });
@@ -105,11 +106,14 @@ hxManager.ComponentMOJO = (function(
 
         setOrder: function( type , newOrder ) {
 
+            var that = this;
+            var order = that.order;
+
             if (newOrder) {
-                this.order[type] = newOrder;
+                order[type] = newOrder;
             }
             else {
-                delete this.order[type];
+                Del( order , type );
             }
         },
 

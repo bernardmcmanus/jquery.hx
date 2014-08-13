@@ -1,21 +1,25 @@
 (function() {
 
 
-    /*$('.tgt').hx()
-    .defer( 1000 )
-    .animate({
-        type: "transform",
-        translate: {x: '+=200'},
-        duration: 1000,
-        easing: 'linear'
-    })
-    .animate({
-        type: 'transform',
-        translate: null,
-        duration: 0
-    });*/
+    $('#target').on( 'click' , function() {
 
-    $('.tgt').hx()
+        $('.tgt').hx()
+        //.defer( 1000 )
+        .iterate({
+            type: "transform",
+            translate: {x: '+=200'},
+            duration: 1000,
+            easing: 'linear'
+        })
+        //.defer( 1000 )
+        .iterate({
+            type: 'transform',
+            translate: null,
+            duration: 0
+        });
+    });
+
+    /*$('.tgt').hx()
     .animate([
         {
             type: 'opacity',
@@ -44,7 +48,7 @@
 
     $('#target').on( 'click' , function() {
         $('.tgt').hx().clear();
-    });
+    });*/
 
     return;
 
