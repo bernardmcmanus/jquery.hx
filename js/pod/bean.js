@@ -98,7 +98,7 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
 
             var progress = calcProgress(( elapsed - that.buffer) , duration , delay );
 
-            if (isWithinTolerance( progress , 1 , TOLERANCE , duration )) {
+            if (isWithinTolerance( progress , 1 , TOLERANCE , duration , delay )) {
                 progress = 1;
             }
 
@@ -190,12 +190,12 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
     function calcProgress( elapsed , duration , delay ) {
         elapsed = elapsed - delay;
         elapsed = elapsed < 0 ? 0 : elapsed;
-        return duration > 0 ? (elapsed / duration) : 1;
+        return (elapsed / (duration || 1));
     }
 
 
-    function isWithinTolerance( subject , target , tolerance , duration ) {
-        return (target - subject) <= (tolerance / duration);
+    function isWithinTolerance( subject , target , tolerance , duration , delay ) {
+        return (target - subject) <= (tolerance / (duration + delay));
     }
 
 

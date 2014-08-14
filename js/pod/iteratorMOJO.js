@@ -119,7 +119,7 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
             var delay = that.delay;
             var progress = calcProgress( elapsed , duration , delay );
 
-            if (isWithinTolerance( progress , 1 , TOLERANCE , duration )) {
+            if (isWithinTolerance( progress , 1 , TOLERANCE , duration , delay )) {
                 progress = 1;
             }
 
@@ -197,12 +197,12 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
     function calcProgress( elapsed , duration , delay ) {
         elapsed = elapsed - delay;
         elapsed = elapsed < 0 ? 0 : elapsed;
-        return duration > 0 ? (elapsed / duration) : 1;
+        return (elapsed / (duration || 1));
     }
 
 
-    function isWithinTolerance( subject , target , tolerance , duration ) {
-        return (target - subject) <= (tolerance / duration);
+    function isWithinTolerance( subject , target , tolerance , duration , delay ) {
+        return (target - subject) <= (tolerance / (duration + delay));
     }
 
 

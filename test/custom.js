@@ -1,21 +1,31 @@
 (function() {
 
 
+    $('.tgt').hx( 'zero' , {
+        type: 'opacity',
+        value: 0
+    });
+
+
     $('#target').on( 'click' , function() {
 
-        $('.tgt').hx()
-        //.defer( 1000 )
-        .iterate({
-            type: "transform",
-            translate: {x: '+=200'},
-            duration: 1000,
-            easing: 'linear'
+        var method = 'animate';
+
+        $('.tgt')
+        .hx( method , {
+            type: 'opacity',
+            value: 1,
+            duration: 0,
+            delay: 200
         })
-        //.defer( 1000 )
-        .iterate({
-            type: 'transform',
-            translate: null,
-            duration: 0
+        .hx( method , {
+            type: 'opacity',
+            value: 0,
+            duration: 0,
+            delay: 1200
+        })
+        .done(function() {
+            console.log('done');
         });
     });
 
