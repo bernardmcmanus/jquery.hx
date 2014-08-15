@@ -318,6 +318,7 @@ window.hxManager = (function( Object , Error , $ , Promise ) {
         // remove any stored transitions
         that.eachNode(function( node_hx ) {
             node_hx.resetTransition();
+            node_hx.applyTransition();
         });
 
         // run paint

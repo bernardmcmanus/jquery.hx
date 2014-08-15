@@ -1,7 +1,54 @@
 (function() {
 
 
-    $('.tgt').hx( 'zero' , {
+    /*$('.tgt').hx( 'zero' , {
+        type: 'transform',
+        scale: {x: 1.5, y: 1.5}
+    });*/
+
+
+    $('#target').on( 'click' , function() {
+
+        var method = 'animate';
+        var isResolve = false;
+
+        $('.tgt')
+        /*.hx( method , {
+            type: 'opacity',
+            value: 1,
+            duration: 800,
+            delay: 200
+        })*/
+        .hx( method , [
+            {
+                type: 'transform',
+                scale: {x: 1.5, y: 1.5},
+                duration: 1200
+            },
+            {
+                type: 'transform',
+                scale: null,
+                duration: 1200,
+                delay: 2000
+            }/*,
+            function( elapsed , progress ) {
+                if (progress[0] === 1 && !isResolve) {
+                    this.resolve( true );
+                    isResolve = true;
+                    console.log('resolve');
+                }
+                console.log(progress);
+            }*/
+        ])
+        .done(function() {
+            console.log('done');
+        });
+
+        tests.t7();
+    });
+
+
+    /*$('.tgt').hx( 'zero' , {
         type: 'opacity',
         value: 0
     });
@@ -15,19 +62,19 @@
         .hx( method , {
             type: 'opacity',
             value: 1,
-            duration: 0,
+            duration: 800,
             delay: 200
         })
         .hx( method , {
             type: 'opacity',
             value: 0,
-            duration: 0,
+            duration: 1200,
             delay: 1200
         })
         .done(function() {
             console.log('done');
         });
-    });
+    });*/
 
     /*$('.tgt').hx()
     .animate([
@@ -60,7 +107,7 @@
         $('.tgt').hx().clear();
     });*/
 
-    return;
+    //return;
 
 
     
@@ -266,7 +313,7 @@
     }
 
 
-    $(document).on( 'hx.ready' , function() {
+    /*$(document).on( 'hx.ready' , function() {
 
         $('#target').on( 'touchstart click' , Main );
 
@@ -283,7 +330,7 @@
                 $('.indicate').removeClass( 'indicate' );
             }
         });
-    });
+    });*/
 
 
     var tests = {
@@ -1163,7 +1210,7 @@
                 start = {};
                 move = {now:{},last:{}};
                 diff = {total:{},inst:{}};
-                origin = $(target).hx( 'get' , 'transform' , 'translate' )[0];
+                origin = $(target).hx( 'get' , 'translate' )[0];
             }
 
             function coolStart( e ) {
@@ -1208,10 +1255,11 @@
                             x: x,
                             y: y
                         },
-                        scale: {
+                        /*scale: {
                             x: ((x / 100) >= 1 ? (x / 100) : 1),
                             y: ((y / 100) >= 1 ? (y / 100) : 1)
-                        }
+                        },*/
+                        order: [ 'translate' , 'scale' ]
                     }
                 ]);
             }
