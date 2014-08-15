@@ -91,10 +91,19 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
         },
 
         addCallback: function( callback ) {
+            
             var that = this;
-            that.when( TIMING_CALLBACK , function( e , elapsed ) {
-                callback( elapsed , that.progress );
-            });
+
+            function timingCallback( e , elapsed ) {
+                callback( elapsed , that.progress , detach );
+            }
+
+            function detach( all ) {
+                var handler = (all ? NULL : timingCallback);
+                that.dispel( TIMING_CALLBACK , handler );
+            }
+
+            that.when( TIMING_CALLBACK , timingCallback );
         },
 
         run: function() {

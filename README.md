@@ -182,12 +182,22 @@ A pod will also accept timing callbacks that are executed while the pod is runni
 ]
 ```
 
-Two arguments are passed to each timing callback. `elapsed` is the time (ms) that has elapsed since the pod started running. `progress` is an array containing the percent completion for each bean in the pod.
+Three arguments are passed to each timing callback:
+
+* `elapsed` is the time (ms) that has elapsed since the pod started running.
+* `progress` is an array containing the percent completion for each bean in the pod.
+* `detach` is a function that removes the timing callback from the pod. If `true` is passed to detach, all timing callbacks will be removed from this pod.
+
 ```javascript
-function( elapsed , progress ) {
-    // ...
+function( elapsed , progress , detach ) {
+    if (progress[1] >= 0.5) {
+        $(this).hx( 'resolve' , true );
+        detach( true );
+    }
 }
 ```
+
+* __NOTE:__ Timing callbacks will continue to run even after a pod is resolved or canceled unless `detach` is called.
 
 ### Operators, Values, and Persistent States
 Assignment operators (`+=`, `-=`, `*=`, `/=`, and `%=`) can be used to perform relative changes:

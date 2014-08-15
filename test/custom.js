@@ -10,41 +10,39 @@
     $('#target').on( 'click' , function() {
 
         var method = 'animate';
-        var isResolve = false;
 
         $('.tgt')
-        /*.hx( method , {
-            type: 'opacity',
-            value: 1,
-            duration: 800,
-            delay: 200
-        })*/
         .hx( method , [
             {
                 type: 'transform',
                 scale: {x: 1.5, y: 1.5},
                 duration: 1200
             },
+            function( elapsed , progress , detach ) {
+                if (progress[0] >= 0.5) {
+                    console.log(progress);
+                    $(this).hx( 'resolve' , true );
+                    console.log( '------------------------' );
+                    detach( true );
+                }
+            },
+            function( elapsed , progress , detach ) {
+                //console.log(progress);
+            }
+        ])
+        .hx( method , [
             {
                 type: 'transform',
                 scale: null,
-                duration: 1200,
-                delay: 2000
-            }/*,
-            function( elapsed , progress ) {
-                if (progress[0] === 1 && !isResolve) {
-                    this.resolve( true );
-                    isResolve = true;
-                    console.log('resolve');
-                }
-                console.log(progress);
-            }*/
+                duration: 1200
+            },
+            function( elapsed , progress , detach ) {
+                //console.log(progress);
+            }
         ])
         .done(function() {
             console.log('done');
         });
-
-        tests.t7();
     });
 
 
@@ -107,7 +105,7 @@
         $('.tgt').hx().clear();
     });*/
 
-    //return;
+    return;
 
 
     
@@ -313,7 +311,7 @@
     }
 
 
-    /*$(document).on( 'hx.ready' , function() {
+    $(document).on( 'hx.ready' , function() {
 
         $('#target').on( 'touchstart click' , Main );
 
@@ -330,7 +328,7 @@
                 $('.indicate').removeClass( 'indicate' );
             }
         });
-    });*/
+    });
 
 
     var tests = {
