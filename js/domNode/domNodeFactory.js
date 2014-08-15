@@ -116,6 +116,8 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
                 break;
 
                 case POD_COMPLETE:
+                    pod = args[1];
+                    pod.dispel( POD_COMPLETE , that_hx );
                     that_hx.proceed();
                 break;
 

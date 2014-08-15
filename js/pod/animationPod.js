@@ -231,7 +231,7 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
                     if (!that.forced && that._next( type )) {
                         that._runSequence();
                     }
-                    else {
+                    else if (!that.forced) {
                         that.happen( CLUSTER_COMPLETE , type );
                     }
 

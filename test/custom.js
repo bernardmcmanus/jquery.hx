@@ -19,15 +19,15 @@
                 duration: 1200
             },
             function( elapsed , progress , detach ) {
+                console.log(progress);
+            },
+            function( elapsed , progress , detach ) {
                 if (progress[0] >= 0.5) {
-                    console.log(progress);
+                    //$(this).hx( 'break' );
                     $(this).hx( 'resolve' , true );
                     console.log( '------------------------' );
                     detach( true );
                 }
-            },
-            function( elapsed , progress , detach ) {
-                //console.log(progress);
             }
         ])
         .hx( method , [
@@ -37,7 +37,7 @@
                 duration: 1200
             },
             function( elapsed , progress , detach ) {
-                //console.log(progress);
+                console.log(progress);
             }
         ])
         .done(function() {

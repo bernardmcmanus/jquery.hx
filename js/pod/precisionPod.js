@@ -70,7 +70,7 @@ hxManager.PrecisionPod = (function( Object , MOJO , hxManager ) {
             var index = that.subscribers;
 
             that.when( TIMING , iteratorMOJO );
-            that.once([ INIT , POD_COMPLETE , POD_CANCELED ] , iteratorMOJO );
+            that.once([ INIT , POD_CANCELED ] , iteratorMOJO );
 
             iteratorMOJO.when( PROGRESS , index , that );
             iteratorMOJO.once([ BEAN_START , BEAN_COMPLETE , BEAN_CANCELED ] , that );
