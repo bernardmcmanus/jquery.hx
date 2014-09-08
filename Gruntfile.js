@@ -69,11 +69,11 @@ module.exports = function( grunt ) {
         },
 
         replace: {
-            dev: {
+            debug: {
                 options: {
                     patterns: [{
                         match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                        replacement: '<script src=\"../hx-<%= pkg.version %>.js\"></script>'
+                        replacement: '<script src=\"../<%= BUILD %>\"></script>'
                     }]
                 },
                 files: [{
@@ -81,58 +81,40 @@ module.exports = function( grunt ) {
                     dest: 'live/index.html'
                 }]
             },
-            prod: {
-                options: {
-                    patterns: [{
-                        match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                        replacement: '<script src=\"../hx-<%= pkg.version %>.min.js\"></script>'
-                    }]
-                },
-                files: [{
-                    src: 'live/index.html',
-                    dest: 'live/index.html'
-                }]
-            },
-            bower: {
+            packages: {
                 options: {
                     patterns: [
-                        {
-                            match: /(\"name\")(.*?)(\")(.{1,}?)(\")/i,
-                            replacement: '\"name\": \"<%= pkg.name %>\"'
-                        },
                         {
                             match: /(\"version\")(.*?)(\")(.{1,}?)(\")/i,
                             replacement: '\"version\": \"<%= pkg.version %>\"'
                         },
                         {
-                            match: /(\"homepage\")(.*?)(\")(.{1,}?)(\")/i,
-                            replacement: '\"homepage\": \"<%= pkg.repository.url %>\"'
-                        },
-                        {
-                            match: /(\"description\")(.*?)(\")(.{1,}?)(\")/i,
-                            replacement: '\"description\": \"<%= pkg.description %>\"'
-                        },
-                        {
                             match: /(\"main\")(.*?)(\")(.{1,}?)(\")/i,
-                            replacement: '\"main\": \"hx-<%= pkg.version %>.min.js\"'
+                            replacement: '\"main\": \"<%= BUILD %>\"'
                         }
                     ]
                 },
-                files: [{
-                    src: 'bower.json',
-                    dest: 'bower.json'
-                }]
+                files: [
+                    {
+                        src: 'package.json',
+                        dest: 'package.json'
+                    },
+                    {
+                        src: 'bower.json',
+                        dest: 'bower.json'
+                    }
+                ]
             }
         },
 
         watch: {
-            debugProd: {
-                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( Build ),
-                tasks: [ '_debugProd' ]
-            },
-            src: {
-                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( Build ),
+            debug: {
+                files: [ 'Gruntfile.js' , 'package.json' , 'test/*' , 'js/**/*.js' ],
                 tasks: [ 'dev' ]
+            },
+            debugProd: {
+                files: [ 'Gruntfile.js' , 'package.json' , 'test/*' , 'js/**/*.js' ],
+                tasks: [ '_debugProd' ]
             }
         },
 
@@ -149,7 +131,7 @@ module.exports = function( grunt ) {
             },
             build: {
                 src: Build,
-                dest: 'hx-<%= pkg.version %>.js'
+                dest: '<%= BUILD %>'
             }
         },
 
@@ -159,7 +141,7 @@ module.exports = function( grunt ) {
             },
             release: {
                 files: {
-                    'hx-<%= pkg.version %>.min.js' : Build
+                    '<%= BUILD %>' : Build
                 }
             }
         }
@@ -229,9 +211,18 @@ module.exports = function( grunt ) {
     });
 
 
+    grunt.registerTask( 'setBuildName' , function() {
+        var version = grunt.config.get( 'pkg.version' );
+        var ext = (/(dev|debug)$/).test( process.argv[2] ) ? '.js' : '.min.js';
+        var name = 'hx-' + version + ext;
+        grunt.config.set( 'BUILD' , name );
+    });
+
+
     grunt.registerTask( 'always' , [
         'jshint',
         'git-describe',
+        'setBuildName',
         'getHash',
         'getBranch',
         'clean'
@@ -240,7 +231,7 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'default' , [
         'always',
-        'replace:bower',
+        'replace:packages',
         'uglify'
     ]);
 
@@ -248,7 +239,7 @@ module.exports = function( grunt ) {
     grunt.registerTask( 'dev' , [
         'always',
         'createLive',
-        'replace:dev',
+        'replace:debug',
         'concat'
     ]);
 
@@ -256,13 +247,13 @@ module.exports = function( grunt ) {
     grunt.registerTask( 'debug' , [
         'dev',
         'startServer',
-        'watch:src'
+        'watch:debug'
     ]);
 
     grunt.registerTask( '_debugProd' , [
         'always',
         'createLive',
-        'replace:prod',
+        'replace:debug',
         'uglify'
     ]);
 

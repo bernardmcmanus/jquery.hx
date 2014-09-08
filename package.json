@@ -2,7 +2,7 @@
     "name": "jquery.hx",
     "version": "1.0.4",
     "description": "A hardware-accelerated animation library for mobile and desktop.",
-    "main": "hx-1.0.3.min.js",
+    "main": "hx-1.0.4.min.js",
     "devDependencies": {
         "httpd-node": "0.1.8",
         "fs-extra": "0.9.1",
