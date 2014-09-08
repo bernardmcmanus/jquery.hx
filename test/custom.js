@@ -1,6 +1,9 @@
 (function() {
 
 
+    window.RUN_TESTS = true;
+
+
     /*$('.tgt').hx( 'zero' , {
         type: 'transform',
         scale: {x: 1.5, y: 1.5}
@@ -42,6 +45,7 @@
         ])
         .done(function() {
             console.log('done');
+            console.log(this[0].$hx);
         });
     });
 

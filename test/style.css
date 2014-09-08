@@ -12,6 +12,12 @@ body {
     font-family: Arial, sans-serif;
     font-size: 13px;
     background-color: rgb(78,86,88);
+    margin: 10px;
+}
+
+#qunit {
+    float: right;
+    max-width: 800px;
 }
 
 #target {
@@ -37,24 +43,17 @@ body {
 }
 
 .tgt-container {
-    position: absolute;
-    left: 0;
-    top: 90px;
-    width: 280px;
-    padding-bottom: 10px;
+    display: inline-block;
+    padding: 10px;
+    padding-left: 0;
+    margin-top: 80px;
     pointer-events: none;
 }
 
-.tgt,
-.tgt2,
-.tgt3
-{
+.tgt-container > div {
     text-align: center;
-    /*float: left;
-    margin-left: 10px;
-    margin-top: 10px;*/
-    position: absolute;
-    top: 10px;
+    float: left;
+    margin: 0;
     width: 80px;
     height: 80px;
     line-height: 80px;
@@ -67,31 +66,23 @@ body {
     transform-style: preserve-3d;
 }
 
-.tgt {
-    left: 10px;
-}
-
-.tgt2 {
-    left: 100px;
-}
-
-.tgt3 {
-    left: 190px;
+.tgt-container > div:not(:first-child) {
+    margin-left: 10px;
 }
 
 .tgt {
     z-index: 3;
-    background-color: rgb(255,89,199);
+    background-color: #FF59C7;
 }
 
 .tgt2 {
     z-index: 2;
-    background-color: rgb(151,242,36);
+    background-color: #97F224;
 }
 
 .tgt3 {
     z-index: 1;
-    background-color: rgb(244,174,41);
+    background-color: #F4AE29;
 }
 
 .indicate {
