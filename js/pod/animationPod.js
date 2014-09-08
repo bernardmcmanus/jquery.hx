@@ -115,13 +115,13 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
         _runSequence: function() {
 
             var that = this;
-            var node_hx = that.node._hx;
+            var $hx = that.node.$hx;
 
             MOJO_Each( that.sequence , function( bean , type ) {
-                if (bean.run( node_hx )) {
+                if (bean.run( $hx )) {
                     bean.once( BEAN_PAINT , function( e ) {
-                        node_hx.applyTransition();
-                        node_hx.paint( bean.type );
+                        $hx.applyTransition();
+                        $hx.paint( bean.type );
                     });
                 }
             });

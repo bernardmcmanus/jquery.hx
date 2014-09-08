@@ -54,11 +54,11 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
         paint: function( model ) {
 
             var that = this;
-            var node_hx = that.node._hx;
+            var $hx = that.node.$hx;
             var bean = that._updateBean( model );
 
-            node_hx.updateComponent( bean );
-            node_hx.paint( that.type );
+            $hx.updateComponent( bean );
+            $hx.paint( that.type );
         },
 
         resolve: function( model ) {
@@ -102,12 +102,12 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
         _init: function() {
             var that = this;
             var node = that.node;
-            var node_hx = node._hx;
+            var $hx = node.$hx;
             var current = that.current = that._getCurrent( node );
             that.dest = that._getDest( current , that.styles );
             that.diff = that._getDiff( node , current , that.dest );
-            node_hx.deleteTransition( that.type );
-            node_hx.applyTransition();
+            $hx.deleteTransition( that.type );
+            $hx.applyTransition();
             that.when( 'progress' , that );
             that.happen( 'beanStart' );
         },
@@ -157,7 +157,7 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
 
             properties.forEach(function( property ) {
                 var find = (property === 'value' ? type : property);
-                current[property] = node._hx.getComponents( find , false );
+                current[property] = node.$hx.getComponents( find , false );
             });
 
             return current;

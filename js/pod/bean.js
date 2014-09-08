@@ -41,7 +41,7 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
 
     var Bean_prototype = Bean.prototype = MOJO.Create({
 
-        run: function( node_hx ) {
+        run: function( $hx ) {
 
             var that = this;
 
@@ -52,7 +52,7 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
             that.running = true;
 
             that.when( PROGRESS , that );
-            that.once( BEAN_PAINT , node_hx , that );
+            that.once( BEAN_PAINT , $hx , that );
             that.happen( BEAN_START );
 
             return true;
@@ -62,7 +62,7 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
             
             var that = this;
             var args = arguments;
-            var progress, node_hx;
+            var progress, $hx;
 
             switch (e.type) {
 
@@ -79,9 +79,9 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
                 break;
 
                 case BEAN_PAINT:
-                    node_hx = args[1];
-                    node_hx.setTransition( that );
-                    node_hx.updateComponent( that );
+                    $hx = args[1];
+                    $hx.setTransition( that );
+                    $hx.updateComponent( that );
                 break;
             }
         },

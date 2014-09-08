@@ -31,20 +31,20 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
     function DomNodeFactory( element ) {
 
         // if this is already an hx element, return it
-        if (element._hx !== UNDEFINED) {
+        if (element.$hx !== UNDEFINED) {
             return element;
         }
 
         // otherwise, create a new hx element
-        var _hxModule = new MOJO(
+        var $hx = new MOJO(
             getBoundModule( hxModule , element )
         );
 
-        _hxModule.queue = new Queue();
-        _hxModule.componentMOJO = new ComponentMOJO();
-        _hxModule.transitionMOJO = new TransitionMOJO();
+        $hx.queue = new Queue();
+        $hx.componentMOJO = new ComponentMOJO();
+        $hx.transitionMOJO = new TransitionMOJO();
 
-        element._hx = _hxModule;
+        element.$hx = $hx;
 
         return element;
     }
@@ -55,11 +55,11 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         paint: function( typeArray ) {
 
             var that = this;
-            var that_hx = that._hx;
+            var $hx = that.$hx;
             var style = {};
 
             if (typeArray === UNDEFINED) {
-                typeArray = Object.keys( that_hx.getOrder() );
+                typeArray = Object.keys( $hx.getOrder() );
             }
             else {
                 typeArray = EnsureArray( typeArray );
@@ -67,7 +67,7 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
 
             typeArray.forEach(function( type ) {
                 var property = Prefix( type );
-                var string = that_hx.getStyleString( type );
+                var string = $hx.getStyleString( type );
                 style[property] = string;
             });
 
@@ -77,7 +77,7 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         handleMOJO: function( e ) {
             
             var that = this;
-            var that_hx = that._hx;
+            var $hx = that.$hx;
             var args = arguments;
             var type, bean, pod;
 
@@ -100,8 +100,8 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
 
                 case CLUSTER_COMPLETE:
                     type = args[1];
-                    that_hx.deleteTransition( type );
-                    that_hx.applyTransition();
+                    $hx.deleteTransition( type );
+                    $hx.applyTransition();
                 break;
 
                 case POD_PAUSED:
@@ -117,8 +117,8 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
 
                 case POD_COMPLETE:
                     pod = args[1];
-                    pod.dispel( POD_COMPLETE , that_hx );
-                    that_hx.proceed();
+                    pod.dispel( POD_COMPLETE , $hx );
+                    $hx.proceed();
                 break;
 
                 case POD_CANCELED:
@@ -130,12 +130,12 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
                     }
                     else {
 
-                        pod.dispel( POD_COMPLETE , that_hx );
+                        pod.dispel( POD_COMPLETE , $hx );
 
                         pod.once( POD_COMPLETE , function() {
-                            if (!that_hx.getPodCount( 'animation' )) {
-                                that_hx.resetTransition();
-                                that_hx.applyTransition();
+                            if (!$hx.getPodCount( 'animation' )) {
+                                $hx.resetTransition();
+                                $hx.applyTransition();
                             }
                         });
                     }
@@ -144,16 +144,16 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         },
 
         setTransition: function( bean ) {
-            this._hx.transitionMOJO.setTransition( bean );
+            this.$hx.transitionMOJO.setTransition( bean );
         },
 
         deleteTransition: function( type ) {
-            this._hx.transitionMOJO.deleteTransition( type );
+            this.$hx.transitionMOJO.deleteTransition( type );
         },
 
         resetTransition: function() {
 
-            var transitionMOJO = this._hx.transitionMOJO;
+            var transitionMOJO = this.$hx.transitionMOJO;
 
             MOJO_Each( transitionMOJO , function( val , type ) {
                 transitionMOJO.deleteTransition( type );
@@ -163,7 +163,7 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         applyTransition: function() {
             var that = this;
             var property = Prefix( 'transition' );
-            var string = that._hx.getTransitionString();
+            var string = that.$hx.getTransitionString();
             if (that.style.transition === string) {
                 return;
             }
@@ -175,13 +175,13 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
             find = PropertyMap[find] || find;
             pretty = (!isUndef( pretty ) ? pretty : true);
             
-            var that_hx = this._hx;
-            var components = that_hx.componentMOJO.getComponents( find );
+            var $hx = this.$hx;
+            var components = $hx.componentMOJO.getComponents( find );
             var out = {};
 
             if (instOf( components , ComponentMOJO )) {
                 components.each(function( styleObj , key ) {
-                    out[key] = that_hx.getComponents( key , pretty );
+                    out[key] = $hx.getComponents( key , pretty );
                 });
             }
             else if (instOf( components , CSSProperty )) {
@@ -215,16 +215,16 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         },
 
         getOrder: function( type ) {
-            return this._hx.componentMOJO.getOrder( type );
+            return this.$hx.componentMOJO.getOrder( type );
         },
 
         updateComponent: function( bean ) {
-            this._hx.componentMOJO.updateComponent( bean );
+            this.$hx.componentMOJO.updateComponent( bean );
         },
 
         resetComponents: function( type ) {
 
-            var componentMOJO = this._hx.componentMOJO;
+            var componentMOJO = this.$hx.componentMOJO;
 
             if (type) {
                 componentMOJO.remove( type );
@@ -237,16 +237,16 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         },
 
         getStyleString: function( type ) {
-            return this._hx.componentMOJO.getString( type );
+            return this.$hx.componentMOJO.getString( type );
         },
 
         getTransitionString: function() {
-            return this._hx.transitionMOJO.getString();
+            return this.$hx.transitionMOJO.getString();
         },
 
         addPod: function( pod ) {
 
-            var that_hx = this._hx;
+            var $hx = this.$hx;
 
             [
                 BEAN_START,
@@ -258,38 +258,38 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
                 POD_CANCELED
             ]
             .forEach(function( evt ) {
-                pod.when( evt , that_hx );
+                pod.when( evt , $hx );
             });
 
-            that_hx.queue.pushPod( pod );
+            $hx.queue.pushPod( pod );
         },
 
         proceed: function() {
-            return this._hx.queue.proceed();
+            return this.$hx.queue.proceed();
         },
 
         clearQueue: function( all ) {
-            this._hx.queue.clear( all );
+            this.$hx.queue.clear( all );
         },
 
         getCurrentPod: function() {
-            return this._hx.queue.current;
+            return this.$hx.queue.current;
         },
 
         /*nextOfType: function( type ) {
-            return this._hx.queue.nextOfType( type );
+            return this.$hx.queue.nextOfType( type );
         },*/
 
         /*getLastPod: function() {
-            return this._hx.queue.last;
+            return this.$hx.queue.last;
         },*/
 
         getPodCount: function( type ) {
-            return this._hx.queue.getPodCount( type );
+            return this.$hx.queue.getPodCount( type );
         },
 
         cleanup: function() {
-            delete this._hx;
+            delete this.$hx;
         }
     };
 
