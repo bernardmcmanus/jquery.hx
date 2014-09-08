@@ -1,7 +1,15 @@
 module.exports = function( grunt ) {
 
 
+    var HTTPD_NODE_PORT = 8888;
+
+
+    var httpd = require( 'httpd-node' );
     var fs = require( 'fs-extra' );
+    var exec = require( 'child_process' ).exec;
+
+
+    httpd.environ( 'root' , __dirname );
 
 
     var Script = [
@@ -30,14 +38,14 @@ module.exports = function( grunt ) {
     ];
 
 
-    var Lib = [
-        'js/lib/promise-1.0.0.min.js',
-        'js/lib/mojo-0.1.4.min.js',
-        'js/lib/bezier-easing-0.4.1.js'
+    var Includes = [
+        'js/includes/promise-1.0.0.min.js',
+        'js/includes/mojo-0.1.4.min.js',
+        'js/includes/bezier-easing-0.4.1.js'
     ];
 
 
-    var All = Lib.concat( Script );
+    var Build = Includes.concat( Script );
 
 
     grunt.initConfig({
@@ -45,14 +53,14 @@ module.exports = function( grunt ) {
         pkg: grunt.file.readJSON( 'package.json' ),
 
         'git-describe': {
-            'options': {
+            options: {
                 prop: 'git-version'
             },
             dist : {}
         },
 
         jshint: {
-            all: [ 'Gruntfile.js' ].concat( Script )
+            all: [ 'Gruntfile.js' , 'js/**/*.js' , '!js/includes/*' ]
         },
 
         clean: {
@@ -78,24 +86,6 @@ module.exports = function( grunt ) {
                     patterns: [{
                         match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
                         replacement: '<script src=\"../hx-<%= pkg.version %>.min.js\"></script>'
-                    }]
-                },
-                files: [{
-                    src: 'live/index.html',
-                    dest: 'live/index.html'
-                }]
-            },
-            live: {
-                options: {
-                    patterns: [{
-                        match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
-                        replacement: function() {
-                            var template = '<script src=\"../[src]\"></script>';
-                            return All.map(function( src , i ) {
-                                return (i > 0 ? '\t\t' : '') + template.replace( /\[src\]/ , src );
-                            })
-                            .join( '\n' );
-                        }
                     }]
                 },
                 files: [{
@@ -137,16 +127,12 @@ module.exports = function( grunt ) {
 
         watch: {
             debugProd: {
-                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( All ),
+                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( Build ),
                 tasks: [ '_debugProd' ]
             },
             src: {
-                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( All ),
+                files: ([ 'Gruntfile.js' , 'package.json' , 'test/*' ]).concat( Build ),
                 tasks: [ 'dev' ]
-            },
-            test: {
-                files: [ 'Gruntfile.js' , 'package.json' , 'test/*' ],
-                tasks: [ '_live' ]
             }
         },
 
@@ -154,7 +140,7 @@ module.exports = function( grunt ) {
             options: {
                 banner: (function() {
                     var banner = '/*\n\n';
-                    banner += '<%= pkg.name %> - <%= pkg.version %> - <%= grunt.config.get( \'git-hash\' ) %> - <%= grunt.template.today("yyyy-mm-dd") %>';
+                    banner += '<%= pkg.name %> - <%= pkg.version %> - <%= grunt.config.get( \'git-branch\' ) %> - <%= grunt.config.get( \'git-hash\' ) %> - <%= grunt.template.today("yyyy-mm-dd") %>';
                     banner += '\n\n';
                     banner += fs.readFileSync( 'LICENSE.txt' , 'utf8' );
                     banner += '\n\n*/\n\n';
@@ -162,18 +148,18 @@ module.exports = function( grunt ) {
                 }())
             },
             build: {
-                src: All,
+                src: Build,
                 dest: 'hx-<%= pkg.version %>.js'
             }
         },
 
         uglify: {
             options: {
-                banner: '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.get( \'git-hash\' ) %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner: '/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.get( \'git-branch\' ) %> - <%= grunt.config.get( \'git-hash\' ) %> - <%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             release: {
                 files: {
-                    'hx-<%= pkg.version %>.min.js' : All
+                    'hx-<%= pkg.version %>.min.js' : Build
                 }
             }
         }
@@ -192,6 +178,13 @@ module.exports = function( grunt ) {
     .forEach( grunt.loadNpmTasks );
 
 
+    grunt.registerTask( 'startServer' , function() {
+        var server = new httpd({ port : HTTPD_NODE_PORT });
+        server.setHttpDir( 'default' , '/' );
+        server.start();
+    });
+
+
     grunt.registerTask( 'createLive' , function() {
         var src = __dirname + '/test';
         var dest = __dirname + '/live';
@@ -199,7 +192,7 @@ module.exports = function( grunt ) {
     });
 
 
-    grunt.registerTask( 'createHash' , function() {
+    grunt.registerTask( 'getHash' , function() {
 
         grunt.task.requires( 'git-describe' );
 
@@ -221,21 +214,39 @@ module.exports = function( grunt ) {
     });
 
 
-    grunt.registerTask( 'default' , [
+    grunt.registerTask( 'getBranch' , function() {
+        var done = this.async();
+        exec( 'git status' , function( error , stdout , stderr ) {
+            if (!error) {
+                var branch = stdout
+                    .split( '\n' )
+                    .shift()
+                    .replace( /on\sbranch\s/i , '' );
+                grunt.config.set( 'git-branch' , branch );
+            }
+            done();
+        });
+    });
+
+
+    grunt.registerTask( 'always' , [
         'jshint',
         'git-describe',
-        'createHash',
-        'clean',
+        'getHash',
+        'getBranch',
+        'clean'
+    ]);
+
+
+    grunt.registerTask( 'default' , [
+        'always',
         'replace:bower',
         'uglify'
     ]);
 
 
     grunt.registerTask( 'dev' , [
-        'jshint',
-        'git-describe',
-        'createHash',
-        'clean',
+        'always',
         'createLive',
         'replace:dev',
         'concat'
@@ -244,12 +255,12 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'debug' , [
         'dev',
+        'startServer',
         'watch:src'
     ]);
 
     grunt.registerTask( '_debugProd' , [
-        'jshint',
-        'clean',
+        'always',
         'createLive',
         'replace:prod',
         'uglify'
@@ -257,20 +268,8 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'debugProd' , [
         '_debugProd',
+        'startServer',
         'watch:debugProd'
-    ]);
-
-
-    grunt.registerTask( '_live' , [
-        'clean:live',
-        'createLive',
-        'replace:live'
-    ]);
-
-
-    grunt.registerTask( 'live' , [
-        '_live',
-        'watch:test'
     ]);
 };
 
