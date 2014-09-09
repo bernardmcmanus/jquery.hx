@@ -177,11 +177,14 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
         var getOptions = Bean_prototype.getOptions;
         var getStyles = Bean_prototype.getStyles;
 
+        var options = getOptions( seed , node , index );
+
         return {
+            ref: options.ref,
             seed: seed,
             type: seed.type,
             order: getOrder( seed ),
-            options: getOptions( seed , node , index ),
+            options: options,
             styles: getStyles( seed , node , index )
         };
     }
