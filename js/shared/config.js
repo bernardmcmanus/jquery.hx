@@ -9,11 +9,12 @@ hxManager.Config = (function( Object , MOJO , hxManager ) {
 
     var Config = {
 
-        optionKeys: [ 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
+        optionKeys: [ 'ref' , 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
 
         properties: {},
 
         defaults: {
+            ref: null,
             duration: 400,
             easing: 'ease',
             delay: 0,
