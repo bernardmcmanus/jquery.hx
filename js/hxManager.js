@@ -281,11 +281,27 @@ window.hxManager = (function( Object , Error , $ , Promise ) {
     };
 
 
-    hxManager_prototype.clear = function() {
+    hxManager_prototype.detach = function() {
+
+        // detach callbacks from the subscriber module,
+        // but still allow the pod to continue running
 
         var that = this;
         
+        that.eachNode(function( $hx ) {
+            $hx.getCurrentPod().detach();
+        });
+
+        return that;
+    };
+
+
+    hxManager_prototype.clear = function() {
+
         // clear all pods in each queue
+
+        var that = this;
+        
         that.eachNode(function( $hx ) {
             $hx.clearQueue();
         });
