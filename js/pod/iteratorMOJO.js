@@ -61,9 +61,11 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
             $hx.paint( that.type );
         },
 
-        resolve: function( model ) {
+        resolve: function( model , attached ) {
             var that = this;
-            that.paint( model );
+            if (attached) {
+                that.paint( model );
+            }
             that.happen( 'beanComplete' , that );
         },
 
@@ -85,7 +87,7 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
 
                 case 'progress':
                     progress = args[1];
-                    if (!that.running && progress > 0) {
+                    if (!that.running && progress >= 0) {
                         that.running = true;
                         that.dispel( 'progress' , that );
                     }
@@ -112,7 +114,7 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
             that.happen( 'beanStart' );
         },
 
-        _timing: function( e , elapsed ) {
+        _timing: function( e , elapsed , diff , attached ) {
 
             var that = this;
             var duration = that.duration;
@@ -126,9 +128,9 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
             that.happen( 'progress' , progress );
 
             if (progress === 1) {
-                that.resolve( that.dest );
+                that.resolve( that.dest , attached );
             }
-            else {
+            else if (attached) {
                 that.calculate(
                     that.easing.function( progress )
                 );

@@ -4,6 +4,7 @@ hxManager.PromisePod = (function( MOJO ) {
     function PromisePod() {
         var that = this;
         that.type = 'promise';
+        that.attached = true;
         MOJO.Construct( that );
     }
 
@@ -26,6 +27,10 @@ hxManager.PromisePod = (function( MOJO ) {
         cancel: function() {
             var that = this;
             that.happen( 'podCanceled' , that );
+        },
+
+        detach: function() {
+            
         }
     });
 

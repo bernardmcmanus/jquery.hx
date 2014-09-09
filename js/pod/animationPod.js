@@ -35,6 +35,7 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
         that.forced = false;
         that.paused = false;
         that.buffer = 0;
+        that.attached = true;
         that[PROGRESS] = [];
 
         MOJO.Construct( that );
@@ -94,22 +95,21 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
             
             var that = this;
 
-            function timingCallback( e , elapsed ) {
-                callback( elapsed , that.progress , detach );
-            }
-
-            function detach( all ) {
-                var handler = (all ? NULL : timingCallback);
-                that.dispel( TIMING_CALLBACK , handler );
-            }
-
-            that.when( TIMING_CALLBACK , timingCallback );
+            that.when( TIMING_CALLBACK , function( e , elapsed , diff , attached ) {
+                if (attached) {
+                    callback( elapsed , that.progress );
+                }
+            });
         },
 
         run: function() {
             var that = this;
             that.happen( SUBSCRIBE );
             that._runSequence();
+        },
+
+        detach: function() {
+            this.attached = false;
         },
 
         _runSequence: function() {
@@ -205,9 +205,14 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
                     that.forced = true;
                     subscriber = args[1];
 
-                    that.dispel( NULL , that );
-                    that.happen( POD_COMPLETE , that );
-                    that.once( POD_COMPLETE , subscriber , that );
+                    if (!that.attached) {
+                        that.happen( POD_COMPLETE , that );
+                    }
+                    else {
+                        that.dispel( NULL , that );
+                        that.happen( POD_COMPLETE , that );
+                        that.once( POD_COMPLETE , subscriber , that );
+                    }
                 break;
 
                 case PROGRESS:
@@ -255,12 +260,13 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
         _timing: function( e , elapsed , diff ) {
 
             var that = this;
+            var attached = that.attached;
 
             if (that.paused) {
                 that.buffer += diff;
             }
             else {
-                that.happen([ TIMING , TIMING_CALLBACK ] , [( elapsed - that.buffer ) , diff ]);
+                that.happen([ TIMING , TIMING_CALLBACK ] , [( elapsed - that.buffer ) , diff , attached ]);
             }
         }
     });
