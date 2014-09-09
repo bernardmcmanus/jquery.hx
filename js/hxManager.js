@@ -289,7 +289,10 @@ window.hxManager = (function( Object , Error , $ , Promise ) {
         var that = this;
         
         that.eachNode(function( $hx ) {
-            $hx.getCurrentPod().detach();
+            var pod = $hx.getCurrentPod();
+            if (pod) {
+                pod.detach();
+            }
         });
 
         return that;
