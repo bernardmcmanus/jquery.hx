@@ -87,13 +87,17 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
 
                 case BEAN_START:
                     bean = args[1];
-                    $(that).trigger( 'hx.start' , bean.seed );
+                    $(that).trigger( 'hx.start' , {
+                        ref: bean.ref,
+                        bean: bean.seed
+                    });
                 break;
 
                 case BEAN_COMPLETE:
                     bean = args[1];
                     $(that).trigger( 'hx.end' , {
-                        type: bean.type
+                        ref: bean.ref,
+                        bean: bean.seed
                     });
                     bean.options.done();
                 break;
