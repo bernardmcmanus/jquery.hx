@@ -74,7 +74,7 @@
         [
             [ 'rotate' , 'rotate3d' ],
             [ 0 , 0 , 0 , 0 ],
-            [ 'x' , 'y' , 'z' ],
+            [ 'x' , 'y' , 'z' , 'a' ],
             function( name , CSSProperty ) {
                 return name + '(' + CSSProperty.join( ',' ) + 'deg)';
             }
