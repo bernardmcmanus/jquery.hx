@@ -72,7 +72,7 @@ module.exports = function( grunt ) {
             debug: {
                 options: {
                     patterns: [{
-                        match: /<\!(\-){2}\s\[scripts\]\s(\-){2}>/,
+                        match: /<\!(\-){2}\s\[BUILD\]\s(\-){2}>/,
                         replacement: '<script src=\"../<%= BUILD %>\"></script>'
                     }]
                 },
