@@ -1,4 +1,4 @@
-hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
+hxManager.IteratorMOJO = (function( MOJO , hxManager , isNaN ) {
 
 
     var TOLERANCE = ( 1000 / 240 );
@@ -44,7 +44,13 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
                 diff.forEach(function( val , i ) {
 
                     var value = val * (1 - percent);
-                    current[i] = dest[i] - value;
+                    
+                    if (isNumber( val )) {
+                        current[i] = dest[i] - value;
+                    }
+                    else {
+                        current[i] = (val === current.defaults[i] ? dest[i] : val);
+                    }
                 });
             });
 
@@ -187,13 +193,18 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
             MOJO_Each( current , function( property , key ) {
                 
                 diff[key] = property.map(function( val , i ) {
-                    return dest[key][i] - val;
+                    return isNumber( val ) ? dest[key][i] - val : val;
                 });
             });
 
             return diff;
         }
     });
+
+
+    function isNumber( subject ) {
+        return !isNaN( subject * 1 );
+    }
 
 
     function calcProgress( elapsed , duration , delay ) {
@@ -211,7 +222,7 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager ) {
     return IteratorMOJO;
 
     
-}( MOJO , hxManager ));
+}( MOJO , hxManager , isNaN ));
 
 
 
