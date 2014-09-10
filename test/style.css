@@ -15,11 +15,6 @@ body {
     margin: 10px;
 }
 
-#qunit {
-    float: right;
-    max-width: 800px;
-}
-
 #target {
     cursor: pointer;
     text-align: center;
@@ -43,10 +38,13 @@ body {
 }
 
 .tgt-container {
+    float: left;
     display: inline-block;
+    height: 180px;
     padding: 10px;
     padding-left: 0;
     margin-top: 80px;
+    margin-right: 10px;
     pointer-events: none;
 }
 
@@ -89,6 +87,30 @@ body {
     -webkit-box-shadow: 0 0 4px 1px #fff;
     -moz-box-shadow: 0 0 4px 1px #fff;
     box-shadow: 0 0 4px 1px #fff;
+}
+
+/* ================================================== */
+
+#qunit {
+    float: left;
+    max-width: 800px;
+    margin-bottom: 60px;
+}
+
+#qunit li > a:not(:hover) {
+    color: #4E5658;
+}
+
+#qunit li.running {
+    background-color: #c9cdd2;
+}
+
+#qunit li.running > a:not(:hover) {
+    color: #a63930;
+}
+
+#qunit li.running > ol {
+    display: none;
 }
 
 
