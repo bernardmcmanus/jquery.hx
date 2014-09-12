@@ -1,138 +1,102 @@
-hxManager.Helper = (function( Function , Object , Array ) {
-
-
-    var UNDEFINED;
-    var NULL = null;
-    var T = true;
-    var F = false;
-    var PROTOTYPE = 'prototype';
-
-
-    function compareArray( subject , array ) {
-        
-        if (!subject || !array) {
-            return F;
-        }
-
-        if (length( subject ) != length( array )) {
-            return F;
-        }
-
-        for (var i = 0, l = length( subject ); i < l; i++) {
-            if (isArr( subject[i] ) && isArr( array[i] )) {
-                if (!compareArray( subject[i] , array[i] )) {
-                    return F;
-                }
-            }
-            else if (subject[i] !== array[i]) {
-                return F;
-            }
-        }
-
-        return T;
-    }
-
-
-    function ensureArray( subject ) {
-        return (isArr( subject ) ? subject : [ subject ]);
-    }
-
-
-    function length( subject ) {
-        return subject.length;
-    }
-
-
-    function shift( subject ) {
-        return Array[PROTOTYPE].shift.call( subject );
-    }
-
-
-    function pop( subject ) {
-        return Array[PROTOTYPE].pop.call( subject );
-    }
-
-
-    function descriptor( getter , setter ) {
-        return {
-            get: getter,
-            set: setter
-        };
-    }
-
-
-    function del( subject , key ) {
-        delete subject[key];
-    }
-
-
-    function instOf( subject , constructor ) {
-        return (subject instanceof constructor);
-    }
-
-
-    function isFunc( subject ) {
-        return instOf( subject , Function );
-    }
-
-
-    function isObj( subject ) {
-        return instOf( subject , Object );
-    }
-
-
-    function isArr( subject ) {
-        return instOf( subject , Array );
-    }
-
-
-    function isNull( subject ) {
-        return subject === NULL;
-    }
-
-
-    function isUndef( subject ) {
-        return subject === UNDEFINED;
-    }
-
-
-    function test( subject , testval ) {
-        return subject.test( testval );
-    }
-
-
-    function treeSearch( branch , find ) {
-        for (var key in branch) {
-            if (key === find) {
-                return branch[key];
-            }
-            else if (find in branch[key]) {
-                return treeSearch( branch[key] , find );
-            }
-        }
-    }
+hxManager.Helper = (function() {
 
 
     return {
-        compareArray: compareArray,
-        ensureArray: ensureArray,
-        length: length,
-        shift: shift,
-        pop: pop,
-        descriptor: descriptor,
-        del: del,
-        instOf: instOf,
-        isFunc: isFunc,
-        isObj: isObj,
-        isArr: isArr,
-        isNull: isNull,
-        isUndef: isUndef,
-        test: test,
-        treeSearch: treeSearch
+
+        compareArray: function( subject , array ) {
+
+            var Helper = hxManager.Helper;
+            
+            if (!subject || !array) {
+                return false;
+            }
+
+            if (Helper.length( subject ) != Helper.length( array )) {
+                return false;
+            }
+
+            for (var i = 0, l = Helper.length( subject ); i < l; i++) {
+                if (Helper.isArr( subject[i] ) && Helper.isArr( array[i] )) {
+                    if (!Helper.compareArray( subject[i] , array[i] )) {
+                        return false;
+                    }
+                }
+                else if (subject[i] !== array[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        ensureArray: function( subject ) {
+            return (Array.isArray( subject ) ? subject : [ subject ]);
+        },
+
+        length: function( subject ) {
+            return subject.length;
+        },
+
+        shift: function( subject ) {
+            return Array.prototype.shift.call( subject );
+        },
+
+        pop: function( subject ) {
+            return Array.prototype.pop.call( subject );
+        },
+
+        descriptor: function( getter , setter ) {
+            return {
+                get: getter,
+                set: setter
+            };
+        },
+
+        has: function( subject , key ) {
+            return subject.hasOwnProperty( key );
+        },
+
+        del: function( subject , key ) {
+            delete subject[key];
+        },
+
+        instOf: function( subject , constructor ) {
+            return (subject instanceof constructor);
+        },
+
+        isFunc: function( subject ) {
+            return hxManager.Helper.instOf( subject , Function );
+        },
+
+        isArr: function( subject ) {
+            return hxManager.Helper.instOf( subject , Array );
+        },
+
+        isNull: function( subject ) {
+            return subject === null;
+        },
+
+        isUndef: function( subject ) {
+            return subject === undefined;
+        },
+
+        test: function( subject , testval ) {
+            return subject.test( testval );
+        },
+
+        treeSearch: function( branch , find ) {
+            for (var key in branch) {
+                if (key === find) {
+                    return branch[key];
+                }
+                else if (find in branch[key]) {
+                    return hxManager.Helper.treeSearch( branch[key] , find );
+                }
+            }
+        }
     };
 
-
-}( Function , Object , Array ));
+}());
 
 
 
