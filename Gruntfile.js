@@ -15,6 +15,7 @@ module.exports = function( grunt ) {
     var Script = [
         'js/hxManager.js',
         'js/shared/helper.js',
+        'js/shared/inject.js',
         'js/shared/config.js',
         'js/shared/vendorPatch.js',
         'js/shared/bezier.js',
