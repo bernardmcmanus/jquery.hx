@@ -10,6 +10,19 @@
     var DURATION = 200;
     var EASING = 'linear';
 
+    if ((/(iphone|ipad|ipod|android)/i).test( navigator.userAgent )) {
+        
+        window.onerror = function() {
+            //alert(JSON.stringify(arguments));
+            Solace.log(arguments);
+        };
+
+        $(window).on( 'hx.error' , function( e , err ) {
+            //alert(err.message);
+            Solace.log(err.message);
+        });
+    }
+
 // ======================================== //
 
     $.hx.defineProperty( 'blur' )
@@ -20,7 +33,6 @@
         .set( 'defaults' , [ 0 , 0 , 0 , 'transparent' ])
         .set( 'keymap' , [ 'x' , 'y' , 'blur' , 'color' ])
         .set( 'stringGetter' , dropShadowStringGetter );
-
 
     $.hx.defineProperty( 'clip' )
         .set( 'defaults' , [ 0 , 0 , 0 , 0 ])
@@ -183,6 +195,133 @@
                 var assertion = (value === 'all 0s ease 0s' || value === '' || value === 'none');
                 assert.ok( assertion , ( 'transition string ' + i ));
             });
+            resolve();
+        })
+        .done(function() {
+            assert.ok( true , 'ok' );
+            async(function() {
+                QUnit.start();
+            });
+        });
+    });
+
+    QUnit.asyncTest( 'null transitions' , function( assert ) {
+
+        var method = this.method;
+        var duration = this.duration;
+        var easing = this.easing;
+
+        var BCR = $(SELECTOR).toArray().map(function( element ) {
+            return element.getBoundingClientRect();
+        });
+
+        expect( BCR.length );
+
+        $(SELECTOR)
+        .hx()
+        [ method ]({
+            type: 'transform',
+            translate: {y: '+=50'},
+            scale: {x: '+=0.5', y: '+=0.5'},
+            duration: duration,
+            easing: easing
+        })
+        [ method ]({
+            type: 'transform',
+            translate: null,
+            scale: null,
+            duration: 0
+        })
+        .done(function() {
+
+            var that = this;
+
+            BCR.forEach(function( bcr , i ) {
+                var test = that[i].getBoundingClientRect();
+                assert.deepEqual( test , bcr , JSON.stringify( test ));
+            });
+
+            async(function() {
+                QUnit.start();
+            });
+        });
+    });
+
+    QUnit.asyncTest( 'persistent transforms' , function( assert ) {
+
+        var method = this.method;
+        var duration = this.duration;
+        var easing = this.easing;
+        var sampleIndex = Math.floor( Math.random() * $(SELECTOR).length );
+
+        expect( 7 );
+
+        $(SELECTOR)
+        .hx()
+        [ method ]({
+            type: 'transform',
+            translate: {x: '+=20'},
+            duration: duration,
+            easing: easing
+        })
+        .then(function( resolve ) {
+            var t = this.get( 'translate' )[sampleIndex];
+            assert.deepEqual( t , {x: 20, y: 0, z: 0} , JSON.stringify( t ));
+            resolve();
+        })
+        [ method ]({
+            type: 'transform',
+            translate: {y: '+=20'},
+            duration: duration,
+            easing: easing
+        })
+        .then(function( resolve ) {
+            var t = this.get( 'translate' )[sampleIndex];
+            assert.deepEqual( t , {x: 20, y: 20, z: 0} , JSON.stringify( t ));
+            resolve();
+        })
+        [ method ]({
+            type: 'transform',
+            translate: {z: '+=20'},
+            duration: duration,
+            easing: easing
+        })
+        .then(function( resolve ) {
+            var t = this.get( 'translate' )[sampleIndex];
+            assert.deepEqual( t , {x: 20, y: 20, z: 20} , JSON.stringify( t ));
+            resolve();
+        })
+        [ method ]({
+            type: 'transform',
+            translate: {x: 10},
+            duration: duration,
+            easing: easing
+        })
+        .then(function( resolve ) {
+            var t = this.get( 'translate' )[sampleIndex];
+            assert.deepEqual( t , {x: 10, y: 20, z: 20} , JSON.stringify( t ));
+            resolve();
+        })
+        [ method ]({
+            type: 'transform',
+            translate: {y: 10},
+            duration: duration,
+            easing: easing
+        })
+        .then(function( resolve ) {
+            var t = this.get( 'translate' )[sampleIndex];
+            assert.deepEqual( t , {x: 10, y: 10, z: 20} , JSON.stringify( t ));
+            resolve();
+        })
+        [ method ]({
+            type: 'transform',
+            translate: {z: 10},
+            duration: duration,
+            easing: easing
+        })
+        .then(function( resolve ) {
+            var t = this.get( 'translate' )[sampleIndex];
+            assert.deepEqual( t , {x: 10, y: 10, z: 10} , JSON.stringify( t ));
             resolve();
         })
         .done(function() {
@@ -543,37 +682,38 @@
         var duration = this.duration;
         var easing = this.easing;
 
-        var Search = [ 'opacity' , 'rotateZ' , 'translate' , 'blur' , 'dropShadow' , 'clip' ];
         var Expected = [];
         var sampleIndex = Math.floor( Math.random() * $(SELECTOR).length );
         var target = $(SELECTOR).get( sampleIndex );
 
-        Expected.push([
-            0.8,
-            45,
-            { x: 0, y: 135, z: 0 },
-            10,
-            { x: 10, y: 10, blur: 0, color: 'blue' },
-            (function() {
-                return {
-                    left: 0,
-                    top: 0,
-                    right: $(target).width(),
-                    bottom: $(target).height()
-                };
-            }())
-        ]);
+        Expected.push({
+            opacity: 0.8,
+            rotateZ: 45,
+            translate: { x: 0, y: 135, z: 0 },
+            blur: 10,
+            dropShadow: { x: 10, y: 10, blur: 0, color: '#512eff' },
+            clip: {
+                left: 0,
+                top: 0,
+                right: $(target).width(),
+                bottom: $(target).height()
+            }
+        });
 
-        Expected.push([
-            1,
-            0,
-            { x: 0, y: 0, z: 0 },
-            0,
-            { x: 0, y: 0, blur: 0, color: 'transparent' },
-            { left: 0, top: 0, right: 0, bottom: 0 }
-        ]);
+        Expected.push({
+            opacity: 1,
+            rotateZ: 0,
+            translate: { x: 0, y: 0, z: 0 },
+            blur: 0,
+            dropShadow: { x: 0, y: 0, blur: 0, color: 'transparent' },
+            clip: { left: 0, top: 0, right: 0, bottom: 0 }
+        });
 
-        expect( Search.length * Expected.length + 1 );
+        var count = Expected.reduce(function( prev , current ) {
+            return prev + Object.keys( current ).length;
+        }, 0);
+
+        expect( count + 1 );
 
         $(SELECTOR)
         .hx()
@@ -590,7 +730,7 @@
             {
                 type: 'filter',
                 blur: 10,
-                dropShadow: {x: 10, y: 10, color: 'blue'}
+                dropShadow: {x: 10, y: 10, color: '#512eff'}
             },
             {
                 type: 'clip',
@@ -651,9 +791,10 @@
 
             var expected = Expected.shift();
 
-            Search.forEach(function( key , i ) {
+            Object.keys( expected ).forEach(function( key ) {
+                var expval = expected[key];
                 var stored = $(target).hx( 'get' , key )[0];
-                assert.deepEqual( stored , expected[i] , ( key + ' = ' + stringify( expected[i] )));
+                assert.deepEqual( stored , expval , ( key + ' = ' + stringify( expval )));
             });
         }
 
@@ -736,8 +877,9 @@
                 easing: easing
             })
             .done(function() {
+                var that = this;
                 assert.ok( true , 'resolved: ' + i );
-                $(this).next().hx( 'resolve' );
+                $(that).next().hx( 'resolve' );
             });
         });
 
@@ -751,7 +893,7 @@
 
 // ======================================== //
 
-    /*QUnit.module( '#break' , {
+    QUnit.module( '#break' , {
         method: METHOD,
         duration: DURATION,
         easing: EASING,
@@ -801,7 +943,7 @@
                 });
             });
         });
-    });*/
+    });
 
 // ======================================== //
 
@@ -869,7 +1011,7 @@
 
 // ======================================== //
 
-    /*QUnit.module( '#clear' , {
+    QUnit.module( '#clear' , {
         method: METHOD,
         duration: DURATION,
         easing: EASING,
@@ -917,7 +1059,7 @@
                 QUnit.start();
             });
         });
-    });*/
+    });
 
 // ======================================== //
 
@@ -1113,6 +1255,107 @@
         });
     });
 
+    QUnit.asyncTest( 'paused' , function( assert ) {
+
+        var method = this.method;
+
+        if (method !== 'iterate') {
+            expect( 1 );
+            assert.ok( true , 'this test only applies to iterate' );
+            QUnit.start();
+            return;
+        }
+
+        var duration = this.duration;
+        var easing = this.easing;
+        var iterations = this.iterations;
+        var time, tcallback;
+        var sampleIndex = Math.floor( Math.random() * $(SELECTOR).length );
+        var n = 0;
+
+        expect( iterations + 1 );
+
+        for (var i = 0; i < iterations; i++) {
+            
+            $(SELECTOR)
+            .hx()
+            .then(function( resolve ) {
+                async(function( elapsed ) {
+                    time = elapsed;
+                    $(SELECTOR)
+                    .hx()
+                    .pause()
+                    .resolve( true );
+                }, ( duration / 2 ));
+                resolve();
+            })
+            [ method ]([
+                {
+                    type: 'transform',
+                    translate: {y: '+=20'},
+                    duration: duration,
+                    easing: easing,
+                    ref: '#resolve-paused'
+                },
+                function( elapsed ) {
+                    if (n === sampleIndex) {
+                        tcallback = elapsed;
+                    }
+                    n = ((n + 1) >= $(SELECTOR).length ? 0 : (n + 1));
+                }
+            ])
+            .done(function() {
+                assert.ok(( tcallback < time ) , 'timing callback < subscriber time' );
+            });
+        }
+
+        $(SELECTOR).hx( 'done' , function() {
+            assert.ok( true , 'done' );
+            async(function() {
+                QUnit.start();
+            });
+        });
+    });
+
+    QUnit.asyncTest( 'bean_done' , function( assert ) {
+
+        var method = this.method;
+        var duration = this.duration;
+        var easing = this.easing;
+        var iterations = this.iterations;
+
+        expect( 1 );
+
+        for (var i = 0; i < iterations; i++) {
+            
+            $(SELECTOR)
+            .hx()
+            .then(function( resolve ) {
+                async(function( elapsed ) {
+                    $(SELECTOR).hx( 'resolve' , true );
+                }, ( duration / 2 ));
+                resolve();
+            })
+            [ method ]({
+                type: 'transform',
+                translate: {y: '+=20'},
+                duration: duration,
+                easing: easing,
+                ref: '#resolve-bean_done',
+                done: function() {
+                    assert.ok( false , 'this should not be executed' );
+                }
+            });
+        }
+
+        $(SELECTOR).hx( 'done' , function() {
+            assert.ok( true , 'done' );
+            async(function() {
+                QUnit.start();
+            });
+        });
+    });
+
 // ======================================== //
 
     QUnit.module( '#race' , {
@@ -1213,13 +1456,14 @@
 // ======================================== //
 
     function async( callback , delay ) {
-        delay = delay || 20;
+        delay = delay || 30;
         var unsubscribe = $.hx.subscribe(function( elapsed ) {
             if (elapsed >= delay) {
                 callback( elapsed );
                 unsubscribe();
             }
         });
+        return unsubscribe;
     }
 
 

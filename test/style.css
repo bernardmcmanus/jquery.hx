@@ -46,6 +46,7 @@ body {
     margin-top: 80px;
     margin-right: 10px;
     pointer-events: none;
+    -webkit-perspective: 1000px;
 }
 
 .tgt-container > div {
@@ -56,7 +57,6 @@ body {
     height: 80px;
     line-height: 80px;
     pointer-events: auto;
-    -webkit-perspective: 1000px;
     -webkit-transform-style: preserve-3d;
     -moz-transform-style: preserve-3d;
     -o-transform-style: preserve-3d;
@@ -93,8 +93,9 @@ body {
 
 #qunit {
     float: left;
-    max-width: 800px;
+    max-width: 100%;
     margin-bottom: 60px;
+    overflow: hidden;
 }
 
 #qunit li > a:not(:hover) {
@@ -113,6 +114,26 @@ body {
     display: none;
 }
 
+#qunit .qunit-assert-list {
+    overflow: auto;
+}
+
+#qunit .qunit-assert-list .fail pre {
+    font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+    white-space: pre;
+}
+
+@media (max-width: 768px) {
+    #qunit-tests li {
+        padding: 1.4em 1em 1.4em 1em;
+    }
+}
+
+@media (max-width: 400px) {
+    #qunit .qunit-assert-list .fail pre {
+        font-size: 10px !important;
+    }
+}
 
 
 
