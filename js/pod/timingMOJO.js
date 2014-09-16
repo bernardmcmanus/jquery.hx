@@ -1,11 +1,22 @@
-hxManager.TimingMOJO = (function( Object , MOJO , hxManager ) {
+hxManager.TimingMOJO = hxManager.Inject(
+[
+    MOJO,
+    'VendorPatch',
+    'defProp',
+    'descriptor',
+    'length'
+],
+function(
+    MOJO,
+    VendorPatch,
+    defProp,
+    descriptor,
+    length
+){
 
 
     var TIMING = 'timing';
     var SUBSCRIBERS = 'subscribers';
-
-
-    var VendorPatch = hxManager.VendorPatch;
 
 
     var RAF = VendorPatch.RAF;
@@ -19,13 +30,13 @@ hxManager.TimingMOJO = (function( Object , MOJO , hxManager ) {
 
         MOJO.Construct( that );
 
-        Object.defineProperty( that , SUBSCRIBERS , {
-            get: function() {
-                return (that.handlers[ TIMING ] || []).length;
+        defProp( that , SUBSCRIBERS , descriptor(
+            function() {
+                return length( that.handlers[ TIMING ] || [] );
             }
-        });
+        ));
 
-        that.step = that._step.bind( that );
+        that.step = that.step.bind( that );
     }
 
 
@@ -56,7 +67,7 @@ hxManager.TimingMOJO = (function( Object , MOJO , hxManager ) {
             RAF( that.step );
         },
 
-        _step: function( timestamp ) {
+        step: function( timestamp ) {
 
             var that = this;
 
@@ -76,17 +87,7 @@ hxManager.TimingMOJO = (function( Object , MOJO , hxManager ) {
 
     return new TimingMOJO();
 
-    
-}( Object , MOJO , hxManager ));
-
-
-
-
-
-
-
-
-
+});
 
 
 

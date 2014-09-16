@@ -1,8 +1,14 @@
-hxManager.TransitionMOJO = (function( MOJO , hxManager ) {
-
-
-    var VendorPatch = hxManager.VendorPatch;
-    var Easing = hxManager.Easing;
+hxManager.TransitionMOJO = hxManager.Inject(
+[
+    MOJO,
+    'VendorPatch',
+    'Easing',
+],
+function(
+    MOJO,
+    VendorPatch,
+    Easing
+){
 
 
     function TransitionMOJO() {
@@ -59,17 +65,7 @@ hxManager.TransitionMOJO = (function( MOJO , hxManager ) {
 
     return TransitionMOJO;
 
-    
-}( MOJO , hxManager ));
-
-
-
-
-
-
-
-
-
+});
 
 
 

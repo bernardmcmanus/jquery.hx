@@ -1,17 +1,28 @@
-hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
-
-
-    var UNDEFINED;
-
-
-    var Helper = hxManager.Helper;
-    var StyleDefinition = hxManager.StyleDefinition;
-    var CSSProperty = hxManager.CSSProperty;
-
-
-    var TreeSearch = Helper.treeSearch;
-    var Del = Helper.del;
-    var isUndef = Helper.isUndef;
+hxManager.ComponentMOJO = hxManager.Inject(
+[
+    MOJO,
+    'StyleDefinition',
+    'CSSProperty',
+    'treeSearch',
+    'defProp',
+    'keys',
+    'indexOf',
+    'length',
+    'del',
+    'isUndef'
+],
+function(
+    MOJO,
+    StyleDefinition,
+    CSSProperty,
+    treeSearch,
+    defProp,
+    keys,
+    indexOf,
+    length,
+    del,
+    isUndef
+){
 
 
     function ComponentMOJO() {
@@ -21,7 +32,7 @@ hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
 
         MOJO.Construct( that );
 
-        Object.defineProperty( that , 'order' , {
+        defProp( that , 'order' , {
             value: order
         });
     }
@@ -52,7 +63,7 @@ hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
             var out = that;
 
             if (find) {
-                out = TreeSearch( that , find );
+                out = treeSearch( that , find );
             }
 
             if (isUndef( out )) {
@@ -81,9 +92,9 @@ hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
                 }
 
                 if (component[key].isDefault()) {
-                    Del( component , key );
-                    if (Object.keys( component ).length < 1) {
-                        Del( that , type );
+                    del( component , key );
+                    if (length(keys( component )) < 1) {
+                        del( that , type );
                     }
                 }
             });
@@ -112,7 +123,7 @@ hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
                 order[type] = newOrder;
             }
             else {
-                Del( order , type );
+                del( order , type );
             }
         },
 
@@ -126,10 +137,10 @@ hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
             var computedOrder = bean.order.computed;
             var newOrder = passedOrder.concat( storedOrder , computedOrder );
 
-            var componentKeys = Object.keys( that.getComponents( type ));
+            var componentKeys = keys( that.getComponents( type ));
 
             newOrder = newOrder.filter(function( property , i ) {
-                return (newOrder.indexOf( property ) === i && componentKeys.indexOf( property ) >= 0);
+                return (indexOf( newOrder , property ) === i && indexOf( componentKeys , property ) >= 0);
             });
 
             that.setOrder( type , newOrder );
@@ -139,9 +150,7 @@ hxManager.ComponentMOJO = (function( Object , MOJO , hxManager ) {
 
     return ComponentMOJO;
 
-    
-}( Object , MOJO , hxManager ));
-
+});
 
 
 

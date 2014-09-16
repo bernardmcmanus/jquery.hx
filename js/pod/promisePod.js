@@ -1,12 +1,18 @@
 hxManager.PromisePod = (function( MOJO ) {
 
 
+    var TYPE = 'TYPE';
+
+
     function PromisePod() {
         var that = this;
-        that.type = 'promise';
+        that.type = PromisePod[TYPE];
         that.attached = true;
         MOJO.Construct( that );
     }
+
+
+    PromisePod[TYPE] = 'promise';
 
 
     PromisePod.prototype = MOJO.Create({
@@ -39,3 +45,22 @@ hxManager.PromisePod = (function( MOJO ) {
 
     
 }( MOJO ));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

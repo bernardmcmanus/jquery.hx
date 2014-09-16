@@ -1,13 +1,21 @@
-hxManager.IteratorMOJO = (function( MOJO , hxManager , isNaN ) {
-
-
-    var TOLERANCE = ( 1000 / 240 );
-
-
-    var Easing = hxManager.Easing;
+hxManager.IteratorMOJO = hxManager.Inject(
+[
+    MOJO,
+    'Easing',
+    'Bean',
+    'isNum'
+],
+function(
+    MOJO,
+    Easing,
+    Bean,
+    isNum
+){
 
 
     var MOJO_Each = MOJO.Each;
+    var Calc = Bean.Calc;
+    var CheckTol = Bean.CheckTol;
 
 
     function IteratorMOJO( node , bean ) {
@@ -45,7 +53,7 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager , isNaN ) {
 
                     var value = val * (1 - percent);
                     
-                    if (isNumber( val )) {
+                    if (isNum( val )) {
                         current[i] = dest[i] - value;
                     }
                     else {
@@ -125,9 +133,9 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager , isNaN ) {
             var that = this;
             var duration = that.duration;
             var delay = that.delay;
-            var progress = calcProgress( elapsed , duration , delay );
+            var progress = Calc( elapsed , duration , delay );
 
-            if (isWithinTolerance( progress , 1 , TOLERANCE , duration , delay )) {
+            if (CheckTol( progress , 1 , duration , delay )) {
                 progress = 1;
             }
 
@@ -193,7 +201,7 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager , isNaN ) {
             MOJO_Each( current , function( property , key ) {
                 
                 diff[key] = property.map(function( val , i ) {
-                    return isNumber( val ) ? dest[key][i] - val : val;
+                    return isNum( val ) ? dest[key][i] - val : val;
                 });
             });
 
@@ -202,30 +210,9 @@ hxManager.IteratorMOJO = (function( MOJO , hxManager , isNaN ) {
     });
 
 
-    function isNumber( subject ) {
-        return !isNaN( subject * 1 );
-    }
-
-
-    function calcProgress( elapsed , duration , delay ) {
-        elapsed = elapsed - delay;
-        elapsed = elapsed < 0 ? 0 : elapsed;
-        return (elapsed / (duration || 1));
-    }
-
-
-    function isWithinTolerance( subject , target , tolerance , duration , delay ) {
-        return (target - subject) <= (tolerance / (duration + delay));
-    }
-
-
     return IteratorMOJO;
 
-    
-}( MOJO , hxManager , isNaN ));
-
-
-
+});
 
 
 

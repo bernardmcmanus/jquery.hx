@@ -1,7 +1,36 @@
-hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
+hxManager.DomNodeFactory = hxManager.Inject(
+[
+    Object,
+    jQuery,
+    MOJO,
+    'Config',
+    'VendorPatch',
+    'Queue',
+    'CSSProperty',
+    'ComponentMOJO',
+    'TransitionMOJO',
+    'ensureArray',
+    'isUndef',
+    'instOf',
+    'keys'
+],
+function(
+    Object,
+    $,
+    MOJO,
+    Config,
+    VendorPatch,
+    Queue,
+    CSSProperty,
+    ComponentMOJO,
+    TransitionMOJO,
+    ensureArray,
+    isUndef,
+    instOf,
+    keys
+){
 
 
-    var UNDEFINED;
     var BEAN_START = 'beanStart';
     var BEAN_COMPLETE = 'beanComplete';
     var CLUSTER_COMPLETE = 'clusterComplete';
@@ -11,27 +40,15 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
     var POD_CANCELED = 'podCanceled';
 
 
-    var Config = hxManager.Config;
-    var Helper = hxManager.Helper;
-    var VendorPatch = hxManager.VendorPatch;
-    var Queue = hxManager.Queue;
-    var CSSProperty = hxManager.CSSProperty;
-    var ComponentMOJO = hxManager.ComponentMOJO;
-    var TransitionMOJO = hxManager.TransitionMOJO;
-
-    
     var MOJO_Each = MOJO.Each;
     var PropertyMap = Config.properties;
-    var EnsureArray = Helper.ensureArray;
-    var isUndef = Helper.isUndef;
-    var instOf = Helper.instOf;
     var Prefix = VendorPatch.prefix;
 
 
     function DomNodeFactory( element ) {
 
         // if this is already an hx element, return it
-        if (element.$hx !== UNDEFINED) {
+        if (!isUndef( element.$hx )) {
             return element;
         }
 
@@ -58,11 +75,11 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
             var $hx = that.$hx;
             var style = {};
 
-            if (typeArray === UNDEFINED) {
-                typeArray = Object.keys( $hx.getOrder() );
+            if (isUndef( typeArray )) {
+                typeArray = keys( $hx.getOrder() );
             }
             else {
-                typeArray = EnsureArray( typeArray );
+                typeArray = ensureArray( typeArray );
             }
 
             typeArray.forEach(function( type ) {
@@ -80,8 +97,6 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
             var $hx = that.$hx;
             var args = arguments;
             var type, bean, pod;
-
-            //console.log(e.type);
 
             switch (e.type) {
 
@@ -251,8 +266,7 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         addPod: function( pod ) {
 
             var $hx = this.$hx;
-
-            [
+            var evt = [
                 BEAN_START,
                 BEAN_COMPLETE,
                 CLUSTER_COMPLETE,
@@ -260,11 +274,9 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
                 POD_RESUMED,
                 POD_COMPLETE,
                 POD_CANCELED
-            ]
-            .forEach(function( evt ) {
-                pod.when( evt , $hx );
-            });
+            ];
 
+            pod.when( evt , $hx );
             $hx.queue.pushPod( pod );
         },
 
@@ -279,14 +291,6 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
         getCurrentPod: function() {
             return this.$hx.queue.current;
         },
-
-        /*nextOfType: function( type ) {
-            return this.$hx.queue.nextOfType( type );
-        },*/
-
-        /*getLastPod: function() {
-            return this.$hx.queue.last;
-        },*/
 
         getPodCount: function( type ) {
             return this.$hx.queue.getPodCount( type );
@@ -313,8 +317,7 @@ hxManager.DomNodeFactory = (function( Object , $ , MOJO , hxManager ) {
 
     return DomNodeFactory;
 
-    
-}( Object , jQuery , MOJO , hxManager ));
+});
 
 
 

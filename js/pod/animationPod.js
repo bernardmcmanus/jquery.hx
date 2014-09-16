@@ -1,7 +1,23 @@
-hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
+hxManager.AnimationPod = hxManager.Inject(
+[
+    MOJO,
+    'SubscriberMOJO',
+    'NULL',
+    'defProps',
+    'descriptor',
+    'length'
+],
+function(
+    MOJO,
+    SubscriberMOJO,
+    NULL,
+    defProps,
+    descriptor,
+    length
+){
 
 
-    var NULL = null;
+    var TYPE = 'TYPE';
     var TIMING = 'timing';
     var TIMING_CALLBACK = 'timingCallback';
     var POD_COMPLETE = 'podComplete';
@@ -15,12 +31,6 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
     var PROGRESS = 'progress';
 
 
-    var Helper = hxManager.Helper;
-    var SubscriberMOJO = hxManager.SubscriberMOJO;
-
-
-    var Length = Helper.length;
-    var Descriptor = Helper.descriptor;
     var MOJO_Each = MOJO.Each;
 
 
@@ -28,7 +38,7 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
 
         var that = this;
 
-        that.type = 'animation';
+        that.type = AnimationPod[TYPE];
         that.node = node;
         that.beans = {};
 
@@ -40,29 +50,32 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
 
         MOJO.Construct( that );
 
-        Object.defineProperties( that , {
+        defProps( that , {
 
-            sequence: Descriptor(function() {
+            sequence: descriptor(function() {
                 var sequence = {};
                 MOJO_Each( that.beans , function( cluster , type ) {
-                    if (Length( cluster ) > 0) {
+                    if (length( cluster ) > 0) {
                         sequence[type] = cluster[0];
                     }
                 });
                 return sequence;
             }),
 
-            subscribers: Descriptor(function() {
-                return Length( that.handlers[ TIMING ] || [] );
+            subscribers: descriptor(function() {
+                return length( that.handlers[ TIMING ] || [] );
             }),
 
-            complete: Descriptor(function() {
+            complete: descriptor(function() {
                 return that.subscribers === 0;
             })
         });
 
         that._init();
     }
+
+
+    AnimationPod[TYPE] = 'animation';
 
 
     AnimationPod.prototype = MOJO.Create({
@@ -131,7 +144,7 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
             var that = this;
             var cluster = that._getBeans( type );
             cluster.shift();
-            return Length( cluster ) > 0;
+            return length( cluster ) > 0;
         },
 
         _getBeans: function( type ) {
@@ -274,16 +287,7 @@ hxManager.AnimationPod = (function( Object , MOJO , hxManager ) {
 
     return AnimationPod;
 
-    
-}( Object , MOJO , hxManager ));
-
-
-
-
-
-
-
-
+});
 
 
 

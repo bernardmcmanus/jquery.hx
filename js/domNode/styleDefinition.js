@@ -1,15 +1,23 @@
-hxManager.StyleDefinition = (function( Error , hxManager ) {
-
-
-    var Config = hxManager.Config;
-    var Helper = hxManager.Helper;
+hxManager.StyleDefinition = hxManager.Inject(
+[
+    Error,
+    'Config',
+    'ensureArray',
+    'pop',
+    'shift',
+    'isUndef'
+],
+function(
+    Error,
+    Config,
+    ensureArray,
+    pop,
+    shift,
+    isUndef
+){
 
 
     var PropertyMap = Config.properties;
-    var EnsureArray = Helper.ensureArray;
-    var Pop = Helper.pop;
-    var Shift = Helper.shift;
-    var isUndef = Helper.isUndef;
 
 
     function StyleDefinition() {
@@ -18,7 +26,7 @@ hxManager.StyleDefinition = (function( Error , hxManager ) {
         var args = arguments;
         var other = Properties.other;
 
-        that.name = Shift( args );
+        that.name = shift( args );
         that.pName = args[0] || that.name;
 
         that.defaults = other.defaults;
@@ -33,7 +41,7 @@ hxManager.StyleDefinition = (function( Error , hxManager ) {
     StyleDefinition.define = function() {
 
         var args = arguments;
-        var name = Pop( args );
+        var name = pop( args );
         var prettyName = args[0] || name;
         
         if (Properties[name]) {
@@ -64,7 +72,7 @@ hxManager.StyleDefinition = (function( Error , hxManager ) {
         set: function( key , value ) {
             var that = this;
             if (key === 'defaults' || key === 'keymap') {
-                value = EnsureArray( value );
+                value = ensureArray( value );
             }
             that[key] = value;
             return that;
@@ -87,16 +95,7 @@ hxManager.StyleDefinition = (function( Error , hxManager ) {
 
     return StyleDefinition;
 
-    
-}( Error , hxManager ));
-
-
-
-
-
-
-
-
+});
 
 
 

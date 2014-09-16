@@ -1,46 +1,48 @@
-(function( TypeError , $ , hxManager ) {
+hxManager.Inject(
+[
+    Error,
+    jQuery,
+    hxManager,
+    'shift',
+    'isFunc',
+    'is'
+],
+function(
+    Error,
+    $,
+    hxManager,
+    shift,
+    isFunc,
+    is
+){
 
-
-    var Helper = hxManager.Helper;
-
-
-    var Shift = Helper.shift;
-
-    
     $.fn.hx = function() {
 
         var args = arguments;
         var hxm = new hxManager( this );
         var out;
 
-        switch (typeof args[0]) {
+        if (is( args[0] , 'string' )) {
 
-            case 'string':
-                var method = Shift( args );
+            var method = shift( args );
 
-                if (typeof hxm[method] !== 'function') {
-                    throw new TypeError( method + ' is not a function.' );
-                }
+            if (!isFunc( hxm[method] )) {
+                throw new Error( method + ' is not a function.' );
+            }
 
-                out = hxm[method].apply( hxm , args );
-            break;
-
-            case 'object':
-                out = hxm.animate( args[0] );
-            break;
-
-            default:
-                out = hxm;
-            break;
+            out = hxm[method].apply( hxm , args );
+        }
+        else if (is( args[0] , 'object' )) {
+            out = hxm.animate( args[0] );
+        }
+        else {
+            out = hxm;
         }
 
         return out;
     };
 
- 
-}( TypeError , jQuery , hxManager ));
-
-
+});
 
 
 

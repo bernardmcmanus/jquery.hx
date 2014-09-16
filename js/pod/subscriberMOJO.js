@@ -1,12 +1,24 @@
-hxManager.SubscriberMOJO = (function( Object , MOJO , hxManager ) {
+hxManager.SubscriberMOJO = hxManager.Inject(
+[
+    MOJO,
+    'TimingMOJO',
+    'NULL',
+    'defProp',
+    'descriptor',
+    'length'
+],
+function(
+    MOJO,
+    TimingMOJO,
+    NULL,
+    defProp,
+    descriptor,
+    length
+){
 
 
-    var NULL = null;
     var TIMING = 'timing';
     var SUBSCRIBERS = 'subscribers';
-
-
-    var TimingMOJO = hxManager.TimingMOJO;
 
 
     function SubscriberMOJO() {
@@ -18,19 +30,19 @@ hxManager.SubscriberMOJO = (function( Object , MOJO , hxManager ) {
 
         MOJO.Construct( that );
 
-        Object.defineProperty( that , SUBSCRIBERS , {
-            get: function() {
-                return (that.handlers[ TIMING ] || []).length;
+        defProp( that , SUBSCRIBERS , descriptor(
+            function() {
+                return length( that.handlers[ TIMING ] || [] );
             }
-        });
+        ));
 
-        that.timing = that._timing.bind( that );
+        that[TIMING] = that[TIMING].bind( that );
     }
 
 
     SubscriberMOJO.prototype = MOJO.Create({
 
-        _timing: function( e , timestamp ) {
+        timing: function( e , timestamp ) {
 
             var that = this;
             var diff = timestamp - (that.time || timestamp);
@@ -51,28 +63,18 @@ hxManager.SubscriberMOJO = (function( Object , MOJO , hxManager ) {
         },
 
         subscribe: function() {
-            TimingMOJO.subscribe( this.timing );
+            TimingMOJO.subscribe( this[TIMING] );
         },
 
         destroy: function() {
-            TimingMOJO.unsubscribe( this.timing );
+            TimingMOJO.unsubscribe( this[TIMING] );
         }
     });
 
 
     return SubscriberMOJO;
 
-    
-}( Object , MOJO , hxManager ));
-
-
-
-
-
-
-
-
-
+});
 
 
 

@@ -1,48 +1,89 @@
-hxManager.Helper = (function() {
+hxManager.Helper = (function( Function , Object , Array , isNaN ) {
+
+
+    var UNDEFINED;
+    var NULL = null;
+    var PROTOTYPE = 'prototype';
+    var CALL = 'call';
+
+
+    function compareArray( subject , array ) {
+        
+        if (!subject || !array) {
+            return false;
+        }
+
+        if (length( subject ) != length( array )) {
+            return false;
+        }
+
+        for (var i = 0, l = length( subject ); i < l; i++) {
+            if (isArr( subject[i] ) && isArr( array[i] )) {
+                if (!compareArray( subject[i] , array[i] )) {
+                    return false;
+                }
+            }
+            else if (subject[i] !== array[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    function length( subject ) {
+        return subject.length;
+    }
+
+
+    function isArr( subject ) {
+        return instOf( subject , Array );
+    }
+
+
+    function instOf( subject , constructor ) {
+        return (subject instanceof constructor);
+    }
+
+
+    function is( subject , type ) {
+        return typeof subject === type;
+    }
+
+
+    function treeSearch( branch , find ) {
+        for (var key in branch) {
+            if (key === find) {
+                return branch[key];
+            }
+            else if (find in branch[key]) {
+                return treeSearch( branch[key] , find );
+            }
+        }
+    }
 
 
     return {
 
-        compareArray: function( subject , array ) {
+        NULL: NULL,
 
-            var Helper = hxManager.Helper;
-            
-            if (!subject || !array) {
-                return false;
-            }
+        PROTOTYPE: PROTOTYPE,
 
-            if (Helper.length( subject ) != Helper.length( array )) {
-                return false;
-            }
-
-            for (var i = 0, l = Helper.length( subject ); i < l; i++) {
-                if (Helper.isArr( subject[i] ) && Helper.isArr( array[i] )) {
-                    if (!Helper.compareArray( subject[i] , array[i] )) {
-                        return false;
-                    }
-                }
-                else if (subject[i] !== array[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        },
+        compareArray: compareArray,
 
         ensureArray: function( subject ) {
-            return (Array.isArray( subject ) ? subject : [ subject ]);
+            return (isArr( subject ) ? subject : [ subject ]);
         },
 
-        length: function( subject ) {
-            return subject.length;
-        },
+        length: length,
 
         shift: function( subject ) {
-            return Array.prototype.shift.call( subject );
+            return Array[ PROTOTYPE ].shift[ CALL ]( subject );
         },
 
         pop: function( subject ) {
-            return Array.prototype.pop.call( subject );
+            return Array[ PROTOTYPE ].pop[ CALL ]( subject );
         },
 
         descriptor: function( getter , setter ) {
@@ -52,51 +93,69 @@ hxManager.Helper = (function() {
             };
         },
 
+        indexOf: function( subject , search ) {
+            return subject.indexOf( search );
+        },
+
+        keys: function( subject ) {
+            return Object.keys( subject );
+        },
+
+        create: function( subject ) {
+            return Object.create( subject );
+        },
+
+        defProp: function( subject , name , descriptor ) {
+            Object.defineProperty( subject , name , descriptor );
+        },
+
+        defProps: function( subject , props ) {
+            Object.defineProperties( subject , props );
+        },
+
         has: function( subject , key ) {
             return subject.hasOwnProperty( key );
         },
+
+        is: is,
 
         del: function( subject , key ) {
             delete subject[key];
         },
 
-        instOf: function( subject , constructor ) {
-            return (subject instanceof constructor);
-        },
+        instOf: instOf,
 
         isFunc: function( subject ) {
-            return hxManager.Helper.instOf( subject , Function );
+            return instOf( subject , Function );
         },
 
-        isArr: function( subject ) {
-            return hxManager.Helper.instOf( subject , Array );
+        isObj: function( subject , strict ) {
+            return strict ? instOf( subject , Object ) : is( subject , 'object' );
+        },
+
+        isArr: isArr,
+
+        isNum: function( subject ) {
+            return !isNaN( subject * 1 );
         },
 
         isNull: function( subject ) {
-            return subject === null;
+            return subject === NULL;
         },
 
         isUndef: function( subject ) {
-            return subject === undefined;
+            return subject === UNDEFINED;
         },
 
         test: function( subject , testval ) {
             return subject.test( testval );
         },
 
-        treeSearch: function( branch , find ) {
-            for (var key in branch) {
-                if (key === find) {
-                    return branch[key];
-                }
-                else if (find in branch[key]) {
-                    return hxManager.Helper.treeSearch( branch[key] , find );
-                }
-            }
-        }
+        treeSearch: treeSearch
     };
 
-}());
+
+}( Function , Object , Array , isNaN ));
 
 
 

@@ -1,36 +1,36 @@
-/*jshint -W061 */
-hxManager.Inject = (function( window , hxManager ) {
+hxManager.Inject = (function( hxManager ) {
 
 
     var Helper = hxManager.Helper;
+    var pop = Helper.pop;
+    var has = Helper.has;
+    var is = Helper.is;
 
 
     function Inject() {
-        
+
         var that = this;
         var args = arguments;
-        var callback = Helper.pop( args );
-        var imports = Helper.pop( args ) || parse( callback );
+        var callback = pop( args );
+        var imports = pop( args ) || parse( callback );
 
         imports = imports.map(function( subject ) {
             
-            var func;
+            var out;
 
-            if (typeof subject === 'string') {
-                
-                if (Helper.has( Helper , subject )) {
-                    func = Helper[subject];
+            if (is( subject , 'string' )) {
+                if (has( Helper , subject )) {
+                    out = Helper[subject];
                 }
                 else {
-                    func = hxManager[subject];
+                    out = hxManager[subject];
                 }
-
-                eval( 'var ' + subject + ' = ' + func.toString() );
-                return eval( subject );
             }
             else {
-                return subject;
+                out = subject;
             }
+
+            return out;
         });
 
         return callback.apply( null , imports );
@@ -52,7 +52,7 @@ hxManager.Inject = (function( window , hxManager ) {
     return Inject;
 
 
-}( window , hxManager ));
+}( hxManager ));
 
 
 

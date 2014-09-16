@@ -1,23 +1,30 @@
-hxManager.Easing = (function( hxManager ) {
+hxManager.Easing = hxManager.Inject(
+[
+    'Bezier',
+    'NULL',
+    'is'
+],
+function(
+    Bezier,
+    NULL,
+    is
+){
 
-
-    var Bezier = hxManager.Bezier;
-
-    
     function Easing( definition ) {
 
-        switch (typeof definition) {
+        var out;
 
-            case 'string':
-                return Bezier.retrieve( definition );
-
-            case 'object':
-                return new Bezier( null , definition );
+        if (is( definition , 'string' )) {
+            out = Bezier.retrieve( definition );
         }
+        else if (is( definition , 'object' )) {
+            out =  new Bezier( NULL , definition );
+        }
+
+        return out;
     }
 
 
     return Easing;
 
-
-}( hxManager ));
+});

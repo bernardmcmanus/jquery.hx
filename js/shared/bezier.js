@@ -1,22 +1,37 @@
-hxManager.Bezier = (function( Object , Array , Error , BezierEasing , hxManager ) {
-
-
-    var UNDEFINED;
-    var NULL = null;
-
-
-    var Helper = hxManager.Helper;
-    var VendorPatch = hxManager.VendorPatch;
-
-
-    var Descriptor = Helper.descriptor;
+hxManager.Bezier = hxManager.Inject(
+[
+    Array,
+    Error,
+    BezierEasing,
+    'VendorPatch',
+    'PROTOTYPE',
+    'NULL',
+    'create',
+    'defProps',
+    'descriptor',
+    'isUndef',
+    'length'
+],
+function(
+    Array,
+    Error,
+    BezierEasing,
+    VendorPatch,
+    PROTOTYPE,
+    NULL,
+    create,
+    defProps,
+    descriptor,
+    isUndef,
+    length
+){
 
 
     function Bezier( name , points ) {
 
         var that = this;
 
-        for (var i = 0; i < points.length; i++) {
+        for (var i = 0; i < length( points ); i++) {
             that.push( points[i] );
         }
 
@@ -26,11 +41,11 @@ hxManager.Bezier = (function( Object , Array , Error , BezierEasing , hxManager 
 
         var easeFunction = BezierEasing.apply( NULL , that );
 
-        Object.defineProperties( that , {
+        defProps( that , {
 
             name: {value: name},
 
-            string: Descriptor(function() {
+            string: descriptor(function() {
                 return 'cubic-bezier(' + that.join( ',' ) + ')';
             }),
 
@@ -41,7 +56,7 @@ hxManager.Bezier = (function( Object , Array , Error , BezierEasing , hxManager 
 
     Bezier.define = function( name , points ) {
 
-        if (Definitions[name] !== UNDEFINED) {
+        if (!isUndef( Definitions[name] )) {
             throw new Error( name + ' is already defined' );
         }
         
@@ -55,7 +70,7 @@ hxManager.Bezier = (function( Object , Array , Error , BezierEasing , hxManager 
     };
 
 
-    var Bezier_prototype = (Bezier.prototype = Object.create( Array.prototype ));
+    var Bezier_prototype = (Bezier[PROTOTYPE] = create( Array[PROTOTYPE] ));
 
 
     Bezier_prototype.clamp = function() {
@@ -73,16 +88,7 @@ hxManager.Bezier = (function( Object , Array , Error , BezierEasing , hxManager 
 
     return Bezier;
 
-    
-}( Object , Array , Error , BezierEasing , hxManager ));
-
-
-
-
-
-
-
-
+});
 
 
 

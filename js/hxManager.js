@@ -1,446 +1,416 @@
-window.hxManager = (function( Object , Error , $ , Promise ) {
 
 
-    var PROTOTYPE = 'prototype';
-    var PROMISE = 'promise';
+window.hxManager = function( j ) {
+    var that = this;
+    return that._init( that , j );
+};
 
 
-    function hxManager( j ) {
+setTimeout(function() {
 
-        if (instOf( j , hxManager )) {
-            return j;
-        }
+    hxManager.Inject(
+    [
+        document,
+        Error,
+        jQuery,
+        Promise,
+        MOJO,
+        hxManager,
+        'DomNodeFactory',
+        'PodFactory',
+        'Bean',
+        'IteratorMOJO',
+        'defProp',
+        'create',
+        'descriptor',
+        'ensureArray',
+        'isFunc',
+        'isUndef',
+        'instOf',
+        'length',
+        'PROTOTYPE'
+    ],
+    function(
+        document,
+        Error,
+        $,
+        Promise,
+        MOJO,
+        hxManager,
+        DomNodeFactory,
+        PodFactory,
+        Bean,
+        IteratorMOJO,
+        defProp,
+        create,
+        descriptor,
+        ensureArray,
+        isFunc,
+        isUndef,
+        instOf,
+        length,
+        PROTOTYPE
+    ){
 
-        var that = this;
+        var hxManager_prototype = (hxManager[PROTOTYPE] = create( $[PROTOTYPE] ));
 
-        j.each(function( i ) {
-            that[i] = hxManager.DomNodeFactory( j[i] );
-        });
 
-        Object.defineProperty( that , 'length' , {
-            get: function() {
-                return length( j );
+        hxManager_prototype._init = function( that , j ) {
+
+            if (instOf( j , hxManager )) {
+                return j;
             }
-        });
-    }
 
+            j.each(function( i ) {
+                that[i] = DomNodeFactory( j[i] );
+            });
 
-    var hxManager_prototype = (hxManager[PROTOTYPE] = Object.create( $[PROTOTYPE] ));
-
-
-    hxManager_prototype.animate = function( bundle ) {
-
-        var that = this;
-
-        that.eachNode(function( $hx , node , i ) {
-
-            var pod = PodFactory( node , 'animation' );
-
-            ensureArray( bundle ).forEach(function( seed ) {
-
-                if (isFunc( seed )) {
-                    pod.addCallback(
-                        bind( that , seed )
-                    );
+            defProp( that , 'length' , descriptor(
+                function() {
+                    return length( j );
                 }
-                else {
-                    var bean = Bean( seed , node , i );
-                    pod.addBean( bean );
-                }
-            });
-
-            $hx.addPod( pod );
-        });
-
-        return that;
-    };
+            ));
+        };
 
 
-    hxManager_prototype.iterate = function( bundle ) {
+        hxManager_prototype.animate = function( bundle ) {
 
-        var that = this;
+            var that = this;
 
-        that.eachNode(function( $hx , node , i ) {
+            return eachNode( that , function( $hx , node , i ) {
 
-            var pod = PodFactory( node , 'precision' );
+                var pod = PodFactory( node , 'animation' );
 
-            ensureArray( bundle ).forEach(function( seed ) {
+                ensureArray( bundle ).forEach(function( seed ) {
 
-                if (isFunc( seed )) {
-                    pod.addCallback(
-                        bind( that , seed )
-                    );
-                }
-                else {
-                    var bean = Bean( seed , node , i );
-                    var iterator = new hxManager.IteratorMOJO( node , bean );
-                    pod.addBean( iterator );
-                }
-            });
-
-            $hx.addPod( pod );
-        });
-
-        return that;
-    };
-
-
-    hxManager_prototype.promise = function( func , method ) {
-
-        method = method || 'all';
-
-        var that = this;
-        var micro = [];
-        var pods = [];
-
-        that.eachNode(function( $hx , node ) {
-
-            // create a promisePod for each dom node
-            var pod = PodFactory( node , PROMISE );
-
-            // when the pod reaches its turn in the queue, resolve its promise
-            pod.when( 'promiseMade' , function() {
-                pod.resolvePromise();
-            });
-
-            // create a microPromise for each pod
-            var microPromise = new Promise(function( resolve ) {
-                // when the pod is resolved, resolve the microPromise
-                pod.when( 'promiseResolved' , resolve );
-            });
-
-            // add the promise to the dom node queue
-            $hx.addPod( pod );
-
-            pods.push( pod );
-            micro.push( microPromise );
-        });
-
-        // when the appropriate microPromises have been resolved, create the macroPromise
-        Promise[ method ]( micro ).then(function() {
-
-            var macroPromise = new Promise(
-                bind( that , func )
-            );
-
-            // if the macroPromise is resolved, resolve the pods
-            macroPromise.then(function() {
-                pods.forEach(function( pod ) {
-                    pod.resolvePod();
-                });
-            });
-
-            // otherwise, clear the queue so we can start again
-            macroPromise.catch(function( err ) {
-                that.clear();
-                if (instOf( err , Error )) {
-                    $.hx.error( err );
-                }
-            });
-        });
-
-        return that;
-    };
-
-
-    hxManager_prototype.eachNode = function( callback ) {
-        var that = this;
-        toArray( that ).forEach(function( node , i ) {
-            callback( node.$hx , node , i );
-        });
-        return that;
-    };
-
-
-    hxManager_prototype.pause = function() {
-        return this._precisionPodAction( 'pause' );
-    };
-
-
-    hxManager_prototype.resume = function() {
-        return this._precisionPodAction( 'resume' );
-    };
-
-
-    hxManager_prototype._precisionPodAction = function( method , attempts ) {
-
-        attempts = attempts || 0;
-
-        var that = this;
-
-        var pods = toArray( that )
-            .map(function( node ) {
-                return node.$hx.getCurrentPod();
-            })
-            .filter(function( pod ) {
-                return pod.type === 'precision';
-            });
-
-        if (length( pods ) !== length( that ) && attempts < 10) {
-            var unsubscribe = subscribe(function() {
-                attempts++;
-                unsubscribe();
-                that._precisionPodAction( method , attempts );
-            });
-        }
-        else {
-            pods.forEach(function( pod ) {
-                pod[ method ]();
-            });
-        }
-
-        return that;
-    };
-
-
-    hxManager_prototype.paint = function( type ) {
-
-        var that = this;
-        
-        that.eachNode(function( $hx ) {
-            $hx.paint( type );
-        });
-
-        return that;
-    };
-    
-
-    hxManager_prototype.reset = function( type ) {
-
-        var that = this;
-
-        that.eachNode(function( $hx ) {
-            $hx.resetComponents( type );
-        });
-
-        return that;
-    };
-
-
-    hxManager_prototype.then = function( func ) {
-        return this.promise( func );
-    };
-
-
-    hxManager_prototype.race = function( func ) {
-        return this.promise( func , 'race' );
-    };
-
-
-    hxManager_prototype.defer = function( time ) {
-        return this.promise(function( resolve ) {
-            if (time) {
-                var unsubscribe = subscribe(function( elapsed ) {
-                    if (elapsed >= time) {
-                        unsubscribe();
-                        resolve();
+                    if (isFunc( seed )) {
+                        pod.addCallback(
+                            bind( that , seed )
+                        );
+                    }
+                    else {
+                        var bean = new Bean( seed , node , i );
+                        pod.addBean( bean );
                     }
                 });
-            }
-        });
-    };
 
-
-    hxManager_prototype.update = function( bundle ) {
-
-        // update a node's components without applying the transition
-
-        var that = this;
-
-        ensureArray( bundle ).forEach(function( seed ) {
-
-            that.eachNode(function( $hx , node , i ) {
-
-                var bean = Bean( seed , node , i );
-                $hx.updateComponent( bean );
+                $hx.addPod( pod );
             });
-        });
-
-        return that;
-    };
+        };
 
 
-    hxManager_prototype.resolve = function( all ) {
+        hxManager_prototype.iterate = function( bundle ) {
 
-        var that = this;
+            var that = this;
 
-        // all controls whether all pod types or only promise pods will be resolved
-        all = (!isUndef( all ) ? all : false);
+            return eachNode( that , function( $hx , node , i ) {
 
-        // force resolve the current pod in each queue
-        that.eachNode(function( $hx ) {
+                var pod = PodFactory( node , 'precision' );
 
-            var pod = $hx.getCurrentPod();
+                ensureArray( bundle ).forEach(function( seed ) {
 
-            if (pod && (all || (!all && pod.type === PROMISE))) {
-                pod.resolvePod();
+                    if (isFunc( seed )) {
+                        pod.addCallback(
+                            bind( that , seed )
+                        );
+                    }
+                    else {
+                        var bean = new Bean( seed , node , i );
+                        var iterator = new IteratorMOJO( node , bean );
+                        pod.addBean( iterator );
+                    }
+                });
+
+                $hx.addPod( pod );
+            });
+        };
+
+
+        hxManager_prototype.promise = function( func , method ) {
+
+            method = method || 'all';
+
+            var that = this;
+            var micro = [];
+            var pods = [];
+
+            eachNode( that , function( $hx , node ) {
+
+                // create a promisePod for each dom node
+                var pod = PodFactory( node , 'promise' );
+
+                // when the pod reaches its turn in the queue, resolve its promise
+                pod.when( 'promiseMade' , function() {
+                    pod.resolvePromise();
+                });
+
+                // create a microPromise for each pod
+                var microPromise = new Promise(function( resolve ) {
+                    // when the pod is resolved, resolve the microPromise
+                    pod.when( 'promiseResolved' , resolve );
+                });
+
+                // add the promise to the dom node queue
+                $hx.addPod( pod );
+
+                pods.push( pod );
+                micro.push( microPromise );
+            });
+
+            // when the appropriate microPromises have been resolved, create the macroPromise
+            Promise[ method ]( micro ).then(function() {
+
+                var macroPromise = new Promise(
+                    bind( that , func )
+                );
+
+                // if the macroPromise is resolved, resolve the pods
+                macroPromise.then(function() {
+                    pods.forEach(function( pod ) {
+                        pod.resolvePod();
+                    });
+                });
+
+                // otherwise, clear the queue so we can start again
+                macroPromise.catch(function( err ) {
+                    that.clear();
+                    if (instOf( err , Error )) {
+                        $.hx.error( err );
+                    }
+                });
+            });
+
+            return that;
+        };
+
+
+        hxManager_prototype.pause = function() {
+            return this._precAction( 'pause' );
+        };
+
+
+        hxManager_prototype.resume = function() {
+            return this._precAction( 'resume' );
+        };
+
+
+        hxManager_prototype._precAction = function( method , attempts ) {
+
+            attempts = attempts || 0;
+
+            var that = this;
+
+            var pods = toArray( that )
+                .map(function( node ) {
+                    return node.$hx.getCurrentPod();
+                })
+                .filter(function( pod ) {
+                    return pod.type === 'precision';
+                });
+
+            if (length( pods ) !== length( that ) && attempts < 10) {
+                var unsubscribe = subscribe(function() {
+                    attempts++;
+                    unsubscribe();
+                    that._precAction( method , attempts );
+                });
             }
-        });
-
-        return that;
-    };
-
-
-    hxManager_prototype.detach = function() {
-
-        // detach callbacks from the subscriber module,
-        // but still allow the pod to continue running
-
-        var that = this;
-        
-        that.eachNode(function( $hx ) {
-            var pod = $hx.getCurrentPod();
-            if (pod) {
-                pod.detach();
+            else {
+                pods.forEach(function( pod ) {
+                    pod[ method ]();
+                });
             }
-        });
 
-        return that;
-    };
+            return that;
+        };
 
 
-    hxManager_prototype.clear = function() {
-
-        // clear all pods in each queue
-
-        var that = this;
+        hxManager_prototype.paint = function( type ) {            
+            return eachNode( this , function( $hx ) {
+                $hx.paint( type );
+            });
+        };
         
-        that.eachNode(function( $hx ) {
-            $hx.clearQueue();
-        });
 
-        return that;
-    };
-
-
-    hxManager_prototype.break = function() {
-
-        var that = this;
-        
-        // clear all but the current pod in each queue
-        that.eachNode(function( $hx ) {
-            $hx.clearQueue( false );
-        });
-
-        // resolve any remaining promise pods
-        return that.resolve();
-    };
+        hxManager_prototype.reset = function( type ) {
+            return eachNode( this , function( $hx ) {
+                $hx.resetComponents( type );
+            });
+        };
 
 
-    hxManager_prototype.zero = function( hxArgs ) {
-
-        var that = this;
-
-        // update the stored components
-        that.update( hxArgs );
-
-        // remove any stored transitions
-        that.eachNode(function( $hx ) {
-            $hx.resetTransition();
-            $hx.applyTransition();
-        });
-
-        // run paint
-        return that.paint();
-    };
+        hxManager_prototype.then = function( func ) {
+            return this.promise( func );
+        };
 
 
-    // !!! done does not return the hxManager instance
-    hxManager_prototype.done = function( func ) {
-
-        var that = this;
-
-        that.promise(function( resolve ) {
-            (func || function() {}).call( that );
-            resolve();
-        });
-    };
+        hxManager_prototype.race = function( func ) {
+            return this.promise( func , 'race' );
+        };
 
 
-    // !!! get does not return the hxManager instance
-    hxManager_prototype.get = function( find , pretty ) {
-        return toArray( this ).map(function( node ) {
-            return node.$hx.getComponents( find , pretty );
-        });
-    };
+        hxManager_prototype.defer = function( time ) {
+            return this.promise(function( resolve ) {
+                if (time) {
+                    var unsubscribe = subscribe(function( elapsed ) {
+                        if (elapsed >= time) {
+                            unsubscribe();
+                            resolve();
+                        }
+                    });
+                }
+            });
+        };
 
 
-    // !!! clean does not return the hxManager instance
-    hxManager_prototype.cleanup = function() {
+        hxManager_prototype.update = function( bundle ) {
 
-        this.eachNode(function( $hx ) {
-            $hx.cleanup();
-        });
-    };
+            // update a node's components without applying the transition
 
+            var that = this;
 
-    function Bean( seed , node , i ) {
-        return new hxManager.Bean( seed , node , i );
-    }
+            ensureArray( bundle ).forEach(function( seed ) {
 
+                eachNode( that , function( $hx , node , i ) {
 
-    function PodFactory( node , type ) {
-        return hxManager.PodFactory( node , type );
-    }
+                    var bean = new Bean( seed , node , i );
+                    $hx.updateComponent( bean );
+                });
+            });
 
-
-    function subscribe( callback ) {
-        return $.hx.subscribe( callback );
-    }
+            return that;
+        };
 
 
-    function bind( hxm , func ) {
-        return func.bind( hxm );
-    }
+        hxManager_prototype.resolve = function( all ) {
+
+            // all controls whether all pod types or only promise pods will be resolved
+            all = (!isUndef( all ) ? all : false);
+
+            // force resolve the current pod in each queue
+            return eachNode( this , function( $hx ) {
+
+                var pod = $hx.getCurrentPod();
+
+                if (pod && (all || (!all && pod.type === 'promise'))) {
+                    pod.resolvePod();
+                }
+            });
+        };
 
 
-    function toArray( hxm ) {
-        return hxm.toArray();
-    }
+        hxManager_prototype.detach = function() {
+
+            // detach callbacks from the subscriber module,
+            // but still allow the pod to continue running
+            
+            return eachNode( this , function( $hx ) {
+                var pod = $hx.getCurrentPod();
+                if (pod) {
+                    pod.detach();
+                }
+            });
+        };
 
 
-    function Helper() {
-        return hxManager.Helper;
-    }
+        hxManager_prototype.clear = function() {
+
+            // clear all pods in each queue
+            
+            return eachNode( this , function( $hx ) {
+                $hx.clearQueue();
+            });
+        };
 
 
-    function ensureArray( bundle ) {
-        return Helper().ensureArray( bundle );
-    }
+        hxManager_prototype.break = function() {
+
+            var that = this;
+            
+            // clear all but the current pod in each queue
+            eachNode( that , function( $hx ) {
+                $hx.clearQueue( false );
+            });
+
+            // resolve any remaining promise pods
+            return that.resolve();
+        };
 
 
-    function instOf( subject , constructor ) {
-        return Helper().instOf( subject , constructor );
-    }
+        hxManager_prototype.zero = function( hxArgs ) {
+
+            var that = this;
+
+            // update the stored components
+            that.update( hxArgs );
+
+            // remove any stored transitions
+            eachNode( that , function( $hx ) {
+                $hx.resetTransition();
+                $hx.applyTransition();
+            });
+
+            // run paint
+            return that.paint();
+        };
 
 
-    function isFunc( subject ) {
-        return Helper().isFunc( subject );
-    }
+        // !!! done does not return the hxManager instance
+        hxManager_prototype.done = function( func ) {
+
+            var that = this;
+
+            that.promise(function( resolve ) {
+                (func || function() {}).call( that );
+                resolve();
+            });
+        };
 
 
-    function isUndef( subject ) {
-        return Helper().isUndef( subject );
-    }
+        // !!! get does not return the hxManager instance
+        hxManager_prototype.get = function( find , pretty ) {
+            return toArray( this ).map(function( node ) {
+                return node.$hx.getComponents( find , pretty );
+            });
+        };
 
 
-    function length( subject ) {
-        return Helper().length( subject );
-    }
+        // !!! clean does not return the hxManager instance
+        hxManager_prototype.cleanup = function() {
+            eachNode( this , function( $hx ) {
+                $hx.cleanup();
+            });
+        };
 
 
-    return hxManager;
-
-    
-}( Object , Error , jQuery , Promise ));
+        $(document).trigger( 'hx.ready' );
 
 
+        function eachNode( hxm , callback ) {
+            toArray( hxm ).forEach(function( node , i ) {
+                callback( node.$hx , node , i );
+            });
+            return hxm;
+        }
 
 
+        function subscribe( callback ) {
+            return $.hx.subscribe( callback );
+        }
 
 
+        function bind( hxm , func ) {
+            return func.bind( hxm );
+        }
 
 
+        function toArray( hxm ) {
+            return hxm.toArray();
+        }
+
+    });
+
+}, 1);
 
 
 

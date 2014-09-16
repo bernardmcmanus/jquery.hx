@@ -1,7 +1,23 @@
-hxManager.PrecisionPod = (function( Object , MOJO , hxManager ) {
+hxManager.PrecisionPod = hxManager.Inject(
+[
+    MOJO,
+    'SubscriberMOJO',
+    'NULL',
+    'defProps',
+    'descriptor',
+    'length'
+],
+function(
+    MOJO,
+    SubscriberMOJO,
+    NULL,
+    defProps,
+    descriptor,
+    length
+){
 
 
-    var NULL = null;
+    var TYPE = 'TYPE';
     var TIMING = 'timing';
     var TIMING_CALLBACK = 'timingCallback';
     var POD_PAUSED = 'podPaused';
@@ -17,19 +33,11 @@ hxManager.PrecisionPod = (function( Object , MOJO , hxManager ) {
     var PROGRESS = 'progress';
 
 
-    var Helper = hxManager.Helper;
-    var SubscriberMOJO = hxManager.SubscriberMOJO;
-
-
-    var Descriptor = Helper.descriptor;
-    var Length = Helper.length;
-
-
     function PrecisionPod() {
 
         var that = this;
 
-        that.type = 'precision';
+        that.type = PrecisionPod[TYPE];
         that.forced = false;
         that.paused = false;
         that.buffer = 0;
@@ -38,19 +46,22 @@ hxManager.PrecisionPod = (function( Object , MOJO , hxManager ) {
 
         MOJO.Construct( that );
 
-        Object.defineProperties( that , {
+        defProps( that , {
 
-            subscribers: Descriptor(function() {
-                return Length( that.handlers[ TIMING ] || [] );
+            subscribers: descriptor(function() {
+                return length( that.handlers[ TIMING ] || [] );
             }),
             
-            complete: Descriptor(function() {
+            complete: descriptor(function() {
                 return that.subscribers === 0;
             })
         });
 
         that._init();
     }
+
+
+    PrecisionPod[TYPE] = 'precision';
 
 
     PrecisionPod.prototype = MOJO.Create({
@@ -217,17 +228,7 @@ hxManager.PrecisionPod = (function( Object , MOJO , hxManager ) {
 
     return PrecisionPod;
 
-    
-}( Object , MOJO , hxManager ));
-
-
-
-
-
-
-
-
-
+});
 
 
 

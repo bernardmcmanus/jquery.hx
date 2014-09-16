@@ -1,19 +1,39 @@
-hxManager.CSSProperty = (function( Object , Array , hxManager ) {
-
-
-    var NULL = null;
-    var PROTOTYPE = 'prototype';
-
-
-    var Helper = hxManager.Helper;
-    var StyleDefinition = hxManager.StyleDefinition;
-
-
-    var Descriptor = Helper.descriptor;
-    var Length = Helper.length;
-    var instOf = Helper.instOf;
-    var isArr = Helper.isArr;
-    var isUndef = Helper.isUndef;
+/*jshint -W061 */
+hxManager.CSSProperty = hxManager.Inject(
+[   
+    Array,
+    parseFloat,
+    'StyleDefinition',
+    'PROTOTYPE',
+    'NULL',
+    'compareArray',
+    'defProps',
+    'descriptor',
+    'keys',
+    'create',
+    'length',
+    'instOf',
+    'isArr',
+    'isObj',
+    'isUndef'
+],
+function(
+    Array,
+    parseFloat,
+    StyleDefinition,
+    PROTOTYPE,
+    NULL,
+    compareArray,
+    defProps,
+    descriptor,
+    keys,
+    create,
+    length,
+    instOf,
+    isArr,
+    isObj,
+    isUndef
+){
 
 
     function CSSProperty( name , values ) {
@@ -22,21 +42,21 @@ hxManager.CSSProperty = (function( Object , Array , hxManager ) {
         var definition = StyleDefinition.retrieve( name );
         var isNull;
 
-        Object.defineProperties( that , {
+        defProps( that , {
 
-            name: Descriptor(function() {
+            name: descriptor(function() {
                 return name;
             }),
 
-            pName: Descriptor(function() {
+            pName: descriptor(function() {
                 return definition.pName;
             }),
 
-            defaults: Descriptor(function() {
+            defaults: descriptor(function() {
                 return definition.defaults;
             }),
 
-            isNull: Descriptor(
+            isNull: descriptor(
                 function() {
                     return isNull;
                 },
@@ -45,27 +65,27 @@ hxManager.CSSProperty = (function( Object , Array , hxManager ) {
                 }
             ),
 
-            keymap: Descriptor(function() {
+            keymap: descriptor(function() {
                 return definition.keymap;
             }),
 
-            string: Descriptor(function() {
+            string: descriptor(function() {
                 return definition.toString( that );
             }),
 
-            length: Descriptor(function() {
-                return Length(
-                    Object.keys( that )
+            length: descriptor(function() {
+                return length(
+                    keys( that )
                 );
             }),
 
-            values: Descriptor(function() {
-                if (Length( that ) === 1) {
+            values: descriptor(function() {
+                if (length( that ) === 1) {
                     return that[0];
                 }
                 else {
                     var key, obj = {}, keymap = that.keymap;
-                    for (var i = 0; i < Length( keymap ); i++) {
+                    for (var i = 0; i < length( keymap ); i++) {
                         key = keymap[i];
                         obj[key] = that[i];
                     }
@@ -82,7 +102,7 @@ hxManager.CSSProperty = (function( Object , Array , hxManager ) {
     }
 
 
-    var CSSProperty_prototype = (CSSProperty[PROTOTYPE] = Object.create( Array[PROTOTYPE] ));
+    var CSSProperty_prototype = (CSSProperty[PROTOTYPE] = create( Array[PROTOTYPE] ));
 
 
     CSSProperty_prototype.clone = function( cloneDefaults ) {
@@ -104,11 +124,11 @@ hxManager.CSSProperty = (function( Object , Array , hxManager ) {
 
         values = (( values || values === 0 ) ? values : that.defaults );
 
-        if (typeof values !== 'object') {
+        if (!isObj( values )) {
             values = [ values ];
         }
 
-        for (i = 0; i < Length( keymap ); i++) {
+        for (i = 0; i < length( keymap ); i++) {
 
             if (isArr( values )) {
                 key = i;
@@ -123,16 +143,15 @@ hxManager.CSSProperty = (function( Object , Array , hxManager ) {
         }
 
         function mergeUpdates( storedVal , newVal ) {
-            var _eval = eval;
             var parts = parseExpression( newVal );
-            return ( parts.op ? _eval( storedVal + parts.op + parts.val ) : parts.val );
+            return ( parts.op ? eval( storedVal + parts.op + parts.val ) : parts.val );
         }
     };
 
 
     CSSProperty_prototype.isDefault = function() {
         var that = this;
-        return that.isNull && Helper.compareArray( that , that.defaults );
+        return that.isNull && compareArray( that , that.defaults );
     };
 
 
@@ -159,16 +178,7 @@ hxManager.CSSProperty = (function( Object , Array , hxManager ) {
 
     return CSSProperty;
 
-    
-}( Object , Array , hxManager ));
-
-
-
-
-
-
-
-
+});
 
 
 

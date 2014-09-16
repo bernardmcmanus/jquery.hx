@@ -1,17 +1,23 @@
-hxManager.Config = (function( Object , MOJO , hxManager ) {
+hxManager.Config = hxManager.Inject(
+[
+    MOJO,
+    'defProps',
+    'descriptor'
+],
+function(
+    MOJO,
+    defProps,
+    descriptor
+){
 
 
-    var Helper = hxManager.Helper;
-
-
-    var Descriptor = Helper.descriptor;
-
+    var properties = {};
 
     var Config = {
 
         optionKeys: [ 'ref' , 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
 
-        properties: {},
+        properties: properties,
 
         defaults: {
             ref: null,
@@ -32,7 +38,7 @@ hxManager.Config = (function( Object , MOJO , hxManager ) {
 
             os: {
                 android : (/android/i),
-                ios     : (/(ios|iphone)/i),
+                ios     : (/(ipad|iphone|ipod)/i),
                 macos   : (/mac os/i),
                 windows : (/windows/i)
             },
@@ -43,8 +49,8 @@ hxManager.Config = (function( Object , MOJO , hxManager ) {
             },
 
             prefix: [
-                (/(\-{0})transition/g),
                 (/(\-{0})transform/g),
+                (/(\-{0})transition/g),
                 {
                     regx: (/(\-{0})filter/g),
                     omit: [ 'ms' ]
@@ -54,9 +60,9 @@ hxManager.Config = (function( Object , MOJO , hxManager ) {
     };
 
 
-    Object.defineProperties( Config.properties , {
+    defProps( properties , {
 
-        inverse: Descriptor(function() {
+        inverse: descriptor(function() {
             var out = {};
             MOJO.Each( this , function( val , key ) {
                 out[val] = key;
@@ -68,16 +74,7 @@ hxManager.Config = (function( Object , MOJO , hxManager ) {
     
     return Config;
 
-    
-}( Object , MOJO , hxManager ));
-
-
-
-
-
-
-
-
+});
 
 
 

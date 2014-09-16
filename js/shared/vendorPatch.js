@@ -1,20 +1,36 @@
-hxManager.VendorPatch = (function( window , navigator , Date , RegExp , hxManager ) {
+hxManager.VendorPatch = hxManager.Inject(
+[
+    window,
+    navigator,
+    Date,
+    RegExp,
+    setTimeout,
+    clearTimeout,
+    'Config',
+    'instOf',
+    'test',
+    'indexOf'
+],
+function(
+    window,
+    navigator,
+    Date,
+    RegExp,
+    setTimeout,
+    clearTimeout,
+    Config,
+    instOf,
+    test,
+    indexOf
+){
 
 
     var OTHER = 'other';
-
-
-    var Config = hxManager.Config;
-    var Helper = hxManager.Helper;
-
-
     var UserAgent = navigator.userAgent;
     var VPConfig = Config.VendorPatch;
     var Vendors = VPConfig.vendors;
     var OS = VPConfig.os;
     var Tests = VPConfig.tests;
-    var InstOf = Helper.instOf;
-    var Test = Helper.test;
 
 
     function VendorPatch() {
@@ -41,7 +57,7 @@ hxManager.VendorPatch = (function( window , navigator , Date , RegExp , hxManage
 
                 var re, omit = [];
 
-                if (InstOf( pfx , RegExp )) {
+                if (instOf( pfx , RegExp )) {
                     re = pfx;
                 }
                 else {
@@ -49,7 +65,7 @@ hxManager.VendorPatch = (function( window , navigator , Date , RegExp , hxManage
                     omit = pfx.omit || omit;
                 }
 
-                if (omit.indexOf( vendor ) < 0) {
+                if (indexOf( omit , vendor ) < 0) {
                     var match = re.exec( str );
                     if (match) {
                         str = str.replace( re , ('-' + vendor + '-' + match[0]) );
@@ -93,7 +109,7 @@ hxManager.VendorPatch = (function( window , navigator , Date , RegExp , hxManage
 
     function UA_RegExp( search ) {
         for (var key in search) {
-            if (Test( search[key] , UserAgent )) {
+            if (test( search[key] , UserAgent )) {
                 return key;
             }
         }
@@ -102,21 +118,13 @@ hxManager.VendorPatch = (function( window , navigator , Date , RegExp , hxManage
 
 
     function isAndroidNative( os ) {
-        return (os === 'android' && !Test( Tests.andNat , UserAgent ));
+        return (os === 'android' && !test( Tests.andNat , UserAgent ));
     }
 
 
     return new VendorPatch();
 
-    
-}( window , navigator , Date , RegExp , hxManager ));
-
-
-
-
-
-
-
+});
 
 
 

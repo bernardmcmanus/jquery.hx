@@ -1,4 +1,28 @@
-hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
+hxManager.Bean = hxManager.Inject(
+[
+    Error,
+    jQuery,
+    MOJO,
+    'Config',
+    'SubscriberMOJO',
+    'keys',
+    'has',
+    'isFunc',
+    'indexOf',
+    'del'
+],
+function(
+    Error,
+    $,
+    MOJO,
+    Config,
+    SubscriberMOJO,
+    keys,
+    has,
+    isFunc,
+    indexOf,
+    del
+){
 
 
     var TOLERANCE = ( 1000 / 240 );
@@ -9,16 +33,9 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
     var BEAN_COMPLETE = 'beanComplete';
 
 
-    var Config = hxManager.Config;
-    var Helper = hxManager.Helper;
-    var SubscriberMOJO = hxManager.SubscriberMOJO;
-
-
     var MOJO_Each = MOJO.Each;
     var OptionKeys = Config.optionKeys;
     var PropertyMap = Config.properties;
-    var isFunction = Helper.isFunc;
-    var Del = Helper.del;
 
 
     function Bean( seed , node , index ) {
@@ -39,7 +56,23 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
     }
 
 
-    var Bean_prototype = Bean.prototype = MOJO.Create({
+    var Calc = (
+        Bean.Calc = function( elapsed , duration , delay ) {
+            elapsed = elapsed - delay;
+            elapsed = elapsed < 0 ? 0 : elapsed;
+            return (elapsed / (duration || 1));
+        }
+    );
+
+
+    var CheckTol = (
+        Bean.CheckTol = function( current , target , duration , delay ) {
+            return (target - current) <= (TOLERANCE / (duration + delay));
+        }
+    );
+
+
+    Bean.prototype = MOJO.Create({
 
         run: function( $hx ) {
 
@@ -96,9 +129,9 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
                 that.buffer += diff;
             }
 
-            var progress = calcProgress(( elapsed - that.buffer) , duration , delay );
+            var progress = Calc(( elapsed - that.buffer) , duration , delay );
 
-            if (isWithinTolerance( progress , 1 , TOLERANCE , duration , delay )) {
+            if (CheckTol( progress , 1 , duration , delay )) {
                 progress = 1;
             }
 
@@ -109,73 +142,81 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
             }
         },
 
-        getOrder: function( seed ) {
+        getOrder: getOrder,
 
-            var passed = (seed.order || []).map( mapCallback );
-            
-            var computed = Object.keys( seed )
-                .filter(function( key , i ) {
-                    return OptionKeys.indexOf( key ) < 0;
-                })
-                .map( mapCallback );
+        getOptions: getOptions,
 
-            function mapCallback( key ) {
-                return PropertyMap[key] || key;
-            }
-
-            return {
-                passed: passed,
-                computed: computed
-            };
-        },
-
-        getOptions: function( seed , node , index ) {
-
-            var defaults = Config.defaults;
-            var options = $.extend( {} , defaults , seed );
-
-            MOJO_Each( options , function( val , key ) {
-                if (!defaults.hasOwnProperty( key )) {
-                    Del( options , key );
-                }
-                else if (key === 'done') {
-                    // make sure we don't execute the done function just yet
-                    options[key] = val.bind( null , node , index );
-                }
-                else {
-                    options[key] = getBeanProperty( val , node , index );
-                }
-            });
-
-            return options;
-        },
-
-        getStyles: function( seed , node , index ) {
-
-            var styles = {};
-
-            MOJO_Each( seed , function( val , key ) {
-                var mappedKey = PropertyMap[key] || key;
-                if (OptionKeys.indexOf( mappedKey ) < 0) {
-                    styles[mappedKey] = getBeanProperty( val , node , index );
-                }
-            });
-
-            return styles;
-        }
+        getStyles: getStyles
     });
 
 
+    function getOrder( seed ) {
+
+        var passed = (seed.order || []).map( mapCallback );
+        
+        var computed = keys( seed )
+            .filter(function( key , i ) {
+                return indexOf( OptionKeys , key ) < 0;
+            })
+            .map( mapCallback );
+
+        function mapCallback( key ) {
+            return PropertyMap[key] || key;
+        }
+
+        return {
+            passed: passed,
+            computed: computed
+        };
+    }
+
+
+    function getOptions( seed , node , index ) {
+
+        var defaults = Config.defaults;
+        var options = $.extend( {} , defaults , seed );
+
+        MOJO_Each( options , function( val , key ) {
+
+            if (!has( defaults , key )) {
+                del( options , key );
+            }
+            else if (key === 'done') {
+                // make sure we don't execute the done function just yet
+                options[key] = val.bind( null , node , index );
+            }
+            else {
+                options[key] = getBeanProperty( val , node , index );
+            }
+        });
+
+        return options;
+    }
+
+
+    function getStyles( seed , node , index ) {
+
+        var styles = {};
+
+        MOJO_Each( seed , function( val , key ) {
+            
+            var mappedKey = PropertyMap[key] || key;
+
+            if (indexOf( OptionKeys , mappedKey ) < 0) {
+                styles[mappedKey] = getBeanProperty( val , node , index );
+            }
+        });
+
+        return styles;
+    }
+
+
     function getBeanProperty( property , node , index ) {
-        return (isFunction( property ) ? property( node , index ) : property);
+        return (isFunc( property ) ? property( node , index ) : property);
     }
 
 
     function getCompiledData( seed , node , index ) {
-
-        var getOrder = Bean_prototype.getOrder;
-        var getOptions = Bean_prototype.getOptions;
-        var getStyles = Bean_prototype.getStyles;
 
         var options = getOptions( seed , node , index );
 
@@ -190,30 +231,9 @@ hxManager.Bean = (function( Object , Error , $ , MOJO , hxManager ) {
     }
 
 
-    function calcProgress( elapsed , duration , delay ) {
-        elapsed = elapsed - delay;
-        elapsed = elapsed < 0 ? 0 : elapsed;
-        return (elapsed / (duration || 1));
-    }
-
-
-    function isWithinTolerance( subject , target , tolerance , duration , delay ) {
-        return (target - subject) <= (tolerance / (duration + delay));
-    }
-
-
     return Bean;
 
-    
-}( Object , Error , jQuery , MOJO , hxManager ));
-
-
-
-
-
-
-
-
+});
 
 
 

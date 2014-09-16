@@ -1,40 +1,51 @@
-hxManager.Queue = (function( Object , Array , hxManager ) {
-
-
-    var UNDEFINED;
-
-
-    var Helper = hxManager.Helper;
-
-
-    var Descriptor = Helper.descriptor;
-    var EnsureArray = Helper.ensureArray;
-    var Length = Helper.length;
+hxManager.Queue = hxManager.Inject(
+[
+    Array,
+    'PROTOTYPE',
+    'defProps',
+    'create',
+    'descriptor',
+    'ensureArray',
+    'length',
+    'isUndef',
+    'indexOf'
+],
+function(
+    Array,
+    PROTOTYPE,
+    defProps,
+    create,
+    descriptor,
+    ensureArray,
+    length,
+    isUndef,
+    indexOf
+){
 
 
     function Queue() {
 
         var that = this;
 
-        Object.defineProperties( that , {
+        defProps( that , {
 
-            current: Descriptor(function() {
+            current: descriptor(function() {
                 return that[0] || false;
             }),
 
-            last: Descriptor(function() {
-                var l = Length( that ) - 1;
+            last: descriptor(function() {
+                var l = length( that ) - 1;
                 return l >= 0 ? that[l] : false;
             }),
 
-            complete: Descriptor(function() {
-                return !Length( that );
+            complete: descriptor(function() {
+                return !length( that );
             })
         });
     }
 
 
-    var Queue_prototype = (Queue.prototype = Object.create( Array.prototype ));
+    var Queue_prototype = (Queue[PROTOTYPE] = create( Array[PROTOTYPE] ));
 
 
     Queue_prototype.pushPod = function( pod ) {
@@ -43,32 +54,10 @@ hxManager.Queue = (function( Object , Array , hxManager ) {
 
         that.push( pod );
 
-        if (Length( that ) === 1) {
+        if (length( that ) === 1) {
             that.current.run();
         }
     };
-
-
-    /*Queue_prototype.nextOfType = function( type ) {
-
-        var that = this;
-        var pod = false;
-
-        for (var i = 0; i < Length( that ); i++) {
-            if (that[i].type === type) {
-                pod = that[i];
-                break;
-            }
-        }
-
-        return pod;
-    };*/
-
-
-    /*Queue_prototype.next = function() {
-
-        var that = this;
-    };*/
 
 
     Queue_prototype.proceed = function() {
@@ -89,11 +78,11 @@ hxManager.Queue = (function( Object , Array , hxManager ) {
     Queue_prototype.clear = function( all ) {
 
         // all controls whether all pods or all but the current pod will be cleared
-        all = (all !== UNDEFINED ? all : true);
+        all = (!isUndef( all ) ? all : true);
 
         var that = this;
 
-        while (Length( that ) > (all ? 0 : 1)) {
+        while (length( that ) > (all ? 0 : 1)) {
             that.pop().cancel();
         }
     };
@@ -101,20 +90,18 @@ hxManager.Queue = (function( Object , Array , hxManager ) {
 
     Queue_prototype.getPodCount = function( type ) {
 
-        type = EnsureArray( type );
+        type = ensureArray( type );
 
-        return Length(
+        return length(
             this.filter(function( pod ) {
-                return type.indexOf( pod.type ) >= 0;
+                return indexOf( type , pod.type ) >= 0;
             })
         );
     };
 
 
     return Queue;
-
-    
-}( Object , Array , hxManager ));
+});
 
 
 

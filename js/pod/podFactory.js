@@ -1,22 +1,30 @@
-hxManager.PodFactory = (function( hxManager ) {
+hxManager.PodFactory = hxManager.Inject(
+[
+    'AnimationPod',
+    'PrecisionPod',
+    'PromisePod'
+],
+function(
+    AnimationPod,
+    PrecisionPod,
+    PromisePod
+){
 
 
-    var AnimationPod = hxManager.AnimationPod;
-    var PrecisionPod = hxManager.PrecisionPod;
-    var PromisePod = hxManager.PromisePod;
+    var TYPE = 'TYPE';
 
 
     function PodFactory( node , type ) {
 
         switch (type) {
 
-            case 'animation':
+            case AnimationPod[TYPE]:
                 return new AnimationPod( node );
 
-            case 'precision':
+            case PrecisionPod[TYPE]:
                 return new PrecisionPod();
 
-            case 'promise':
+            case PromisePod[TYPE]:
                 return new PromisePod();
         }
     }
@@ -24,5 +32,4 @@ hxManager.PodFactory = (function( hxManager ) {
 
     return PodFactory;
 
-    
-}( hxManager ));
+});

@@ -1,22 +1,33 @@
-(function( window , document , $ , MOJO , hxManager ) {
+hxManager.Inject(
+[
+    document,
+    jQuery,
+    MOJO,
+    hxManager,
+    'VendorPatch',
+    'StyleDefinition',
+    'Bezier',
+    'TimingMOJO',
+    'NULL'
+],
+function(
+    document,
+    $,
+    MOJO,
+    hxManager,
+    VendorPatch,
+    StyleDefinition,
+    Bezier,
+    TimingMOJO,
+    NULL
+){
 
 
-    var NULL = null;
-
-
-    var Helper = hxManager.Helper;
-    var VendorPatch = hxManager.VendorPatch;
-    var StyleDefinition = hxManager.StyleDefinition;
-    var Bezier = hxManager.Bezier;
-    var TimingMOJO = hxManager.TimingMOJO;
+    // Do some important stuff when hx is loaded
 
 
     var DefineProperty = StyleDefinition.define;
     var DefineBezier = Bezier.define;
-    var EnsureArray = Helper.ensureArray;
-
-
-    // Do some important stuff when hx is loaded
 
 
     $.hx = {
@@ -138,7 +149,11 @@
 
         var property = DefineProperty.apply( NULL , definition[0] );
 
-        [ 'defaults' , 'keymap' , 'stringGetter' ]
+        [
+            'defaults',
+            'keymap',
+            'stringGetter'
+        ]
         .forEach(function( key , i ) {
 
             var args = definition[i+1];
@@ -194,30 +209,8 @@
     MOJO.Each( beziers , function( points , name ) {
         DefineBezier( name , points );
     });
-
-
-    function hxReady() {
-        $(window).off( 'load' , hxReady );
-        $(document).trigger( 'hx.ready' );
-    }
-
-    if (document.readyState !== 'complete') {
-        $(window).on( 'load' , hxReady );
-    }
-    else {
-        hxReady();
-    }
-
-
-}( window , document , jQuery , MOJO , hxManager ));
-
-
-
-
-
-
-
-
+    
+});
 
 
 
