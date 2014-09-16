@@ -36,6 +36,7 @@ function(
     var MOJO_Each = MOJO.Each;
     var OptionKeys = Config.optionKeys;
     var PropertyMap = Config.properties;
+    var Buffer = Config.buffer;
 
 
     function Bean( seed , node , index ) {
@@ -60,14 +61,14 @@ function(
         Bean.Calc = function( elapsed , duration , delay ) {
             elapsed = elapsed - delay;
             elapsed = elapsed < 0 ? 0 : elapsed;
-            return (elapsed / (duration || 1));
+            return (elapsed / (duration ? duration + Buffer : 1));
         }
     );
 
 
     var CheckTol = (
         Bean.CheckTol = function( current , target , duration , delay ) {
-            return (target - current) <= (TOLERANCE / (duration + delay));
+            return (target - current) <= (TOLERANCE / (duration + delay + Buffer));
         }
     );
 

@@ -15,6 +15,8 @@ function(
 
     var Config = {
 
+        buffer: ((1000 / 60) * 2),
+
         optionKeys: [ 'ref' , 'type' , 'duration' , 'easing' , 'delay' , 'done' , 'order' ],
 
         properties: properties,
