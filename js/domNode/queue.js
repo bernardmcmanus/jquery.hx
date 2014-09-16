@@ -6,7 +6,6 @@ hxManager.Queue = hxManager.Inject(
     'create',
     'descriptor',
     'ensureArray',
-    'length',
     'isUndef',
     'indexOf'
 ],
@@ -17,7 +16,6 @@ function(
     create,
     descriptor,
     ensureArray,
-    length,
     isUndef,
     indexOf
 ){
@@ -29,15 +27,6 @@ function(
 
         defProps( that , {
 
-            current: descriptor(function() {
-                return that[0] || false;
-            }),
-
-            last: descriptor(function() {
-                var l = length( that ) - 1;
-                return l >= 0 ? that[l] : false;
-            }),
-
             complete: descriptor(function() {
                 return !length( that );
             })
@@ -48,6 +37,14 @@ function(
     var Queue_prototype = (Queue[PROTOTYPE] = create( Array[PROTOTYPE] ));
 
 
+    Queue_prototype.run = function() {
+        var pod = this[0];
+        if (pod) {
+            pod.run();
+        }
+    };
+
+
     Queue_prototype.pushPod = function( pod ) {
 
         var that = this;
@@ -55,7 +52,7 @@ function(
         that.push( pod );
 
         if (length( that ) === 1) {
-            that.current.run();
+            that.run();
         }
     };
 
@@ -67,7 +64,7 @@ function(
         that.shift();
 
         if (!that.complete) {
-            that.current.run();
+            that.run();
             return true;
         }
 
@@ -100,7 +97,22 @@ function(
     };
 
 
+    /*
+    **  iOS encounters a strange issue using Helper.length
+    **  (but not this length function), mainly in Queue.prototype.clear,
+    **  where pods are removed from the queue and cancelled,
+    **  but length( queue ) continues to return the same value.
+    **  It's inconsistent and difficult to reproduce, so fixing
+    **  for now by adding this length function in the same context.
+    */
+
+    function length( subject ) {
+        return subject.length;
+    }
+
+
     return Queue;
+
 });
 
 

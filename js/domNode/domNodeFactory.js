@@ -289,7 +289,7 @@ function(
         },
 
         getCurrentPod: function() {
-            return this.$hx.queue.current;
+            return this.$hx.queue[0] || false;
         },
 
         getPodCount: function( type ) {
