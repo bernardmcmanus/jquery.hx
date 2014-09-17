@@ -1,27 +1,26 @@
-(function( QUnit ) {
+(function( window , navigator , document , $ , QUnit ) {
 
 
     QUnit.config.autostart = false;
     QUnit.config.reorder = false;
     QUnit.config.altertitle = false;
+    QUnit.config.hidepassed = false;
 
     var SELECTOR = '.tgt,.tgt2,.tgt3';
-    var METHOD = 1 ? 'animate' : 'iterate';
+    var METHOD = 0 ? 'animate' : 'iterate';
     var DURATION = 200;
     var EASING = 'linear';
 
-    if ((/(iphone|ipad|ipod|android)/i).test( navigator.userAgent )) {
-        
-        window.onerror = function() {
-            //alert(JSON.stringify(arguments));
-            Solace.log(arguments);
-        };
+    $(document).on( 'Solace.ready' , function( e ) {
+        Solace.log( 'SELECTOR -> <span style="color: #FF4500;">' + SELECTOR + '</span>');
+        Solace.log( 'METHOD -> <span style="color: #FF4500;">' + METHOD + '</span>');
+        Solace.log( 'DURATION -> <span style="color: #FF4500;">' + DURATION + '</span>');
+        Solace.log( 'EASING -> <span style="color: #FF4500;">' + EASING + '</span>');
+    });
 
-        $(window).on( 'hx.error' , function( e , err ) {
-            //alert(err.message);
-            Solace.log(err.message);
-        });
-    }
+    $(window).on( 'hx.error' , function( e , err ) {
+        Solace.log(err.message);
+    });
 
 // ======================================== //
 
@@ -261,7 +260,7 @@
         [ method ]({
             type: 'transform',
             translate: {x: '+=20'},
-            duration: duration,
+            duration: (duration / 4),
             easing: easing
         })
         .then(function( resolve ) {
@@ -272,7 +271,7 @@
         [ method ]({
             type: 'transform',
             translate: {y: '+=20'},
-            duration: duration,
+            duration: (duration / 4),
             easing: easing
         })
         .then(function( resolve ) {
@@ -283,7 +282,7 @@
         [ method ]({
             type: 'transform',
             translate: {z: '+=20'},
-            duration: duration,
+            duration: (duration / 4),
             easing: easing
         })
         .then(function( resolve ) {
@@ -294,7 +293,7 @@
         [ method ]({
             type: 'transform',
             translate: {x: 10},
-            duration: duration,
+            duration: (duration / 4),
             easing: easing
         })
         .then(function( resolve ) {
@@ -305,7 +304,7 @@
         [ method ]({
             type: 'transform',
             translate: {y: 10},
-            duration: duration,
+            duration: (duration / 4),
             easing: easing
         })
         .then(function( resolve ) {
@@ -316,7 +315,7 @@
         [ method ]({
             type: 'transform',
             translate: {z: 10},
-            duration: duration,
+            duration: (duration / 4),
             easing: easing
         })
         .then(function( resolve ) {
@@ -331,6 +330,181 @@
             });
         });
     });
+
+// ======================================== //
+
+(function() {
+
+    QUnit.module( 'events' , {
+        method: METHOD,
+        duration: DURATION,
+        easing: EASING
+    });
+
+    QUnit.test( 'hx.ready' , function( assert ) {
+        expect( 2 );
+        assert.equal( Events[Index].e.namespace , 'ready' , 'event' );
+        assert.equal( Events[Index].data , undefined , 'data' );
+        Index++;
+    });
+
+    QUnit.asyncTest( 'hx.error' , function( assert ) {
+
+        expect( 2 );
+
+        var temp = $.hx.error;
+        $.hx.error = function() {};
+
+        $(window).once( 'hx.error' , function( e , data ) {
+            capture( e , data );
+            assert.equal( Events[Index].e.namespace , 'error' , 'event' );
+            assert.ok(( Events[Index].data instanceof Error ) , 'data' );
+            Index++;
+            $.hx.error = temp;
+            async(function() {                
+                QUnit.start();
+            });
+        });
+
+        $(SELECTOR)
+        .hx()
+        .then(function() {
+            var a = null;
+            a.b = true;
+        })
+        .done(function() {
+            assert.ok( false , 'this should not be executed' );
+        });
+    });
+
+    QUnit.asyncTest( 'hx.start / hx.end' , function( assert ) {
+
+        var method = this.method;
+        var duration = this.duration;
+        var easing = this.easing;
+
+        expect( 6 );
+
+        var bean0 = {
+            type: 'transform',
+            translate: {y: '+=20'},
+            duration: function( element , i ) {
+                return (( duration * ( i + 1 )) / 2 );
+            },
+            easing: easing,
+            ref: '#hx.start'
+        };
+
+        var bean1 = {
+            type: 'transform',
+            translate: {y: '-=20'},
+            duration: duration,
+            easing: easing,
+            ref: '#hx.end'
+        };
+
+        $(SELECTOR)
+        .hx()
+        .then(function( resolve ) {
+
+            $(SELECTOR).once( 'hx.start' , function( e , data ) {
+                capture( e , data );
+                assert.equal( Events[Index].e.namespace , 'start' , 'start: event' );
+                assert.equal( Events[Index].data.ref , '#hx.start' , 'start: data.ref' );
+                assert.deepEqual( Events[Index].data.bean , bean0 , 'start: data.bean' );
+                Index++;
+            });
+
+            resolve();
+        })
+        [ method ]( bean0 )
+        .then(function( resolve ) {
+
+            $(SELECTOR).once( 'hx.end' , function( e , data ) {
+                capture( e , data );
+                assert.equal( Events[Index].e.namespace , 'end' , 'end: event' );
+                assert.equal( Events[Index].data.ref , '#hx.end' , 'end: data.ref' );
+                assert.deepEqual( Events[Index].data.bean , bean1 , 'end: data.bean' );
+                Index++;
+            });
+
+            resolve();
+        })
+        [ method ]( bean1 )
+        .done(function() {
+            async(function() {
+                QUnit.start();
+            });
+        });
+    });
+
+    QUnit.asyncTest( 'hx.pause / hx.resume' , function( assert ) {
+
+        var method = this.method;
+
+        if (method !== 'iterate') {
+            expect( 1 );
+            assert.ok( true , 'this test only applies to iterate' );
+            QUnit.start();
+            return;
+        }
+
+        var duration = this.duration;
+        var easing = this.easing;
+
+        expect( 4 );
+
+        $(SELECTOR).once( 'hx.pause' , function( e , data ) {
+            capture( e , data );
+            assert.equal( Events[Index].e.namespace , 'pause' , 'pause: event' );
+            assert.ok(( Events[Index].data.progress.length === 1 ) , 'pause: progress' );
+            Index++;
+        });
+
+        $(SELECTOR).once( 'hx.resume' , function( e , data ) {
+            capture( e , data );
+            assert.equal( Events[Index].e.namespace , 'resume' , 'resume: event' );
+            assert.ok(( Events[Index].data.progress.length === 1 ) , 'resume: progress' );
+            Index++;
+        });
+
+        $(SELECTOR)
+        .hx()
+        [ method ]({
+            type: 'transform',
+            translate: {y: '+=50'},
+            duration: function( element , i ) {
+                return (( duration * ( i + 1 )) / 2 );
+            },
+            easing: easing
+        })
+        .done(function() {
+            async(function() {
+                QUnit.start();
+            });
+        });
+
+        async(function() {
+            $(SELECTOR).hx( 'pause' );
+        }, (duration / 2));
+
+        async(function() {
+            $(SELECTOR).hx( 'resume' );
+        }, (duration * 2));
+    });
+
+    var Events = [];
+    var Index = 0;
+
+    $(window).once( 'hx.ready' , function( e , data ) {
+        capture( e , data );
+    });
+
+    function capture( e , data ) {
+        Events.push({ e: e, data: data });
+    }
+
+}());
 
 // ======================================== //
 
@@ -367,7 +541,11 @@
 
 // ======================================== //
 
-    QUnit.module( '#then' );
+    QUnit.module( '#then' , {
+        method: METHOD,
+        duration: DURATION,
+        easing: EASING
+    });
 
     QUnit.asyncTest( 'resolve' , function( assert ) {
 
@@ -407,6 +585,66 @@
         });
     });
 
+    QUnit.asyncTest( 'aggregate' , function( assert ) {
+
+        var method = this.method;
+        var duration = this.duration;
+        var easing = this.easing;
+
+        expect( $(SELECTOR).length + 1 );
+
+        $(SELECTOR)
+        .hx()
+        [ method ]([
+            {
+                type: 'opacity',
+                value: 0.5,
+                duration: duration,
+                delay: function( element , i ) {
+                    return (duration * i);
+                },
+                easing: easing
+            },
+            {
+                type: 'transform',
+                translate: {y: 40},
+                rotateZ: 360,
+                duration: duration,
+                delay: function( element , i ) {
+                    return (duration * i);
+                },
+                easing: easing
+            }
+        ])
+        .then(function( resolve ) {
+            this.each(function( i ) {
+                assert.equal( this.$hx.queue.length , 3 , ( 'queue length ' + i ));
+            });
+            resolve();
+        })
+        [ method ]([
+            {
+                type: 'opacity',
+                value: null,
+                duration: duration,
+                easing: easing
+            },
+            {
+                type: 'transform',
+                translate: null,
+                rotateZ: null,
+                duration: duration,
+                easing: easing
+            }
+        ])
+        .done(function() {
+            assert.ok( true , 'done' );
+            async(function() {
+                QUnit.start();
+            });
+        });
+    });
+
 // ======================================== //
 
     QUnit.module( '#update' , {
@@ -424,7 +662,7 @@
             },
             {
                 type: 'opacity',
-                value: 0
+                value: 0.5
             },
             {
                 type: 'filter',
@@ -434,10 +672,10 @@
             {
                 type: 'clip',
                 value: {
-                    top: 25,
+                    top: 0,
                     right: 25,
                     bottom: 25,
-                    left: 25
+                    left: 0
                 }
             }
         ]
@@ -467,7 +705,7 @@
 
 // ======================================== //
 
-    /*QUnit.module( '#paint' , {
+    QUnit.module( '#paint' , {
         beans: [
             {
                 type: 'transform',
@@ -482,7 +720,7 @@
             },
             {
                 type: 'opacity',
-                value: 0
+                value: 0.5
             },
             {
                 type: 'filter',
@@ -492,10 +730,10 @@
             {
                 type: 'clip',
                 value: {
-                    top: 25,
+                    top: 0,
                     right: 25,
                     bottom: 25,
-                    left: 25
+                    left: 0
                 }
             }
         ]
@@ -516,12 +754,10 @@
             .update( bean )
             .paint( type );
 
+            var style = $(SELECTOR).attr( 'style' );
             var prefixed = hxManager.VendorPatch.prefix( type );
             var re = new RegExp( prefixed );
-
-            var assertion = re.test(
-                $(SELECTOR).attr( 'style' )
-            );
+            var assertion = re.test( style );
 
             assert.ok( assertion , type );
 
@@ -589,12 +825,10 @@
             .update( bean )
             .paint( type );
 
+            var style = $(SELECTOR).attr( 'style' );
             var prefixed = hxManager.VendorPatch.prefix( type );
             var re = new RegExp( prefixed );
-
-            var assertion = re.test(
-                $(SELECTOR).attr( 'style' )
-            );
+            var assertion = re.test( style );
 
             assert.ok( assertion , type );
 
@@ -607,11 +841,11 @@
                 QUnit.start();
             });
         });
-    });*/
+    });
 
 // ======================================== //
 
-    /*QUnit.module( '#reset' , {
+    QUnit.module( '#reset' , {
         beans: [
             {
                 type: 'transform',
@@ -626,7 +860,7 @@
             },
             {
                 type: 'opacity',
-                value: 0
+                value: 0.5
             },
             {
                 type: 'filter',
@@ -636,10 +870,10 @@
             {
                 type: 'clip',
                 value: {
-                    top: 25,
+                    top: 0,
                     right: 25,
                     bottom: 25,
-                    left: 25
+                    left: 0
                 }
             }
         ]
@@ -647,9 +881,10 @@
 
     QUnit.asyncTest( 'main' , function( assert ) {
 
-        expect( 1 );
-
         var beans = this.beans;
+        var initStyle = $(SELECTOR).attr( 'style' );
+
+        expect( beans.length + 1 );
 
         beans.forEach(function( bean ) {
 
@@ -658,6 +893,9 @@
             .update( bean )
             .reset()
             .paint();
+
+            var style = $(SELECTOR).attr( 'style' );
+            assert.equal( style , initStyle , bean.type );
         });
 
         async(function() {
@@ -666,7 +904,7 @@
                 QUnit.start();
             });
         });
-    });*/
+    });
 
 // ======================================== //
 
@@ -1467,7 +1705,7 @@
     }
 
 
-}( QUnit ));
+}( window , navigator , document , jQuery , QUnit ));
 
 
 
