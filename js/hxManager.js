@@ -176,6 +176,7 @@ setTimeout(function() {
                     that.clear();
                     if (instOf( err , Error )) {
                         $.hx.error( err );
+                        $(document).trigger( 'hx.error' , err );
                     }
                 });
             });

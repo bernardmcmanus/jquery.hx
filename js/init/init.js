@@ -1,6 +1,5 @@
 hxManager.Inject(
 [
-    document,
     jQuery,
     MOJO,
     hxManager,
@@ -11,7 +10,6 @@ hxManager.Inject(
     'NULL'
 ],
 function(
-    document,
     $,
     MOJO,
     hxManager,
@@ -49,7 +47,6 @@ function(
             };
         },
         error: function( error ) {
-            $(document).trigger( 'hx.error' , error );
             try { console.error( error.stack ); }
             catch( err ) {}
         }
