@@ -9,9 +9,6 @@ module.exports = function( grunt ) {
     var exec = require( 'child_process' ).exec;
 
 
-    httpd.environ( 'root' , __dirname );
-
-
     var Script = [
         'js/hxManager.js',
         'js/shared/helper.js',
@@ -162,9 +159,11 @@ module.exports = function( grunt ) {
 
 
     grunt.registerTask( 'startServer' , function() {
-        var server = new httpd({ port : HTTPD_NODE_PORT });
-        server.setHttpDir( 'default' , '/' );
-        server.start();
+        
+        new httpd({ port : HTTPD_NODE_PORT })
+            .environ( 'root' , __dirname )
+            .setHttpDir( 'default' , '/' )
+            .start();
     });
 
 
@@ -180,7 +179,7 @@ module.exports = function( grunt ) {
         grunt.task.requires( 'git-describe' );
 
         var rev = grunt.config.get( 'git-version' );
-        var matches = rev.match( /(\-{0,1})+([A-Za-z0-9]{7})+(\-{0,1})/ );
+        var matches = rev.match( /\-?([A-Za-z0-9]{7})\-?/ );
 
         var hash = matches
             .filter(function( match ) {
