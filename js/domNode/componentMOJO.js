@@ -25,6 +25,9 @@ function(
 ){
 
 
+    var VALUE = 'value';
+
+
     function ComponentMOJO() {
 
         var that = this;
@@ -46,8 +49,10 @@ function(
             var order = that.getOrder( type );
 
             var arr = order
-                .map(function( property ) {
-                    var component = that.getComponents( property );
+                .map(function( key ) {
+                    var name = getPropertyName( type , key );
+                    var component = that.getComponents( name );
+                    component = (key === VALUE ? component[VALUE] : component);
                     return component.isDefault() ? '' : component.string;
                 })
                 .filter(function( str ) {
@@ -82,7 +87,7 @@ function(
 
             MOJO.Each( styles , function( property , key ) {
 
-                var name = (key === 'value' ? type : key);
+                var name = getPropertyName( type , key );
 
                 if (isUndef( component[key] )) {
                     component[key] = new CSSProperty( name , property );
@@ -146,6 +151,11 @@ function(
             that.setOrder( type , newOrder );
         }
     });
+
+
+    function getPropertyName( type , property ) {
+        return (property === VALUE ? type : property);
+    }
 
 
     return ComponentMOJO;
