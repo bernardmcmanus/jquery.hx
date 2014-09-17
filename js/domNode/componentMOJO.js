@@ -8,6 +8,7 @@ hxManager.ComponentMOJO = hxManager.Inject(
     'keys',
     'indexOf',
     'length',
+    'has',
     'del',
     'isUndef'
 ],
@@ -20,6 +21,7 @@ function(
     keys,
     indexOf,
     length,
+    has,
     del,
     isUndef
 ){
@@ -52,7 +54,7 @@ function(
                 .map(function( key ) {
                     var name = getPropertyName( type , key );
                     var component = that.getComponents( name );
-                    component = (key === VALUE ? component[VALUE] : component);
+                    component = has( component , VALUE ) ? component[VALUE] : component;
                     return component.isDefault() ? '' : component.string;
                 })
                 .filter(function( str ) {
