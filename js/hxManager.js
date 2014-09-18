@@ -70,6 +70,8 @@ setTimeout(function() {
                     return length( j );
                 }
             ));
+
+            return that;
         };
 
 
@@ -131,48 +133,34 @@ setTimeout(function() {
             method = method || 'all';
 
             var that = this;
-            var micro = [];
-            var pods = [];
 
-            eachNode( that , function( $hx , node ) {
-
-                // create a promisePod for each dom node
+            var pods = toArray( that ).map(function( node ) {
+                var $hx = node.$hx;
                 var pod = PodFactory( node , 'promise' );
-
-                // when the pod reaches its turn in the queue, resolve its promise
-                pod.when( 'promiseMade' , function() {
-                    pod.resolvePromise();
-                });
-
-                // create a microPromise for each pod
-                var microPromise = new Promise(function( resolve ) {
-                    // when the pod is resolved, resolve the microPromise
-                    pod.when( 'promiseResolved' , resolve );
-                });
-
-                // add the promise to the dom node queue
                 $hx.addPod( pod );
-
-                pods.push( pod );
-                micro.push( microPromise );
+                return pod;
             });
 
-            // when the appropriate microPromises have been resolved, create the macroPromise
-            Promise[ method ]( micro ).then(function() {
+            Promise[ method ]( pods ).then(function() {
+                
+                new Promise(
 
-                var macroPromise = new Promise(
+                    // create the macroPromise
+
                     bind( that , func )
-                );
+                )
+                .then(function() {
 
-                // if the macroPromise is resolved, resolve the pods
-                macroPromise.then(function() {
+                    // if the macroPromise is resolved, resolve the pods
+
                     pods.forEach(function( pod ) {
                         pod.resolvePod();
                     });
-                });
+                })
+                .catch(function( err ) {
 
-                // otherwise, clear the queue so we can start again
-                macroPromise.catch(function( err ) {
+                    // otherwise, clear the queue so we can start again
+
                     that.clear();
                     if (instOf( err , Error )) {
                         $.hx.error( err );

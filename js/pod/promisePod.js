@@ -1,14 +1,22 @@
-hxManager.PromisePod = (function( MOJO ) {
+hxManager.PromisePod = (function( Promise , $ , MOJO ) {
 
 
     var TYPE = 'TYPE';
 
 
     function PromisePod() {
+
         var that = this;
         that.type = PromisePod[TYPE];
         that.attached = true;
         MOJO.Construct( that );
+
+        var promise = new Promise(function( resolve , reject ) {
+            that.resolve = resolve;
+            that.reject = reject;
+        });
+
+        return $.extend( promise , that );
     }
 
 
@@ -18,11 +26,7 @@ hxManager.PromisePod = (function( MOJO ) {
     PromisePod.prototype = MOJO.Create({
 
         run: function() {
-            this.happen( 'promiseMade' );
-        },
-
-        resolvePromise: function() {
-            this.happen( 'promiseResolved' );
+            this.resolve();
         },
 
         resolvePod: function() {
@@ -43,8 +47,8 @@ hxManager.PromisePod = (function( MOJO ) {
 
     return PromisePod;
 
-    
-}( MOJO ));
+
+}( Promise , jQuery , MOJO ));
 
 
 
