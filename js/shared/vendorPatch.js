@@ -6,7 +6,6 @@ hxManager.VendorPatch = hxManager.Inject(
     RegExp,
     setTimeout,
     clearTimeout,
-    'Config',
     'instOf',
     'test',
     'indexOf'
@@ -18,7 +17,6 @@ function(
     RegExp,
     setTimeout,
     clearTimeout,
-    Config,
     instOf,
     test,
     indexOf
