@@ -5,12 +5,10 @@ hxManager.Bezier = hxManager.Inject(
     BezierEasing,
     'VendorPatch',
     'PROTOTYPE',
-    'NULL',
     'create',
     'defProps',
     'descriptor',
-    'isUndef',
-    'length'
+    'isUndef'
 ],
 function(
     Array,
@@ -18,28 +16,26 @@ function(
     BezierEasing,
     VendorPatch,
     PROTOTYPE,
-    NULL,
     create,
     defProps,
     descriptor,
-    isUndef,
-    length
+    isUndef
 ){
+
+
+    var UNCLAMPED = VendorPatch.unclamped();
 
 
     function Bezier( name , points ) {
 
         var that = this;
+        var easeFunction = BezierEasing.apply( null , points );
 
-        for (var i = 0; i < length( points ); i++) {
-            that.push( points[i] );
-        }
-
-        if (!VendorPatch.unclamped()) {
-            that.clamp();
-        }
-
-        var easeFunction = BezierEasing.apply( NULL , that );
+        points.forEach(function( point ) {
+            that.push(
+                UNCLAMPED ? point : clamp( point )
+            );
+        });
 
         defProps( that , {
 
@@ -70,15 +66,12 @@ function(
     };
 
 
-    var Bezier_prototype = (Bezier[PROTOTYPE] = create( Array[PROTOTYPE] ));
+    Bezier[PROTOTYPE] = create( Array[PROTOTYPE] );
 
 
-    Bezier_prototype.clamp = function() {
-        var that = this;
-        that.forEach(function( point , i ) {
-            that[i] = (point < 0 ? 0 : (point > 1 ? 1 : point));
-        });
-    };
+    function clamp( point ) {
+        return (point < 0 ? 0 : (point > 1 ? 1 : point));
+    }
 
 
     var Definitions = {
