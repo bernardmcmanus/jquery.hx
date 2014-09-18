@@ -20,72 +20,55 @@ function(
 
 
     var RAF = VendorPatch.RAF;
+    var shouldLoop = false;
 
 
-    function TimingMOJO() {
-
-        var that = this;
-
-        that.shouldLoop = false;
-
-        MOJO.Construct( that );
-
-        defProp( that , SUBSCRIBERS , descriptor(
-            function() {
-                return length( that.handlers[ TIMING ] || [] );
-            }
-        ));
-
-        that.step = that.step.bind( that );
+    function start() {
+        shouldLoop = true;
+        RAF( step );
     }
 
 
-    TimingMOJO.prototype = MOJO.Create({
+    function step( timestamp ) {
+
+        //console.log(timestamp);
+
+        TimingMOJO.happen( TIMING , timestamp );
+
+        if (!TimingMOJO[ SUBSCRIBERS ]) {
+            shouldLoop = false;
+        }
+        else if (shouldLoop) {
+            RAF( step );
+        }
+    }
+
+
+    var TimingMOJO = new MOJO({
 
         subscribe: function( callback ) {
 
-            var that = this;
+            TimingMOJO.when( TIMING , callback );
 
-            that.when( TIMING , callback );
-
-            if (!that.shouldLoop) {
-                that._start();
+            if (!shouldLoop) {
+                start();
             }
         },
 
         unsubscribe: function( callback ) {
-
-            var that = this;
-            that.dispel( TIMING , callback );
-        },
-
-        _start: function() {
-
-            var that = this;
-
-            that.shouldLoop = true;
-            RAF( that.step );
-        },
-
-        step: function( timestamp ) {
-
-            var that = this;
-
-            //console.log(timestamp);
-
-            that.happen( TIMING , timestamp );
-
-            if (that[SUBSCRIBERS] < 1) {
-                that.shouldLoop = false;
-            }
-            else if (that.shouldLoop) {
-                RAF( that.step );
-            }
+            TimingMOJO.dispel( TIMING , callback );
         }
     });
 
 
-    return new TimingMOJO();
+    defProp( TimingMOJO , SUBSCRIBERS , descriptor(
+        function() {
+            return length( TimingMOJO.handlers[ TIMING ] || [] );
+        }
+    ));
+
+
+    return TimingMOJO;
 
 });
 
