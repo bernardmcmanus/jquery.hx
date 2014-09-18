@@ -26,60 +26,34 @@ function(
 
 
     var OTHER = 'other';
-    var UserAgent = navigator.userAgent;
-    var VPConfig = Config.VendorPatch;
-    var Vendors = VPConfig.vendors;
-    var OS = VPConfig.os;
-    var Tests = VPConfig.tests;
+    var USER_AGENT = navigator.userAgent;
 
-
-    function VendorPatch() {
-
-        var that = this;
-        var vendor = UA_RegExp( Vendors );
-        var os = UA_RegExp( OS );
-
-        that.RAF = getRequestAnimationFrame();
-        that.prefix = that.prefix.bind( that , vendor );
-        that.unclamped = that.unclamped.bind( that , os );
-    }
-
-
-    VendorPatch.prototype = {
-
-        prefix: function( vendor , str ) {
-
-            if (vendor === OTHER) {
-                return str;
-            }
-
-            VPConfig.prefix.forEach(function( pfx ) {
-
-                var re, omit = [];
-
-                if (instOf( pfx , RegExp )) {
-                    re = pfx;
-                }
-                else {
-                    re = pfx.regx;
-                    omit = pfx.omit || omit;
-                }
-
-                if (indexOf( omit , vendor ) < 0) {
-                    var match = re.exec( str );
-                    if (match) {
-                        str = str.replace( re , ('-' + vendor + '-' + match[0]) );
-                    }
-                }
-            });
-
-            return str;
-        },
-
-        unclamped: function( os ) {
-            return isAndroidNative( os ) === false;
-        }
+    var VENDORS = {
+        webkit  : (/webkit/i),
+        moz     : (/firefox/i),
+        o       : (/opera/i),
+        ms      : (/msie/i)
     };
+
+    var OS = {
+        android : (/android/i),
+        ios     : (/(ipad|iphone|ipod)/i),
+        macos   : (/mac os/i),
+        windows : (/windows/i)
+    };
+
+    var PREFIX = [
+        (/(?!\-)transform/g),
+        (/(?!\-)transition/g),
+        {
+            regx: (/(?!\-)filter/g),
+            omit: [ 'ms' ]
+        }
+    ];
+
+
+    var vendor = UA_RegExp( VENDORS );
+    var os = UA_RegExp( OS );
 
 
     function getRequestAnimationFrame() {
@@ -109,7 +83,7 @@ function(
 
     function UA_RegExp( search ) {
         for (var key in search) {
-            if (test( search[key] , UserAgent )) {
+            if (test( search[key] , USER_AGENT )) {
                 return key;
             }
         }
@@ -118,11 +92,47 @@ function(
 
 
     function isAndroidNative( os ) {
-        return (os === 'android' && !test( Tests.andNat , UserAgent ));
+        return (os === 'android' && !test( /(chrome|firefox)/i , USER_AGENT ));
     }
 
 
-    return new VendorPatch();
+    return {
+
+        RAF: getRequestAnimationFrame(),
+
+        unclamped: function() {
+            return isAndroidNative( os ) === false;
+        },
+
+        prefix: function( str ) {
+
+            if (vendor === OTHER) {
+                return str;
+            }
+
+            PREFIX.forEach(function( pfx ) {
+
+                var re, omit = [];
+
+                if (instOf( pfx , RegExp )) {
+                    re = pfx;
+                }
+                else {
+                    re = pfx.regx;
+                    omit = pfx.omit || omit;
+                }
+
+                if (indexOf( omit , vendor ) < 0) {
+                    var match = re.exec( str );
+                    if (match) {
+                        str = str.replace( re , ('-' + vendor + '-' + match[0]) );
+                    }
+                }
+            });
+
+            return str;
+        }
+    };
 
 });
 
