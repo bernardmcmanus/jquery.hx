@@ -3,6 +3,7 @@ hxManager.CSSProperty = hxManager.Inject(
 [   
     Array,
     parseFloat,
+    eval,
     'StyleDefinition',
     'PROTOTYPE',
     'NULL',
@@ -20,6 +21,7 @@ hxManager.CSSProperty = hxManager.Inject(
 function(
     Array,
     parseFloat,
+    _eval,
     StyleDefinition,
     PROTOTYPE,
     NULL,
@@ -144,7 +146,7 @@ function(
 
         function mergeUpdates( storedVal , newVal ) {
             var parts = parseExpression( newVal );
-            return ( parts.op ? eval( storedVal + parts.op + parts.val ) : parts.val );
+            return ( parts.op ? _eval( storedVal + parts.op + parts.val ) : parts.val );
         }
     };
 
