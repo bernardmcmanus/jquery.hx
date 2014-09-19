@@ -6,7 +6,7 @@
 
 ## Overview
 
-hx is a JavaScript animation library that couples the slick animation capabilities of CSS3 with the power and flexibility of JS, making complex animation sequences a breeze. It's written as a jQuery plugin and uses the familiar syntax:
+hx is a JavaScript animation library that couples the slick animation capabilities of CSS3 with the power and flexibility of JS, making complex animation sequences a breeze. It's written as a jQuery plugin and follows the familiar syntax:
 
 ```javascript
 $('selector').hx( arguments );
@@ -94,7 +94,7 @@ $('selector')
 
 ### Queueing
 
-Each time ```$('selector').hx( ... )``` is invoked, a __pod__ is being pushed to a queue for each element returned by ```'selector'```. Each element has its own queue which executes independently. This allows us to do things like:
+Each time a synchronous hx method is called, a __pod__ is pushed to a queue for each element returned by ```'selector'```. Each element has its own queue which executes independently. This allows us to do things like:
 
 ```javascript
 $('selector1').hx({
@@ -128,7 +128,7 @@ The following diagram illustrates how the queues for each element in the previou
 
 ### Promises
 
-hx is bundled with the latest promises <a href="http://s3.amazonaws.com/es6-promises/promise-1.0.0.min.js" target="_blank">polyfill</a>, so it will work even in browsers that have not yet implemented promises. If you're not familiar with the concept of promises, you may find these resources helpful:
+hx is bundled with <a href="https://github.com/elnarddogg/wee-promise" target="_blank">wee-promise</a>, so it will work even in browsers that have not yet implemented promises. If you're not familiar with the concept of promises, you may find these resources helpful:
 * <a href="http://www.html5rocks.com/en/tutorials/es6/promises/" target="_blank">Intro to Promises</a>
 * <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">MDN Promises Documentation</a>
 
@@ -182,17 +182,18 @@ A pod will also accept timing callbacks that are executed while the pod is runni
 ]
 ```
 
-Three arguments are passed to each timing callback:
+Two arguments are passed to each timing callback:
 
 * `elapsed` is the time (ms) that has elapsed since the pod started running.
 * `progress` is an array containing the percent completion for each bean in the pod.
-* `detach` is a function that removes the timing callback from the pod. If `true` is passed to detach, all timing callbacks will be removed from this pod.
 
 ```javascript
-function( elapsed , progress , detach ) {
+function( elapsed , progress ) {
     if (progress[1] >= 0.5) {
-        $(this).hx( 'resolve' , true );
-        detach( true );
+        $(this)
+        .hx()
+        .detach()
+        .resolve( true );
     }
 }
 ```
@@ -256,7 +257,7 @@ $('selector').hx({
 // the element is translated to (0,0,0)
 ```
 
-When a property is reset, hx removes it from the style string. To force hx to write default values, pass an empty object or string, depending on the type of arguments that property requires:
+When a property is reset, it is removed from the style string. To force default values to be written, pass an empty object or string, depending on the type of arguments that property requires:
 
 ```javascript
 $('selector').hx([
@@ -296,11 +297,11 @@ $('selector').hx([
 
 ### animate vs. iterate
 
-As of __v1.0.3__, hx includes two animation methods: [__.animate()__](#animate-obj-) and [__.iterate()__](#iterate-obj-). __animate is the default animation method__ - whenever `$('selector').hx({ ... })` is called, the animation will be performed using the animate method.
+As of version 1.0.3, hx includes two animation methods:
 
-__animate__ uses CSS transitions, making it much lighter but subject to the same constraints as CSS animations.
+- [__animate__](#animate-obj-) is the default animation method. Whenever `$('selector').hx({ ... })` is called, the animation will be performed using this method. animate uses CSS transitions, making it much lighter but subject to the same constraints as CSS animations.
 
-__iterate__ updates the DOM at 60 fps, making it heavier but free of CSS animation constraints. For example, an element can be translated and scaled simultaneously with different durations and easings.
+- [__iterate__](#iterate-obj-) attempts to update the DOM at 60 fps, making it heavier but free of CSS animation constraints. For example, an element can be translated and scaled simultaneously with different durations and easings.
 
 |     | animate | iterate |
 | --- | ------- | ------- |
@@ -325,6 +326,7 @@ The following options can be included in each bean:
 | easing | `String`<br>`Array`<br>`Function` | The transition easing | `'ease'` |
 | order | `Array` | An array setting the order of properties for the bean type (see [Troubleshooting: Transform Order](#transform-order)) | `[]` |
 | done | `Function` | A function to be executed on bean completion | `null` |
+| ref | `String`<br>`Function` | A reference string for this bean | `null` |
 
 * If duration, delay, or easing are passed as functions, they are evaluated immediately.
 
@@ -337,6 +339,9 @@ $('selector').hx({
     },
     delay: function( element , i ) {
         return i * 50;
+    },
+    ref: function( element , i ) {
+        return '#maybe-unique-bean-ref-' + i;
     }
 });
 ```
@@ -419,7 +424,7 @@ $('selector').hx({
 
 ### Overview
 
-#### .hx([ method ] , args )
+#### .hx([ method , args ])
 * Invokes `.animate()` if the first argument is a __bean__ or __pod__, or calls another method if the first argument is a string.
 * `.hx()` is the only method available to jquery, so in order call another hx method (like defer), you must either create a new hx instance first or pass the name of the method as the first argument of `.hx()`. The following examples both show valid ways to call `.defer( 1000 )`:
 
@@ -520,7 +525,6 @@ var unsubscribe = $.hx.subscribe(function( elapsed ) {
 ```javascript
 // the default $.hx.error function
 $.hx.error = function( error ) {
-    $(document).trigger( 'hx.error' , error );
     try { console.error( error.stack ); }
     catch( err ) {}
 };
@@ -700,6 +704,14 @@ $('selector').hx( 'clear' );
 $('selector').hx( 'break' );
 ```
 
+#### .detach()
+* __Chainable: YES__
+* Detaches timing and paint callbacks from the current pod, but allows it to continue running.
+
+```javascript
+$('selector').hx( 'detach' );
+```
+
 #### .pause()
 * __Chainable: YES__
 * Pauses the current animation if it was run using `iterate`.
@@ -843,11 +855,12 @@ $(target).on( 'hx.namespace' , function( e , [ data ]) {
 | Namespace | Target | Data | Description |
 | --------- | ------ | ---- | ----------- |
 | `ready` | `document` | `none` | Triggered when hx loads. |
-| `start` | `element` | `bean` | Triggered on __bean__ start. |
-| `end` | `element` | `{type: String}` | Triggered on __bean__ end. |
+| `start` | `element` | `{bean: bean, ref: String}` | Triggered on __bean__ start. |
+| `end` | `element` | `{bean: bean, ref: String}` | Triggered on __bean__ end. |
+| `reject` | `element` | reject arguments | Triggered when a promise __pod__ is rejected. |
 | `pause` | `element` | `{progress: Array}` | Triggered when an iteration __pod__ is paused. |
 | `resume` | `element` | `{progress: Array}` | Triggered when an iteration __pod__ is resumed. |
-| `error` | `document` | `error` | Triggered by [$.hx.error](#hxerror-error-) when an error is encountered within a promise function. |
+| `error` | `document` | `error` | Triggered when an error is encountered within a promise function. |
 
 =====
 

@@ -1,3 +1,18 @@
+1.0.4
+=====
+- Fixed [issue #5](https://github.com/millennialmedia/jquery.hx/issues/5)
+- Fixed [issue #6](https://github.com/millennialmedia/jquery.hx/issues/6)
+- Fixed [issue #7](https://github.com/millennialmedia/jquery.hx/issues/7)
+- Fixed [issue #8](https://github.com/millennialmedia/jquery.hx/issues/8)
+- Fixed [issue #9](https://github.com/millennialmedia/jquery.hx/issues/9)
+- Fixed [issue #10](https://github.com/millennialmedia/jquery.hx/issues/10)
+- Implemented [wee-promise](https://github.com/elnarddogg/wee-promise)
+- Added `bean.ref`
+- Added methods:
+    - `detach`
+- Added events:
+    - `hx.reject`
+
 1.0.3
 =====
 - Fixed [issue #2](https://github.com/millennialmedia/jquery.hx/issues/2)
