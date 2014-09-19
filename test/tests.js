@@ -389,6 +389,29 @@
             easing: EASING
         });
 
+        QUnit.asyncTest( 'hx.reject' , function( assert ) {
+
+            expect( 3 );
+
+            $(window).once( 'hx.reject' , function( e , args ) {
+                assert.equal( e.namespace , 'reject' , 'event' );
+                assert.equal( args[0] , 'test0' , 'args[0]' );
+                assert.equal( args[1] , 'test1' , 'args[1]' );
+                async(function() {                
+                    QUnit.start();
+                });
+            });
+
+            $(SELECTOR)
+            .hx()
+            .then(function( resolve , reject ) {
+                reject([ 'test0' , 'test1' ]);
+            })
+            .done(function() {
+                assert.ok( false , 'this should not be executed' );
+            });
+        });
+
         QUnit.asyncTest( 'hx.error' , function( assert ) {
 
             expect( 2 );

@@ -161,7 +161,10 @@ setTimeout(function() {
 
                     // otherwise, clear the queue so we can start again
 
-                    that.clear();
+                    that
+                    .clear()
+                    .trigger( 'hx.reject' , arguments );
+
                     if (instOf( err , Error )) {
                         $.hx.error( err );
                         $(document).trigger( 'hx.error' , err );
