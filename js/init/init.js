@@ -7,6 +7,7 @@ hxManager.Inject(
     'StyleDefinition',
     'Bezier',
     'TimingMOJO',
+    'del',
     'NULL'
 ],
 function(
@@ -17,6 +18,7 @@ function(
     StyleDefinition,
     Bezier,
     TimingMOJO,
+    del,
     NULL
 ){
 
@@ -207,6 +209,11 @@ function(
         DefineBezier( name , points );
     });
     
+
+    // initialize the hxManager prototype
+    var __ready = '__ready';
+    hxManager[ __ready ]();
+    del( hxManager , __ready );
 });
 
 

@@ -6,7 +6,7 @@ window.hxManager = function( j ) {
 };
 
 
-setTimeout(function() {
+hxManager.__ready = function() {
 
     hxManager.Inject(
     [
@@ -399,10 +399,8 @@ setTimeout(function() {
         function toArray( hxm ) {
             return hxm.toArray();
         }
-
     });
-
-}, 1);
+};
 
 
 
