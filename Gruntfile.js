@@ -38,7 +38,7 @@ module.exports = function( grunt ) {
 
     var Includes = [
         'js/includes/wee-promise-0.1.4.min.js',
-        'js/includes/mojo-0.1.5.min.js',
+        'js/includes/mojo-0.1.6.min.js',
         'js/includes/bezier-easing-0.4.1.js'
     ];
 
