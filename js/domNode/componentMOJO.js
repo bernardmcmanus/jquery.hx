@@ -55,6 +55,7 @@ function(
                     var name = getPropertyName( type , key );
                     var component = that.getComponents( name );
                     component = has( component , VALUE ) ? component[VALUE] : component;
+                    if ($.hx.preFilter) component = $.hx.preFilter(component);
                     return component.isDefault() ? '' : component.string;
                 })
                 .filter(function( str ) {
