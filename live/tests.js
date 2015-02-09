@@ -10,6 +10,19 @@
 
     var ALL_SELECTOR = '.tgt0,.tgt1,.tgt2';
 
+    var SKIP = [
+        // 'should call done',
+        // 'should execute in the right order',
+        // 'should reset transition',
+        // 'null transitions',
+        // 'persistent transforms',
+        // 'should reject',
+        // 'should throw an error',
+        // 'hx.start / hx.end',
+        // 'hx.pause / hx.resume',
+        // 'defineProperty'
+    ]
+
     var TEST_CASES = [
         {
             selector: ALL_SELECTOR,
@@ -75,6 +88,34 @@
 
 // ================================================================================ //
 
+   $.hx.defineProperty( 'blur' )
+        .set( 'defaults' , 0 )
+        .set( 'stringGetter' , blurStringGetter );
+
+    $.hx.defineProperty( 'dropShadow' , 'drop-shadow' )
+        .set( 'defaults' , [ 0 , 0 , 0 , 'transparent' ])
+        .set( 'keymap' , [ 'x' , 'y' , 'blur' , 'color' ])
+        .set( 'stringGetter' , dropShadowStringGetter );
+
+    $.hx.defineProperty( 'clip' )
+        .set( 'defaults' , [ 0 , 0 , 0 , 0 ])
+        .set( 'keymap' , [ 'top' , 'right' , 'bottom' , 'left' ])
+        .set( 'stringGetter' , clipStringGetter );
+
+    function blurStringGetter( name , CSSProperty ) {
+        return name + '(' + CSSProperty[0] + 'px)';
+    }
+
+    function dropShadowStringGetter( name , CSSProperty ) {
+        return name + '(' + CSSProperty.join( 'px ' ) + ')';
+    }
+
+    function clipStringGetter( name , CSSProperty ) {
+        return 'rect(' + CSSProperty.join( 'px,' ) + 'px)';
+    }
+
+// ================================================================================ //
+
     function beforeEachAndEvery() {
         var color = [
             '#ff0000',
@@ -115,7 +156,12 @@
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ('should call done', function ( done ) {
+
+            var msg = 'should call done';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -140,84 +186,89 @@
 
         //  THIS ONE ISN'T PASSING FOR SOME REASON
 
-        // TEST_CASES.forEach(function( params ) {
-        //     it ('should execute in the right order', function ( done ) {
-        //         var selector = params.selector;
-        //         var method = params.method;
-        //         var duration = params.duration;
-        //         var easing = params.easing;
+        TEST_CASES.forEach(function( params ) {
+            it ('should execute in the right order', function ( done ) {
+                var selector = params.selector;
+                var method = params.method;
+                var duration = params.duration;
+                var easing = params.easing;
 
-        //         var spy = sinon.spy();
+                var spy = sinon.spy();
 
-        //         var expectedOrder = [
-        //             [ 'translate3d' , 'scale3d' ],
-        //             [ 'scale3d' , 'translate3d' ],
-        //             [ 'translate3d' , 'rotateZ' ]
-        //         ];
+                var expectedOrder = [
+                    [ 'translate3d' , 'scale3d' ],
+                    [ 'scale3d' , 'translate3d' ],
+                    [ 'translate3d' , 'rotateZ' ]
+                ];
 
-        //         $(selector)
-        //         .hx()
-        //         [ method ]({
-        //             type: 'transform',
-        //             translate: {y: '+=50'},
-        //             scale: {x: '+=0.5', y: '+=0.5'},
-        //             duration: duration,
-        //             easing: easing
-        //         })
-        //         .then(function( resolve ) {
-        //             checkOrder( this , 0 );
-        //             spy();
-        //             resolve();
-        //         })
-        //         [ method ]({
-        //             type: 'transform',
-        //             scale: {x: '+=0.5', y: '+=0.5'},
-        //             order: [ 'scale' , 'translate' ],
-        //             duration: duration,
-        //             easing: easing
-        //         })
-        //         .then(function( resolve ) {
-        //             checkOrder( this , 1 );
-        //             spy();
-        //             resolve();
-        //         })
-        //         [ method ]({
-        //             type: 'transform',
-        //             scale: null,
-        //             translate: {y: '+=50'},
-        //             rotateZ: '+=90',
-        //             duration: duration,
-        //             easing: easing
-        //         })
-        //         .then(function( resolve ) {
-        //             checkOrder( this , 2 );
-        //             spy();
-        //             resolve();
-        //         })
-        //         .done(function() {
-        //             expect(spy).to.have.callCount(3);
-        //             done();
-        //         });
+                $(selector)
+                .hx()
+                [ method ]({
+                    type: 'transform',
+                    translate: {y: '+=50'},
+                    scale: {x: '+=0.5', y: '+=0.5'},
+                    duration: duration,
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    checkOrder( this , 0 );
+                    spy();
+                    resolve();
+                })
+                [ method ]({
+                    type: 'transform',
+                    scale: {x: '+=0.5', y: '+=0.5'},
+                    order: [ 'scale' , 'translate' ],
+                    duration: duration,
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    checkOrder( this , 1 );
+                    spy();
+                    resolve();
+                })
+                [ method ]({
+                    type: 'transform',
+                    scale: null,
+                    translate: {y: '+=50'},
+                    rotateZ: '+=90',
+                    duration: duration,
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    checkOrder( this , 2 );
+                    spy();
+                    resolve();
+                })
+                .done(function() {
+                    expect(spy).to.have.callCount(3);
+                    done();
+                });
 
-        //         function checkOrder( context , i ) {
-        //             var expected = expectedOrder.shift();
-        //             var order = [], controlOrder = [];
-        //             $(context).each(function() {
-        //                 order = order.concat(
-        //                     this.$hx.componentMOJO.order.transform
-        //                 );
-        //                 controlOrder = controlOrder.concat( expected );
-        //             });
-        //             expect(order).to.equal(controlOrder);    < --------------- This right here is failing
-        //         }
+                function checkOrder( context , i ) {
+                    var expected = expectedOrder.shift();
+                    var order = [], controlOrder = [];
+                    $(context).each(function() {
+                        order = order.concat(
+                            this.$hx.componentMOJO.order.transform
+                        );
+                        controlOrder = controlOrder.concat( expected );
+                    });
+                    expect(order).to.deep.equal(controlOrder);
+                }
     
-        //     });
-        // });
+            });
+        });
 
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ('should reset transition', function ( done ) {
+
+            var msg = 'should reset transition';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -251,7 +302,12 @@
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ('null transitions', function ( done ) {
+
+            var msg = 'null transitions';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -291,7 +347,12 @@
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ('persistent transforms', function ( done ) {
+
+            var msg = 'persistent transforms';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -399,7 +460,12 @@
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ('should reject', function ( done ) {
+
+            var msg = 'should reject';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -433,7 +499,12 @@
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ('should throw an error', function ( done ) {
+
+            var msg = 'should throw an error';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -473,7 +544,12 @@
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ('hx.start / hx.end', function ( done ) {
+
+            var msg = 'hx.start / hx.end';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -536,7 +612,12 @@
 // ================================================================================ //
 
         TEST_CASES.forEach(function( params ) {
-            it ( 'hx.pause / hx.resume' , function ( done ) {
+
+            var msg = 'hx.pause / hx.resume';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it ( msg , function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -607,38 +688,44 @@
 
 // ================================================================================ //
 
-        // TEST_CASES.forEach(function( params ) {
-        //     it ( 'defineProperty' , function ( done ) {
-        //         var selector = params.selector;
-        //         var method = params.method;
-        //         var duration = params.duration;
-        //         var easing = params.easing;
+        TEST_CASES.forEach(function( params ) {
 
-        //         var blur = hxManager.StyleDefinition.retrieve( 'blur' );
+            var msg = 'defineProperty';
+            if (SKIP.indexOf(msg) != -1)
+                return;
 
-        //         expect( blur.name ).to.equal('blur');
-        //         expect( blur.defaults ).to.equal([ 0 ]);
-        //         expect( blur.keymap ).to.equal([ 0 ]);
-        //         expect( blur.stringGetter ).to.equal( blurStringGetter );
+            it ( msg , function () {
 
-        //         var dropShadow = hxManager.StyleDefinition.retrieve( 'drop-shadow' );
+                var selector = params.selector;
+                var method = params.method;
+                var duration = params.duration;
+                var easing = params.easing;
 
-        //         expect( dropShadow.name ).to.equal( 'drop-shadow' );
-        //         expect( dropShadow.pName ).to.equal( 'dropShadow' );
-        //         expect( dropShadow.defaults ).to.deep.equal( [ 0 , 0 , 0 , 'transparent' ] );
-        //         expect( dropShadow.keymap ).to.deep.equal([ 'x' , 'y' , 'blur' , 'color' ]);
-        //         expect( dropShadow.stringGetter ).to.equal( dropShadowStringGetter );
+                var blur = hxManager.StyleDefinition.retrieve( 'blur' );
 
-        //         var clip = hxManager.StyleDefinition.retrieve( 'clip' );
+                expect( blur.name ).to.equal('blur');
+                expect( blur.defaults ).to.deep.equal([ 0 ]);
+                expect( blur.keymap ).to.deep.equal([ 0 ]);
+                expect( blur.stringGetter ).to.equal( blurStringGetter );
 
-        //         expect( clip.name ).to.equal( 'clip' );
-        //         expect( clip.pName ).to.equal( 'clip' );
-        //         expect( clip.defaults ).to.deep.equal( [ 0 , 0 , 0 , 0 ] );
-        //         expect( clip.keymap ).to.deep.equal( [ 'top' , 'right' , 'bottom' , 'left' ] );
-        //         expect( clip.stringGetter ).to.equal( clipStringGetter );
+                var dropShadow = hxManager.StyleDefinition.retrieve( 'drop-shadow' );
+
+                expect( dropShadow.name ).to.equal( 'drop-shadow' );
+                expect( dropShadow.pName ).to.equal( 'dropShadow' );
+                expect( dropShadow.defaults ).to.deep.equal( [ 0 , 0 , 0 , 'transparent' ] );
+                expect( dropShadow.keymap ).to.deep.equal([ 'x' , 'y' , 'blur' , 'color' ]);
+                expect( dropShadow.stringGetter ).to.equal( dropShadowStringGetter );
+
+                var clip = hxManager.StyleDefinition.retrieve( 'clip' );
+
+                expect( clip.name ).to.equal( 'clip' );
+                expect( clip.pName ).to.equal( 'clip' );
+                expect( clip.defaults ).to.deep.equal( [ 0 , 0 , 0 , 0 ] );
+                expect( clip.keymap ).to.deep.equal( [ 'top' , 'right' , 'bottom' , 'left' ] );
+                expect( clip.stringGetter ).to.equal( clipStringGetter );
     
-        //     });
-        // });
+            });
+        });
 
 // ================================================================================ //
 
