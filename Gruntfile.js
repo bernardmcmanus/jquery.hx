@@ -107,7 +107,7 @@ module.exports = function( grunt ) {
 
         watch: {
             debug: {
-                files: [ 'Gruntfile.js' , 'package.json' , 'test/*' , 'js/**/*.js' ],
+                files: [ 'Gruntfile.js' , 'package.json' , 'test/*' , 'js/**/*.js' , 'karma.conf.js' ],
                 tasks: [ 'dev' ]
             },
             debugProd: {
@@ -142,7 +142,15 @@ module.exports = function( grunt ) {
                     '<%= BUILD %>' : Build
                 }
             }
+        },
+
+        karma: {
+            unit: {
+                configFile: 'karma.conf.js',
+                singleRun: true
+            }
         }
+
     });
 
 
@@ -153,7 +161,8 @@ module.exports = function( grunt ) {
         'grunt-replace',
         'grunt-contrib-concat',
         'grunt-contrib-uglify',
-        'grunt-contrib-watch'
+        'grunt-contrib-watch',
+        'grunt-karma'
     ]
     .forEach( grunt.loadNpmTasks );
 
@@ -240,13 +249,13 @@ module.exports = function( grunt ) {
         'always',
         'createLive',
         'replace:debug',
-        'concat'
+        'concat',
+        'karma:unit'
     ]);
 
 
     grunt.registerTask( 'debug' , [
         'dev',
-        'startServer',
         'watch:debug'
     ]);
 
