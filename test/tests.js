@@ -268,6 +268,96 @@
 
 // ================================================================================ //
 
+        TEST_CASES.forEach(function( params ) {
+            it ('persistent transforms', function ( done ) {
+                var selector = params.selector;
+                var method = params.method;
+                var duration = params.duration;
+                var easing = params.easing;
+                var sampleIndex = Math.floor( Math.random() * $(selector).length );
+
+                var BCR = $(selector).toArray().map(function( element ) {
+                    return element.getBoundingClientRect();
+                });
+
+                $(selector)
+                .hx()
+                [ method ]({
+                    type: 'transform',
+                    translate: {x: '+=20'},
+                    duration: (duration / 4),
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    var t = this.get( 'translate' )[sampleIndex];
+                    expect(t).to.deep.equal({x: 20, y: 0, z: 0});
+                    resolve();
+                })
+                [ method ]({
+                    type: 'transform',
+                    translate: {y: '+=20'},
+                    duration: (duration / 4),
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    var t = this.get( 'translate' )[sampleIndex];
+                    expect(t).to.deep.equal({x: 20, y: 20, z: 0});
+                    resolve();
+                })
+                [ method ]({
+                    type: 'transform',
+                    translate: {z: '+=20'},
+                    duration: (duration / 4),
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    var t = this.get( 'translate' )[sampleIndex];
+                    expect(t).to.deep.equal({x: 20, y: 20, z: 20});
+                    resolve();
+                })
+                [ method ]({
+                    type: 'transform',
+                    translate: {x: 10},
+                    duration: (duration / 4),
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    var t = this.get( 'translate' )[sampleIndex];
+                    expect(t).to.deep.equal({x: 10, y: 20, z: 20});
+                    resolve();
+                })
+                [ method ]({
+                    type: 'transform',
+                    translate: {y: 10},
+                    duration: (duration / 4),
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    var t = this.get( 'translate' )[sampleIndex];
+                    expect(t).to.deep.equal({x: 10, y: 10, z: 20});
+                    resolve();
+                })
+                [ method ]({
+                    type: 'transform',
+                    translate: {z: 10},
+                    duration: (duration / 4),
+                    easing: easing
+                })
+                .then(function( resolve ) {
+                    var t = this.get( 'translate' )[sampleIndex];
+                    expect(t).to.deep.equal({x: 10, y: 10, z: 10});
+                    resolve();
+                })
+                .done(function() {
+                    done();
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+
     });
 
 
