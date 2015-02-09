@@ -36,6 +36,7 @@ module.exports = function(config) {
         'js/pod/podFactory.js',
         'js/hx.js',
         'js/init/init.js',
+        'test/once.js',
         'test/tests.js'
     ],
     exclude: [ ],

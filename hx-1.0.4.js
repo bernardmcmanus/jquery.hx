@@ -1,6 +1,6 @@
 /*
 
-jquery.hx - 1.0.4 - featPreFilter - gc29116 - 2015-02-09
+jquery.hx - 1.0.4 - featPreFilter - g9aa487 - 2015-02-09
 
 Copyright (c) 2014 Bernard McManus
 

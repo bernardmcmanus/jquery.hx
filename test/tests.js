@@ -50,6 +50,18 @@
         {
             selector: ALL_SELECTOR,
             method: 'animate',
+            duration: 0,
+            easing: 'linear'
+        },
+        {
+            selector: ALL_SELECTOR,
+            method: 'iterate',
+            duration: 0,
+            easing: 'linear'
+        },
+        {
+            selector: ALL_SELECTOR,
+            method: 'animate',
             duration: 300,
             easing: [ 0.25 , 0.1 , 0.25 , 1 ]
         },
@@ -63,32 +75,42 @@
 
 // ================================================================================ //
 
+    function beforeEachAndEvery() {
+        var color = [
+            '#ff0000',
+            '#00ff00',
+            '#0000ff'
+        ];
+        for (var i = 0; i < 3; i++) {
+            var target = $(document.createElement('div'));
+            target.width(100).height(100).css('background-color', color[i]).css('margin', 50);
+            target.addClass('tgt'+i);
+            container.append(target)
+        };
+    }
+
+    function afterEachAndEvery() {
+        container.empty();
+    }
+
     var container = $(document.createElement('div'));
     container.addClass('tgt-container');
     $('body').prepend(container);
+
+
+// ================================================================================ //
+//                                                                                  //
+//                            /* PROMISE DIGESTION */                               //
+//                                                                                  //
+// ================================================================================ //
 
     describe('Promise Digestion', function() {
 
         this.timeout(0);
 
         // hard reset DOM
-        beforeEach(function() {
-            var color = [
-                '#ff0000',
-                '#00ff00',
-                '#0000ff'
-            ];
-            for (var i = 0; i < 3; i++) {
-                var target = $(document.createElement('div'));
-                target.width(100).height(100).css('background-color', color[i]).css('margin', 50);
-                target.addClass('tgt'+i);
-                container.append(target)
-            };
-        })
-
-        afterEach(function() {
-            container.empty();
-        })
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
 
 // ================================================================================ //
 
@@ -186,7 +208,7 @@
         //                 );
         //                 controlOrder = controlOrder.concat( expected );
         //             });
-        //             expect(order).to.equal(controlOrder);    < --------------- This right here
+        //             expect(order).to.equal(controlOrder);    < --------------- This right here is failing
         //         }
     
         //     });
@@ -360,6 +382,278 @@
 
     });
 
+// ================================================================================ //
+//                                                                                  //
+//                                  /* EVENTS */                                    //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('Events', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params ) {
+            it ('should reject', function ( done ) {
+                var selector = params.selector;
+                var method = params.method;
+                var duration = params.duration;
+                var easing = params.easing;
+
+                var spy = sinon.spy();
+
+                $(window).once( 'hx.reject' , function( e , args ) {
+                    expect(e.namespace).to.equal('reject');
+                    expect(args[0]).to.equal('test0');
+                    expect(args[1]).to.equal('test1');
+                });
+
+                async(function() {
+                    expect(spy).to.not.have.been.called;
+                    done();
+                }, 100)
+
+                $(selector)
+                .hx()
+                .then(function( resolve , reject ) {
+                    reject([ 'test0' , 'test1' ]);
+                })
+                .done(function() {
+                    spy();
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params ) {
+            it ('should throw an error', function ( done ) {
+                var selector = params.selector;
+                var method = params.method;
+                var duration = params.duration;
+                var easing = params.easing;
+
+                var spy = sinon.spy();
+
+                var temp = $.hx.error;
+                $.hx.error = function() {};
+
+                $(window).once( 'hx.error' , function( e , data ) {
+                    expect(e.namespace).to.equal('error');
+                    expect( data instanceof Error ).to.be.ok;
+                    spy('Good Spy');
+                    $.hx.error = temp;
+                });
+
+                async(function() {
+                    expect(spy).to.not.have.been.calledWith('Bad Spy');
+                    expect(spy).to.have.been.calledWith('Good Spy');
+                    done();
+                }, duration);
+
+                $(selector)
+                .hx()
+                .then(function( resolve , reject ) {
+                    var a = null;
+                    a.b = true;
+                })
+                .done(function() {
+                    spy('Bad Spy');
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params ) {
+            it ('hx.start / hx.end', function ( done ) {
+                var selector = params.selector;
+                var method = params.method;
+                var duration = params.duration;
+                var easing = params.easing;
+
+                var spy = sinon.spy();
+
+                var bean0 = {
+                    type: 'transform',
+                    translate: {y: '+=20'},
+                    duration: function( element , i ) {
+                        return (( duration * ( i + 1 )) / 2 );
+                    },
+                    easing: easing,
+                    ref: '#hx.start'
+                };
+
+                var bean1 = {
+                    type: 'transform',
+                    translate: {y: '-=20'},
+                    duration: duration,
+                    easing: easing,
+                    ref: '#hx.end'
+                };
+
+                $(selector)
+                .hx()
+                .then(function( resolve ) {
+
+                    $(selector).once( 'hx.start' , function( e , data ) {
+                        expect( e.namespace ).to.equal( 'start' );
+                        expect( data.ref ).to.equal( '#hx.start' )
+                        expect( data.bean ).to.deep.equal( bean0 );
+                        spy();
+                    });
+
+                    resolve();
+                })
+                [ method ]( bean0 )
+                .then(function( resolve ) {
+
+                    $(selector).once( 'hx.end' , function( e , data ) {
+                        expect( e.namespace ).to.equal( 'end' );
+                        expect( data.ref ).to.equal( '#hx.end' );
+                        expect( data.bean ).to.deep.equal( bean1 );
+                        spy();
+                    });
+
+                    resolve();
+                })
+                [ method ]( bean1 )
+                .done(function() {
+                    expect(spy).to.have.been.calledTwice;
+                    done();
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params ) {
+            it ( 'hx.pause / hx.resume' , function ( done ) {
+                var selector = params.selector;
+                var method = params.method;
+                var duration = params.duration;
+                var easing = params.easing;
+
+                if (method !== 'iterate' || duration === 0) {
+                    done();
+                    return;
+                }
+
+                var spy = sinon.spy();
+
+                $(selector).once( 'hx.pause' , function( e , data ) {
+                    expect( e.namespace ).to.equal( 'pause' );
+                    expect( data.progress.length ).to.equal( 1 );
+                    spy();
+                });
+
+                $(selector).once( 'hx.resume' , function( e , data ) {
+                    expect( e.namespace ).to.equal( 'resume' );
+                    expect( data.progress.length ).to.equal( 1 );
+                    spy();
+                });
+
+                $(selector)
+                .hx()
+                [ method ]({
+                    type: 'transform',
+                    translate: {y: '+=50'},
+                    duration: function( element , i ) {
+                        return (( duration * ( i + 1 )) / 2 );
+                    },
+                    easing: easing
+                })
+                .done(function() {
+                    expect(spy).to.have.been.calledTwice;
+                    done();
+                });
+
+                async(function() {
+                    $(selector).hx( 'pause' );
+                }, (duration / 2));
+
+                async(function() {
+                    $(selector).hx( 'resume' );
+                }, (duration * 2));
+    
+            });
+        });
+
+// ================================================================================ //
+
+    });
+
+// ================================================================================ //
+//                                                                                  //
+//                                   /* #$hx */                                     //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('#$hx', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
+
+// ================================================================================ //
+
+        // TEST_CASES.forEach(function( params ) {
+        //     it ( 'defineProperty' , function ( done ) {
+        //         var selector = params.selector;
+        //         var method = params.method;
+        //         var duration = params.duration;
+        //         var easing = params.easing;
+
+        //         var blur = hxManager.StyleDefinition.retrieve( 'blur' );
+
+        //         expect( blur.name ).to.equal('blur');
+        //         expect( blur.defaults ).to.equal([ 0 ]);
+        //         expect( blur.keymap ).to.equal([ 0 ]);
+        //         expect( blur.stringGetter ).to.equal( blurStringGetter );
+
+        //         var dropShadow = hxManager.StyleDefinition.retrieve( 'drop-shadow' );
+
+        //         expect( dropShadow.name ).to.equal( 'drop-shadow' );
+        //         expect( dropShadow.pName ).to.equal( 'dropShadow' );
+        //         expect( dropShadow.defaults ).to.deep.equal( [ 0 , 0 , 0 , 'transparent' ] );
+        //         expect( dropShadow.keymap ).to.deep.equal([ 'x' , 'y' , 'blur' , 'color' ]);
+        //         expect( dropShadow.stringGetter ).to.equal( dropShadowStringGetter );
+
+        //         var clip = hxManager.StyleDefinition.retrieve( 'clip' );
+
+        //         expect( clip.name ).to.equal( 'clip' );
+        //         expect( clip.pName ).to.equal( 'clip' );
+        //         expect( clip.defaults ).to.deep.equal( [ 0 , 0 , 0 , 0 ] );
+        //         expect( clip.keymap ).to.deep.equal( [ 'top' , 'right' , 'bottom' , 'left' ] );
+        //         expect( clip.stringGetter ).to.equal( clipStringGetter );
+    
+        //     });
+        // });
+
+// ================================================================================ //
+
+    });
+
+    function async( callback , delay ) {
+        delay = delay || 30;
+        var unsubscribe = $.hx.subscribe(function( elapsed ) {
+            if (elapsed >= delay) {
+                callback( elapsed );
+                unsubscribe();
+            }
+        });
+        return unsubscribe;
+    }
 
 })();
 
