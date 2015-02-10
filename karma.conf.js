@@ -29,8 +29,8 @@ module.exports = function(config) {
 
     // optionally run in chrome as well as phantomjs... but why??
     browsers: [ 
-        //'Chrome',
-        'PhantomJS'
+        'Chrome',
+        //'PhantomJS'
     ]
 
   });

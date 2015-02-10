@@ -20,7 +20,16 @@
         // 'should throw an error',
         // 'hx.start / hx.end',
         // 'hx.pause / hx.resume',
-        // 'defineProperty'
+        // 'defineProperty',
+        // 'resolve',
+        // 'reject',
+        // 'aggregate',
+        // 'main',
+        // 'individual',
+        // 'array',
+        // 'paint all',
+        // 'should reset',
+        // 'should get'
     ]
 
     var TEST_CASES = [
@@ -141,7 +150,7 @@
 
 // ================================================================================ //
 //                                                                                  //
-//                            /* PROMISE DIGESTION */                               //
+//                             PROMISE DIGESTION                                    //
 //                                                                                  //
 // ================================================================================ //
 
@@ -155,13 +164,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'should call done';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it (msg, function ( done ) {
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -184,10 +193,13 @@
 
 // ================================================================================ //
 
-        //  THIS ONE ISN'T PASSING FOR SOME REASON
+        TEST_CASES.forEach(function( params, i ) {
 
-        TEST_CASES.forEach(function( params ) {
-            it ('should execute in the right order', function ( done ) {
+            var msg = 'should execute in the right order';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -262,13 +274,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'should reset transition';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it (msg, function ( done ) {
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -301,13 +313,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'null transitions';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it (msg, function ( done ) {
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -346,13 +358,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'persistent transforms';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it (msg, function ( done ) {
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -445,7 +457,7 @@
 
 // ================================================================================ //
 //                                                                                  //
-//                                  /* EVENTS */                                    //
+//                                 EVENTS                                           //
 //                                                                                  //
 // ================================================================================ //
 
@@ -459,13 +471,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'should reject';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it (msg, function ( done ) {
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -498,13 +510,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'should throw an error';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it (msg, function ( done ) {
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -543,13 +555,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'hx.start / hx.end';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it (msg, function ( done ) {
+            it (i+' '+msg, function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -611,13 +623,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'hx.pause / hx.resume';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it ( msg , function ( done ) {
+            it ( i+' '+msg , function ( done ) {
                 var selector = params.selector;
                 var method = params.method;
                 var duration = params.duration;
@@ -674,7 +686,7 @@
 
 // ================================================================================ //
 //                                                                                  //
-//                                   /* #$hx */                                     //
+//                                 #$hx                                             //
 //                                                                                  //
 // ================================================================================ //
 
@@ -688,13 +700,13 @@
 
 // ================================================================================ //
 
-        TEST_CASES.forEach(function( params ) {
+        TEST_CASES.forEach(function( params, i ) {
 
             var msg = 'defineProperty';
             if (SKIP.indexOf(msg) != -1)
                 return;
 
-            it ( msg , function () {
+            it ( i+' '+msg , function () {
 
                 var selector = params.selector;
                 var method = params.method;
@@ -726,6 +738,712 @@
     
             });
         });
+
+// ================================================================================ //
+
+    });
+
+// ================================================================================ //
+//                                                                                  //
+//                                 #then                                            //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('#then', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'resolve';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            var spy = sinon.spy();
+
+            it ( i+' '+msg , function ( done ) {
+
+                $(selector)
+                .hx()
+                .then(function( resolve , reject ) {
+                    spy();
+                    resolve();
+                })
+                .done(function() {
+                    expect(spy).to.have.been.called;
+                    done();
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'reject';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            var spy = sinon.spy();
+
+            it ( i+' '+msg , function ( done ) {
+
+                $(selector)
+                .hx()
+                .then(function( resolve , reject ) {
+                    spy('Good Spy');
+                    reject();
+                })
+                .done(function() {
+                    spy('Bad Spy');
+                });
+
+                async(function() {
+                    expect(spy).to.have.been.calledWith('Good Spy');
+                    expect(spy).to.not.have.been.calledWith('Bad Spy');
+                    done();
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'aggregate';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            var spy = sinon.spy();
+
+            it ( i+' '+msg , function ( done ) {
+
+                $(selector)
+                .hx()
+                [ method ]([
+                    {
+                        type: 'opacity',
+                        value: 0.5,
+                        duration: duration,
+                        delay: function( element , i ) {
+                            return (duration * i);
+                        },
+                        easing: easing
+                    },
+                    {
+                        type: 'transform',
+                        translate: {y: 40},
+                        rotateZ: 360,
+                        duration: duration,
+                        delay: function( element , i ) {
+                            return (duration * i);
+                        },
+                        easing: easing
+                    }
+                ])
+                .then(function( resolve ) {
+                    this.each(function( i ) {
+                        spy();
+                        expect( this.$hx.queue.length ).to.equal( 3 );
+                    });
+                    resolve();
+                })
+                [ method ]([
+                    {
+                        type: 'opacity',
+                        value: null,
+                        duration: duration,
+                        easing: easing
+                    },
+                    {
+                        type: 'transform',
+                        translate: null,
+                        rotateZ: null,
+                        duration: duration,
+                        easing: easing
+                    }
+                ])
+                .done(function() {
+                    expect(spy).to.have.been.called;
+                    done();
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+    });
+
+// ================================================================================ //
+//                                                                                  //
+//                                  #update                                         //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('#update', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
+
+        var beans = [
+            {
+                type: 'transform',
+                translate: {x: 20, y: 20, z: 20},
+                rotate: {x: 1, y: 1, z: 1, a: 60},
+                scale: {x: 1.2, y: 1.2, z: 1.2},
+                rotateX: 20,
+                rotateY: 20,
+                rotateZ: 20,
+                translate2d: {x: 20, y: 20},
+                scale2d: {x: 1.2, y: 1.2}
+            },
+            {
+                type: 'opacity',
+                value: 0.5
+            },
+            {
+                type: 'filter',
+                blur: 2,
+                dropShadow: { x: 10, y: 10, color: 'blue'}
+            },
+            {
+                type: 'clip',
+                value: {
+                    top: 0,
+                    right: 25,
+                    bottom: 25,
+                    left: 0
+                }
+            }
+        ]
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'main';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            beans.forEach(function( bean ) {
+                it ( i+' '+msg , function ( done ) {
+
+                    $(selector)
+                    .hx()
+                    .update( bean )
+                    .paint()
+                    .done(function() {
+                        done();
+                    });
+
+                });
+    
+            });
+        });
+
+// ================================================================================ //
+
+    });
+
+// ================================================================================ //
+//                                                                                  //
+//                                   #paint                                         //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('#paint', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
+
+        var beans = [
+            {
+                type: 'transform',
+                translate: {x: 20, y: 20, z: 20},
+                rotate: {x: 1, y: 1, z: 1, a: 60},
+                scale: {x: 1.2, y: 1.2, z: 1.2},
+                rotateX: 20,
+                rotateY: 20,
+                rotateZ: 20,
+                translate2d: {x: 20, y: 20},
+                scale2d: {x: 1.2, y: 1.2}
+            },
+            {
+                type: 'opacity',
+                value: 0.5
+            },
+            {
+                type: 'filter',
+                blur: 2,
+                dropShadow: { x: 10, y: 10, color: 'blue' }
+            },
+            {
+                type: 'clip',
+                value: {
+                    top: 0,
+                    right: 25,
+                    bottom: 25,
+                    left: 0
+                }
+            }
+        ];
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'individual';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            beans.forEach(function( bean ) {
+                it ( i+' '+msg , function () {
+                
+                    var type = bean.type;
+
+                    $(selector)
+                    .hx()
+                    .update( bean )
+                    .paint( bean.type );
+
+                    var style = $(selector).attr( 'style' );
+                    var prefixed = hxManager.VendorPatch.prefix( type );
+                    var re = new RegExp( '(' + prefixed + '|' + type + ')' );
+
+                    expect(style).to.match(re);
+
+                });
+            });
+
+        });
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'array';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            var types = [];
+
+            it ( msg , function () {
+                beans.forEach(function( bean ) {
+
+                    var type = bean.type;
+                    var rand = Math.round( Math.random() );
+
+                    $(selector).hx( 'update' , bean );
+
+                    if (rand) {
+                        types.push( type );
+                    }
+                });
+            });
+
+            $(selector).hx( 'paint' , types );
+
+            var style = $(selector).attr( 'style' );
+
+            types.forEach(function( type ) {
+                var prefixed = hxManager.VendorPatch.prefix( type );
+                var re = new RegExp( '(' + prefixed + '|' + type + ')' );
+                expect(type).to.match(re);
+            });
+
+        });
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'paint all';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            var types = [];
+            beans.forEach(function( bean ) {
+                it (i+' '+ msg , function () {
+                
+                    var type = bean.type;
+
+                    $(selector)
+                    .hx()
+                    .update( bean )
+                    .paint( type );
+
+                    var style = $(selector).attr( 'style' );
+                    var prefixed = hxManager.VendorPatch.prefix( type );
+                    var re = new RegExp( '(' + prefixed + '|' + type + ')' );
+
+                    expect(style).to.match(re);
+
+                });
+            });
+
+        });
+
+// ================================================================================ //
+
+    });
+
+// ================================================================================ //
+//                                                                                  //
+//                                   #reset                                         //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('#reset', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
+
+        var beans = [
+            {
+                type: 'transform',
+                translate: {x: 20, y: 20, z: 20},
+                rotate: {x: 1, y: 1, z: 1, a: 60},
+                scale: {x: 1.2, y: 1.2, z: 1.2},
+                rotateX: 20,
+                rotateY: 20,
+                rotateZ: 20,
+                translate2d: {x: 20, y: 20},
+                scale2d: {x: 1.2, y: 1.2}
+            },
+            {
+                type: 'opacity',
+                value: 0.5
+            },
+            {
+                type: 'filter',
+                blur: 2,
+                dropShadow: {x: 10, y: 10, color: 'blue'}
+            },
+            {
+                type: 'clip',
+                value: {
+                    top: 0,
+                    right: 25,
+                    bottom: 25,
+                    left: 0
+                }
+            }
+        ]
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'should reset';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            beans.forEach(function( bean ) {
+
+                var type = bean.type;
+
+                it (i+' '+msg, function() {
+
+                    var initStyle;
+
+                    var type = bean.type;
+
+                    $(selector)
+                    .hx()
+                    .update( bean )
+                    .reset()
+                    .paint( type );
+
+                    var style = $(selector).attr( 'style' );
+                    var prefixed = hxManager.VendorPatch.prefix( type );
+                    var re = new RegExp( '(' + prefixed + '|' + type + ')' );
+
+                    expect(style).to.not.match(re);
+
+                });
+
+            });
+            
+
+        });
+
+// ================================================================================ //
+
+    });
+
+// ================================================================================ //
+//                                                                                  //
+//                                   #get                                           //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('#get', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(function() {
+            beforeEachAndEvery();
+
+        });
+        afterEach(afterEachAndEvery);
+
+// ================================================================================ //
+
+        TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'should get';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            it (i+' '+msg, function( done ) {
+
+                var Expected = [];
+
+                Expected.push({
+                    opacity: 0.8,
+                    rotateZ: 45,
+                    translate: { x: 0, y: 135, z: 0 },
+                    blur: 10,
+                    dropShadow: { x: 10, y: 10, blur: 0, color: '#512eff' },
+                    clip: {
+                        left: 0,
+                        top: 0,
+                        right: 100,
+                        bottom: 100
+                    }
+                });
+
+                Expected.push({
+                    opacity: 1,
+                    rotateZ: 0,
+                    translate: { x: 0, y: 0, z: 0 },
+                    blur: 0,
+                    dropShadow: { x: 0, y: 0, blur: 0, color: 'transparent' },
+                    clip: { left: 0, top: 0, right: 0, bottom: 0 }
+                });
+
+                var count = Expected.reduce(function( prev , current ) {
+                    return prev + Object.keys( current ).length;
+                }, 0);
+
+                $(selector)
+                .hx()
+                .update([
+                    {
+                        type: 'opacity',
+                        value: 0.8
+                    },
+                    {
+                        type: 'transform',
+                        translate: {y: '+=135'},
+                        rotateZ: '+=45'
+                    },
+                    {
+                        type: 'filter',
+                        blur: 10,
+                        dropShadow: {x: 10, y: 10, color: '#512eff'}
+                    },
+                    {
+                        type: 'clip',
+                        value: function( element , i ) {
+                            return {
+                                right: $(element).width(),
+                                bottom: $(element).height()
+                            };
+                        }
+                    }
+                ])
+                .paint()
+                .then(function( resolve ) {
+                    expect( $(selector).hx( 'get' ).length ).to.equal( $(selector).length );
+                    compareSample();
+                    resolve();
+                })
+                [ method ]([
+                    {
+                        type: 'opacity',
+                        value: null,
+                        duration: duration,
+                        easing: easing
+                    },
+                    {
+                        type: 'transform',
+                        translate: null,
+                        rotateZ: null,
+                        duration: duration,
+                        easing: easing
+                    },
+                    {
+                        type: 'filter',
+                        blur: null,
+                        dropShadow: null,
+                        duration: duration,
+                        easing: easing
+                    },
+                    {
+                        type: 'clip',
+                        value: null,
+                        duration: duration,
+                        easing: easing
+                    }
+                ])
+                .done(function() {
+                    compareSample();
+                    done();
+                });
+
+                function compareSample() {
+
+                    var expected = Expected.shift();
+
+                    for ( var key in expected ) {
+                        var expval = expected[key];
+                        var stored = $(selector).hx( 'get' , key )[0];
+                        expect( stored ).to.deep.equal( expval );
+                    }
+                }
+
+                function stringify( expected ) {
+                    return typeof expected === 'object' ? JSON.stringify( expected ) : expected;
+                }
+
+            });
+            
+
+        });
+
+// ================================================================================ //
+
+    });
+
+// ================================================================================ //
+//                                                                                  //
+//                                   #reset                                         //
+//                                                                                  //
+// ================================================================================ //
+
+    describe('#defer', function() {
+
+        this.timeout(0);
+
+        // hard reset DOM
+        beforeEach(beforeEachAndEvery);
+        afterEach(afterEachAndEvery);
+
+// ================================================================================ //
+
+       /* TEST_CASES.forEach(function( params, i ) {
+
+            var selector = params.selector;
+            var method = params.method;
+            var duration = params.duration;
+            var easing = params.easing;
+
+            var msg = 'timed';
+            if (SKIP.indexOf(msg) != -1)
+                return;
+
+            if (!duration) {
+                it (i+" doesn't apply", function() {});
+                return;
+            }
+
+            it (i+' '+msg, function( done ) {
+
+                $(selector).each(function( j ) {
+
+                    //if (j > 0) {
+                        //$(this).hx( 'defer' , ((j + 1) * duration) );
+                    //}
+
+                    $(this)
+                    .hx()
+                    .hx( 'defer' , ((j + 1) * duration) )
+                    .then(function( resolve ) {
+                        console.log(this[0].$hx.queue.length);
+                        //expect( this[0].$hx.queue.length ).to.equal( 4 );
+                        resolve();
+                    })
+                    [ method ]({
+                        type: 'transform',
+                        rotateZ: '+=360',
+                        duration: duration,
+                        easing: easing
+                    })
+                    .done(function() {
+                        done();
+                    });
+
+                    console.log($(this)[0].$hx.queue.length);
+                });
+
+            });
+        
+        });*/
 
 // ================================================================================ //
 
