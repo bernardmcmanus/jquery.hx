@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <!-- ============================================= -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>jquery.hx tests</title>
+    <!-- ============================================= -->
+    <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <!-- ============================================= -->
+    <script src="performance-polyfill.js"></script>
+    <!-- ============================================= -->
+    <script src="/bower_components/requirejs/index.js"></script>
+    <!-- ============================================= -->
+    <script>
+      require.config({
+        paths: {
+          'hx': '/dist/hx',
+          'jquery': '/bower_components/jquery/dist/jquery.min',
+          'mocha': '/bower_components/mocha/mocha',
+          'chai': '/bower_components/chai/chai',
+          'sinon': '/bower_components/sinon/index',
+          'sinon-chai': '/node_modules/sinon-chai/lib/sinon-chai'
+        },
+        shim: {
+          'jquery': { exports: '$' },
+          'mocha': { exports: 'mocha' },
+          'chai': { exports: 'chai' },
+          'sinon': { exports: 'sinon' },
+          'sinon-chai': [ 'chai' , 'sinon' ],
+          'once': [ 'jquery' ],
+          'hx': [ 'jquery' ]
+        }
+      });
+      require([ 'chai' , 'sinon-chai' ], function( chai , sinonChai ) {
+        window.chai = chai;
+        window.expect = chai.expect;
+        chai.use( sinonChai );
+      });
+      define( 'init' , [ 'jquery' , 'mocha' , 'sinon-chai' ], function( $ , mocha ) {
+        mocha.setup( 'bdd' );
+        mocha.reporter( 'html' );
+      });
+      require([ 'hx' , 'once' , 'init' ], function() {
+        $.getScript( '/test/tests.js' , function() {
+          mocha.run();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="mocha"></div>
+  </body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

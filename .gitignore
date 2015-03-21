@@ -1,6 +1,7 @@
-# npm & grunt #
-###############
+# packages #
+############
 node_modules
+bower_components
 
 # OS generated files #
 ######################

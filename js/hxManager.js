@@ -13,7 +13,7 @@ hxManager.__ready = function() {
         document,
         Error,
         jQuery,
-        Promise,
+        WeePromise,
         MOJO,
         hxManager,
         'DomNodeFactory',

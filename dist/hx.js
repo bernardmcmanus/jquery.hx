@@ -1,31 +1,7 @@
-/*
+/*! jquery.hx - 1.0.4 - Bernard McManus - a383dc5 - 2015-03-21 */
 
-jquery.hx - 1.0.4 - featPreFilter - g3fefa1 - 2015-02-10
-
-Copyright (c) 2014 Bernard McManus
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
-
-/*! wee-promise - 0.1.4 - Bernard McManus - gf7782e - 2014-09-18 */
-!function(a){"object"==typeof exports?module.exports=a:window.Promise=window.Promise||a}(function(a,b){function c(a){var b=this;g(b,m,0),g(b,n,[]),g(b,t,[]),g(b,u,[]),g(b,v,[]),b[y]=!1,b[o]=d(b,u),b[p]=d(b,v),h(function(){i(b,function(){a(b[o],b[p])}),b[y]=!0})}function d(a,b){function c(d){h(a[y]?function(){a[m]||a[x](b,d)[x](t,d)}:function(){c(d)})}return function(a){c(a)}}function e(a,b,c,d,e){return function(){var g=f(a,1),h=f(a,-1);if(j(g)===d){var i=g.map(function(a){return a[n][0]});b(e?i[0]:i)}else j(h)>0&&c(h[0][n][0])}}function f(a,b){return a.filter(function(a){return a[m]===b})}function g(b,c,d){a.defineProperty(b,c,{value:d,writable:!0})}function h(a){b(a,1)}function i(a,b){try{b()}catch(c){a[x](v,c)}}function j(a){return a.length}function k(a,b){a.forEach(b)}var l="prototype",m="state",n="args",o="resolve",p="reject",q="always",r="then",s="catch",t="_"+q,u="_"+r,v="_"+s,w="_add",x="_exec",y="_ready",z={};return z[v]=-1,z[u]=1,c[l][w]=function(a,b){var c=this;return b&&c[a].push(b),c},c[l][x]=function(a,b){b=[b];var c=this,d=c[a],e=j(d),f=0;return i(c,function(){for(;e>f&&j(d)>0;)(z[a]?d.shift():d[f]).apply(null,b),f++}),c[n]=b,c[m]=z[a]||c[m],c},c[l][q]=function(a){return this[w](t,a)},c[l][r]=function(a,b){return this[w](u,a)[s](b)},c[l][s]=function(a){return this[w](v,a)},c.all=function(a){return new c(function(b,c){k(a,function(d){d[q](e(a,b,c,j(a)))})})},c.race=function(a){return new c(function(b,c){k(a,function(d){d[q](e(a,b,c,1,!0))})})},c}(Object,setTimeout));
+/*! wee-promise - 0.2.1 - Bernard McManus - master - gb12466 - 2015-03-21 */
+!function(a){var b=this;"object"==typeof exports?module.exports=a:b.WeePromise=a}(function(a){"use strict";function b(a){var b=this;k([v,w,u],function(a){b[a]=[]}),h(function(){b[B]=e(b),i(b,function(){a(c(b,v),c(b,w))}),b[z]=!0})}function c(a,b){function c(d){h(a[z]?function(){a[s]||a[y](b,d)[y](u,d)}:function(){c(d)})}return c}function d(a,b,c,d,e){return function(){a=a.map(function(a){return g(a[t])?a[t]:a});var h=f(a,1),i=f(a,-1);if(j(h)===d){var k=h.map(function(a){return a[t][0]});b(e?k[0]:k)}else j(i)>0&&c(i[0][t][0])}}function e(a){return j(a[w])>0}function f(a,b){return a.filter(function(a){return a[s]===b})}function g(a){return a instanceof b}function h(b){a(b,1)}function i(a,b){try{return b()}catch(c){return a[y](w,c)}}function j(a){return a.length}function k(a,b){a.forEach(b)}var l,m="$$",n="prototype",o="always",p="then",q="catch",r=m+"pass",s=m+"state",t=m+"args",u=m+o,v=m+p,w=m+q,x=m+"add",y=m+"exec",z=m+"ready",A=m+"child",B=m+"handled",C=B+"Self",D={};return D[v]=1,D[w]=-1,b[n][x]=function(a,b){var c=this;return b&&c[a].push(b),c},b[n][y]=function(a,b){var c,d=this,e=d[a],f=j(e),h=0,k=D[a];return i(d,function(){for(;f>h;){if(k&&d[s]===k&&d[A]&&d[B]&&(e=!d[C]||d[z]?[]:e.slice(-1),h=f-1,!j(e)))return d;if(c=(k?e.shift():e[h]).apply(l,[b]),b=k?c:b,g(c))return d[r](c);if(a==w){if(d[B]&&(k=D[v],d[A]))return d[s]=k,d[t]=[c],d[y](v,c)[y](u,c);break}h++}return d[t]=d[s]?d[t]:[b],d[s]=k||d[s],d})},b[n][o]=function(a){return this[x](u,a)},b[n][p]=function(a,b){return this[x](v,a)[q](b)},b[n][q]=function(a){return this[x](w,a)},b[n][r]=function(a){var b=this;return a[C]=e(a),a[A]=!0,k([v,w,u],function(c){a[c]=a[C]?a[c].concat(b[c]):b[c]}),b[t]=a,a},b.all=function(a){return new b(function(b,c){k(a,function(e){e[o](d(a,b,c,j(a)))})})},b.race=function(a){return new b(function(b,c){k(a,function(e){e[o](d(a,b,c,1,!0))})})},b}(setTimeout));
 /*! mojo - 0.1.6 - Bernard McManus - master - g727d74 - 2014-10-16 */
 var _MOJO={},MOJO={};_MOJO.Shared=function(a,b){function c(a){return a.length}function d(b){return a.keys(b)}function e(a){return b.prototype.shift.call(a)}function f(a){return a instanceof b?a:a!==i?[a]:[]}function g(a,b){return{get:a,set:b,configurable:!0}}function h(a){return(a||{})[j]?a[j]:a}var i,j="handleMOJO";return{length:c,keys:d,shift:e,ensureArray:f,descriptor:g,getHandlerFunc:h}}(Object,Array),_MOJO.EventHandler=function(a){function b(a,b,c){var e=this;e.handler=a,e.context=b,e.active=!0,e.callback=function(){},e.args=d(c)}var c=a.Shared,d=c.ensureArray;return b.prototype={invoke:function(a,b){var c=this,e=c.handler;if(c.active&&!a.isBreak&&!a.shouldSkip(e)){var f=c.args.concat(d(b));f.unshift(a),e.apply(c.context,f),c.callback(a,e)}}},b}(_MOJO),_MOJO.Event=function(a,b){function c(b,c){var d=this;d.isBreak=e,d.cancelBubble=e,d.defaultPrevented=e,d.skipHandlers=[],d.target=b,d.type=c,d.timeStamp=a.now()}var d=!0,e=!1,f=b.Shared,g=f.ensureArray,h=f.getHandlerFunc;return c.prototype={skip:function(a){var b=this.skipHandlers;g(a).forEach(function(a){b.push(h(a))})},shouldSkip:function(a){return this.skipHandlers.indexOf(a)>=0},"break":function(){this.isBreak=d},preventDefault:function(){this.defaultPrevented=d},stopPropagation:function(){this.cancelBubble=d}},c}(Date,_MOJO),_MOJO.When=function(a,b,c){function d(a,b){return l(a).map(function(a){return a.handler}).indexOf(b)}function e(a,c){(a instanceof b?a:a.split(" ")).forEach(c)}function f(a,b){return a===b?null:a}var g=c.Shared,h=c.EventHandler,i=c.Event,j=g.keys,k=g.shift,l=g.ensureArray,m=g.length,n=g.getHandlerFunc,o={once:function(){var a=this,b=a._when(arguments);return b.forEach(function(a){a.callback=function(){this.active=!1}}),a},when:function(){var a=this;return a._when(arguments),a},_when:function(a){var b=this,c=k(a),d=m(a)>1?k(a):d,g=[],i=k(a),j=n(i),l=f(i,j);return e(c,function(a,c){g.push(new h(j,l,d)),b._addHandler(a,g[c])}),g},happen:function(a,b){var c=this;return a=c._ensureEType(a),e(a,function(a){var d=c._getHandlers(a,!0),e=new i(c,a);d.filter(function(a){return a.invoke(e,b),!a.active}).forEach(function(b){c._removeHandler(c._getHandlers(a),b.handler)})}),c},dispel:function(a,b){var c=this,d=c._getHandlers(),f=n(b);return a=c._ensureEType(a),e(a,function(a){f?c._removeHandler(d[a],f):delete d[a]}),c},_ensureEType:function(a){return a||j(this._getHandlers()).join(" ")},_getHandlers:function(b,c){var d=this,e=d.handlers=d.handlers||{},f=b?e[b]=e[b]||[]:e;return c?b?f.slice():a.create(f):f},_addHandler:function(a,b){var c=this;c._getHandlers(a).push(b)},_removeHandler:function(a,b){var c=d(a,b);c>=0&&a.splice(c,1)}};return o}(Object,Array,_MOJO),MOJO=function(a){function b(a){a=a||{};var c=this;b.Each(a,function(a,b){c[b]=a}),b.Construct(c)}var c=b.prototype=Object.create(a.When);return c.each=function(a){var c=this;return b.Each(c,a,c.keys),c},c.set=function(a,b){var c=this;return c[a]=b,c.happen("set",a),c},c.remove=function(a){var b=this;return delete b[a],b.happen("remove",a),b},b}(_MOJO),MOJO.Each=function(a){function b(a,b,c){(c||d(a)).forEach(function(c,d){b(a[c],c,d)})}var c=a.Shared,d=c.keys;return b}(_MOJO),MOJO.Create=function(a,b){function c(c){var d=a.create(b.prototype);return b.Each(c,function(a,b){d[b]=a}),d}return c}(Object,MOJO),MOJO.Construct=function(a,b){function c(b){var c={};a.defineProperties(b,{handlers:{get:function(){return c},set:function(a){c=a},configurable:!0},keys:f(function(){return e(b)}),length:f(function(){return g(b.keys)}),handleMOJO:{value:(b.handleMOJO||function(){}).bind(b),configurable:!0}})}var d=b.Shared,e=d.keys,f=d.descriptor,g=d.length;return c}(Object,_MOJO),function(a){"object"==typeof exports?module.exports=a:window.MOJO=a}(MOJO);
 /**
@@ -37,14 +13,7 @@ var _MOJO={},MOJO={};_MOJO.Shared=function(a,b){function c(a){return a.length}fu
  *
  */
 (function (definition) {
-  if (typeof exports === "object") {
-    module.exports = definition();
-  }
-  else if (typeof window.define === 'function' && window.define.amd) {
-    window.define([], definition);
-  } else {
-    window.BezierEasing = definition();
-  }
+  window.BezierEasing = definition();
 }(function () {
   var global = this;
 
@@ -183,7 +152,7 @@ hxManager.__ready = function() {
         document,
         Error,
         jQuery,
-        Promise,
+        WeePromise,
         MOJO,
         hxManager,
         'DomNodeFactory',
@@ -3562,8 +3531,8 @@ hxManager.PromisePod = (function( Promise , $ , MOJO ) {
         MOJO.Construct( that );
 
         var promise = new Promise(function( resolve , reject ) {
-            that.resolve = resolve;
-            that.reject = reject;
+            promise.resolve = resolve;
+            promise.reject = reject;
         });
 
         return $.extend( promise , that );
@@ -3576,7 +3545,13 @@ hxManager.PromisePod = (function( Promise , $ , MOJO ) {
     PromisePod.prototype = MOJO.Create({
 
         run: function() {
-            this.resolve();
+            var that = this;
+            new Promise(function( resolve ) {
+                resolve();
+            })
+            .then(function() {
+                that.resolve();
+            });
         },
 
         resolvePod: function() {
@@ -3598,7 +3573,7 @@ hxManager.PromisePod = (function( Promise , $ , MOJO ) {
     return PromisePod;
 
 
-}( Promise , jQuery , MOJO ));
+}( WeePromise , jQuery , MOJO ));
 
 
 

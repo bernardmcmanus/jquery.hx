@@ -7,14 +7,7 @@
  *
  */
 (function (definition) {
-  if (typeof exports === "object") {
-    module.exports = definition();
-  }
-  else if (typeof window.define === 'function' && window.define.amd) {
-    window.define([], definition);
-  } else {
-    window.BezierEasing = definition();
-  }
+  window.BezierEasing = definition();
 }(function () {
   var global = this;
 
