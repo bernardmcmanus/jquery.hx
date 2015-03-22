@@ -6,7 +6,7 @@
     "Bernard McManus"
   ],
   "description": "A hardware-accelerated animation library for mobile and desktop.",
-  "main": "hx.min.js",
+  "main": "dist/hx.min.js",
   "keywords": [
     "jquery",
     "animation"
