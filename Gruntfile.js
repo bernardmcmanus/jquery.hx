@@ -34,7 +34,6 @@ module.exports = function( grunt ) {
 
   var Includes = [
     'bower_components/wee-promise/wee-promise-0.2.1.min.js',
-    // 'bower_components/es6-promise/index.js',
     'js/includes/mojo-0.1.6.min.js',
     'js/includes/bezier-easing-0.4.1.js'
   ];
@@ -84,10 +83,6 @@ module.exports = function( grunt ) {
       debug: {
         files: [ 'Gruntfile.js' , 'package.json' , 'test/*' , 'js/**/*.js' ],
         tasks: [ 'dev' ]
-      },
-      debugProd: {
-        files: [ 'Gruntfile.js' , 'package.json' , 'test/*' , 'js/**/*.js' ],
-        tasks: [ '_debugProd' ]
       }
     },
 
@@ -147,43 +142,46 @@ module.exports = function( grunt ) {
   ]
   .forEach( grunt.loadNpmTasks );
 
+  grunt.registerTask( 'bower-install' , function() {
+    var done = this.async();
+    var task = cp.spawn( 'bower' , [ 'install' ]);
+    var readable = task.stdout;
+    readable.pipe( process.stdout );
+    readable.on( 'end' , done );
+  });
+
+  grunt.registerTask( 'default' , [
+    'replace:packages',
+    'dev',
+    'uglify'
+  ]);
+
   grunt.registerTask( 'always' , [
     'jshint',
     'gitinfo',
     'clean'
   ]);
 
-  grunt.registerTask( 'build' , [
+  grunt.registerTask( 'dev' , [
     'always',
+    'bower-install',
     'concat'
   ]);
 
-  grunt.registerTask( 'default' , [
-    'replace:packages',
-    'build',
-    'uglify'
-  ]);
-
-  grunt.registerTask( 'dev' , [
-    'always',
-    'concat',
-    'karma:unit'
-  ]);
+  grunt.registerTask( 'test' , function() {
+    try {
+      grunt.task.requires( 'dev' );
+    }
+    catch( err ) {
+      grunt.task.run( 'dev' );
+    }
+    grunt.task.run([ 'karma:unit' ]);
+  });
 
   grunt.registerTask( 'debug' , [
     'dev',
-    'watch:debug'
-  ]);
-
-  grunt.registerTask( '_debugProd' , [
-    'build',
-    'uglify'
-  ]);
-
-  grunt.registerTask( 'debugProd' , [
-    '_debugProd',
     'connect',
-    'watch:debugProd'
+    'watch:debug'
   ]);
 };
 

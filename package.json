@@ -1,11 +1,8 @@
 {
   "name": "jquery.hx",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A hardware-accelerated animation library for mobile and desktop.",
   "main": "hx.min.js",
-  "scripts": {
-    "initialize": "npm install; bower install"
-  },
   "config": {
     "banner": "/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.data.gitinfo.local.branch.current.shortSHA %> - <%= grunt.template.today('yyyy-mm-dd') %> */\n",
     "dist": {
