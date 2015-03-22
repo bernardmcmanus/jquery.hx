@@ -1,6 +1,6 @@
 {
   "name": "jquery.hx",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "homepage": "https://github.com/millennialmedia/jquery.hx.git",
   "authors": [
     "Bernard McManus"
@@ -13,13 +13,15 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "jquery": "~2.1.3",
+    "emoney": "~0.2.3",
+    "briskit": "~0.1.4",
     "wee-promise": "~0.2.1",
-    "es6-promise": "https://es6-promises.s3.amazonaws.com/es6-promise-2.0.1.js"
+    "bezier-easing": "https://raw.githubusercontent.com/gre/bezier-easing/master/index.js"
   },
   "devDependencies": {
     "requirejs": "http://requirejs.org/docs/release/2.1.16/comments/require.js",
     "sinon": "http://sinonjs.org/releases/sinon-1.14.1.js",
-    "jquery": "~2.1.3",
     "mocha": "~2.1.0",
     "chai": "~2.1.1"
   },

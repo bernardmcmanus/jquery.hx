@@ -1,13 +1,39 @@
 {
   "name": "jquery.hx",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "A hardware-accelerated animation library for mobile and desktop.",
   "main": "dist/hx.min.js",
   "config": {
-    "banner": "/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.data.gitinfo.local.branch.current.shortSHA %> - <%= grunt.template.today('yyyy-mm-dd') %> */\n",
-    "dist": {
+    "src": [
+      "src/**/*.js"
+    ],
+    "lib": [
+      "bower_components/bezier-easing/index.js",
+      "bower_components/wee-promise/wee-promise-0.2.1.min.js",
+      "bower_components/emoney/dist/emoney-0.2.3.js"
+    ],
+    "build": {
+      "header": "build/header.js",
+      "footer": "build/footer.js",
+      "umd": "build/umd.js",
+      "tmp": "tmp/hx.js",
       "dev": "dist/hx.js",
       "prod": "dist/hx.min.js"
+    },
+    "banner": "/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.data.gitinfo.local.branch.current.shortSHA %> - <%= grunt.template.today('yyyy-mm-dd') %> */\n",
+    "watch": {
+      "files": [
+        "*.js",
+        "*.json",
+        "test/**/*",
+        "build/*",
+        "tasks/*",
+        "<%= pkg.config.lib %>",
+        "<%= pkg.config.src %>"
+      ],
+      "options": {
+        "interrupt": true
+      }
     },
     "connect": {
       "port": 9001,
@@ -16,29 +42,33 @@
     }
   },
   "devDependencies": {
-    "chai": "^1.10.0",
+    "colors": "~1.0.2",
     "fs-extra": "0.9.1",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": ">=0.4.1",
-    "grunt-contrib-concat": ">=0.4.0",
+    "grunt-contrib-concat": "~0.5.1",
     "grunt-contrib-jshint": "~0.6.3",
     "grunt-contrib-uglify": "0.5.0",
     "grunt-contrib-watch": ">=0.6.1",
     "grunt-git-describe": "~2.0.2",
+    "grunt-import-clean": "~0.1.7",
     "grunt-contrib-connect": "~0.9.0",
-    "grunt-karma": "^0.10.1",
+    "grunt-karma": "~0.10.1",
     "grunt-replace": ">=0.7.7",
     "grunt-gitinfo": "~0.1.7",
-    "karma": "^0.12.31",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^0.1.7",
-    "karma-mocha": "^0.1.10",
-    "karma-mocha-reporter": "^0.3.2",
-    "karma-phantomjs-launcher": "^0.1.4",
-    "karma-sinon-chai": "^0.3.0",
-    "mocha": "^2.1.0",
-    "sinon": "^1.12.2",
-    "sinon-chai": "^2.6.0"
+    "karma": "~0.12.31",
+    "karma-chai": "~0.1.0",
+    "karma-chrome-launcher": "~0.1.7",
+    "karma-mocha": "~0.1.10",
+    "karma-mocha-reporter": "~0.3.2",
+    "karma-phantomjs-launcher": "~0.1.4",
+    "karma-sinon-chai": "~0.3.0",
+    "mocha": "~2.1.0",
+    "chai": "^1.10.0",
+    "sinon": "~1.12.2",
+    "sinon-chai": "~2.6.0",
+    "es6-module-transpiler": "~0.9.0",
+    "es6-module-transpiler-amd-formatter": "~0.3.0"
   },
   "repository": {
     "type": "git",

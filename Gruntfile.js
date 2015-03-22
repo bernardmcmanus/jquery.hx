@@ -1,59 +1,57 @@
 module.exports = function( grunt ) {
 
 
-  var fs = require( 'fs-extra' );
-  var cp = require( 'child_process' );
-
-
-  var Script = [
-    'js/hxManager.js',
-    'js/shared/helper.js',
-    'js/shared/inject.js',
-    'js/shared/config.js',
-    'js/shared/vendorPatch.js',
-    'js/shared/bezier.js',
-    'js/shared/easing.js',
-    'js/domNode/styleDefinition.js',
-    'js/domNode/cssProperty.js',
-    'js/domNode/componentMOJO.js',
-    'js/domNode/transitionMOJO.js',
-    'js/domNode/queue.js',
-    'js/domNode/domNodeFactory.js',
-    'js/pod/timingMOJO.js',
-    'js/pod/subscriberMOJO.js',
-    'js/pod/bean.js',
-    'js/pod/iteratorMOJO.js',
-    'js/pod/animationPod.js',
-    'js/pod/precisionPod.js',
-    'js/pod/promisePod.js',
-    'js/pod/podFactory.js',
-    'js/hx.js',
-    'js/init/init.js'
-  ];
-
-
-  var Includes = [
-    'bower_components/wee-promise/wee-promise-0.2.1.min.js',
-    'js/includes/mojo-0.1.6.min.js',
-    'js/includes/bezier-easing-0.4.1.js'
-  ];
-
-
-  var Build = Includes.concat( Script );
-
-
   grunt.initConfig({
 
     pkg: grunt.file.readJSON( 'package.json' ),
 
-    jshint: {
-      all: [ 'Gruntfile.js' , 'js/**/*.js' , '!js/includes/*' ]
-    },
-
     gitinfo: {},
 
     clean: {
-      dist: [ 'dist' ]
+      dist: [ 'dist' ],
+      tmp: [ 'tmp' ]
+    },
+
+    jshint: {
+      all: '<%= pkg.config.src %>',
+      options: {
+        esnext: true,
+        laxbreak: true
+      }
+    },
+
+    'import-clean': {
+      all: '<%= pkg.config.src %>'
+    },
+
+    transpile: {
+      build: {
+        src: '<%= pkg.config.src %>',
+        dest: '<%= pkg.config.build.tmp %>',
+        umd: '<%= pkg.config.build.umd %>',
+        options: {
+          inject: [
+            'window',
+            'document',
+            'Object',
+            'Array',
+            'RegExp',
+            'Math',
+            'Error',
+            'E$',
+            'BezierEasing',
+            [ '$' , 'jQuery' ],
+            [ 'Promise' , 'WeePromise' ]
+          ]
+        }
+      }
+    },
+
+    'release-describe': {
+      build: {
+        src: '<%= pkg.config.build.dev %>',
+        dest: '<%= pkg.config.build.prod %>'
+      }
     },
 
     replace: {
@@ -61,7 +59,7 @@ module.exports = function( grunt ) {
         options: {
           patterns: [
             {
-              match: /(\"version\")(.*?)(\")(.{1,}?)(\")/i,
+              match: /"version".+"[\d\.]+"/i,
               replacement: '\"version\": \"<%= pkg.version %>\"'
             }
           ]
@@ -81,8 +79,9 @@ module.exports = function( grunt ) {
 
     watch: {
       debug: {
-        files: [ 'Gruntfile.js' , 'package.json' , 'test/*' , 'js/**/*.js' ],
-        tasks: [ 'dev' ]
+        files: '<%= pkg.config.watch.files %>',
+        options: '<%= pkg.config.watch.options %>',
+        tasks: [ 'build' , 'karma:unit' ]
       }
     },
 
@@ -99,34 +98,48 @@ module.exports = function( grunt ) {
 
     concat: {
       options: {
-        banner: '<%= pkg.config.banner %>\n'
+        banner: '<%= pkg.config.banner %>',
+        stripBanners: {
+          options: { block: true }
+        }
       },
       build: {
-        src: Build,
-        dest: '<%= pkg.config.dist.dev %>'
+        src: [
+          '<%= pkg.config.build.header %>',
+          '<%= pkg.config.lib %>',
+          '<%= pkg.config.build.tmp %>',
+          '<%= pkg.config.build.footer %>'
+        ],
+        dest: '<%= pkg.config.build.dev %>'
       }
     },
 
     uglify: {
       options: {
-        banner: '<%= pkg.config.banner %>'
+        banner: '<%= pkg.config.banner %>',
+        screwIE8: true
       },
-      release: {
-        files: {
-          '<%= pkg.config.dist.prod %>' : '<%= pkg.config.dist.dev %>'
-        }
+      build: {
+        src: '<%= pkg.config.build.dev %>',
+        dest: '<%= pkg.config.build.prod %>'
       }
     },
 
     karma: {
       unit: {
-        configFile: 'test/karma.conf.js',
+        configFile: 'test/unit/karma.conf.js',
+        singleRun: true
+      },
+      functional: {
+        configFile: 'test/functional/karma.conf.js',
         singleRun: true
       }
     }
 
   });
 
+  
+  grunt.loadTasks( 'tasks' );
 
   [
     'grunt-contrib-jshint',
@@ -137,50 +150,54 @@ module.exports = function( grunt ) {
     'grunt-contrib-uglify',
     'grunt-contrib-watch',
     'grunt-contrib-connect',
+    'grunt-import-clean',
     'grunt-gitinfo',
     'grunt-karma'
   ]
   .forEach( grunt.loadNpmTasks );
 
-  grunt.registerTask( 'bower-install' , function() {
-    var done = this.async();
-    var task = cp.spawn( 'bower' , [ 'install' ]);
-    var readable = task.stdout;
-    readable.pipe( process.stdout );
-    readable.on( 'end' , done );
-  });
+  grunt.registerTask( 'init' , [ 'bower-install' ]);
+  grunt.registerTask( 'default' , [ 'prod' ]);
+  grunt.registerTask( 'prod' , [ 'release' ]);
+  grunt.registerTask( 'dev' , [ 'build' ]);
 
-  grunt.registerTask( 'default' , [
-    'replace:packages',
-    'dev',
-    'uglify'
-  ]);
-
-  grunt.registerTask( 'always' , [
-    'jshint',
+  grunt.registerTask( 'build' , [
+    'init',
+    'clean',
     'gitinfo',
-    'clean'
+    'lint',
+    'transpile',
+    'concat'
   ]);
 
-  grunt.registerTask( 'dev' , [
-    'always',
-    'bower-install',
-    'concat'
+  grunt.registerTask( 'lint' , [
+    'jshint',
+    'import-clean'
   ]);
 
   grunt.registerTask( 'test' , function() {
     try {
-      grunt.task.requires( 'dev' );
+      grunt.task.requires( 'build' );
     }
     catch( err ) {
-      grunt.task.run( 'dev' );
+      grunt.task.run( 'build' );
     }
-    grunt.task.run([ 'karma:unit' ]);
+    grunt.task.run([ 'karma' ]);
   });
 
+  grunt.registerTask( 'release' , [
+    'replace:packages',
+    'build',
+    'uglify',
+    'release-describe',
+    'test',
+    'clean:tmp'
+  ]);
+
   grunt.registerTask( 'debug' , [
-    'dev',
+    'build',
     'connect',
+    'karma:unit',
     'watch:debug'
   ]);
 };

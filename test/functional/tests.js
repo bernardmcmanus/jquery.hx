@@ -2,11 +2,13 @@
 
   'use strict';
 
-  describe('Jquery', function() {
-    it('should have hx', function() {
-      expect($).to.have.property('hx');
+  describe( 'jquery.hx' , function() {
+    it('should exist', function() {
+      expect( $ ).to.have.property( 'hx' );
     });
   });
+
+  return;
 
   var ALL_SELECTOR = '.tgt0,.tgt1,.tgt2';
 
