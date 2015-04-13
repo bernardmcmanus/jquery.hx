@@ -14,7 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "jquery": "~2.1.3",
-    "emoney": "~0.2.3",
+    "emoney": "~0.2.4",
     "briskit": "~0.1.4",
     "wee-promise": "~0.2.1",
     "bezier-easing": "https://raw.githubusercontent.com/gre/bezier-easing/master/index.js"

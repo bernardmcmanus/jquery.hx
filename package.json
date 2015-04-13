@@ -10,11 +10,15 @@
     "lib": [
       "bower_components/bezier-easing/index.js",
       "bower_components/wee-promise/wee-promise-0.2.1.min.js",
-      "bower_components/emoney/dist/emoney-0.2.3.js"
+      "bower_components/emoney/dist/emoney-0.2.4.js"
     ],
+    "include": {
+      "header": "include/header.js",
+      "footer": "include/footer.js",
+      "helper": "include/helper.js",
+      "fn": "include/fn.js"
+    },
     "build": {
-      "header": "build/header.js",
-      "footer": "build/footer.js",
       "umd": "build/umd.js",
       "tmp": "tmp/hx.js",
       "dev": "dist/hx.js",
@@ -28,6 +32,7 @@
         "test/**/*",
         "build/*",
         "tasks/*",
+        "include/*",
         "<%= pkg.config.lib %>",
         "<%= pkg.config.src %>"
       ],
@@ -48,7 +53,7 @@
     "grunt-contrib-clean": ">=0.4.1",
     "grunt-contrib-concat": "~0.5.1",
     "grunt-contrib-jshint": "~0.6.3",
-    "grunt-contrib-uglify": "0.5.0",
+    "grunt-contrib-uglify": "~0.5.0",
     "grunt-contrib-watch": ">=0.6.1",
     "grunt-git-describe": "~2.0.2",
     "grunt-import-clean": "~0.1.7",

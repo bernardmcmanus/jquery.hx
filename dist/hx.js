@@ -1,4 +1,4 @@
-/*! jquery.hx - 2.0.0 - Bernard McManus - 6b4423a - 2015-03-22 */
+/*! jquery.hx - 2.0.0 - Bernard McManus - c26e3f2 - 2015-04-13 */
 // make sure no included libs try to use amd define
 window.__TMP$define = window.define;
 window.define = null;
@@ -152,7 +152,7 @@ window.define = null;
 
 /*! wee-promise - 0.2.1 - Bernard McManus - master - gb12466 - 2015-03-21 */
 !function(a){var b=this;"object"==typeof exports?module.exports=a:b.WeePromise=a}(function(a){"use strict";function b(a){var b=this;k([v,w,u],function(a){b[a]=[]}),h(function(){b[B]=e(b),i(b,function(){a(c(b,v),c(b,w))}),b[z]=!0})}function c(a,b){function c(d){h(a[z]?function(){a[s]||a[y](b,d)[y](u,d)}:function(){c(d)})}return c}function d(a,b,c,d,e){return function(){a=a.map(function(a){return g(a[t])?a[t]:a});var h=f(a,1),i=f(a,-1);if(j(h)===d){var k=h.map(function(a){return a[t][0]});b(e?k[0]:k)}else j(i)>0&&c(i[0][t][0])}}function e(a){return j(a[w])>0}function f(a,b){return a.filter(function(a){return a[s]===b})}function g(a){return a instanceof b}function h(b){a(b,1)}function i(a,b){try{return b()}catch(c){return a[y](w,c)}}function j(a){return a.length}function k(a,b){a.forEach(b)}var l,m="$$",n="prototype",o="always",p="then",q="catch",r=m+"pass",s=m+"state",t=m+"args",u=m+o,v=m+p,w=m+q,x=m+"add",y=m+"exec",z=m+"ready",A=m+"child",B=m+"handled",C=B+"Self",D={};return D[v]=1,D[w]=-1,b[n][x]=function(a,b){var c=this;return b&&c[a].push(b),c},b[n][y]=function(a,b){var c,d=this,e=d[a],f=j(e),h=0,k=D[a];return i(d,function(){for(;f>h;){if(k&&d[s]===k&&d[A]&&d[B]&&(e=!d[C]||d[z]?[]:e.slice(-1),h=f-1,!j(e)))return d;if(c=(k?e.shift():e[h]).apply(l,[b]),b=k?c:b,g(c))return d[r](c);if(a==w){if(d[B]&&(k=D[v],d[A]))return d[s]=k,d[t]=[c],d[y](v,c)[y](u,c);break}h++}return d[t]=d[s]?d[t]:[b],d[s]=k||d[s],d})},b[n][o]=function(a){return this[x](u,a)},b[n][p]=function(a,b){return this[x](v,a)[q](b)},b[n][q]=function(a){return this[x](w,a)},b[n][r]=function(a){var b=this;return a[C]=e(a),a[A]=!0,k([v,w,u],function(c){a[c]=a[C]?a[c].concat(b[c]):b[c]}),b[t]=a,a},b.all=function(a){return new b(function(b,c){k(a,function(e){e[o](d(a,b,c,j(a)))})})},b.race=function(a){return new b(function(b,c){k(a,function(e){e[o](d(a,b,c,1,!0))})})},b}(setTimeout));
-/*! emoney - 0.2.3 - Bernard McManus - master - g75a578 - 2015-01-10 */
+/*! emoney - 0.2.4 - Bernard McManus - master - g3b5bc7 - 2015-03-22 */
 
 (function() {
     "use strict";
@@ -228,6 +228,7 @@ window.define = null;
     }
 
     function static$shared$$$_defineProperty( subject , property , descriptor ) {
+      descriptor.configurable = static$shared$$$_is( descriptor.configurable , 'boolean' ) ? descriptor.configurable : true;
       static$constants$$$Object.defineProperty( subject , property , descriptor );
     }
 
@@ -261,16 +262,6 @@ window.define = null;
 
     function static$shared$$$_ensureFunc( subject ) {
       return static$shared$$$_is( subject , static$constants$$$FUNCTION ) ? subject : function(){};
-    }
-
-    function static$shared$$$_defineProto( proto ) {
-      var nonEnumerableProto = {};
-      for (var key in proto) {
-        static$shared$$$_defineProperty( nonEnumerableProto , key , {
-          value: proto[key]
-        });
-      }
-      return nonEnumerableProto;
     }
 
     function static$shared$$$_getHandlerFunc( subject ) {
@@ -735,19 +726,14 @@ window.define = null;
 
 
     var static$create$$default = function( subjectProto ) {
-
-      var extendedProto = static$shared$$$_defineProto(
-        static$shared$$$_create( proto$$default )
-      );
-
+      var extendedProto = static$shared$$$_create( proto$$default );
       for (var key in subjectProto) {
         extendedProto[key] = subjectProto[key];
       }
-
       return extendedProto;
     };
 
-    main$$default[static$constants$$$PROTO] = static$shared$$$_defineProto( proto$$default );
+    main$$default[static$constants$$$PROTO] = proto$$default;
     main$$default.is = static$is$emoney$$default;
     main$$default.create = static$create$$default;
     main$$default.construct = static$construct$$default;
@@ -766,12 +752,241 @@ window.define = null;
 }).call(this);
 
 
+(function( window , Object , Array ) {
+
+	var PROTOTYPE = 'prototype';
+
+	Array.$cast = function( subject ) {
+		return Array[ PROTOTYPE ].slice.call( subject , 0 );
+	};
+
+	Array.$ensure = function( subject ) {
+		return (Array.isArray( subject ) ? subject : ( subject !== undefined ? [ subject ] : [] ));
+	};
+
+	Object.$build = function( key , val ) {
+		return {}.$insert( key , val );
+	};
+
+	Object.defineProperties( String[ PROTOTYPE ] , {
+		$strip: {
+			value: function( pattern ) {
+				return this.replace( pattern , '' );
+			}
+		}
+	});
+
+	Object.defineProperties( Array[ PROTOTYPE ] , {
+		$unique: {
+			value: function() {
+				var that = this;
+				return that.filter(function( element , i ) {
+					return that.indexOf( element ) === i;
+				});
+			}
+		},
+		$contains: {
+			value: function( lookFor ) {
+				lookFor = Array.$ensure( lookFor );
+				return !!this.reduce(function( prev , current ) {
+					return prev + lookFor.indexOf( current ) < 0 ? 0 : 1;
+				},0);
+			}
+		},
+		$last: {
+			get: function() { return this.slice( -1 )[0] }
+		}
+	});
+
+	Object.defineProperties( Object[ PROTOTYPE ] , {
+		$keys: {
+			get: function() { return Object.keys( this ) }
+		},
+		$each: {
+			value: function( iterator ) {
+				var that = this;
+				that.$keys.forEach(function( key ) {
+					iterator( key , that[key] );
+				});
+				return that;
+			}
+		},
+		$insert: {
+			value: function( key , val ) {
+				var that = this;
+				that[key] = val;
+				return that;
+			}
+		},
+		$fetch: {
+			value: function( key , otherwise ) {
+				var that = this;
+				return key in that ? that[key] : otherwise;
+			}
+		},
+		$extract: {
+			value: function( key , otherwise ) {
+				var that = this;
+				var value = that.$fetch( key , otherwise );
+				delete that[key];
+				return value;
+			}
+		}
+	});
+
+}( window , Object , Array ));
+
+$.fn.hx = function() {
+  return $hx.fn.apply( this , arguments );
+};
+
 (function(window,document,Object,Array,RegExp,Math,Error,E$,BezierEasing,$,Promise) {
     "use strict";
-    function main$$$hx() {
-
+    function core$class$$$Class( constructor ) {
+        return {
+            inherits: function() {
+                var args = Array.$cast( arguments );
+                var target = core$util$$$_is( args.$last , 'object' ) ? args.pop() : {};
+                var prototypes = args.map(function( constructor ) { return core$class$$getPrototype( constructor ); });
+                var proto = $.extend.apply( null , [ {} ].concat( prototypes , target ));
+                var $new = proto._new || function(){};
+                delete proto._new;
+                proto.constructor = constructor;
+                constructor.prototype = proto;
+                constructor.$new = function() {
+                    var args = Array.$cast( arguments );
+                    var instance = args.shift();
+                    $new.apply( instance , args );
+                    return instance;
+                };
+            }
+        };
     }
+
+    var core$class$$default = core$class$$$Class;
+    function core$class$$getPrototype( subject ) {
+        return core$util$$$_is( subject , 'function' ) ? subject.prototype : Object.getPrototypeOf( subject );
+    }
+    function core$util$$$_defineProperties( subject , descriptors ) {
+      Object.defineProperties( subject , descriptors );
+    }
+
+    function core$util$$$_defineGetters( subject , getters ) {
+      getters.$each(function( key , val ) {
+        getters[key] = { get: val, configurable: true, enumerable: false };
+      });
+      core$util$$$_defineProperties( subject , getters );
+    }
+
+    function core$util$$$_guid() {
+      return ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').replace( /[xy]/g , function( c ) {
+        var r = Math.random() * 16|0,
+        v = c == 'x' ? r : r&0x3|0x8;
+        return v.toString( 16 );
+      });
+    }
+
+    function core$util$$$_freeze( subject ) {
+      return Object.freeze( subject );
+    }
+
+    function core$util$$$_clone( subject ) {
+      return $.extend( true , new core$class$$getPrototype( subject ).constructor() , subject );
+    }
+
+    function core$util$$$_is( subject , test ) {
+      if (typeof test == 'string') {
+        return typeof subject == test;
+      }
+      else if (test === Array) {
+        return Array.isArray( subject );
+      }
+      else {
+        return subject instanceof test;
+      }
+    }
+
+    function core$util$$$_defined( subject ) {
+      return !core$util$$$_is( subject , 'undefined' );
+    }
+
+    function core$util$$$_reportErr( err ) {
+      if (core$util$$$_is( err , Error )) {
+        try { console.error( err.stack ); } catch( _err ) {}
+      }
+      return err;
+    }
+    function main$$$hx( jq ) {
+      return this.init( jq );
+    }
+
     var main$$default = main$$$hx;
+
+    core$class$$default( main$$$hx ).inherits( $ , {
+      _new: function( jq ) {
+        var that = this;
+        $.fn.init.call( that , jq );
+      },
+      init: function( jq ) {
+        var that = this;
+        if (!core$util$$$_defined( jq ) && that.length) {
+          that.splice( 0 , that.length );
+        }
+        else if (core$util$$$_is( jq , main$$$hx )) {
+          console.log('jq is already $hx');
+          return jq;
+        }
+        else {
+          console.log('return new $hx');
+        }
+        return main$$$hx.$new( this , jq );
+      },
+      asdf: function() {
+
+      }
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function fn$hx$$fn() {
+      var args = Array.$cast( arguments );
+      var hx = new main$$default( this );
+      var out;
+      /*if ($_is( args[0] , 'string' )) {
+        var method = args.shift();
+        if (!$_is( hx[method] , 'function' )) {
+          throw new Error( method + ' is not a function.' );
+        }
+        out = hx[method].apply( hx , args );
+      }
+      else if ($_is( args[0] , 'object' )) {
+        out = hx.animate( args[0] );
+      }
+      else {*/
+        out = hx;
+      // }
+      return out;
+    }
+    var fn$hx$$default = fn$hx$$fn;
+
+    main$$default.fn = fn$hx$$default;
+
     var $$index$$default = main$$default;
 
     if (typeof define == 'function' && define.amd) {

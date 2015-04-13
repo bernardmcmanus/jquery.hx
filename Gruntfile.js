@@ -105,10 +105,12 @@ module.exports = function( grunt ) {
       },
       build: {
         src: [
-          '<%= pkg.config.build.header %>',
+          '<%= pkg.config.include.header %>',
           '<%= pkg.config.lib %>',
+          '<%= pkg.config.include.helper %>',
+          '<%= pkg.config.include.fn %>',
           '<%= pkg.config.build.tmp %>',
-          '<%= pkg.config.build.footer %>'
+          '<%= pkg.config.include.footer %>'
         ],
         dest: '<%= pkg.config.build.dev %>'
       }

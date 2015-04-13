@@ -4,7 +4,7 @@
 
   describe( 'jquery.hx' , function() {
     it('should exist', function() {
-      expect( $ ).to.have.property( 'hx' );
+      expect( $.fn ).to.have.property( 'hx' );
     });
   });
 
