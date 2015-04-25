@@ -169,7 +169,8 @@ module.exports = function( grunt ) {
     'gitinfo',
     'lint',
     'transpile',
-    'concat'
+    'concat',
+    'uglify'
   ]);
 
   grunt.registerTask( 'lint' , [
@@ -190,9 +191,8 @@ module.exports = function( grunt ) {
   grunt.registerTask( 'release' , [
     'replace:packages',
     'build',
-    'uglify',
-    'release-describe',
     'test',
+    'release-describe',
     'clean:tmp'
   ]);
 

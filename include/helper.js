@@ -57,7 +57,7 @@
 				return that;
 			}
 		},
-		$insert: {
+		$store: {
 			value: function( key , val ) {
 				var that = this;
 				that[key] = val;

@@ -1,4 +1,4 @@
-/*! jquery.hx - 2.0.0 - Bernard McManus - c26e3f2 - 2015-04-13 */
+/*! jquery.hx - 2.0.0 - Bernard McManus - d0b7920 - 2015-04-25 */
 // make sure no included libs try to use amd define
 window.__TMP$define = window.define;
 window.define = null;
@@ -811,7 +811,7 @@ window.define = null;
 				return that;
 			}
 		},
-		$insert: {
+		$store: {
 			value: function( key , val ) {
 				var that = this;
 				that[key] = val;
@@ -879,15 +879,11 @@ $.fn.hx = function() {
     }
 
     function core$util$$$_guid() {
-      return ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').replace( /[xy]/g , function( c ) {
+      return ('xxxxxxxxxxxx').replace( /[xy]/g , function( c ) {
         var r = Math.random() * 16|0,
         v = c == 'x' ? r : r&0x3|0x8;
         return v.toString( 16 );
       });
-    }
-
-    function core$util$$$_freeze( subject ) {
-      return Object.freeze( subject );
     }
 
     function core$util$$$_clone( subject ) {
@@ -912,37 +908,43 @@ $.fn.hx = function() {
 
     function core$util$$$_reportErr( err ) {
       if (core$util$$$_is( err , Error )) {
-        try { console.error( err.stack ); } catch( _err ) {}
+        console.error( err.stack );
       }
       return err;
     }
-    function main$$$hx( jq ) {
-      return this.init( jq );
+    function core$jquery$special$$$$( jq ) {
+      var that = this;
+      return core$util$$$_is( that , core$jquery$special$$$$ ) ? that : core$jquery$special$$$$.$new( that , jq );
     }
 
-    var main$$default = main$$$hx;
+    var core$jquery$special$$default = core$jquery$special$$$$;
 
-    core$class$$default( main$$$hx ).inherits( $ , {
+    core$class$$default( core$jquery$special$$$$ ).inherits( $ , {
       _new: function( jq ) {
-        var that = this;
-        $.fn.init.call( that , jq );
+        $.fn.init.call( this , jq );
       },
-      init: function( jq ) {
+      pushStack: function ( elems ) {
         var that = this;
-        if (!core$util$$$_defined( jq ) && that.length) {
-          that.splice( 0 , that.length );
-        }
-        else if (core$util$$$_is( jq , main$$$hx )) {
-          console.log('jq is already $hx');
-          return jq;
-        }
-        else {
-          console.log('return new $hx');
-        }
-        return main$$$hx.$new( this , jq );
-      },
-      asdf: function() {
+        var ret = new that.constructor( elems );
+        var intRe = /\d+/;
+        ret.prevObject = that;
+        that.$each(function( key , val ) {
+          if (!core$util$$$_defined( ret[key] ) && !intRe.test( key )) {
+            ret[key] = val;
+          }
+        });
+        return ret;
+      }
+    });
+    function core$element$$$Element( node ) {
+      var that = core$element$$$Element.$new( this , node );
+    }
 
+    var core$element$$default = core$element$$$Element;
+
+    core$class$$default( core$element$$$Element ).inherits( core$jquery$special$$default , {
+      _new: function( node ) {
+        core$jquery$special$$default.call( this , node );
       }
     });
 
@@ -963,6 +965,35 @@ $.fn.hx = function() {
 
 
 
+
+    function main$$$hx( jq ) {
+      if (core$util$$$_is( jq , main$$$hx )) {
+        return jq;
+      }
+      var that = main$$$hx.$new( this , jq ).mapd(function( el ) {
+        return new core$element$$default( el );
+      });
+    }
+
+    var main$$default = main$$$hx;
+
+    core$class$$default( main$$$hx ).inherits( core$jquery$special$$default , {
+      _new: function( jq ) {
+        core$jquery$special$$default.call( this , jq );
+      },
+      it: function( iterator ) {
+        var that = this;
+        return that.each(function( i ) {
+          iterator( this , i );
+        });
+      },
+      mapd: function( iterator ) {
+        var that = this;
+        return that.it(function( el , i ) {
+          that[i] = iterator( el , i );
+        });
+      }
+    });
 
     function fn$hx$$fn() {
       var args = Array.$cast( arguments );

@@ -12,16 +12,16 @@ export function $_defineGetters( subject , getters ) {
 }
 
 export function $_guid() {
-  return ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').replace( /[xy]/g , function( c ) {
+  return ('xxxxxxxxxxxx').replace( /[xy]/g , function( c ) {
     var r = Math.random() * 16|0,
     v = c == 'x' ? r : r&0x3|0x8;
     return v.toString( 16 );
   });
 }
 
-export function $_freeze( subject ) {
+/*export function $_freeze( subject ) {
   return Object.freeze( subject );
-}
+}*/
 
 export function $_clone( subject ) {
   return $.extend( true , new getPrototype( subject ).constructor() , subject );
@@ -45,7 +45,7 @@ export function $_defined( subject ) {
 
 export function $_reportErr( err ) {
   if ($_is( err , Error )) {
-    try { console.error( err.stack ); } catch( _err ) {}
+    console.error( err.stack );
   }
   return err;
 }

@@ -1,38 +1,57 @@
-import {
-  $_is,
-  $_defined,
-  $_defineProperties,
-  $_defineGetters
-} from 'core/util';
+import { $_is } from 'core/util';
 import $Class from 'core/class';
+import $Element from 'core/element';
+import $$ from 'core/jquery-special';
 
 export default function $hx( jq ) {
-  return this.init( jq );
+  if ($_is( jq , $hx )) {
+    return jq;
+  }
+  var that = $hx.$new( this , jq ).mapd(function( el ) {
+    return new $Element( el );
+  });
 }
 
-$Class( $hx ).inherits( $ , {
+$Class( $hx ).inherits( $$ , {
   _new: function( jq ) {
-    var that = this;
-    $.fn.init.call( that , jq );
+    $$.call( this , jq );
   },
-  init: function( jq ) {
+  it: function( iterator ) {
     var that = this;
-    if (!$_defined( jq ) && that.length) {
-      that.splice( 0 , that.length );
-    }
-    else if ($_is( jq , $hx )) {
-      console.log('jq is already $hx');
-      return jq;
-    }
-    else {
-      console.log('return new $hx');
-    }
-    return $hx.$new( this , jq );
+    return that.each(function( i ) {
+      iterator( this , i );
+    });
   },
-  asdf: function() {
-
+  mapd: function( iterator ) {
+    var that = this;
+    return that.it(function( el , i ) {
+      that[i] = iterator( el , i );
+    });
   }
 });
+
+// export default function $hx( jq ) {
+//   if ($_is( jq , $hx )) {
+//     return jq;
+//   }
+//   /*var that = $hx.$new( this , jq ).mapd(function( el ) {
+//     return $Element( el );
+//   });*/
+//   var that = $hx.$new( this , jq );
+//   that.$elements = that.toArray().map(function( element ) {
+//     // return new $Element( element );
+//     return $(element);
+//   });
+// }
+
+// $Class( $hx ).inherits( $ , overrides , {
+//   _new: function( jq ) {
+//     $.fn.init.call( this , jq );
+//   },
+//   asdf: function() {
+
+//   }
+// });
 
 
 

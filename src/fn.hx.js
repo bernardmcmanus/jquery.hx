@@ -1,5 +1,5 @@
 import $hx from 'main';
-import { $_is } from 'core/util';
+// import { $_is } from 'core/util';
 
 export default function fn() {
   var args = Array.$cast( arguments );
