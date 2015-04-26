@@ -5,77 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <title>jquery.hx unit tests</title>
-    <!-- ============================================= -->
-    <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css" />
-    <link rel="stylesheet" type="text/css" href="style.css" />
-    <!-- ============================================= -->
-    <script src="bind-polyfill.js"></script>
-    <script src="performance-polyfill.js"></script>
-    <!-- ============================================= -->
-    <script src="/bower_components/requirejs/index.js"></script>
-    <!-- ============================================= -->
+    <title>$hx unit tests</title>
     <script>
-      require.config({
-        paths: {
-          'hx': '/dist/hx',
-          'jquery': '/bower_components/jquery/dist/jquery',
-          'mocha': '/bower_components/mocha/mocha',
-          'chai': '/bower_components/chai/chai',
-          'sinon': '/bower_components/sinon/index',
-          'sinon-chai': '/node_modules/sinon-chai/lib/sinon-chai'
-        },
-        shim: {
-          'jquery': { exports: '$' },
-          'mocha': { exports: 'mocha' },
-          'chai': { exports: 'chai' },
-          'sinon': { exports: 'sinon' },
-          'sinon-chai': [ 'chai' , 'sinon' ],
-          'once': [ 'jquery' ],
-          'hx': {
-            exports: '$hx',
-            deps: [ 'jquery' ]
-          }
-        }
-      });
-      require([ 'chai' , 'sinon-chai' ], function( chai , sinonChai ) {
-        window.chai = chai;
-        window.expect = chai.expect;
-        chai.use( sinonChai );
-      });
-      define( 'init' , [ 'jquery' , 'mocha' , 'sinon-chai' ], function( $ , mocha ) {
-        mocha.setup( 'bdd' );
-        mocha.reporter( 'html' );
-      });
-      require([ 'hx' , 'once' , 'init' ], function( $hx ) {
-        $.getScript( 'tests.js' , function() {
-          mocha.run();
-        });
-      });
+      window.__karma__ = { start: function(){} };
     </script>
+    <!-- ============================================= -->
+    <script data-main="main.js" src="/bower_components/requirejs/index.js"></script>
+    <!-- ============================================= -->
   </head>
-  <body>
-    <div id="mocha"></div>
-  </body>
-
+  <body></body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

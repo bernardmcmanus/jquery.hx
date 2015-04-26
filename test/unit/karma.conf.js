@@ -1,15 +1,13 @@
 module.exports = function( config ) {
-
   config.set({
     basePath: '../../',
-    frameworks: [ 'mocha', 'sinon-chai' ],
+    frameworks: [ 'requirejs' ],
     files: [
-      'bower_components/jquery/dist/jquery.min.js',
-      'test/unit/performance-polyfill.js',
-      'test/unit/bind-polyfill.js',
-      'test/unit/once.js',
-      'test/unit/tests.js',
-      'dist/hx.js',
+      { pattern: 'test/unit/lib/*.js', included: false },
+      { pattern: 'test/unit/tasks/*.js', included: false },
+      { pattern: 'test/unit/tests/*.js', included: false },
+      { pattern: 'dist/hx.js', included: false },
+      'test/unit/main.js',
     ],
     exclude: [],
     preprocessors: {},
@@ -19,5 +17,4 @@ module.exports = function( config ) {
     logLevel: config.LOG_INFO,
     browsers: [ 'PhantomJS' ]
   });
-
 };

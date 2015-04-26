@@ -1,4 +1,4 @@
-/*! jquery.hx - 2.0.0 - Bernard McManus - 612f584 - 2015-04-25 */
+/*! jquery.hx - 2.0.0 - Bernard McManus - f1afa35 - 2015-04-26 */
 // make sure no included libs try to use amd define
 window.__TMP$define = window.define;
 window.define = null;

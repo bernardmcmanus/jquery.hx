@@ -132,7 +132,7 @@ module.exports = function( grunt ) {
       debug: {
         files: '<%= pkg.config.watch.files %>',
         options: '<%= pkg.config.watch.options %>',
-        tasks: [ 'build' , 'karma:unit' ]
+        tasks: [ 'build' , /*'karma:unit'*/ ]
       }
     },
 
@@ -253,7 +253,7 @@ module.exports = function( grunt ) {
   grunt.registerTask( 'debug' , [
     'build',
     'connect',
-    'karma:unit',
+    // 'karma:unit',
     'watch:debug'
   ]);
 };
