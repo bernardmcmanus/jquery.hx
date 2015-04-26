@@ -12,18 +12,19 @@ module.exports = function( grunt ) {
   grunt.task.registerMultiTask( 'transpile' , 'transpile es6 modules' , function() {
     var that = this;
     var data = grunt.task.normalizeMultiTaskFiles( that.data )[0];
-    var options = that.data.options || {};
+    var options = that.options({ inject: [] });
 
-    var src = path.resolve( CWD , data.orig.src[0] , '../..' );
+    var src = path.join( CWD , data.orig.src[0].split( path.sep ).shift() );
     var dest = path.join( CWD , data.dest );
     var umd = path.join( CWD , data.umd );
 
+    var mapSrc = path.basename( grunt.config.get( 'pkg.config.build.map' ));
+
     // inject these globals into closure for better minification
-    var injectArgs = options.inject || [];
-    var leadingInjectArgs = injectArgs.map(function( arg ) {
+    var leadingInjectArgs = options.inject.map(function( arg ) {
       return Array.isArray( arg ) ? arg.shift() : arg;
     });
-    var trailingInjectArgs = injectArgs.map(function( arg ) {
+    var trailingInjectArgs = options.inject.map(function( arg ) {
       return Array.isArray( arg ) ? arg.pop() : arg;
     });
 
@@ -38,35 +39,21 @@ module.exports = function( grunt ) {
 
     var transpiled = fs.readFileSync( dest , 'utf-8' );
 
-    // remove sourceMappingURL
-    var sourceMapRegex = /^\n?.*sourceMappingURL.*/mi;
-    transpiled = transpiled.replace( sourceMapRegex , '' );
+    // extract and remove the sourcemap url string so we can insert it later
+    var matchSourcemap = transpiled.match( /.*sourceMappingURL.*/ );
+    if (matchSourcemap) {
+      grunt.option( 'sourcemap-string' , '\n' + matchSourcemap[0].replace( mapSrc , '#{SOURCEMAP}' ));
+      transpiled = transpiled.replace( /[^\w\)\;]*sourceMappingURL.*/ , '' );
+    }
 
     // add injection args to leading anonymous wrapper
-    var leadingWrapperRegex = /\(function\(\)\s?{/;
-    transpiled = transpiled.replace( leadingWrapperRegex , '(function(' + leadingInjectArgs + ') {' );
+    var leadingArgInjectRegex = /\(function\(\)\s?{/;
+    transpiled = transpiled.replace( leadingArgInjectRegex , '(function(' + leadingInjectArgs + ') {' );
 
     // replace trailing "call" with "apply" and injection args
-    var trailingWrapperRegex = /\.call\(this\)\;(?:\n+)$/;
-    transpiled = transpiled.replace( trailingWrapperRegex , '.apply(this,[' + trailingInjectArgs + ']);' );
+    var trailingArgInjectRegex = /\.call\(this\)\;(?=(\n*((\/\/|\/\*).*(\*\/)?)?)$)/;
+    transpiled = transpiled.replace( trailingArgInjectRegex , '.apply(this,[' + trailingInjectArgs + ']);' );
 
     fs.writeFileSync( dest , transpiled );
   });
-
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-/*! jquery.hx - 2.0.0 - Bernard McManus - d0b7920 - 2015-04-25 */
+/*! jquery.hx - 2.0.0 - Bernard McManus - 612f584 - 2015-04-25 */
 // make sure no included libs try to use amd define
 window.__TMP$define = window.define;
 window.define = null;
@@ -39,7 +39,7 @@ window.define = null;
     return 3.0 * A(aA1, aA2)*aT*aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
   }
 
-  function binarySubdivide (aX, aA, aB) {
+  function binarySubdivide (aX, aA, aB, mX1, mX2) {
     var currentX, currentT, i = 0;
     do {
       currentT = aA + (aB - aA) / 2.0;
@@ -105,7 +105,7 @@ window.define = null;
       } else if (initialSlope === 0.0) {
         return guessForT;
       } else {
-        return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize);
+        return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
       }
     }
 
@@ -764,18 +764,6 @@ window.define = null;
 		return (Array.isArray( subject ) ? subject : ( subject !== undefined ? [ subject ] : [] ));
 	};
 
-	Object.$build = function( key , val ) {
-		return {}.$insert( key , val );
-	};
-
-	Object.defineProperties( String[ PROTOTYPE ] , {
-		$strip: {
-			value: function( pattern ) {
-				return this.replace( pattern , '' );
-			}
-		}
-	});
-
 	Object.defineProperties( Array[ PROTOTYPE ] , {
 		$unique: {
 			value: function() {
@@ -798,6 +786,12 @@ window.define = null;
 		}
 	});
 
+	Object.$build = function( key , val ) {
+		var object = {};
+		object[key] = val;
+		return object;
+	};
+
 	Object.defineProperties( Object[ PROTOTYPE ] , {
 		$keys: {
 			get: function() { return Object.keys( this ) }
@@ -811,36 +805,31 @@ window.define = null;
 				return that;
 			}
 		},
-		$store: {
-			value: function( key , val ) {
+		/*$map: {
+			value: function( iterator ) {
 				var that = this;
-				that[key] = val;
-				return that;
+				var object = new that.constructor();
+				function modify( key , val ) { object[key] = val; }
+				that.$keys.forEach(function( key ) {
+					iterator( key , that[key] , modify );
+				});
+				return object;
 			}
-		},
+		},*/
 		$fetch: {
 			value: function( key , otherwise ) {
 				var that = this;
 				return key in that ? that[key] : otherwise;
-			}
-		},
-		$extract: {
-			value: function( key , otherwise ) {
-				var that = this;
-				var value = that.$fetch( key , otherwise );
-				delete that[key];
-				return value;
 			}
 		}
 	});
 
 }( window , Object , Array ));
 
-$.fn.hx = function() {
-  return $hx.fn.apply( this , arguments );
-};
-
-(function(window,document,Object,Array,RegExp,Math,Error,E$,BezierEasing,$,Promise) {
+// reset amd define
+window.define = window.__TMP$define;
+delete window.__TMP$define;
+(function(window,document,Object,Array,RegExp,Math,Error,Worker,Blob,URL,E$,BezierEasing,Promise) {
     "use strict";
     function core$class$$$Class( constructor ) {
         return {
@@ -852,6 +841,13 @@ $.fn.hx = function() {
                 var $new = proto._new || function(){};
                 delete proto._new;
                 proto.constructor = constructor;
+                proto.$super = function( $super , methodName ) {
+                    var that = this;
+                    var method = core$class$$getPrototype( $super )[ methodName ];
+                    return function( args ) {
+                        return method.apply( that , Array.$ensure( args ));
+                    };
+                };
                 constructor.prototype = proto;
                 constructor.$new = function() {
                     var args = Array.$cast( arguments );
@@ -876,14 +872,6 @@ $.fn.hx = function() {
         getters[key] = { get: val, configurable: true, enumerable: false };
       });
       core$util$$$_defineProperties( subject , getters );
-    }
-
-    function core$util$$$_guid() {
-      return ('xxxxxxxxxxxx').replace( /[xy]/g , function( c ) {
-        var r = Math.random() * 16|0,
-        v = c == 'x' ? r : r&0x3|0x8;
-        return v.toString( 16 );
-      });
     }
 
     function core$util$$$_clone( subject ) {
@@ -912,6 +900,82 @@ $.fn.hx = function() {
       }
       return err;
     }
+    var core$prefixer$$prefixProperties = [];
+
+    function core$prefixer$$Prefixer( obj ) {
+      return obj.$each(function( key , val ) {
+        core$prefixer$$prefixProperties.forEach(function( pname ) {
+          key = core$prefixer$$prefix( pname , key );
+          val = core$prefixer$$prefix( pname , val );
+        });
+        obj[key] = val;
+      });
+    }
+
+    var core$prefixer$$default = core$prefixer$$Prefixer;
+    function core$prefixer$$addProperty( names ) {
+      Array.$ensure( names ).forEach(function( name ) {
+        name = name.toLowerCase();
+        if (core$prefixer$$prefixProperties.indexOf( name ) < 0) {
+          core$prefixer$$prefixProperties.push( name );
+        }
+      });
+    }
+
+    function core$prefixer$$prefix( pname , str ) {
+      var re = new RegExp( '(?:-[^-]+-)?((?:' + pname + '))' , 'gi' );
+      return (str || '').replace( re , function( match , group ) {
+        return (core$prefixer$$vendorPrefix ? '-' + core$prefixer$$vendorPrefix + '-' : '') + group;
+      });
+    }
+
+    var core$prefixer$$vendorPrefix = (function() {
+      var vendors = { webkit: /webkit/i, moz: /firefox/i, ms: /msie/i };
+      return vendors.$keys.filter(function( prefix ) {
+        var re = vendors[prefix];
+        return re.test( navigator.userAgent );
+      })
+      .pop();
+    }());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function fn$hx$$fn() {
+      var args = Array.$cast( arguments );
+      var hx = new main$$default( this );
+      var out;
+      /*if ($_is( args[0] , 'string' )) {
+        var method = args.shift();
+        if (!$_is( hx[method] , 'function' )) {
+          throw new Error( method + ' is not a function.' );
+        }
+        out = hx[method].apply( hx , args );
+      }
+      else if ($_is( args[0] , 'object' )) {
+        out = hx.animate( args[0] );
+      }
+      else {*/
+        out = hx;
+      // }
+      return out;
+    }
+    var fn$hx$$default = fn$hx$$fn;
     function core$jquery$special$$$$( jq ) {
       var that = this;
       return core$util$$$_is( that , core$jquery$special$$$$ ) ? that : core$jquery$special$$$$.$new( that , jq );
@@ -920,6 +984,7 @@ $.fn.hx = function() {
     var core$jquery$special$$default = core$jquery$special$$$$;
 
     core$class$$default( core$jquery$special$$$$ ).inherits( $ , {
+      hx: fn$hx$$default,
       _new: function( jq ) {
         $.fn.init.call( this , jq );
       },
@@ -934,9 +999,42 @@ $.fn.hx = function() {
           }
         });
         return ret;
+      },
+      $css: function() {
+        var args = Array.$cast( arguments );
+        var that = this;
+        if (args.length > 1) {
+          args = [ Object.$build.apply( null , args ) ];
+        }
+        if (core$util$$$_is( args[0] , 'object' )) {
+          core$prefixer$$default( args[0] );
+        }
+        // console.log(args[0]);
+        return that.css.apply( that , args );
       }
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     function core$element$$$Element( node ) {
+      if (node.$hx) {
+        return node;
+      }
       var that = core$element$$$Element.$new( this , node );
     }
 
@@ -944,7 +1042,7 @@ $.fn.hx = function() {
 
     core$class$$default( core$element$$$Element ).inherits( core$jquery$special$$default , {
       _new: function( node ) {
-        core$jquery$special$$default.call( this , node );
+        node.$hx = core$jquery$special$$default.call( this , node );
       }
     });
 
@@ -970,12 +1068,27 @@ $.fn.hx = function() {
       if (core$util$$$_is( jq , main$$$hx )) {
         return jq;
       }
-      var that = main$$$hx.$new( this , jq ).mapd(function( el ) {
-        return new core$element$$default( el );
+      var that = main$$$hx.$new( this , jq ).each(function( i ) {
+        return new core$element$$default( this );
       });
     }
 
     var main$$default = main$$$hx;
+
+    core$util$$$_defineProperties( main$$$hx , {
+      src: {
+        value: (function() {
+          var script = $('script[src$="hx.js"]').get( 0 );
+          return script ? script.src : undefined;
+        }())
+      }
+    });
+
+    core$util$$$_defineGetters( main$$$hx , {
+      multiThread: function() {
+        return core$util$$$_defined( main$$$hx.src ) && core$util$$$_defined( Worker ) && core$util$$$_defined( Blob ) && core$util$$$_defined( URL );
+      }
+    });
 
     core$class$$default( main$$$hx ).inherits( core$jquery$special$$default , {
       _new: function( jq ) {
@@ -984,52 +1097,53 @@ $.fn.hx = function() {
       it: function( iterator ) {
         var that = this;
         return that.each(function( i ) {
-          iterator( this , i );
+          iterator( this.$hx , i );
         });
       },
-      mapd: function( iterator ) {
+      get: function() {
         var that = this;
-        return that.it(function( el , i ) {
-          that[i] = iterator( el , i );
-        });
+        var args = Array.$cast( arguments );
+        if (core$util$$$_is( args[0] , 'string' )) {
+          // get styles 'n such
+        }
+        else {
+          return that.$super( core$jquery$special$$default , 'get' )( args );
+        }
       }
     });
 
-    function fn$hx$$fn() {
-      var args = Array.$cast( arguments );
-      var hx = new main$$default( this );
-      var out;
-      /*if ($_is( args[0] , 'string' )) {
-        var method = args.shift();
-        if (!$_is( hx[method] , 'function' )) {
-          throw new Error( method + ' is not a function.' );
-        }
-        out = hx[method].apply( hx , args );
-      }
-      else if ($_is( args[0] , 'object' )) {
-        out = hx.animate( args[0] );
-      }
-      else {*/
-        out = hx;
-      // }
-      return out;
-    }
-    var fn$hx$$default = fn$hx$$fn;
 
-    main$$default.fn = fn$hx$$default;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     var $$index$$default = main$$default;
 
-    if (typeof define == 'function' && define.amd) {
-      define([], function() { return $$index$$default });
-    }
-    else if (typeof exports == 'object') {
-      module.exports = $$index$$default;
-    }
-    else {
-      this.$hx = $$index$$default;
-    }
-}).apply(this,[window,document,Object,Array,RegExp,Math,Error,E$,BezierEasing,jQuery,WeePromise]);
-// reset amd define
-window.define = window.__TMP$define;
-delete window.__TMP$define;
+    /*
+    ** expose public methods
+    */
+
+    main$$default.prefix = core$prefixer$$addProperty;
+    $.fn.hx = fn$hx$$default;
+
+    /*
+    ** default $hx configuration
+    */
+
+    main$$default.prefix([ 'transform' , 'transition' , 'filter' ]);
+    this.$hx = $$index$$default;
+}).apply(this,[window,document,Object,Array,RegExp,Math,Error,window.Worker,window.Blob,window.URL,E$,BezierEasing,WeePromise]);
+//# sourceMappingURL=

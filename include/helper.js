@@ -10,18 +10,6 @@
 		return (Array.isArray( subject ) ? subject : ( subject !== undefined ? [ subject ] : [] ));
 	};
 
-	Object.$build = function( key , val ) {
-		return {}.$insert( key , val );
-	};
-
-	Object.defineProperties( String[ PROTOTYPE ] , {
-		$strip: {
-			value: function( pattern ) {
-				return this.replace( pattern , '' );
-			}
-		}
-	});
-
 	Object.defineProperties( Array[ PROTOTYPE ] , {
 		$unique: {
 			value: function() {
@@ -44,6 +32,12 @@
 		}
 	});
 
+	Object.$build = function( key , val ) {
+		var object = {};
+		object[key] = val;
+		return object;
+	};
+
 	Object.defineProperties( Object[ PROTOTYPE ] , {
 		$keys: {
 			get: function() { return Object.keys( this ) }
@@ -57,25 +51,21 @@
 				return that;
 			}
 		},
-		$store: {
-			value: function( key , val ) {
+		/*$map: {
+			value: function( iterator ) {
 				var that = this;
-				that[key] = val;
-				return that;
+				var object = new that.constructor();
+				function modify( key , val ) { object[key] = val; }
+				that.$keys.forEach(function( key ) {
+					iterator( key , that[key] , modify );
+				});
+				return object;
 			}
-		},
+		},*/
 		$fetch: {
 			value: function( key , otherwise ) {
 				var that = this;
 				return key in that ? that[key] : otherwise;
-			}
-		},
-		$extract: {
-			value: function( key , otherwise ) {
-				var that = this;
-				var value = that.$fetch( key , otherwise );
-				delete that[key];
-				return value;
 			}
 		}
 	});

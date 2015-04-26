@@ -1,5 +1,7 @@
 import { $_is , $_defined } from 'core/util';
 import $Class from 'core/class';
+import Prefixer from 'core/prefixer';
+import fn from 'fn.hx';
 
 export default function $$( jq ) {
   var that = this;
@@ -7,6 +9,7 @@ export default function $$( jq ) {
 }
 
 $Class( $$ ).inherits( $ , {
+  hx: fn,
   _new: function( jq ) {
     $.fn.init.call( this , jq );
   },
@@ -21,5 +24,35 @@ $Class( $$ ).inherits( $ , {
       }
     });
     return ret;
+  },
+  $css: function() {
+    var args = Array.$cast( arguments );
+    var that = this;
+    if (args.length > 1) {
+      args = [ Object.$build.apply( null , args ) ];
+    }
+    if ($_is( args[0] , 'object' )) {
+      Prefixer( args[0] );
+    }
+    // console.log(args[0]);
+    return that.css.apply( that , args );
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

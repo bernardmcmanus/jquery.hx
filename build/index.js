@@ -1,6 +1,18 @@
-import fn from 'fn.hx';
 import $hx from 'main';
-
-$hx.fn = fn;
+import fn from 'fn.hx';
+import { addProperty } from 'core/prefixer';
 
 export default $hx;
+
+/*
+** expose public methods
+*/
+
+$hx.prefix = addProperty;
+$.fn.hx = fn;
+
+/*
+** default $hx configuration
+*/
+
+$hx.prefix([ 'transform' , 'transition' , 'filter' ]);

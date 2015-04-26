@@ -1,10 +1,21 @@
+var prefixProperties = [];
+
 export default function Prefixer( obj ) {
-  prefixProperties.forEach(function( pname ) {
-    obj.$each(function( key , val ) {
+  return obj.$each(function( key , val ) {
+    prefixProperties.forEach(function( pname ) {
       key = prefix( pname , key );
       val = prefix( pname , val );
-      obj[key] = val;
     });
+    obj[key] = val;
+  });
+}
+
+export function addProperty( names ) {
+  Array.$ensure( names ).forEach(function( name ) {
+    name = name.toLowerCase();
+    if (prefixProperties.indexOf( name ) < 0) {
+      prefixProperties.push( name );
+    }
   });
 }
 
@@ -14,8 +25,6 @@ function prefix( pname , str ) {
     return (vendorPrefix ? '-' + vendorPrefix + '-' : '') + group;
   });
 }
-
-var prefixProperties = [ 'transform' , 'transition' ];
 
 var vendorPrefix = (function() {
   var vendors = { webkit: /webkit/i, moz: /firefox/i, ms: /msie/i };

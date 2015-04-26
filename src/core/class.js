@@ -10,6 +10,13 @@ export default function $Class( constructor ) {
 			var $new = proto._new || function(){};
 			delete proto._new;
 			proto.constructor = constructor;
+			proto.$super = function( $super , methodName ) {
+				var that = this;
+				var method = getPrototype( $super )[ methodName ];
+				return function( args ) {
+					return method.apply( that , Array.$ensure( args ));
+				};
+			};
 			constructor.prototype = proto;
 			constructor.$new = function() {
 				var args = Array.$cast( arguments );

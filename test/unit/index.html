@@ -19,7 +19,7 @@
       require.config({
         paths: {
           'hx': '/dist/hx',
-          'jquery': '/bower_components/jquery/dist/jquery.min',
+          'jquery': '/bower_components/jquery/dist/jquery',
           'mocha': '/bower_components/mocha/mocha',
           'chai': '/bower_components/chai/chai',
           'sinon': '/bower_components/sinon/index',
@@ -32,7 +32,10 @@
           'sinon': { exports: 'sinon' },
           'sinon-chai': [ 'chai' , 'sinon' ],
           'once': [ 'jquery' ],
-          'hx': [ 'jquery' ]
+          'hx': {
+            exports: '$hx',
+            deps: [ 'jquery' ]
+          }
         }
       });
       require([ 'chai' , 'sinon-chai' ], function( chai , sinonChai ) {
@@ -44,7 +47,7 @@
         mocha.setup( 'bdd' );
         mocha.reporter( 'html' );
       });
-      require([ 'hx' , 'once' , 'init' ], function() {
+      require([ 'hx' , 'once' , 'init' ], function( $hx ) {
         $.getScript( 'tests.js' , function() {
           mocha.run();
         });
