@@ -1,6 +1,5 @@
 module.exports = function( grunt ) {
 
-
   grunt.initConfig({
 
     pkg: grunt.file.readJSON( 'package.json' ),
@@ -137,9 +136,7 @@ module.exports = function( grunt ) {
         singleRun: true
       }
     }
-
   });
-
   
   grunt.loadTasks( 'tasks' );
 
@@ -195,7 +192,7 @@ module.exports = function( grunt ) {
     'release-describe',
     'clean:tmp'
   ]);
-
+  
   grunt.registerTask( 'debug' , [
     'build',
     'connect',
@@ -203,15 +200,6 @@ module.exports = function( grunt ) {
     'watch:debug'
   ]);
 };
-
-
-
-
-
-
-
-
-
 
 
 

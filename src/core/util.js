@@ -11,18 +11,6 @@ export function $_defineGetters( subject , getters ) {
   $_defineProperties( subject , getters );
 }
 
-export function $_guid() {
-  return ('xxxxxxxxxxxx').replace( /[xy]/g , function( c ) {
-    var r = Math.random() * 16|0,
-    v = c == 'x' ? r : r&0x3|0x8;
-    return v.toString( 16 );
-  });
-}
-
-/*export function $_freeze( subject ) {
-  return Object.freeze( subject );
-}*/
-
 export function $_clone( subject ) {
   return $.extend( true , new getPrototype( subject ).constructor() , subject );
 }

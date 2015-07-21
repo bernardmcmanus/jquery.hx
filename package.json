@@ -50,6 +50,7 @@
     "colors": "~1.0.2",
     "fs-extra": "0.9.1",
     "es6-promise": "~2.0.1",
+    "grunt-babel": "5.0.1",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": ">=0.4.1",
     "grunt-contrib-concat": "~0.5.1",
