@@ -20,28 +20,17 @@ module.exports = function( grunt ) {
     },
 
     'import-clean': {
+      options: { force: true },
       all: '<%= pkg.config.src %>'
     },
 
-    transpile: {
-      build: {
-        src: '<%= pkg.config.src %>',
-        dest: '<%= pkg.config.build.tmp %>',
-        umd: '<%= pkg.config.build.umd %>',
+    browserify: {
+      dist: {
         options: {
-          inject: [
-            'window',
-            'document',
-            'Object',
-            'Array',
-            'RegExp',
-            'Math',
-            'Error',
-            'E$',
-            'BezierEasing',
-            [ '$' , 'jQuery' ],
-            [ 'Promise' , 'WeePromise' ]
-          ]
+          transform: [[ 'babelify' , { stage: 0 }]]
+        },
+        files: {
+          '<%= pkg.config.build.tmp %>': 'src/main.js'
         }
       }
     },
@@ -54,25 +43,17 @@ module.exports = function( grunt ) {
     },
 
     replace: {
-      packages: {
+      bower: {
         options: {
-          patterns: [
-            {
-              match: /"version".+"[\d\.]+"/i,
-              replacement: '\"version\": \"<%= pkg.version %>\"'
-            }
-          ]
+          patterns: [{
+            match: /"version".+"[\d\.]+"/i,
+            replacement: '\"version\": \"<%= pkg.version %>\"'
+          }]
         },
-        files: [
-          {
-            src: 'package.json',
-            dest: 'package.json'
-          },
-          {
-            src: 'bower.json',
-            dest: 'bower.json'
-          }
-        ]
+        files: [{
+          src: 'bower.json',
+          dest: 'bower.json'
+        }]
       }
     },
 
@@ -80,7 +61,7 @@ module.exports = function( grunt ) {
       debug: {
         files: '<%= pkg.config.watch.files %>',
         options: '<%= pkg.config.watch.options %>',
-        tasks: [ 'build' , 'karma:unit' ]
+        tasks: [ 'build' /*, 'karma:unit'*/ ]
       }
     },
 
@@ -104,12 +85,9 @@ module.exports = function( grunt ) {
       },
       build: {
         src: [
-          '<%= pkg.config.include.header %>',
           '<%= pkg.config.lib %>',
           '<%= pkg.config.include.helper %>',
-          '<%= pkg.config.include.fn %>',
-          '<%= pkg.config.build.tmp %>',
-          '<%= pkg.config.include.footer %>'
+          '<%= pkg.config.build.tmp %>'
         ],
         dest: '<%= pkg.config.build.dev %>'
       }
@@ -151,21 +129,22 @@ module.exports = function( grunt ) {
     'grunt-contrib-connect',
     'grunt-import-clean',
     'grunt-gitinfo',
-    'grunt-karma'
+    'grunt-karma',
+
+    'grunt-babel',
+    'grunt-browserify'
   ]
   .forEach( grunt.loadNpmTasks );
 
-  grunt.registerTask( 'init' , [ 'bower-install' ]);
   grunt.registerTask( 'default' , [ 'prod' ]);
   grunt.registerTask( 'prod' , [ 'release' ]);
   grunt.registerTask( 'dev' , [ 'build' ]);
 
   grunt.registerTask( 'build' , [
-    'init',
     'clean',
     'gitinfo',
     'lint',
-    'transpile',
+    'browserify',
     'concat',
     'uglify'
   ]);
@@ -186,17 +165,17 @@ module.exports = function( grunt ) {
   });
 
   grunt.registerTask( 'release' , [
-    'replace:packages',
+    'replace:bower',
     'build',
     'test',
     'release-describe',
     'clean:tmp'
   ]);
-  
+
   grunt.registerTask( 'debug' , [
     'build',
     'connect',
-    'karma:unit',
+    // 'karma:unit',
     'watch:debug'
   ]);
 };

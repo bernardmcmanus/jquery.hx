@@ -1,4 +1,4 @@
-import { getPrototype } from 'core/class';
+// import { getPrototype } from 'core/class';
 
 export function $_defineProperties( subject , descriptors ) {
   Object.defineProperties( subject , descriptors );
@@ -11,9 +11,9 @@ export function $_defineGetters( subject , getters ) {
   $_defineProperties( subject , getters );
 }
 
-export function $_clone( subject ) {
+/*export function $_clone( subject ) {
   return $.extend( true , new getPrototype( subject ).constructor() , subject );
-}
+}*/
 
 export function $_is( subject , test ) {
   if (typeof test == 'string') {
