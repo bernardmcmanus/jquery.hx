@@ -1,18 +1,14 @@
-(function() {
+import $hx from 'hx';
 
-  'use strict';
+window.$hx = $hx;
 
-  describe( 'jquery.hx' , function() {
-    it('should exist', function() {
-      var count = 0;
-      $hx.$timer.on(function tic( e ) {
-        console.log(e.timeStamp);
-        if (count >= 10) {
-          $hx.$timer.off( tic );
-        }
-        count++;
-      });
+suite( '$hx' , function() {
+  test( 'should exist' , function() {
+    expect( $hx ).to.be.ok;
+  });
+  suite( '#new' , function() {
+    test( 'should do it' , function() {
+      $hx.new();
     });
   });
-
-}());
+});

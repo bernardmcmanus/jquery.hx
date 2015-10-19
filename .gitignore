@@ -1,6 +1,8 @@
 node_modules
 bower_components
+compiled
 tmp
+*.compiled.js
 
 # OS generated files #
 ######################

@@ -1,14 +1,28 @@
-// import { getPrototype } from 'core/class';
-
-export function $_defineProperties( subject , descriptors ) {
+export function $_defineGetters( subject , getters ) {
+  var descriptors = $_map( getters , function( getter ) {
+    return { get: getter, configurable: true, enumerable: false };
+  });
   Object.defineProperties( subject , descriptors );
 }
 
-export function $_defineGetters( subject , getters ) {
-  getters.$each(function( key , val ) {
-    getters[key] = { get: val, configurable: true, enumerable: false };
-  });
-  $_defineProperties( subject , getters );
+export function $_each( subject , cb ) {
+  for (var key in subject) {
+    if ($_has( subject , key )) {
+      cb( subject[key] , key );
+    }
+  }
+}
+
+export function $_has( subject , property ) {
+  return subject.hasOwnProperty( property );
+}
+
+export function $_map( subject , cb , seed ) {
+  seed = seed || new subject.constructor();
+  return Object.keys( subject ).reduce(function( result , key , index ) {
+    result[key] = cb( subject[key] , key , index );
+    return result;
+  },seed);
 }
 
 /*export function $_clone( subject ) {

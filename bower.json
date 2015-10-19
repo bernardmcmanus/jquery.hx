@@ -1,28 +1,30 @@
 {
-  "name": "jquery.hx",
+  "name": "hx",
   "version": "2.0.0",
-  "homepage": "https://github.com/millennialmedia/jquery.hx.git",
+  "description": "A hardware-accelerated animation library for mobile and desktop.",
+  "main": "dist/hx.min.js",
+  "homepage": "https://github.com/millennialmedia/jquery.hx",
+  "license": "MIT",
   "authors": [
     "Bernard McManus"
   ],
-  "description": "A hardware-accelerated animation library for mobile and desktop.",
-  "main": "dist/hx.min.js",
   "keywords": [
     "jquery",
     "animation",
     "promise"
   ],
-  "license": "MIT",
   "dependencies": {
-    "jquery": "~2.1.3",
+    "tinycolor": "~1.2.1",
+    "q": "1.0.1",
+    "qlite": "https://raw.githubusercontent.com/jcamelis/Qlite/f59d5f0c1e2d0403df89f13132774908e6781367/Qlite.js",
     "emoney": "~0.2.4",
-    "briskit": "~0.1.4",
-    "wee-promise": "~0.2.1",
-    "bezier-easing": "https://raw.githubusercontent.com/gre/bezier-easing/master/index.js"
+    "bezier-easing": "https://raw.githubusercontent.com/gre/bezier-easing/5479c4a1c3f1296ad1e2d86776a146b14c539ae3/index.js"
   },
   "devDependencies": {
+    "jquery": "~2.1.3",
     "requirejs": "http://requirejs.org/docs/release/2.1.16/comments/require.js",
     "sinon": "http://sinonjs.org/releases/sinon-1.14.1.js",
+    "sinon-chai": "https://github.com/domenic/sinon-chai.git#2.8.0",
     "mocha": "~2.1.0",
     "chai": "~2.1.1"
   },
@@ -30,7 +32,6 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "test",
-    "tests"
+    "test"
   ]
 }

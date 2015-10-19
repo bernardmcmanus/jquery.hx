@@ -1,29 +1,25 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <!-- ============================================= -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <title>jquery.hx unit tests</title>
-    <!-- ============================================= -->
     <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css" />
-    <link rel="stylesheet" type="text/css" href="style.css" />
-    <!-- ============================================= -->
-    <script src="bind-polyfill.js"></script>
-    <script src="performance-polyfill.js"></script>
-    <!-- ============================================= -->
+    <link rel="stylesheet" type="text/css" href="/test/style.css" />
+    <script src="/test/bind-polyfill.js"></script>
+    <script src="/test/performance-polyfill.js"></script>
     <script src="/bower_components/requirejs/index.js"></script>
-    <!-- ============================================= -->
     <script>
       require.config({
         paths: {
-          'hx': '/dist/hx',
+          'once': '/test/once',
           'jquery': '/bower_components/jquery/dist/jquery.min',
           'mocha': '/bower_components/mocha/mocha',
           'chai': '/bower_components/chai/chai',
           'sinon': '/bower_components/sinon/index',
-          'sinon-chai': '/node_modules/sinon-chai/lib/sinon-chai'
+          'sinon-chai': '/bower_components/sinon-chai/lib/sinon-chai',
+          'tests': 'tests.compiled'
         },
         shim: {
           'jquery': { exports: '$' },
@@ -32,47 +28,23 @@
           'sinon': { exports: 'sinon' },
           'sinon-chai': [ 'chai' , 'sinon' ],
           'once': [ 'jquery' ],
-          'hx': [ 'jquery' ]
+          'tests': [ 'mocha' , 'sinon-chai' , 'once' ]
         }
       });
-      require([ 'chai' , 'sinon-chai' ], function( chai , sinonChai ) {
-        window.chai = chai;
+      define( 'init' , [ 'jquery' , 'mocha' , 'chai' , 'sinon-chai' ], function( $ , mocha , chai , sinonChai ) {
+        window.$ = $;
+        window.mocha = mocha;
         window.expect = chai.expect;
+        mocha.setup( 'tdd' );
+        mocha.reporter( 'html' );
         chai.use( sinonChai );
       });
-      define( 'init' , [ 'jquery' , 'mocha' , 'sinon-chai' ], function( $ , mocha ) {
-        mocha.setup( 'bdd' );
-        mocha.reporter( 'html' );
-      });
-      require([ 'hx' , 'once' , 'init' ], function() {
-        $.getScript( 'tests.js' , function() {
-          mocha.run();
-        });
+      require([ 'init' , 'tests' ], function() {
+        mocha.run();
       });
     </script>
   </head>
   <body>
     <div id="mocha"></div>
   </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
