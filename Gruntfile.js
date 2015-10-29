@@ -1,11 +1,11 @@
-module.exports = function( grunt ) {
+module.exports = function( grunt ){
 
   var extend = require( 'extend' );
 
-  grunt.task.ensure = function( task ) {
+  grunt.task.ensure = function( task ){
     try {
       grunt.task.requires( task );
-    } catch( err ) {
+    } catch( err ){
       grunt.task.run( task );
     }
   };
@@ -54,7 +54,7 @@ module.exports = function( grunt ) {
       }
     },
 
-    compile: {
+    /*compile: {
       options: {
         transform: [[ 'babelify' , { stage: 0 }]],
         plugin: [
@@ -78,9 +78,20 @@ module.exports = function( grunt ) {
           'paths': [ 'src' , 'bower_components' , 'compiled' ]
         }
       }
-    },
+    },*/
 
     browserify: {
+      options: {
+        transform: [[ 'babelify' , { stage: 0 }]],
+        plugin: [
+          [ 'browserify-derequire' ]
+        ],
+        browserifyOptions: {
+          'paths': [ 'src' , 'bower_components' , 'compiled' ],
+          'debug': 'debug',
+          'standalone': '$hx'
+        }
+      },
       dist: {
         files: {
           'tmp/<%= pkg.name %>.js': 'src/main.js'
@@ -100,7 +111,7 @@ module.exports = function( grunt ) {
 
     wrap: {
       options: {
-        args: (function() {
+        args: (function(){
           /*[
             'window',
             'document',
@@ -128,17 +139,17 @@ module.exports = function( grunt ) {
             ['UNDEFINED']
           ];
 
-          var leadingWrapArgs = args.map(function( arg ) {
+          var leadingWrapArgs = args.map(function( arg ){
             return Array.isArray( arg ) ? arg.shift() : arg;
           })
-          .filter(function( arg ) {
+          .filter(function( arg ){
             return !!arg;
           });
 
-          var trailingWrapArgs = args.map(function( arg ) {
+          var trailingWrapArgs = args.map(function( arg ){
             return Array.isArray( arg ) ? arg.pop() : arg;
           })
-          .filter(function( arg ) {
+          .filter(function( arg ){
             return !!arg;
           });
 
@@ -148,7 +159,7 @@ module.exports = function( grunt ) {
           };
         }()),
         wrapper: [
-          '(function(<%= wrap.options.args.leading %>) {\n"use strict";\n',
+          '(function(<%= wrap.options.args.leading %>){\n"use strict";\n',
           '\n}(<%= wrap.options.args.trailing %>))'
         ]
       },
@@ -260,7 +271,8 @@ module.exports = function( grunt ) {
     'clean',
     'gitinfo',
     'lint',
-    'compile:dist',
+    // 'compile:dist',
+    'browserify:dist',
     'wrap',
     'concat',
     'uglify'
@@ -280,19 +292,20 @@ module.exports = function( grunt ) {
     'clean:tmp'
   ]);
 
-  grunt.registerMultiTask( 'compile' , function() {
+  /*grunt.registerMultiTask( 'compile' , function(){
     var target = this.target;
     var options = extend( true , this.options() , this.data );
     grunt.config.set( 'browserify.' + target + '.options' , options );
     grunt.task.run( 'browserify:' + target );
-  });
+  });*/
 
-  grunt.registerMultiTask( 'test' , function() {
-    grunt.task.ensure( 'compile:' + this.target );
+  grunt.registerMultiTask( 'test' , function(){
+    // grunt.task.ensure( 'compile:' + this.target );
+    grunt.task.ensure( 'browserify:' + this.target );
     // grunt.task.run( 'karma:' + this.target );
   });
 
-  grunt.registerMultiTask( 'debug' , function() {
+  grunt.registerMultiTask( 'debug' , function(){
     var target = (process.argv.indexOf( 'debug' ) >= 0 ? '' : ':' + this.target);
     grunt.task.ensure( 'connect' );
     grunt.task.ensure( 'test' + target );

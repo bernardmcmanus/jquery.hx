@@ -3,6 +3,7 @@
 import Bezier from 'bezier-easing';
 import { $_map } from 'core/util';
 import beziers from 'conf/beziers';
+import Property from 'property';
 
 // import Q from 'qlite';
 // import E$ from 'emoney';
@@ -13,10 +14,10 @@ import beziers from 'conf/beziers';
 // console.log(Q);
 
 var $hx = {
-  new: function() {
+  new: function(){
     console.debug('$hx.new');
   },
-  easing: $_map( beziers , function( points ) {
+  easing: $_map( beziers , function( points ){
     return new Bezier( points );
   })
 };

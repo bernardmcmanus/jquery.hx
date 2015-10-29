@@ -1,51 +1,70 @@
 module.exports = function( grunt ) {
-
-  var CWD = process.cwd();
-
-  var cp = require( 'child_process' );
   var path = require( 'path' );
+  var zlib = require( 'zlib' );
   var fs = require( 'fs-extra' );
   var colors = require( 'colors' );
   var Promise = require( 'es6-promise' ).Promise;
 
-  grunt.task.registerMultiTask( 'release-describe' , 'describe build size / minified size.' , function() {
-    var that = this;
-    var done = that.async();
-    var data = grunt.task.normalizeMultiTaskFiles( that.data )[0];
-    var options = that.data.options || {};
-    var src = path.join( CWD , data.src[0] );
-    var dest = path.join( CWD , data.dest );
-    var gz = dest + '.gz';
-    new Promise(function( resolve , reject ) {
-      var proc = cp.spawn( 'gzip' , [ '--keep' , dest ]);
-      proc.on( 'close' , function() {
-        fs.stat( gz , function( err , stats ) {
-          if (err) {
-            reject();
-          }
-          else {
-            fs.removeSync( gz );
-            resolve( stats.size );
-          }
+  grunt.task.registerMultiTask( 'release-describe' , 'print total build size / minified size / gzipped size.' , function() {
+    var queue = [];
+    var done = this.async();
+
+    Promise.all(
+      this.files.map(function( f ) {
+        return releaseDescribe( f.src , f.dest );
+      })
+    )
+    .then( done );
+
+    function releaseDescribe( src , dest ) {
+      return Promise.all([
+        Promise.resolve().then(function() {
+          var promises = src.map(function( fpath ) {
+            return new Promise(function( resolve , reject ) {
+              fs.stat( fpath , function( err , stats ) {
+                return err ? reject( err ) : resolve( stats.size );
+              });
+            });
+          });
+          return Promise.all( promises ).then(function( sizes ) {
+            return sizes.reduce(function( p , c ) {
+              return p + c;
+            },0);
+          });
+        }),
+        new Promise(function( resolve , reject ) {
+          fs.stat( dest , function( err , stats ) {
+            return err ? reject( err ) : resolve( stats.size );
+          });
+        }),
+        new Promise(function( resolve , reject ) {
+          var gzip = zlib.createGzip();
+          var stream = fs.createReadStream( dest );
+          var size = 0;
+          stream
+            .pipe( gzip )
+            .on( 'data' , function( chunk ) {
+              size += chunk.length;
+            })
+            .on( 'end' , function() {
+              resolve( size );
+            })
+            .on( 'error' , reject );
+        })
+      ])
+      .then(function( bytes ) {
+        var kb = bytes.map(function( b ) {
+          return Math.round( b / 10 ) / 100;
         });
+        var msg = 'File ' + path.basename( dest ).cyan + ' created: ' + (kb[0] + ' kB').green + ' \u2192 ' + (kb[1] + ' kB').green;
+        if (kb[2]) {
+          msg += (' (' + kb[2] + ' kB gzipped)').magenta;
+        }
+        console.log( msg );
+      })
+      .catch(function( err ) {
+        grunt.fail.warn( err );
       });
-    })
-    .catch(function() {
-      return false;
-    })
-    .then(function( bytesGzip ) {
-      var bytesInit = fs.statSync( src ).size;
-      var bytesFinal = fs.statSync( dest ).size;
-      var kbInit = Math.round( bytesInit / 10 ) / 100;
-      var kbFinal = Math.round( bytesFinal / 10 ) / 100;
-      var kbGzip = bytesGzip ? (Math.round( bytesGzip / 10 ) / 100) : 0;
-      var msg = 'File ' + path.basename( dest ).cyan + ' created: ' + (kbInit + ' kB').green + ' \u2192 ' + (kbFinal + ' kB').green;
-      if (kbGzip) {
-        msg += (' (' + kbGzip + ' kB gzipped)').magenta;
-      }
-      console.log( msg );
-      done();
-    });
+    }
   });
 };
-
