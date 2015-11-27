@@ -9,17 +9,17 @@ import Property from 'property';
 // import E$ from 'emoney';
 // import tinycolor from 'tinycolor';
 
-// export default $hx;
+// export default hx;
 
 // console.log(Q);
 
-var $hx = {
+var hx = {
   new: function(){
-    console.debug('$hx.new');
+    console.debug('hx.new');
   },
   easing: $_map( beziers , function( points ){
     return new Bezier( points );
   })
 };
 
-export default $hx;
+export default hx;

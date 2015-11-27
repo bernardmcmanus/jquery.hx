@@ -1,25 +1,27 @@
 .tgt-container {
-    height: 180px;
-    padding: 10px;
-    padding-left: 0;
-    margin-top: 80px;
-    margin-right: 10px;
-    pointer-events: none;
-    -webkit-perspective: 1000px;
-    z-index: 1000;
+  height: 180px;
+  padding: 10px;
+  margin-top: 80px;
+  pointer-events: none;
+  -webkit-perspective: 1000px;
+  z-index: 1000;
 }
 
 .tgt-container > div {
-    text-align: center;
-    float: left;
-    margin: 0;
-    width: 80px;
-    height: 80px;
-    line-height: 80px;
-    pointer-events: auto;
-    -webkit-transform-style: preserve-3d;
-    -moz-transform-style: preserve-3d;
-    -o-transform-style: preserve-3d;
-    -ms-transform-style: preserve-3d;
-    transform-style: preserve-3d;
+  text-align: center;
+  float: left;
+  margin: 0;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  pointer-events: auto;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  -o-transform-style: preserve-3d;
+  -ms-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+
+.tgt-container > div:not(:last-child) {
+  margin-right: 10px;
 }

@@ -1,14 +1,14 @@
-import $hx from 'hx';
+import hx from 'hx';
 
-window.$hx = $hx;
+window.hx = hx;
 
-suite( '$hx' , function() {
+suite( 'hx' , function() {
   test( 'should exist' , function() {
-    expect( $hx ).to.be.ok;
+    expect( hx ).to.be.ok;
   });
   suite( '#new' , function() {
     test( 'should do it' , function() {
-      $hx.new();
+      hx.new();
     });
   });
 });

@@ -1,27 +1,13 @@
 module.exports = function( grunt ){
-
-  var extend = require( 'extend' );
-
-  grunt.task.ensure = function( task ){
-    try {
-      grunt.task.requires( task );
-    } catch( err ){
-      grunt.task.run( task );
-    }
-  };
-
+  
   grunt.initConfig({
-
     pkg: grunt.file.readJSON( 'package.json' ),
-
     gitinfo: {},
-
     clean: {
       tests: [ 'test/*/*.compiled.js' ],
       compiled: [ 'compiled' ],
       tmp: [ 'tmp' ]
     },
-
     jshint: {
       all: 'src/**/*.js',
       options: {
@@ -29,16 +15,14 @@ module.exports = function( grunt ){
         laxbreak: true
       }
     },
-
     'import-clean': {
       options: { force: true },
       all: 'src/**/*.js'
     },
-
     update_json: {
       options: {
         src: 'package.json',
-        indent: '  '
+        indent: 2
       },
       bower: {
         dest: 'bower.json',
@@ -53,33 +37,6 @@ module.exports = function( grunt ){
         ]
       }
     },
-
-    /*compile: {
-      options: {
-        transform: [[ 'babelify' , { stage: 0 }]],
-        plugin: [
-          [ 'browserify-derequire' ]
-        ],
-        browserifyOptions: { 'debug': 'debug' }
-      },
-      dist: {
-        browserifyOptions: {
-          'paths': [ 'src' , 'bower_components' ],
-          'standalone': '$hx'
-        }
-      },
-      unit: {
-        browserifyOptions: {
-          'paths': [ 'src' , 'bower_components' , 'compiled' ]
-        }
-      },
-      functional: {
-        browserifyOptions: {
-          'paths': [ 'src' , 'bower_components' , 'compiled' ]
-        }
-      }
-    },*/
-
     browserify: {
       options: {
         transform: [[ 'babelify' , { stage: 0 }]],
@@ -108,7 +65,6 @@ module.exports = function( grunt ){
         }
       }
     },
-
     wrap: {
       options: {
         args: (function(){
@@ -135,6 +91,7 @@ module.exports = function( grunt ){
           var args = [
             'Object',
             'Array',
+            'Math',
             'Error',
             ['UNDEFINED']
           ];
@@ -169,7 +126,6 @@ module.exports = function( grunt ){
         }
       }
     },
-
     concat: {
       options: {
         banner: '<%= pkg.config.banner %>\n',
@@ -183,7 +139,6 @@ module.exports = function( grunt ){
         }
       }
     },
-
     uglify: {
       options: {
         banner: '<%= pkg.config.banner %>',
@@ -195,7 +150,6 @@ module.exports = function( grunt ){
         }
       }
     },
-
     watch: {
       options: { interrupt: true },
       files: [ 'src/**/*.js' , 'test/*/tests.js' ],
@@ -208,13 +162,11 @@ module.exports = function( grunt ){
         tasks: [ 'test:functional' ]
       }
     },
-
     connect: {
       server: {
         options: '<%= pkg.config.connect %>'
       }
     },
-
     karma: {
       unit: {
         configFile: 'test/unit/karma.conf.js',
@@ -225,7 +177,6 @@ module.exports = function( grunt ){
         singleRun: true
       }
     },
-
     'release-describe': {
       dist: {
         files: {
@@ -233,12 +184,10 @@ module.exports = function( grunt ){
         }
       }
     },
-
     test: {
       unit: {},
       functional: {}
     },
-
     debug: {
       unit: {},
       functional: {}
@@ -271,7 +220,6 @@ module.exports = function( grunt ){
     'clean',
     'gitinfo',
     'lint',
-    // 'compile:dist',
     'browserify:dist',
     'wrap',
     'concat',
@@ -292,15 +240,7 @@ module.exports = function( grunt ){
     'clean:tmp'
   ]);
 
-  /*grunt.registerMultiTask( 'compile' , function(){
-    var target = this.target;
-    var options = extend( true , this.options() , this.data );
-    grunt.config.set( 'browserify.' + target + '.options' , options );
-    grunt.task.run( 'browserify:' + target );
-  });*/
-
   grunt.registerMultiTask( 'test' , function(){
-    // grunt.task.ensure( 'compile:' + this.target );
     grunt.task.ensure( 'browserify:' + this.target );
     // grunt.task.run( 'karma:' + this.target );
   });

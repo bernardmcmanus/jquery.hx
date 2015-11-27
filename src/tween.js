@@ -1,71 +1,51 @@
-import Q from 'qlite';
+import { Promise } from 'q.provider';
+import { $_extend, $_limit } from 'core/util';
 
-// var INTERVAL = Math.floor( 1000 / 60 );
-var Promise = Q.defer().constructor;
-
-window.ptime = function( cb ) {
-  setTimeout( cb , 1 );
-};
-
-export default function Tween( cb ){
+export default function Tween( timeFunction ){
   var that = this;
-  that.cb = cb;
   that.pct = 0;
   that.elapsed = 0;
-  that.shouldLoop = false;
+  that.timeFunction = timeFunction;
   Promise.call( that );
 }
 
-Tween.prototype = Object.create( Promise.prototype );
-
-Tween.prototype.constructor = Tween;
-
-Tween.prototype._start = function( cb ){
-  var that = this;
-  var start = 0;
-  var elapsed = 0;
-  that.shouldLoop = true;
-  window.requestAnimationFrame(function recurse( timestamp ){
-    if (that.shouldLoop){
-      if (!start) {
-        start = timestamp;
+Tween.prototype = $_extend(Object.create( Promise.prototype ), {
+  constructor: Tween,
+  easeFunction: function( pct ){
+    return pct
+  },
+  for: function( time ){
+    var that = this;
+    that._start(function( elapsed ){
+      var pct = $_limit(( elapsed / time ), 0 , 1 );
+      that.pct = pct = that.easeFunction( pct );
+      that.elapsed = elapsed = $_limit( elapsed , 0 , time );
+      that.timeFunction( pct , elapsed );
+      if (elapsed < time) {
+        return true;
       }
-      elapsed += (timestamp - start - elapsed);
-      that.elapsed = elapsed;
-      that.shouldLoop = !!cb( elapsed );
-      // if (that.shouldLoop){
-        window.requestAnimationFrame( recurse );
-      // }
-    }
-  });
-};
-
-/*Tween.prototype.for = function( time ){
-  var that = this;
-  that._start(function( elapsed ){
-    var diff = time - elapsed;
-    var pct = that.pct = (elapsed / time);
-    if (diff <= 0) {
       that.resolve();
-    }
-    else if (diff <= INTERVAL) {
-      setTimeout( that.resolve.bind( that ) , diff );
-    }
-    else {
-      that.cb( pct );
-      return true;
-    }
-  });
-  return that;
-};*/
-
-Tween.prototype.for = function( time ){
-  var that = this;
-  that._start(function( elapsed ){
-    var pct = that.pct = (elapsed / time);
-    that.cb( pct );
-    if (pct < 1) return true;
-    that.resolve();
-  });
-  return that;
-};
+    });
+    return that;
+  },
+  ease: function( easeFunction ){
+    var that = this;
+    that.easeFunction = easeFunction;
+    return that;
+  },
+  _start: function( cb ){
+    var that = this,
+      start = 0,
+      elapsed = 0;
+    requestAnimationFrame(function recurse( timestamp ){
+      if (that.status == 'pending') {
+        if (!start) {
+          start = timestamp;
+        }
+        elapsed += (timestamp - start - elapsed);
+        cb( elapsed );
+        requestAnimationFrame( recurse );
+      }
+    });
+  }
+});
