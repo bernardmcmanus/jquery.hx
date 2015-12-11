@@ -1,6 +1,5 @@
 import hx from 'main';
 import Property from 'property';
-import * as Q from 'q.provider';
 
 suite( 'Property' , function(){
   test( 'should exist' , function(){

@@ -1,4 +1,4 @@
-import { Promise } from 'q.provider';
+import Promise from 'wee-promise';
 import { $_extend, $_limit } from 'core/util';
 
 export default function Tween( timeFunction ){
@@ -38,7 +38,7 @@ Tween.prototype = $_extend(Object.create( Promise.prototype ), {
       start = 0,
       elapsed = 0;
     requestAnimationFrame(function recurse( timestamp ){
-      if (that.status == 'pending') {
+      if (!that._state) {
         if (!start) {
           start = timestamp;
         }
@@ -49,3 +49,11 @@ Tween.prototype = $_extend(Object.create( Promise.prototype ), {
     });
   }
 });
+
+Tween.prototype.then = function(){
+  var that = this;
+  var promise = Promise.prototype.then.apply( that , arguments );
+  return $_extend( that , promise );
+};
+
+console.log(Tween.prototype);

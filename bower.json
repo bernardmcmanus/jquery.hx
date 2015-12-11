@@ -16,9 +16,8 @@
   "dependencies": {
     "bezier-easing": "https://raw.githubusercontent.com/gre/bezier-easing/5479c4a1c3f1296ad1e2d86776a146b14c539ae3/index.js",
     "emoney": "~0.2.4",
-    "q": "1.0.1",
-    "qlite": "https://raw.githubusercontent.com/jcamelis/Qlite/f59d5f0c1e2d0403df89f13132774908e6781367/Qlite.js",
-    "tinycolor": "~1.2.1"
+    "tinycolor": "~1.2.1",
+    "wee-promise": "~1.0.0"
   },
   "devDependencies": {
     "jquery": "~2.1.3",
