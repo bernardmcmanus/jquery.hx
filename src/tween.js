@@ -1,59 +1,57 @@
 import Promise from 'wee-promise';
-import { $_extend, $_limit } from 'core/util';
+import Timer from 'timer';
+import { $_limit, $_defineGetters } from 'core/util';
 
-export default function Tween( timeFunction ){
-  var that = this;
-  that.pct = 0;
-  that.elapsed = 0;
-  that.timeFunction = timeFunction;
-  Promise.call( that );
-}
+let $timer = new Timer();
 
-Tween.prototype = $_extend(Object.create( Promise.prototype ), {
-  constructor: Tween,
-  easeFunction: function( pct ){
-    return pct
-  },
-  for: function( time ){
+export default class Tween extends Promise {
+  constructor( timeFunction ){
+    super();
+    var that = this;
+    that.pct = 0;
+    that.elapsed = 0;
+    that.timeFunction = timeFunction;
+    $_defineGetters( that , {
+      pending: function(){ return that._state < 1; }
+    });
+  }
+  easeFunction( pct ){
+    return pct;
+  }
+  for( time ){
     var that = this;
     that._start(function( elapsed ){
       var pct = $_limit(( elapsed / time ), 0 , 1 );
       that.pct = pct = that.easeFunction( pct );
       that.elapsed = elapsed = $_limit( elapsed , 0 , time );
-      that.timeFunction( pct , elapsed );
+      if (that.timeFunction) {
+        that.timeFunction( pct , elapsed );
+      }
       if (elapsed < time) {
         return true;
       }
       that.resolve();
     });
     return that;
-  },
-  ease: function( easeFunction ){
+  }
+  ease( easeFunction ){
     var that = this;
     that.easeFunction = easeFunction;
     return that;
-  },
-  _start: function( cb ){
-    var that = this,
-      start = 0,
-      elapsed = 0;
-    requestAnimationFrame(function recurse( timestamp ){
-      if (!that._state) {
-        if (!start) {
-          start = timestamp;
+  }
+  _start( cb ){
+    var that = this;
+    $timer.on(function tic( e , data , timestamp ){
+      if (that.pending) {
+        if (!data.start) {
+          data.start = timestamp;
         }
-        elapsed += (timestamp - start - elapsed);
-        cb( elapsed );
-        requestAnimationFrame( recurse );
+        data.elapsed += (timestamp - data.start - data.elapsed);
+        cb( data.elapsed );
+      }
+      else {
+        $timer.off( tic );
       }
     });
   }
-});
-
-Tween.prototype.then = function(){
-  var that = this;
-  var promise = Promise.prototype.then.apply( that , arguments );
-  return $_extend( that , promise );
-};
-
-console.log(Tween.prototype);
+}

@@ -7,6 +7,10 @@ export function $_precision( subject , precision ){
   return Math.round( subject * multiplier ) / multiplier;
 }
 
+export var $_reqAFrame = (function(){
+  return window.requestAnimationFrame;
+}());
+
 export var $_string = {
   /*get regexp(){
     return /\$\{([^\$\{\}\:\"]+)\}/g;
@@ -59,20 +63,31 @@ export function $_defineGetters( subject , getters ){
   Object.defineProperties( subject , descriptors );
 }
 
+export function $_defineValues( subject , getters ){
+  var descriptors = $_map( getters , function( value ){
+    return { value: value, configurable: true, writable: false, enumerable: false };
+  });
+  Object.defineProperties( subject , descriptors );
+}
+
 export var $_extend = (function(){
-  function allKeys(obj){
-    if (!isObject(obj)) return [];
+  function allKeys( obj ){
+    if (!isObject( obj )) {
+      return [];
+    }
     var keys = [];
-    for (var key in obj) keys.push(key);
+    for (var key in obj) {
+      keys.push( key );
+    }
     return keys;
   }
 
-  function isObject(obj){
+  function isObject( obj ){
     var type = typeof obj;
-    return type === 'function' || type === 'object' && !!obj;
+    return type == 'function' || type == 'object' && !!obj;
   }
 
-  return function(obj){
+  return function( obj ){
     var args = arguments,
       length = args.length;
     for (var index = 1; index < length; index++){
@@ -84,7 +99,9 @@ export var $_extend = (function(){
         var key, i;
         for (i = 0; i < l; i++){
           key = keys[i];
-          if (obj[key] === void 0) obj[key] = source[key];
+          if ($_defined( source[key] )) {
+            obj[key] = source[key];
+          }
         }
       }
     }

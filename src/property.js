@@ -1,7 +1,6 @@
 import {
-  $_map,
   $_each,
-  $_defineGetters,
+  $_defineValues,
   $_ensure,
   $_string,
   $_extend,
@@ -12,32 +11,32 @@ import Tween from 'tween';
 export default class Property {
   constructor( options ){
     var that = this;
-    $_extend( options , { precision: 2 });
+    options = $_extend({ precision: 2 }, options );
     that.initialize( options );
   }
   initialize( options ){
     var that = this;
     var initial = $_string.interpret( options.template , options.initial );
-    var descriptors = $_map( options , function( value ){
-      return function(){ return value; };
-    });
-    $_defineGetters( that , descriptors );
+    $_defineValues( that , options );
     that.from( initial );
+  }
+  fork(){
+    var that = this;
+    return new Property({
+      name: that.name,
+      template: that.template,
+      initial: that.initial,
+      ancestor: that
+    });
   }
   from( initial ){
     var that = this;
-    initial = $_ensure( initial , {} );
-    $_defineGetters( that , {
-      initial: function(){ return initial; }
-    });
-    return $_extend( that , initial );
+    $_defineValues( that , { initial: $_ensure( initial , {} )});
+    return $_extend( that , that.initial );
   }
   to( eventual ){
     var that = this;
-    eventual = $_ensure( eventual , {} );
-    $_defineGetters( that , {
-      eventual: function(){ return eventual; }
-    });
+    $_defineValues( that , { eventual: $_ensure( eventual , {} )});
     return that;
   }
   tween( cb ){
@@ -48,6 +47,10 @@ export default class Property {
       });
       cb( pct );
     });
+  }
+  isDefault(){
+    var ancestor = this.ancestor;
+    return ancestor ? this.toString() == ancestor.toString() : false;
   }
   toString(){
     var that = this;

@@ -241,6 +241,7 @@ module.exports = function( grunt ){
   ]);
 
   grunt.registerMultiTask( 'test' , function(){
+    grunt.task.ensure( 'lint' );
     grunt.task.ensure( 'browserify:' + this.target );
     // grunt.task.run( 'karma:' + this.target );
   });

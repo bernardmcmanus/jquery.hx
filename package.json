@@ -5,10 +5,13 @@
   "main": "dist/hx.min.js",
   "homepage": "https://github.com/millennialmedia/jquery.hx",
   "license": "MIT",
+  "scripts": {
+    "install": "bower install"
+  },
   "config": {
     "banner": "/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.data.gitinfo.local.branch.current.shortSHA %> - <%= grunt.template.today('yyyy-mm-dd') %> */\n",
     "connect": {
-      "port": 9001,
+      "port": 8001,
       "base": ".",
       "hostname": "0.0.0.0",
       "interrupt": true
