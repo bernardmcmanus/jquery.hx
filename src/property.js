@@ -1,7 +1,6 @@
 import {
   $_each,
   $_defineValues,
-  $_ensure,
   $_string,
   $_extend,
   $_precision
@@ -12,41 +11,61 @@ export default class Property {
   constructor( options ){
     var that = this;
     options = $_extend({ precision: 2 }, options );
-    that.initialize( options );
+    that._init( options );
   }
-  initialize( options ){
+  _init( options ){
     var that = this;
     var initial = $_string.interpret( options.template , options.initial );
     $_defineValues( that , options );
     that.from( initial );
   }
-  fork(){
+  tweenFn( pct ){
     var that = this;
-    return new Property({
-      name: that.name,
-      template: that.template,
-      initial: that.initial,
-      ancestor: that
+    $_each( that.eventual , function( value , key ){
+      that[key] = that.calc( key , pct );
     });
   }
-  from( initial ){
+  calc( key , pct ){
     var that = this;
-    $_defineValues( that , { initial: $_ensure( initial , {} )});
-    return $_extend( that , that.initial );
+    return $_precision( that.initial[key] + (that.eventual[key] - that.initial[key]) * pct , that.precision );
+  }
+  plain(){
+    return $_extend( {} , this );
+  }
+  tweener( duration , easeFn ){
+    var that = this;
+    $_extend( that.initial , that.plain() );
+    return {
+      name: that.name,
+      duration: duration,
+      easeFn: easeFn,
+      tweenFn: function( pct , elapsed ){
+        that.tweenFn( pct , elapsed );
+      }
+    };
+  }
+  fork( options ){
+    var that = this;
+    options = $_extend({
+      name: that.name,
+      template: that.template,
+      initial: that.plain(),
+      tweenFn: that.tweenFn
+    }, options );
+    options.ancestor = that;
+    return new Property( options );
+  }
+  from( initial ){
+    return $_extend( this , initial );
   }
   to( eventual ){
     var that = this;
-    $_defineValues( that , { eventual: $_ensure( eventual , {} )});
+    $_defineValues( that , { eventual: $_extend( {} , eventual )});
     return that;
   }
-  tween( cb ){
-    var that = this;
-    return new Tween(function( pct ){
-      $_each( that.eventual , function( value , key ){
-        that[key] = $_precision(( value - that.initial[key] ) * pct , that.precision );
-      });
-      cb( pct );
-    });
+  tween( duration , easeFn ){
+    var tweener = this.tweener( duration , easeFn );
+    return new Tween( tweener );
   }
   isDefault(){
     var ancestor = this.ancestor;

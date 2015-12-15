@@ -1,6 +1,6 @@
-import hx from 'main';
 import Property from 'property';
 import Collection from 'collection';
+import { Easing } from 'main';
 import { $_each } from 'core/util';
 
 var Opacity = new Property({
@@ -70,8 +70,21 @@ var Scale2d = new Property({
 
 var Rotate = new Property({
   name: 'rotate',
-  template: 'rotate3d(${x}deg,${y}deg,${z}deg,${a})',
-  initial: { x: 0, y: 0, z: 0, a: 0 }
+  template: 'rotate3d(${x},${y},${z},${a}deg)',
+  initial: { x: 0, y: 0, z: 0, a: 0 },
+  tweenFn: function( pct ){
+    var that = this;
+    $_each( that , function( value , key ){
+      switch (key) {
+        case 'a':
+          that.a = that.calc( key , pct );
+        break;
+        default:
+          that[key] = that.eventual[key] || that[key];
+        break;
+      }
+    });
+  }
 });
 
 var RotateX = new Property({
@@ -108,42 +121,46 @@ var Transform = new Collection( 'transform' , [
   RotateZ.fork()
 ]);
 
-console.log(Transform);
-console.log(Transform.toString());
-
 suite( 'Property' , function(){
-  var Translate = new Property({
-    name: 'translate',
-    template: 'translate3d(${x}px,${y}px,${z}px)',
-    initial: { x: 0, y: 0, z: 0 }
-  });
-
   suite( '#fork' , function(){
     test( 'should fork an existing property' , function(){
       var property = Translate.fork()
         .from({ x: 50, y: 50, z: 50 })
         .to({ x: 100, y: 100, z: 100 });
-      expect( property ).to.not.equal( Translate );
-      expect( property.initial ).to.eql({ x: 50, y: 50, z: 50 });
       expect( Translate.initial ).to.eql({ x: 0, y: 0, z: 0 });
+      expect( property.initial ).to.eql( Translate.plain() );
+      expect( property.plain() ).to.eql({ x: 50, y: 50, z: 50 });
+      expect( property.eventual ).to.eql({ x: 100, y: 100, z: 100 });
+      var tween = property.tween( 100 );
+      expect( property.initial ).to.eql({ x: 50, y: 50, z: 50 });
+      return tween
+        .run(function(){})
+        .then(function(){
+          expect( property.plain() ).to.eql( property.eventual );
+        });
     });
   });
 
   suite( '#tween' , function(){
     test( 'should work' , function(){
-      var gotThenCalls = 0,
+      var duration = 300,
+        interval = Math.ceil( 1000 / 60 ),
+        minTweenCalls = Math.floor( duration / interval ),
+        gotTweenCalls = 0,
+        gotThenCalls = 0,
         thenDelay = 200,
         deferStart;
 
       var property = Translate.fork().to({ x: 100, y: 100, z: 100 });
       var tween = property
-        .tween(function( pct ){
-          console.log(pct,property.toString());
-        })
-        .for( 300 )
-        .ease( hx.easing.easeOutQuad.get );
+        .tween( duration )
+        .run(function(){
+          $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+          gotTweenCalls++;
+        });
 
       return tween.then(function(){
+        expect( gotTweenCalls ).to.be.at.least( minTweenCalls );
         gotThenCalls++;
       })
       .then(function(){
@@ -156,6 +173,12 @@ suite( 'Property' , function(){
       .then(function(){
         expect( gotThenCalls ).to.equal( 2 );
         expect( Date.now() - deferStart ).to.be.at.least( thenDelay );
+        return property
+          .to( property.initial )
+          .tween( duration )
+          .run(function(){
+            $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+          });
       });
     });
     test( 'should work' , function(){
@@ -163,20 +186,34 @@ suite( 'Property' , function(){
       return Promise.resolve().then(function(){
         return property
           .to({ x: 100 })
-          .tween(function( pct ){
+          .tween( 300 , Easing.easeInOutBack.get )
+          .run(function(){
             $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
-          })
-          .for( 500 )
-          .ease( hx.easing.easeInOutBack.get );
+          });
       })
       .then(function(){
         return property
           .to({ y: 100 })
-          .tween(function( pct ){
+          .tween( 300 , Easing.easeInOutBack.get )
+          .run(function(){
             $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
-          })
-          .ease( hx.easing.easeInOutBack.get )
-          .for( 500 );
+          });
+      })
+      .then(function(){
+        return property
+          .to({ x: 0 })
+          .tween( 300 , Easing.easeInOutBack.get )
+          .run(function(){
+            $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+          });
+      })
+      .then(function(){
+        return property
+          .to({ y: 0 })
+          .tween( 300 , Easing.easeInOutBack.get )
+          .run(function(){
+            $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+          });
       })
       .then(function(){
         console.log('done');
@@ -186,12 +223,30 @@ suite( 'Property' , function(){
 });
 
 suite( 'Collection' , function(){
-  test( 'should be a collection of properties' , function(){
-    var collection = new Collection([
-      Translate.fork(),
-      Scale.fork()
+  test( 'should work' , function(){
+    var collection = new Collection( 'transform' , [
+      TranslateZ.fork(),
+      Translate.fork().to({ x: 100, y: 100 }),
+      Rotate.fork().to({ x: 1, y: 1, z: 1, a: 360 }),
+      Scale.fork().to({ x: 2, y: 2 })
     ]);
-    // console.log(collection.toString());
+    return Promise.resolve().then(function(){
+      return collection
+        .tween( 800 , Easing.easeOutQuad.get )
+        .run(function(){
+          $('.tgt-container > div').css( '-webkit-transform' , collection.toString() );
+        });
+    })
+    .then(function(){
+      $_each( collection , function( property ){
+        property.to( property.initial );
+      });
+      return collection
+        .tween( 800 , Easing.easeOutQuad.get )
+        .run(function(){
+          $('.tgt-container > div').css( '-webkit-transform' , collection.toString() );
+        });
+    });
   });
 });
 

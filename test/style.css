@@ -4,6 +4,7 @@
   margin-top: 80px;
   pointer-events: none;
   -webkit-perspective: 1000px;
+  perspective: 1000px;
   z-index: 1000;
 }
 

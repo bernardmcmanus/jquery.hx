@@ -16,8 +16,7 @@ export default class Timer extends E$ {
     return instance;
   }
   on( handler ){
-    var data = { start: 0, elapsed: 0 };
-    instance.$when( ticEvent , data , handler );
+    instance.$when( ticEvent , handler );
     subscribers++;
     instance.start();
   }

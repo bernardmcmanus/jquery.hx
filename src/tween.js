@@ -1,57 +1,69 @@
 import Promise from 'wee-promise';
 import Timer from 'timer';
-import { $_limit, $_defineGetters } from 'core/util';
+import { Easing } from 'main';
+import {
+  $_limit,
+  $_ensure,
+  $_extend,
+  $_defineGetters
+} from 'core/util';
 
 let $timer = new Timer();
 
+/**
+ * @class Tween
+ * @classdesc Tween
+ * @extends Promise
+ * @param {(object|array)} tweeners
+ * @param {string} tweeners.name - The property name.
+ * @param {number} [tweeners.duration=0] - The tween duration.
+ * @param {function} [tweeners.easeFn] - The easing function.
+ * @param {function} tweeners.tweenFn - The property's tween function.
+ */
 export default class Tween extends Promise {
-  constructor( timeFunction ){
+  constructor( tweeners ){
     super();
-    var that = this;
-    that.pct = 0;
-    that.elapsed = 0;
-    that.timeFunction = timeFunction;
-    $_defineGetters( that , {
-      pending: function(){ return that._state < 1; }
+    this.tweeners = $_ensure( tweeners , [] ).map(function( tweener ){
+      var promise = new Promise();
+      return $_extend({
+        pct: 0,
+        elapsed: 0,
+        duration: 0,
+        easeFn: Easing.ease.get,
+        promise: promise
+      }, tweener );
     });
   }
-  easeFunction( pct ){
-    return pct;
-  }
-  for( time ){
-    var that = this;
-    that._start(function( elapsed ){
-      var pct = $_limit(( elapsed / time ), 0 , 1 );
-      that.pct = pct = that.easeFunction( pct );
-      that.elapsed = elapsed = $_limit( elapsed , 0 , time );
-      if (that.timeFunction) {
-        that.timeFunction( pct , elapsed );
-      }
-      if (elapsed < time) {
-        return true;
-      }
+  run( cb ){
+    var that = this,
+      start = 0,
+      tweeners = that.tweeners,
+      promises = tweeners.map(function( tweener ){
+        return tweener.promise;
+      }),
+      tic = function( e , timestamp ){
+        start = start || timestamp;
+        var i = 0,
+          pctLinear;
+        for (; i < tweeners.length; i++) {
+          tweeners[i].elapsed = $_limit( timestamp - start , 0 , tweeners[i].duration );
+          pctLinear = $_limit(( tweeners[i].elapsed / tweeners[i].duration ), 0 , 1 );
+          tweeners[i].pct = tweeners[i].easeFn( pctLinear );
+          tweeners[i].tweenFn( tweeners[i].pct , tweeners[i].elapsed );
+          // cb( tweeners[i].pct , tweeners[i].elapsed );
+          if (pctLinear >= 1) {
+            tweeners[i].promise.resolve();
+            tweeners.splice( i , 1 );
+            i--;
+          }
+        }
+        cb();
+      };
+    Promise.all( promises ).then(function(){
+      $timer.off( tic );
       that.resolve();
     });
+    $timer.on( tic );
     return that;
-  }
-  ease( easeFunction ){
-    var that = this;
-    that.easeFunction = easeFunction;
-    return that;
-  }
-  _start( cb ){
-    var that = this;
-    $timer.on(function tic( e , data , timestamp ){
-      if (that.pending) {
-        if (!data.start) {
-          data.start = timestamp;
-        }
-        data.elapsed += (timestamp - data.start - data.elapsed);
-        cb( data.elapsed );
-      }
-      else {
-        $timer.off( tic );
-      }
-    });
   }
 }

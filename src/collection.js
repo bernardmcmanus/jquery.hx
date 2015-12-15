@@ -1,3 +1,5 @@
+import Promise from 'wee-promise';
+import Tween from 'tween';
 import {
   $_ensure,
   $_defineValues
@@ -6,17 +8,23 @@ import {
 export default class Collection {
   constructor( name , properties ){
     var that = this;
+    $_defineValues( that , {
+      name: name,
+      order: []
+    });
     $_ensure( properties , [] ).forEach(function( property ){
       that.add( property );
     });
-    $_defineValues( that , {
-      name: name,
-      order: Object.keys( that )
-    });
   }
   add( property ){
-    var that = this;
-    that[property.name] = property;
+    var that = this,
+      name = property.name,
+      order = that.order,
+      index = order.indexOf( name );
+    if (index < 0) {
+      order.push( name );
+      that[name] = property;
+    }
   }
   remove( name ){
     var that = this,
@@ -24,8 +32,15 @@ export default class Collection {
       index = order.indexOf( name );
     if (index >= 0) {
       order.splice( index , 1 );
+      that[name] = that[name].ancestor.fork();
     }
-    that[name] = that[name].ancestor.fork();
+  }
+  tween( duration , easeFn ){
+    var that = this,
+      tweeners = that.order.map(function( name ){
+        return that[name].tweener( duration , easeFn );
+      });
+    return new Tween( tweeners );
   }
   /*sort( cb ){
     var that = this;
