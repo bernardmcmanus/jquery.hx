@@ -48,16 +48,20 @@ export default class Tween extends Promise {
         for (; i < tweeners.length; i++) {
           tweeners[i].elapsed = $_limit( timestamp - start , 0 , tweeners[i].duration );
           pctLinear = $_limit(( tweeners[i].elapsed / tweeners[i].duration ), 0 , 1 );
+          if (isNaN( pctLinear )) {
+            pctLinear = 1;
+          }
           tweeners[i].pct = tweeners[i].easeFn( pctLinear );
           tweeners[i].tweenFn( tweeners[i].pct , tweeners[i].elapsed );
-          // cb( tweeners[i].pct , tweeners[i].elapsed );
           if (pctLinear >= 1) {
             tweeners[i].promise.resolve();
             tweeners.splice( i , 1 );
             i--;
           }
         }
-        cb();
+        if (cb) {
+          cb();
+        }
       };
     Promise.all( promises ).then(function(){
       $timer.off( tic );

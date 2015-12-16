@@ -5,8 +5,8 @@ import { $_each } from 'core/util';
 
 var Opacity = new Property({
   name: 'opacity',
-  template: '${0}',
-  initial: [ 1 ]
+  template: '${value}',
+  initial: { value: 1 }
 });
 
 var Matrix = new Property({
@@ -34,20 +34,20 @@ var Translate = new Property({
 
 var TranslateX = new Property({
   name: 'translateX',
-  template: 'translateX(${0}px)',
-  initial: [ 0 ]
+  template: 'translateX(${value}px)',
+  initial: { value: 0 }
 });
 
 var TranslateY = new Property({
   name: 'translateY',
-  template: 'translateY(${0}px)',
-  initial: [ 0 ]
+  template: 'translateY(${value}px)',
+  initial: { value: 0 }
 });
 
 var TranslateZ = new Property({
   name: 'translateZ',
-  template: 'translateZ(${0}px)',
-  initial: [ 0 ]
+  template: 'translateZ(${value}px)',
+  initial: { value: 0 }
 });
 
 var Translate2d = new Property({
@@ -72,37 +72,29 @@ var Rotate = new Property({
   name: 'rotate',
   template: 'rotate3d(${x},${y},${z},${a}deg)',
   initial: { x: 0, y: 0, z: 0, a: 0 },
-  tweenFn: function( pct ){
-    var that = this;
-    $_each( that , function( value , key ){
-      switch (key) {
-        case 'a':
-          that.a = that.calc( key , pct );
-        break;
-        default:
-          that[key] = that.eventual[key] || that[key];
-        break;
-      }
-    });
-  }
+  getters: [
+    [ 'x' , 'y' , 'z' , function( initial , eventual ){
+      return eventual;
+    }]
+  ]
 });
 
 var RotateX = new Property({
   name: 'rotateX',
-  template: 'rotateX(${0}deg)',
-  initial: [ 0 ]
+  template: 'rotateX(${value}deg)',
+  initial: { value: 0 }
 });
 
 var RotateY = new Property({
   name: 'rotateY',
-  template: 'rotateY(${0}deg)',
-  initial: [ 0 ]
+  template: 'rotateY(${value}deg)',
+  initial: { value: 0 }
 });
 
 var RotateZ = new Property({
   name: 'rotateZ',
-  template: 'rotateZ(${0}deg)',
-  initial: [ 0 ]
+  template: 'rotateZ(${value}deg)',
+  initial: { value: 0 }
 });
 
 var Transform = new Collection( 'transform' , [
@@ -128,15 +120,15 @@ suite( 'Property' , function(){
         .from({ x: 50, y: 50, z: 50 })
         .to({ x: 100, y: 100, z: 100 });
       expect( Translate.initial ).to.eql({ x: 0, y: 0, z: 0 });
-      expect( property.initial ).to.eql( Translate.plain() );
-      expect( property.plain() ).to.eql({ x: 50, y: 50, z: 50 });
+      expect( property.initial ).to.eql( Translate.plain );
+      expect( property.plain ).to.eql({ x: 50, y: 50, z: 50 });
       expect( property.eventual ).to.eql({ x: 100, y: 100, z: 100 });
-      var tween = property.tween( 100 );
+      var tween = property.tween();
       expect( property.initial ).to.eql({ x: 50, y: 50, z: 50 });
       return tween
         .run(function(){})
         .then(function(){
-          expect( property.plain() ).to.eql( property.eventual );
+          expect( property.plain ).to.eql( property.eventual );
         });
     });
   });
@@ -227,7 +219,7 @@ suite( 'Collection' , function(){
     var collection = new Collection( 'transform' , [
       TranslateZ.fork(),
       Translate.fork().to({ x: 100, y: 100 }),
-      Rotate.fork().to({ x: 1, y: 1, z: 1, a: 360 }),
+      Rotate.fork().from({ x: 1, y: 1, z: 1 }).to({ a: 360 }),
       Scale.fork().to({ x: 2, y: 2 })
     ]);
     return Promise.resolve().then(function(){

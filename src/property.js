@@ -1,46 +1,70 @@
 import {
+  $_map,
+  $_last,
   $_each,
+  $_is,
   $_defineValues,
+  $_defineGetters,
   $_string,
   $_extend,
   $_precision
 } from 'core/util';
 import Tween from 'tween';
 
+function defaultGetter( initial , eventual , pct , precision ){
+  return $_precision( initial + (eventual - initial) * pct , precision );
+}
+
 export default class Property {
   constructor( options ){
     var that = this;
-    options = $_extend({ precision: 2 }, options );
-    that._init( options );
-  }
-  _init( options ){
-    var that = this;
     var initial = $_string.interpret( options.template , options.initial );
+    options = $_extend({ precision: 2, getters: [] }, options );
+
+    (function( getters ){
+      var arr, getter, i, key;
+      /* jshint -W084 */
+      while (arr = getters.shift()) {
+        getter = $_last( arr );
+        for (i = 0; i < arr.length - 1; i++) {
+          key = arr[i];
+          getters[key] = getter;
+        }
+      }
+      for (key in initial) {
+        if (!getters[key]) {
+          getters[key] = defaultGetter;
+        }
+      }
+    }( options.getters ));
+
+    if (Object.keys( options.getters ).indexOf( 'undefined' ) >= 0) {
+      throw new Error( 'Properties may not contain numeric keys.' );
+    }
+
     $_defineValues( that , options );
+    $_defineGetters( that , {
+      plain: function(){
+        return $_extend( {} , that );
+      }
+    });
     that.from( initial );
   }
-  tweenFn( pct ){
+  _crunch( key , pct ){
     var that = this;
-    $_each( that.eventual , function( value , key ){
-      that[key] = that.calc( key , pct );
-    });
-  }
-  calc( key , pct ){
-    var that = this;
-    return $_precision( that.initial[key] + (that.eventual[key] - that.initial[key]) * pct , that.precision );
-  }
-  plain(){
-    return $_extend( {} , this );
+    return that.getters[key]( that.initial[key] , that.eventual[key] , pct , that.precision );
   }
   tweener( duration , easeFn ){
     var that = this;
-    $_extend( that.initial , that.plain() );
+    $_extend( that.initial , that.plain );
     return {
       name: that.name,
       duration: duration,
       easeFn: easeFn,
       tweenFn: function( pct , elapsed ){
-        that.tweenFn( pct , elapsed );
+        $_each( that.eventual , function( value , key ){
+          that[key] = that._crunch( key , pct );
+        });
       }
     };
   }
@@ -49,8 +73,8 @@ export default class Property {
     options = $_extend({
       name: that.name,
       template: that.template,
-      initial: that.plain(),
-      tweenFn: that.tweenFn
+      initial: that.plain,
+      getters: that.getters
     }, options );
     options.ancestor = that;
     return new Property( options );
@@ -67,10 +91,10 @@ export default class Property {
     var tweener = this.tweener( duration , easeFn );
     return new Tween( tweener );
   }
-  isDefault(){
+  /*isDefault(){
     var ancestor = this.ancestor;
     return ancestor ? this.toString() == ancestor.toString() : false;
-  }
+  }*/
   toString(){
     var that = this;
     return $_string.compile( that.template , that );

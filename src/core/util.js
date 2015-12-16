@@ -56,6 +56,11 @@ export function $_toArray( subject ){
   return Array.prototype.slice.call( subject , 0 );
 }
 
+export function $_last( subject , getKey ){
+  var lastKey = Object.keys( subject ).slice( -1 );
+  return getKey ? lastKey : subject[lastKey];
+}
+
 export function $_defineGetters( subject , getters ){
   var descriptors = $_map( getters , function( getter ){
     return { get: getter, configurable: true, enumerable: false };
@@ -148,6 +153,10 @@ export function $_is( subject , test ){
 
 export function $_defined( subject ){
   return !$_is( subject , 'undefined' );
+}
+
+export function $_numeric( subject ){
+  return subject && subject !== 0 && /^(\d*\.)?\d+$/.test( subject.toString() );
 }
 
 export function $_reportErr( err ){
