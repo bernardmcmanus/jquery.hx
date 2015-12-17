@@ -1,5 +1,4 @@
 import Promise from 'wee-promise';
-import Tween from 'tween';
 import {
   $_ensure,
   $_defineValues
@@ -34,13 +33,6 @@ export default class Collection {
       order.splice( index , 1 );
       that[name] = that[name].ancestor.fork();
     }
-  }
-  tween( duration , easeFn ){
-    var that = this,
-      tweeners = that.order.map(function( name ){
-        return that[name].tweener( duration , easeFn );
-      });
-    return new Tween( tweeners );
   }
   /*sort( cb ){
     var that = this;

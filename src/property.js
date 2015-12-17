@@ -9,7 +9,6 @@ import {
   $_extend,
   $_precision
 } from 'core/util';
-import Tween from 'tween';
 
 function defaultGetter( initial , eventual , pct , precision ){
   return $_precision( initial + (eventual - initial) * pct , precision );
@@ -54,20 +53,6 @@ export default class Property {
     var that = this;
     return that.getters[key]( that.initial[key] , that.eventual[key] , pct , that.precision );
   }
-  tweener( duration , easeFn ){
-    var that = this;
-    $_extend( that.initial , that.plain );
-    return {
-      name: that.name,
-      duration: duration,
-      easeFn: easeFn,
-      tweenFn: function( pct , elapsed ){
-        $_each( that.eventual , function( value , key ){
-          that[key] = that._crunch( key , pct );
-        });
-      }
-    };
-  }
   fork( options ){
     var that = this;
     options = $_extend({
@@ -85,16 +70,15 @@ export default class Property {
   to( eventual ){
     var that = this;
     $_defineValues( that , { eventual: $_extend( {} , eventual )});
+    $_extend( that.initial , that.plain );
     return that;
   }
-  tween( duration , easeFn ){
-    var tweener = this.tweener( duration , easeFn );
-    return new Tween( tweener );
+  at( pct ){
+    var that = this;
+    $_each( that.eventual , function( value , key ){
+      that[key] = that._crunch( key , pct );
+    });
   }
-  /*isDefault(){
-    var ancestor = this.ancestor;
-    return ancestor ? this.toString() == ancestor.toString() : false;
-  }*/
   toString(){
     var that = this;
     return $_string.compile( that.template , that );

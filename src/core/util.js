@@ -1,3 +1,7 @@
+export function $_void( input ){
+  return input;
+}
+
 export function $_limit( subject , min , max ){
   return Math.max(Math.min( subject , max ) , min );
 }
@@ -35,8 +39,11 @@ export var $_string = {
 };
 
 export function $_ensure( subject , rescuer ){
-  if ($_defined( subject ) && $_is( rescuer , Array )) {
+  if ($_is( rescuer , Array ) && $_defined( subject )) {
     rescuer[0] = subject;
+  }
+  else if ($_isFunction( rescuer ) && $_isFunction( subject )) {
+    return subject;
   }
   return $_is( subject , rescuer ) ? subject : rescuer;
 }
@@ -134,10 +141,6 @@ export function $_map( subject , cb , seed ){
   },seed);
 }
 
-/*export function $_clone( subject ){
-  return $.extend( true , new getPrototype( subject ).constructor() , subject );
-}*/
-
 export function $_is( subject , test ){
   if (typeof test == 'string'){
     return typeof subject == test;
@@ -145,18 +148,26 @@ export function $_is( subject , test ){
   else if (test === Array){
     return Array.isArray( subject );
   }
-  else if (test) {
-    return subject instanceof (typeof test == 'object' ? test.constructor : test);
+  else if ($_exists( subject ) && $_exists( test )) {
+    return subject.constructor === ($_isFunction( test ) ? test : test.constructor);
   }
-  return false;
+  return subject === test;
+}
+
+export function $_isFunction( subject ){
+  return $_is( subject , 'function' );
 }
 
 export function $_defined( subject ){
   return !$_is( subject , 'undefined' );
 }
 
+export function $_exists( subject ){
+  return $_defined( subject ) && subject !== null && (!$_is( subject , 'number' ) || !isNaN( subject ));
+}
+
 export function $_numeric( subject ){
-  return subject && subject !== 0 && /^(\d*\.)?\d+$/.test( subject.toString() );
+  return $_exists( subject ) && /^(\d*\.)?\d+$/.test( subject.toString() );
 }
 
 export function $_reportErr( err ){
