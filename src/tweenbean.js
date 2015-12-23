@@ -13,5 +13,8 @@ export default class Tweenbean extends Wee$ {
     that.tweenFn = function( pct ){
       property.at( pct );
     };
+    that.$once( 'tween:start' , function( e ){
+      setTimeout( that.resolve , that.duration );
+    });
   }
 }

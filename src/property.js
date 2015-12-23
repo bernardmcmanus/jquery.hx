@@ -53,17 +53,6 @@ export default class Property {
     var that = this;
     return that.getters[key]( that.initial[key] , that.eventual[key] , pct , that.precision );
   }
-  fork( options ){
-    var that = this;
-    options = $_extend({
-      name: that.name,
-      template: that.template,
-      initial: that.plain,
-      getters: that.getters
-    }, options );
-    options.ancestor = that;
-    return new Property( options );
-  }
   from( initial ){
     return $_extend( this , initial );
   }
@@ -78,6 +67,17 @@ export default class Property {
     $_each( that.eventual , function( value , key ){
       that[key] = that._crunch( key , pct );
     });
+  }
+  fork( options ){
+    var that = this;
+    options = $_extend({
+      name: that.name,
+      template: that.template,
+      initial: that.plain,
+      getters: that.getters
+    }, options );
+    options.ancestor = that;
+    return new Property( options );
   }
   toString(){
     var that = this;

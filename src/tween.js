@@ -28,9 +28,9 @@ export default class Tween extends Wee$ {
     super();
     var that = this;
     that._started = 0;
-    that.tweenbeans = $_ensure( tweenbeans , [] )/*.map(function( tweenbean ){
+    that.tweenbeans = $_ensure( tweenbeans , [] ).map(function( tweenbean ){
       return tweenbean.$watch( that );
-    })*/;
+    });
   }
   run( cb ){
     var that = this;
@@ -40,8 +40,10 @@ export default class Tween extends Wee$ {
         timer.off( that );
         that.resolve();
       });
+      timer.once(function(){
+        that.$emit( 'tween:start' );
+      });
       timer.on( that );
-      that.$emit( 'tween:start' );
     }
     return that;
   }

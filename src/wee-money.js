@@ -3,10 +3,12 @@ import E$ from 'emoney';
 import Promise from 'wee-promise';
 
 export default function Wee$(){
-  E$.construct( this );
   Promise.call( this );
+  E$.call( this );
 }
 
-Wee$.prototype = $_extend( Object.create( Promise.prototype ) , E$.create({
-  constructor: Wee$
-}));
+Wee$.prototype = $_extend(
+  Object.create( Promise.prototype ),
+  Object.create( E$.prototype ),
+  { constructor: Wee$ }
+);

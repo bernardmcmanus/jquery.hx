@@ -11,20 +11,24 @@ export default class Timer extends E$ {
     super();
     if (!instance) {
       instance = this;
-      E$.construct( instance );
     }
     return instance;
+  }
+  once( handler ){
+    instance.$once( ticEvent , handler );
+    subscribers++;
+    instance._start();
   }
   on( handler ){
     instance.$when( ticEvent , handler );
     subscribers++;
-    instance.start();
+    instance._start();
   }
   off( handler ){
     instance.$dispel( ticEvent , handler );
     subscribers--;
   }
-  start(){
+  _start(){
     if (!inprog) {
       inprog = true;
       $_reqAFrame(function tic( timestamp ){
