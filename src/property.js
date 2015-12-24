@@ -1,8 +1,8 @@
 import {
-  $_map,
+  // $_map,
   $_last,
   $_each,
-  $_is,
+  // $_is,
   $_defineValues,
   $_defineGetters,
   $_string,

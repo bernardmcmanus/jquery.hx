@@ -1,5 +1,5 @@
 import Wee$ from 'wee-money';
-import { $_ensure, $_extend } from 'core/util';
+import { $_ensure } from 'core/util';
 import { Easing } from 'main';
 
 export default class Tweenbean extends Wee$ {

@@ -2,6 +2,7 @@ import Property from 'property';
 import Collection from 'collection';
 import Tweenbean from 'tweenbean';
 import Tween from 'tween';
+import Aggregator from 'aggregator';
 import { Easing } from 'main';
 import { $_each } from 'core/util';
 
@@ -217,40 +218,69 @@ suite( 'Collection' , function(){
       Scale.fork().to({ x: 2, y: 2 })
     ]);
     return Promise.resolve().then(function(){
-      var tweenbeans = collection.order.map(function( name ){
-        var property = collection[name];
-        return new Tweenbean( property , 800 , Easing.easeOutQuad.get );
-      });
-      return new Tween( tweenbeans ).run(function(){
+      return collection.tween( 800 , Easing.easeOutQuad.get ).run(function(){
         $('.tgt-container > div').css( '-webkit-transform' , collection.toString() );
       });
     })
     .then(function(){
-      var tweenbeans = collection.order.map(function( name ){
-        var property = collection[name];
-        return new Tweenbean( property , 800 , Easing.easeOutQuad.get );
-      });
       $_each( collection , function( property ){
         property.to( property.initial );
       });
-      return new Tween( tweenbeans ).run(function(){
+      return collection.tween( 800 , Easing.easeOutQuad.get ).run(function(){
         $('.tgt-container > div').css( '-webkit-transform' , collection.toString() );
       });
     });
   });
 });
 
+suite( 'Aggregator' , function(){
+  test( 'should work' , function(){
+    var $css = {},
+      transform = new Collection( 'transform' , [
+        TranslateZ.fork(),
+        Translate.fork().to({ x: 100, y: 100 }),
+        Rotate.fork().from({ x: 1, y: 1, z: 1 }).to({ a: 360 }),
+        Scale.fork().to({ x: 2, y: 2 })
+      ]),
+      opacity = new Collection( 'opacity' , [
+        Opacity.fork().to({ value: 0.3 })
+      ]),
+      aggregator = new Aggregator({
+        transform: function( css ){
+          css['-webkit-transform'] = transform.toString();
+        },
+        opacity: function( css ){
+          css.opacity = opacity.toString();
+        }
+      });
 
+    aggregator.all = function( css ){
+      $('.tgt-container > div').css( css );
+    };
 
-
-
-
-
-
-
-
-
-
-
-
-
+    return Promise.all([
+      transform.tween( 800 , Easing.easeOutQuad.get ).run(function(){
+        aggregator.fcall( 'transform' , $css );
+      }),
+      opacity.tween( 400 , Easing.easeOutQuad.get ).run(function(){
+        aggregator.fcall( 'opacity' , $css );
+      })
+    ])
+    .then(function(){
+      $_each( transform , function( property ){
+        property.to( property.initial );
+      });
+      $_each( opacity , function( property ){
+        property.to( property.initial );
+      });
+      return Promise.all([
+        transform.tween( 800 , Easing.easeOutQuad.get ).run(function(){
+          aggregator.fcall( 'transform' , $css );
+        }),
+        opacity.tween( 400 , Easing.easeOutQuad.get ).run(function(){
+          aggregator.fcall( 'opacity' , $css );
+        })
+      ]);
+    });
+  });
+});

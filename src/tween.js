@@ -1,14 +1,14 @@
 import Promise from 'wee-promise';
 import Wee$ from 'wee-money';
 import Timer from 'timer';
-import { Easing } from 'main';
+// import { Easing } from 'main';
 import {
   $_void,
   $_limit,
-  $_exists,
+  // $_exists,
   $_ensure,
-  $_extend,
-  $_defineGetters
+  // $_extend,
+  // $_defineGetters
 } from 'core/util';
 
 let timer = new Timer();
