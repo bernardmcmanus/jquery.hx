@@ -1,10 +1,11 @@
+import tinycolor from 'tinycolor';
 import Property from 'property';
 import Collection from 'collection';
 import Tweenbean from 'tweenbean';
 import Tween from 'tween';
 import Aggregator from 'aggregator';
 import { Easing } from 'main';
-import { $_each } from 'core/util';
+import { $_each, $_map } from 'core/util';
 
 var Opacity = new Property({
   name: 'opacity',
@@ -100,7 +101,7 @@ var RotateZ = new Property({
   initial: { value: 0 }
 });
 
-var Transform = new Collection( 'transform' , [
+/*var Transform = new Collection( 'transform' , [
   Matrix.fork(),
   Matrix2d.fork(),
   Translate.fork(),
@@ -114,7 +115,42 @@ var Transform = new Collection( 'transform' , [
   RotateX.fork(),
   RotateY.fork(),
   RotateZ.fork()
-]);
+]);*/
+
+var Blur = new Property({
+  name: 'blur',
+  template: 'blur(${value}px)',
+  initial: { value: 0 }
+});
+
+var Dropshadow = new Property({
+  name: 'drop-shadow',
+  template: 'drop-shadow(${x}px ${y}px ${blur}px ${color})',
+  initial: { x: 0, y: 0, blur: 0, color: 'rgba(255,255,255,0)' },
+  precision: 0,
+  getters: [
+    [ 'color' , function( initial , eventual , pct , precision ){
+      initial = tinycolor( initial ).toRgb();
+      eventual = tinycolor( eventual ).toRgb();
+      var color = $_map( eventual , function( value , key ){
+        return Property.valueAt( initial[key] , value , pct , 2 );
+      });
+      return tinycolor( color ).toRgbString();
+    }]
+  ]
+});
+
+var Opacity2 = new Property({
+  name: 'opacity',
+  template: 'opacity(${value}%)',
+  initial: { value: 100 }
+});
+
+/*var Filter = new Collection( 'filter' , [
+  Blur.fork(),
+  Dropshadow.fork(),
+  Opacity2.fork()
+]);*/
 
 suite( 'Property' , function(){
   suite( '#fork' , function(){
@@ -207,6 +243,24 @@ suite( 'Tween' , function(){
       console.log('done');
     });
   });
+  test( 'should tween non-numeric values' , function(){
+    var collection = new Collection( 'filter' , [
+      Blur.fork().to({ value: 2 }),
+      Dropshadow.fork().from({ color: 'orchid' }).to({ x: 20, y: 20, blur: 2, color: 'gold' }),
+      Opacity2.fork().to({ value: 30 })
+    ]);
+    return collection.tween( 800 ).run(function(){
+      $('.tgt-container > div').css( '-webkit-filter' , collection.toString() );
+    })
+    .then(function(){
+      $_each( collection , function( property ){
+        property.to( property.initial );
+      });
+      return collection.tween( 800 ).run(function(){
+        $('.tgt-container > div').css( '-webkit-filter' , collection.toString() );
+      })
+    });
+  });
 });
 
 suite( 'Collection' , function(){
@@ -252,11 +306,9 @@ suite( 'Aggregator' , function(){
         opacity: function( css ){
           css.opacity = opacity.toString();
         }
+      },function( css ){
+        $('.tgt-container > div').css( css );
       });
-
-    aggregator.all = function( css ){
-      $('.tgt-container > div').css( css );
-    };
 
     return Promise.all([
       transform.tween( 800 , Easing.easeOutQuad.get ).run(function(){

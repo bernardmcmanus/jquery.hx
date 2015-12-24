@@ -32,6 +32,7 @@
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.5.0",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-exorcise": "^2.1.0",
     "grunt-gitinfo": "^0.1.7",
     "grunt-import-clean": "^0.1.9",
     "grunt-karma": "^0.12.1",

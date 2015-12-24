@@ -10,11 +10,10 @@ import {
   $_precision
 } from 'core/util';
 
-function defaultGetter( initial , eventual , pct , precision ){
-  return $_precision( initial + (eventual - initial) * pct , precision );
-}
-
 export default class Property {
+  static valueAt( initial , eventual , pct , precision ){
+    return $_precision( initial + (eventual - initial) * pct , precision );
+  }
   constructor( options ){
     var that = this;
     var initial = $_string.interpret( options.template , options.initial );
@@ -32,7 +31,7 @@ export default class Property {
       }
       for (key in initial) {
         if (!getters[key]) {
-          getters[key] = defaultGetter;
+          getters[key] = Property.valueAt;
         }
       }
     }( options.getters ));
@@ -74,7 +73,8 @@ export default class Property {
       name: that.name,
       template: that.template,
       initial: that.plain,
-      getters: that.getters
+      getters: that.getters,
+      precision: that.precision
     }, options );
     options.ancestor = that;
     return new Property( options );

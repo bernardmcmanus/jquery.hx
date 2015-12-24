@@ -6,18 +6,15 @@ import {
 } from 'core/util';
 
 export default class Aggregator {
-  constructor( fns ){
-    var that = this;
-    $_extend( that , fns , {
-      all: $_void
-    });
+  constructor( fns , cb ){
+    $_extend( this , fns , { cb: cb });
   }
   fcall( name , args ){
     var that = this;
     args = $_ensure( args , [] );
-    $_ensure( that[name] , $_void ).apply( null , args );
+    that[name].apply( null , args );
     debounce(function(){
-      that.all.apply( null , args );
+      that.cb.apply( null , args );
     });
   }
 }

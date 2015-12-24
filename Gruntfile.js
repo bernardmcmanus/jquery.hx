@@ -65,6 +65,23 @@ module.exports = function( grunt ){
         }
       }
     },
+    exorcise: {
+      dist: {
+        files: {
+          'tmp/<%= pkg.name %>.js.map': 'tmp/<%= pkg.name %>.js'
+        }
+      },
+      unit: {
+        files: {
+          'test/unit/tests.compiled.js.map': 'test/unit/tests.compiled.js'
+        }
+      },
+      functional: {
+        files: {
+          'test/functional/tests.compiled.js.map': 'test/functional/tests.compiled.js'
+        }
+      }
+    },
     wrap: {
       options: {
         args: (function(){
@@ -208,7 +225,8 @@ module.exports = function( grunt ){
     'grunt-gitinfo',
     'grunt-karma',
     'grunt-browserify',
-    'grunt-wrap'
+    'grunt-wrap',
+    'grunt-exorcise'
   ]
   .forEach( grunt.loadNpmTasks );
 
@@ -221,6 +239,7 @@ module.exports = function( grunt ){
     'gitinfo',
     'lint',
     'browserify:dist',
+    'exorcise:dist',
     'wrap',
     'concat',
     'uglify'
@@ -243,6 +262,7 @@ module.exports = function( grunt ){
   grunt.registerMultiTask( 'test' , function(){
     grunt.task.ensure( 'lint' );
     grunt.task.ensure( 'browserify:' + this.target );
+    grunt.task.ensure( 'exorcise:' + this.target );
     // grunt.task.run( 'karma:' + this.target );
   });
 
