@@ -141,6 +141,16 @@ module.exports = function( grunt ){
         files: {
           'tmp/<%= pkg.name %>.js': 'tmp/<%= pkg.name %>.js'
         }
+      },
+      unit: {
+        files: {
+          'test/unit/tests.compiled.js': 'test/unit/tests.compiled.js'
+        }
+      },
+      functional: {
+        files: {
+          'test/functional/tests.compiled.js': 'test/functional/tests.compiled.js'
+        }
       }
     },
     concat: {
@@ -262,6 +272,7 @@ module.exports = function( grunt ){
   grunt.registerMultiTask( 'test' , function(){
     grunt.task.ensure( 'lint' );
     grunt.task.ensure( 'browserify:' + this.target );
+    // grunt.task.ensure( 'wrap:' + this.target );
     grunt.task.ensure( 'exorcise:' + this.target );
     // grunt.task.run( 'karma:' + this.target );
   });

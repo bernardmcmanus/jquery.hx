@@ -13,6 +13,11 @@ export function $_precision( subject , precision ){
 
 export var $_reqAFrame = (function(){
   return window.requestAnimationFrame;
+  /*return function( cb ){
+    setTimeout(function(){
+      cb( performance.now() );
+    },Math.floor( 1000 / 60 ));
+  };*/
 }());
 
 export var $_string = {
@@ -57,6 +62,44 @@ export function $_ensure( subject , rescuer ){
     return $_is( subject , Array ) ? subject : rescuer;
   }
   return subject || rescuer;
+}*/
+
+/*export function $_sanitize( subject ){
+  return !subject ? subject : $_map( subject , function( value ){
+    if (value && $_is( value , 'object' )) {
+      return $_sanitize( value );
+    }
+    else {
+      // strip null, undefined, and empty strings
+      return value || (value !== 0 ? undefined : value);
+    }
+  });
+}*/
+
+/*export function $_parsePrimitives( subject ) {
+  var result;
+  if (subject && $util.is( subject , 'object' )) {
+    result = Array.isArray( subject ) ? [] : {};
+    Object.keys( subject ).forEach(function( key ) {
+      result[key] = $_parsePrimitives( subject[key] );
+    });
+  }
+  else {
+    result = subject;
+    if ($util.contains([ 'true' , 'false' ] , subject )) {
+      return subject == 'true';
+    }
+    else if (subject == 'null') {
+      return null;
+    }
+    else if (subject == 'undefined') {
+      return undefined;
+    }
+    else if ($util.is( subject , 'string' ) && $util.isTrueNumber( subject )) {
+      return parseFloat( subject , 10 );
+    }
+  }
+  return result;
 }*/
 
 export function $_toArray( subject ){
@@ -126,15 +169,25 @@ export function $_has( subject , property ){
 }
 
 export function $_each( subject , cb ){
-  for (var key in subject){
-    if ($_has( subject , key )){
-      cb( subject[key] , key );
+  if ($_is( subject , Array )) {
+    for (var i = 0; i < subject.length; i++) {
+      cb( subject[i] , i );
     }
+  }
+  else if ($_is( subject , 'object' )) {
+    for (var key in subject) {
+      if ($_has( subject , key )){
+        cb( subject[key] , key );
+      }
+    }
+  }
+  else if (subject) {
+    cb( subject , 0 );
   }
 }
 
 export function $_map( subject , cb , seed ){
-  seed = seed || new subject.constructor();
+  seed = seed || ($_is( seed , Array ) ? [] : {});
   return Object.keys( subject ).reduce(function( result , key , index ){
     result[key] = cb( subject[key] , key , index );
     return result;

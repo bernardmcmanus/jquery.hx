@@ -13,6 +13,23 @@ var Opacity = new Property({
   initial: { value: 1 }
 });
 
+var BackgroundColor = new Property({
+  name: 'background-color',
+  template: '${color}',
+  initial: { color: 'rgba(255,255,255,0)' },
+  precision: 0,
+  getters: [
+    [ 'color' , function( initial , eventual , pct , precision ){
+      initial = tinycolor( initial ).toRgb();
+      eventual = tinycolor( eventual ).toRgb();
+      var color = $_map( eventual , function( value , key ){
+        return Property.valueAt( initial[key] , value , pct , 2 );
+      });
+      return tinycolor( color ).toRgbString();
+    }]
+  ]
+});
+
 var Matrix = new Property({
   name: 'matrix',
   template: 'matrix3d(${a1},${b1},${c1},${d1},${a2},${b2},${c2},${d2},${a3},${b3},${c3},${d3},${a4},${b4},${c4},${d4})',
@@ -123,21 +140,10 @@ var Blur = new Property({
   initial: { value: 0 }
 });
 
-var Dropshadow = new Property({
+var Dropshadow = BackgroundColor.fork({
   name: 'drop-shadow',
   template: 'drop-shadow(${x}px ${y}px ${blur}px ${color})',
-  initial: { x: 0, y: 0, blur: 0, color: 'rgba(255,255,255,0)' },
-  precision: 0,
-  getters: [
-    [ 'color' , function( initial , eventual , pct , precision ){
-      initial = tinycolor( initial ).toRgb();
-      eventual = tinycolor( eventual ).toRgb();
-      var color = $_map( eventual , function( value , key ){
-        return Property.valueAt( initial[key] , value , pct , 2 );
-      });
-      return tinycolor( color ).toRgbString();
-    }]
-  ]
+  initial: { x: 0, y: 0, blur: 0 }
 });
 
 var Opacity2 = new Property({
@@ -167,6 +173,10 @@ suite( 'Property' , function(){
         .then(function(){
           expect( property.plain ).to.eql( property.eventual );
         });
+    });
+    test( 'should inherit properties from ancestor' , function(){
+      expect( Dropshadow.initial ).to.not.eql( BackgroundColor.initial );
+      expect( Dropshadow.color ).to.equal( BackgroundColor.color );
     });
   });
 });
@@ -244,21 +254,51 @@ suite( 'Tween' , function(){
     });
   });
   test( 'should tween non-numeric values' , function(){
-    var collection = new Collection( 'filter' , [
-      Blur.fork().to({ value: 2 }),
-      Dropshadow.fork().from({ color: 'orchid' }).to({ x: 20, y: 20, blur: 2, color: 'gold' }),
-      Opacity2.fork().to({ value: 30 })
-    ]);
-    return collection.tween( 800 ).run(function(){
-      $('.tgt-container > div').css( '-webkit-filter' , collection.toString() );
+    this.timeout( 4000 );
+    return Promise.resolve().then(function(){
+      var elements = $('.tgt-container > div').toArray().map(function( element ){
+        var initial = $(element).css( 'background-color' );
+        var collection = new Collection( 'background-color' , [
+          BackgroundColor.fork().from({ color: initial }).to({ color: 'gold' })
+        ]);
+        return $(element).data( 'collection' , collection );
+      });
+      var promises = elements.map(function( element ){
+        var collection = $(element).data( 'collection' );
+        return collection.tween( 800 ).run(function(){
+          $(element).css( 'background-color' , collection.toString() );
+        });
+      });
+      return Promise.all( promises ).then(function(){
+        var promises = elements.map(function( element ){
+          var collection = $(element).data( 'collection' );
+          $_each( collection , function( property ){
+            property.to( property.initial );
+          });
+          return collection.tween( 800 ).run(function(){
+            $(element).css( 'background-color' , collection.toString() );
+          });
+        });
+        return Promise.all( promises );
+      })
     })
     .then(function(){
-      $_each( collection , function( property ){
-        property.to( property.initial );
-      });
+      var collection = new Collection( 'filter' , [
+        Blur.fork().to({ value: 2 }),
+        Dropshadow.fork().from({ color: 'orchid' }).to({ x: 20, y: 20, blur: 2, color: 'gold' }),
+        Opacity2.fork().to({ value: 30 })
+      ]);
       return collection.tween( 800 ).run(function(){
         $('.tgt-container > div').css( '-webkit-filter' , collection.toString() );
       })
+      .then(function(){
+        $_each( collection , function( property ){
+          property.to( property.initial );
+        });
+        return collection.tween( 800 ).run(function(){
+          $('.tgt-container > div').css( '-webkit-filter' , collection.toString() );
+        })
+      });
     });
   });
 });

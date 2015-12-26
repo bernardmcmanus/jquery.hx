@@ -16,7 +16,8 @@ export default class Property {
   }
   constructor( options ){
     var that = this;
-    var initial = $_string.interpret( options.template , options.initial );
+    var ancestor = options.ancestor || {};
+    var initial = $_string.interpret( options.template , $_extend( ancestor.plain , options.initial ));
     options = $_extend({ precision: 2, getters: [] }, options );
 
     (function( getters ){
