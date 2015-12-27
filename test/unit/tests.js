@@ -1,11 +1,10 @@
 import tinycolor from 'tinycolor';
-import Property from 'property';
-import Collection from 'collection';
-import Tweenbean from 'tweenbean';
-import Tween from 'tween';
-import Aggregator from 'aggregator';
 import { Easing } from 'main';
-import { $_each, $_map } from 'core/util';
+import Property from 'engine/property';
+import Collection from 'engine/collection';
+import Tweenbean from 'engine/tweenbean';
+import Aggregator from 'engine/aggregator';
+import { $_each, $_map } from 'engine/util';
 
 var Opacity = new Property({
   name: 'opacity',
@@ -167,12 +166,9 @@ suite( 'Property' , function(){
       expect( Translate.initial ).to.eql({ x: 0, y: 0, z: 0 });
       expect( property.plain ).to.eql({ x: 50, y: 50, z: 50 });
       expect( property.eventual ).to.eql({ x: 100, y: 100, z: 100 });
-      var tweenbean = new Tweenbean( property );
-      return new Tween( tweenbean )
-        .run()
-        .then(function(){
-          expect( property.plain ).to.eql( property.eventual );
-        });
+      new Tweenbean( property ).start().then(function(){
+        expect( property.plain ).to.eql( property.eventual );
+      });
     });
     test( 'should inherit properties from ancestor' , function(){
       expect( Dropshadow.initial ).to.not.eql( BackgroundColor.initial );
@@ -181,7 +177,7 @@ suite( 'Property' , function(){
   });
 });
 
-suite( 'Tween' , function(){
+suite( 'Tweenbean' , function(){
   test( 'should work' , function(){
     var duration = 300,
       interval = Math.ceil( 1000 / 60 ),
@@ -192,13 +188,12 @@ suite( 'Tween' , function(){
       deferStart;
 
     var property = Translate.fork().to({ x: 100, y: 100, z: 100 });
-    var tweenbean = new Tweenbean( property , duration );
-    var tween = new Tween( tweenbean ).run(function(){
+    var tweenbean = new Tweenbean( property , duration ).start(function(){
       $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
       gotTweenCalls++;
     });
 
-    return tween.then(function(){
+    return tweenbean.then(function(){
       expect( gotTweenCalls ).to.be.at.least( minTweenCalls );
       gotThenCalls++;
     })
@@ -213,44 +208,45 @@ suite( 'Tween' , function(){
       expect( gotThenCalls ).to.equal( 2 );
       expect( Date.now() - deferStart ).to.be.at.least( thenDelay );
       property.to( property.initial );
-      var tweenbean = new Tweenbean( property , duration );
-      return new Tween( tweenbean ).run(function(){
+      return new Tweenbean( property , duration ).start(function(){
         $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
       });
     });
   });
   test( 'should work' , function(){
+    this.timeout( 3000 );
     var property = Translate.fork();
     return Promise.resolve().then(function(){
-      var tweenbean = new Tweenbean( property , 300 , Easing.easeInOutBack.get );
       property.to({ x: 100 });
-      return new Tween( tweenbean ).run(function(){
-        $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
-      });
+      return new Tweenbean( property , 500 )
+        .ease( Easing.easeInOutBack.get )
+        .start(function(){
+          $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+        });
     })
     .then(function(){
-      var tweenbean = new Tweenbean( property , 300 , Easing.easeInOutBack.get );
       property.to({ y: 100 });
-      return new Tween( tweenbean ).run(function(){
-        $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
-      });
+      return new Tweenbean( property , 500 )
+        .ease( Easing.easeInOutBack.get )
+        .start(function(){
+          $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+        });
     })
     .then(function(){
-      var tweenbean = new Tweenbean( property , 300 , Easing.easeInOutBack.get );
       property.to({ x: 0 });
-      return new Tween( tweenbean ).run(function(){
-        $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
-      });
+      return new Tweenbean( property , 500 )
+        .ease( Easing.easeInOutBack.get )
+        .start(function(){
+          $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+        });
     })
     .then(function(){
-      var tweenbean = new Tweenbean( property , 300 , Easing.easeInOutBack.get );
       property.to({ y: 0 });
-      return new Tween( tweenbean ).run(function(){
-        $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
-      });
-    })
-    .then(function(){
-      console.log('done');
+      return new Tweenbean( property , 500 )
+        .ease( Easing.easeInOutBack.get )
+        .start(function(){
+          $('.tgt-container > div').css( '-webkit-transform' , property.toString() );
+        });
     });
   });
   test( 'should tween non-numeric values' , function(){
@@ -265,7 +261,7 @@ suite( 'Tween' , function(){
       });
       var promises = elements.map(function( element ){
         var collection = $(element).data( 'collection' );
-        return collection.tween( 800 ).run(function(){
+        return collection.tween( 800 , function(){
           $(element).css( 'background-color' , collection.toString() );
         });
       });
@@ -275,12 +271,12 @@ suite( 'Tween' , function(){
           $_each( collection , function( property ){
             property.to( property.initial );
           });
-          return collection.tween( 800 ).run(function(){
+          return collection.tween( 800 , function(){
             $(element).css( 'background-color' , collection.toString() );
           });
         });
         return Promise.all( promises );
-      })
+      });
     })
     .then(function(){
       var collection = new Collection( 'filter' , [
@@ -288,16 +284,16 @@ suite( 'Tween' , function(){
         Dropshadow.fork().from({ color: 'orchid' }).to({ x: 20, y: 20, blur: 2, color: 'gold' }),
         Opacity2.fork().to({ value: 30 })
       ]);
-      return collection.tween( 800 ).run(function(){
+      return collection.tween( 800 , function(){
         $('.tgt-container > div').css( '-webkit-filter' , collection.toString() );
       })
       .then(function(){
         $_each( collection , function( property ){
           property.to( property.initial );
         });
-        return collection.tween( 800 ).run(function(){
+        return collection.tween( 800 , function(){
           $('.tgt-container > div').css( '-webkit-filter' , collection.toString() );
-        })
+        });
       });
     });
   });
@@ -312,7 +308,7 @@ suite( 'Collection' , function(){
       Scale.fork().to({ x: 2, y: 2 })
     ]);
     return Promise.resolve().then(function(){
-      return collection.tween( 800 , Easing.easeOutQuad.get ).run(function(){
+      return collection.tween( 800 , Easing.easeOutQuad.get , function(){
         $('.tgt-container > div').css( '-webkit-transform' , collection.toString() );
       });
     })
@@ -320,7 +316,7 @@ suite( 'Collection' , function(){
       $_each( collection , function( property ){
         property.to( property.initial );
       });
-      return collection.tween( 800 , Easing.easeOutQuad.get ).run(function(){
+      return collection.tween( 800 , Easing.easeOutQuad.get , function(){
         $('.tgt-container > div').css( '-webkit-transform' , collection.toString() );
       });
     });
@@ -339,22 +335,21 @@ suite( 'Aggregator' , function(){
       opacity = new Collection( 'opacity' , [
         Opacity.fork().to({ value: 0.3 })
       ]),
-      aggregator = new Aggregator({
-        transform: function( css ){
-          css['-webkit-transform'] = transform.toString();
-        },
-        opacity: function( css ){
-          css.opacity = opacity.toString();
-        }
-      },function( css ){
+      aggregator = new Aggregator(function( css ){
         $('.tgt-container > div').css( css );
+      })
+      .add( 'transform' , function( css ){
+        css['-webkit-transform'] = transform.toString();
+      })
+      .add( 'opacity' , function( css ){
+        css.opacity = opacity.toString();
       });
 
     return Promise.all([
-      transform.tween( 800 , Easing.easeOutQuad.get ).run(function(){
+      transform.tween( 800 , Easing.easeOutQuad.get , function(){
         aggregator.fcall( 'transform' , $css );
       }),
-      opacity.tween( 400 , Easing.easeOutQuad.get ).run(function(){
+      opacity.tween( 400 , Easing.easeOutQuad.get , function(){
         aggregator.fcall( 'opacity' , $css );
       })
     ])
@@ -366,10 +361,10 @@ suite( 'Aggregator' , function(){
         property.to( property.initial );
       });
       return Promise.all([
-        transform.tween( 800 , Easing.easeOutQuad.get ).run(function(){
+        transform.tween( 800 , Easing.easeOutQuad.get , function(){
           aggregator.fcall( 'transform' , $css );
         }),
-        opacity.tween( 400 , Easing.easeOutQuad.get ).run(function(){
+        opacity.tween( 400 , Easing.easeOutQuad.get , function(){
           aggregator.fcall( 'opacity' , $css );
         })
       ]);

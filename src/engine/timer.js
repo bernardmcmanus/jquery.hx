@@ -1,5 +1,5 @@
 import E$ from 'emoney';
-import { $_reqAFrame } from 'core/util';
+import { $_reqAFrame } from 'engine/util';
 
 let instance = null,
   ticEvent = 'timer:tic',
@@ -15,7 +15,10 @@ export default class Timer extends E$ {
     return instance;
   }
   once( handler ){
-    instance.$once( ticEvent , handler );
+    instance.$once( ticEvent , function once(){
+      handler.apply( null , arguments );
+      subscribers--;
+    });
     subscribers++;
     instance._start();
   }
@@ -32,6 +35,7 @@ export default class Timer extends E$ {
     if (!inprog) {
       inprog = true;
       $_reqAFrame(function tic( timestamp ){
+        // console.log(timestamp);
         instance.$emit( ticEvent , timestamp );
         if (!subscribers) {
           inprog = false;

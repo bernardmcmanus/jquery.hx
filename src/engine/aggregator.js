@@ -1,27 +1,30 @@
 import Promise from 'wee-promise';
 import {
-  $_extend,
   $_ensure,
   $_void
-} from 'core/util';
+} from 'engine/util';
 
 export default class Aggregator {
-  constructor( fns , cb ){
-    $_extend( this , fns , { cb: cb });
+  constructor( cb ){
+    this.cancel = $_void;
+    this.cb = $_ensure( cb , $_void );
+  }
+  add( name , fn ){
+    this[name] = fn;
+    return this;
   }
   fcall( name , args ){
     var that = this;
     args = $_ensure( args , [] );
     that[name].apply( null , args );
-    debounce(function(){
+    that.debounce(function(){
       that.cb.apply( null , args );
     });
   }
-}
-
-function debounce( cb ){
-  $_ensure( debounce.cancel , $_void )();
-  debounce.cancel = async( cb );
+  debounce( cb ){
+    this.cancel();
+    this.cancel = async( cb );
+  }
 }
 
 function async( cb ){

@@ -1,10 +1,12 @@
-// import Promise from 'wee-promise';
-import Tweenbean from 'tweenbean';
-import Tween from 'tween';
+import Promise from 'wee-promise';
+import Tweenbean from 'engine/tweenbean';
+import Aggregator from 'engine/aggregator';
 import {
+  $_is,
+  $_toArray,
   $_ensure,
   $_defineValues
-} from 'core/util';
+} from 'engine/util';
 
 export default class Collection {
   constructor( name , properties ){
@@ -36,12 +38,21 @@ export default class Collection {
       that[name] = that[name].ancestor.fork();
     }
   }
-  tween( duration , easeFn ){
-    var that = this;
-    var tweenbeans = that.order.map(function( name ){
-      return new Tweenbean( that[name] , duration , easeFn );
-    });
-    return new Tween( tweenbeans );
+  tween(){
+    var that = this,
+      args = $_toArray( arguments ),
+      cb = args.pop(),
+      easeFn = $_is( args[1] , 'function' ) ? args.pop() : null,
+      duration = args[0],
+      aggregator = new Aggregator(),
+      tweenbeans = that.order.map(function( name ){
+        return new Tweenbean( that[name] , duration )
+          .ease( easeFn )
+          .start(function(){
+            aggregator.debounce( cb );
+          });
+      });
+    return Promise.all( tweenbeans );
   }
   /*sort( cb ){
     var that = this;

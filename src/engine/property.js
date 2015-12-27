@@ -8,7 +8,7 @@ import {
   $_string,
   $_extend,
   $_precision
-} from 'core/util';
+} from 'engine/util';
 
 export default class Property {
   static valueAt( initial , eventual , pct , precision ){
