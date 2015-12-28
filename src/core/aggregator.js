@@ -2,7 +2,7 @@ import Promise from 'wee-promise';
 import {
   $_ensure,
   $_void
-} from 'engine/util';
+} from 'core/util';
 
 export default class Aggregator {
   constructor( cb ){

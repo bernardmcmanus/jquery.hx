@@ -1,14 +1,24 @@
-import hx from 'hx';
+import Promise from 'wee-promise';
+import 'jquery/main';
 
-window.hx = hx;
-
-suite( 'hx' , function() {
-  test( 'should exist' , function() {
-    expect( hx ).to.be.ok;
+suite( '$.hx' , function(){
+  test( 'should work' , function(){
+    console.log($.hx);
   });
-  suite( '#new' , function() {
-    test( 'should do it' , function() {
-      hx.new();
-    });
+});
+
+suite( '$.fn.hx' , function(){
+  test( 'should work' , function(){
+    var a = $('.container > div')
+      .transform({
+        translate: { x: 100, y: 100 }
+      })
+      .tween( 500 )
+      .transform({
+        translate: { x: 0, y: 0 }
+      })
+      .tween( 500 );
+    console.log(a.data());
+    return a.promise();
   });
 });

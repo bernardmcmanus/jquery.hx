@@ -1,4 +1,4 @@
-import { $_extend } from 'engine/util';
+import { $_extend } from 'core/util';
 import E$ from 'emoney';
 import Promise from 'wee-promise';
 

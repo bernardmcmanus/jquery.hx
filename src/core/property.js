@@ -1,14 +1,13 @@
+import Tweenbean from 'core/tweenbean';
 import {
-  // $_map,
   $_last,
   $_each,
-  // $_is,
   $_defineValues,
   $_defineGetters,
   $_string,
   $_extend,
   $_precision
-} from 'engine/util';
+} from 'core/util';
 
 export default class Property {
   static valueAt( initial , eventual , pct , precision ){
@@ -61,6 +60,12 @@ export default class Property {
     $_defineValues( that , { eventual: $_extend( {} , eventual )});
     $_extend( that.initial , that.plain );
     return that;
+  }
+  tween( duration ){
+    var that = this;
+    return new Tweenbean( duration , function( pct ){
+      that.at( pct );
+    });
   }
   at( pct ){
     var that = this;
