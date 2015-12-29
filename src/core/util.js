@@ -32,7 +32,17 @@ export var $_string = {
       return context[group];
     });
   },
-  interpret: function( subject , context ){
+  interpret: function( subject ){
+    var matches = subject.match($_string.regexp( 'g' )),
+      regexp = $_string.regexp(),
+      context = {};
+    $_each( matches , function( key ){
+      key = $_ensure( key.match( regexp ), [] )[1];
+      context[key] = undefined;
+    });
+    return context;
+  }
+  /*interpret: function( subject , context ){
     var matches = subject.match($_string.regexp( 'g' ));
     context = $_ensure( context , {} );
     $_ensure( matches , [] ).forEach(function( key ){
@@ -40,7 +50,7 @@ export var $_string = {
       context[key] = $_defined( context[key] ) ? context[key] : '';
     });
     return context;
-  }
+  }*/
 };
 
 export function $_ensure( subject , rescuer ){
@@ -124,6 +134,59 @@ export function $_defineValues( subject , getters ){
   });
   Object.defineProperties( subject , descriptors );
 }
+
+/*export var $_extend = (function(){
+  return function(){
+    // adapted from jQuery.extend (2.0.3)
+    var args = arguments,
+      options,
+      name,
+      src,
+      copy,
+      copyIsArray,
+      clone,
+      target = args[0] || {},
+      i = 1,
+      length = args.length,
+      deep = false;
+    if ($_is( target , 'boolean' )) {
+      deep = target;
+      target = args[1] || {};
+      i = 2;
+    }
+    if (!$_is( target , 'object' ) && !$_is( target , 'function' )) {
+      target = {};
+    }
+    for (; i < length; i++) {
+      if ((options = args[i]) !== null) {
+        for (name in options) {
+          src = target[name];
+          copy = options[name];
+          if (target === copy) {
+            continue;
+          }
+          if (deep && copy && (isPlainObject( copy ) || (copyIsArray = $_is( copy , Array )))) {
+            if (copyIsArray) {
+              copyIsArray = false;
+              clone = src && $_is( src , Array ) ? src : [];
+            }
+            else {
+              clone = src && isPlainObject( src ) ? src : {};
+            }
+            target[name] = $_extend( deep , clone , copy );
+          }
+          else if ($_defined( copy )) {
+            target[name] = copy;
+          }
+        }
+      }
+    }
+    return target;
+  };
+  function isPlainObject( subject ){
+    return $_is( subject , 'object' ) && !$_is( subject , Array ) && !subject.nodeType && subject !== window;
+  }
+}());*/
 
 export var $_extend = (function(){
   function allKeys( obj ){

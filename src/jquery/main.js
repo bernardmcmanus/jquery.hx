@@ -1,4 +1,4 @@
-// import Promise from 'wee-promise';
+import Promise from 'wee-promise';
 import {
   Property,
   Collection,
@@ -6,7 +6,7 @@ import {
 } from 'main';
 import * as util from 'core/util';
 
-function parseMatrix( $element ){
+/*function parseMatrix( $element ){
   var str = $element.css( '-webkit-transform' ),
     property,
     values = str
@@ -26,61 +26,54 @@ function parseMatrix( $element ){
     property.from( values );
   }
   return property || properties.matrix.fork();
-}
+}*/
 
 $.fn.hx = function( opts ){
   /* jshint -W103 */
   var that = this;
+  // $.prototype.init.call( that , that.selector , that.context );
   if (!util.$_is( that , $.fn.hx )) {
     that.__proto__ = $.fn.hx.prototype;
+    // console.log(that);
   }
-  // console.log(that);
   return that;
-  // return that.tween( opts );
 };
 
 $.fn.hx.prototype = $.extend(Object.create( jQuery.prototype ), {
   constructor: $.fn.hx,
-  _setValues: function( name , values ){
-    var that = this;
-    that.each(function(){
-      var $element = $(this).hx(),
-        collection = $element.data( name ),
-        matrix;
-      if (!collection) {
-        matrix = parseMatrix( $element );
-        collection = new Collection( name , [ matrix ]);
+  pushStack: function( elems ){
+    var that = this,
+      ret = $(elems).hx(),
+      intRe = /\d+/;
+    ret.prevObject = that;
+    util.$_each( that , function( value , key ){
+      if (!util.$_defined( ret[key] ) && !intRe.test( key )) {
+        ret[key] = value;
       }
-      $element
-        .queue(function( next ){
-          util.$_each( values , function( value , name ){
-            var property = collection[name] || properties[name].fork();
-            property.to( value );
-            collection.add( property );
-          });
-          $element.data( 'collection' , collection );
-          next();
-        })
-        .data( name , collection );
     });
-    return that;
+    return ret;
   },
   tween: function( duration , easing ){
     var that = this;
     that.each(function(){
       var $element = $(this);
       $element.queue(function( next ){
-        var collection = $element.data( 'collection' );
-        $element.removeData( 'collection' );
-        collection
-          .tween( duration )
-          // .ease( Easing[easing].get )
-          .start(function(){
-            $element.css( collection.name , collection.toString() );
-          })
-          .then( next , next );
+        var tweenables = $element.data( 'tweenables' ),
+          promises = util.$_ensure( tweenables , [] ).map(function( tweenable ){
+            return tweenable
+              .tween( duration )
+              // .ease( Easing[easing].get )
+              .start(function(){
+                // console.log(tweenable.name,tweenable.toString());
+                $element.css( tweenable.name , tweenable.toString() );
+              });
+          });
+        $element.removeData( 'tweenables' );
+        Promise.all( promises ).then( next , function( err ){
+          next();
+          console.error( err.stack );
+        });
       });
-      // console.log(that.queue());
     });
     return that;
   },
@@ -99,55 +92,145 @@ $.fn.hx.prototype = $.extend(Object.create( jQuery.prototype ), {
 var properties = {};
 
 $.hx = {
-  /*get properties(){
-    return properties;
-  },*/
+  _prototype: $.fn.hx.prototype,
+  properties: properties,
   defineProperty: function( opts ){
     properties[opts.name] = new Property( opts );
+    return this;
   },
-  defineMethod: function( name ){
+  defineMethod: function( name , collectionName ){
     $.fn.hx.prototype[name] = function( opts ){
-      return this._setValues( name , opts );
+      var that = this;
+      return that.each(function(){
+        var $element = $(this),
+          propOrCollection = $element.data( collectionName || name );
+        if (!propOrCollection) {
+          propOrCollection = collectionName ? new Collection( collectionName ) : properties[name];
+        }
+        $element
+          .queue(function( next ){
+            Promise.resolve().then(function(){
+              if (util.$_is( propOrCollection , Collection )) {
+                function setPropertyValues( values , name ){
+                  var property = propOrCollection[name] || properties[name].fork();
+                  property.to( values );
+                  propOrCollection.add( property );
+                }
+                if (name == collectionName) {
+                  util.$_each( opts , setPropertyValues );
+                }
+                else {
+                  setPropertyValues( opts , name );
+                }
+              }
+              else {
+                propOrCollection.to( opts );
+              }
+              var tweenables = util.$_ensure( $element.data( 'tweenables' ) , [] );
+              tweenables.push( propOrCollection );
+              $element.data( 'tweenables' , tweenables );
+            })
+            .then( next , function( err ){
+              next();
+              console.error( err.stack );
+            });
+          })
+          .data( collectionName || name , propOrCollection );
+      });
     };
     $.prototype[name] = function( opts ){
       return this.hx()[name]( opts );
     };
+    return this;
   }
 };
 
-$.hx.defineMethod( 'transform' );
+$.hx
+  .defineMethod( 'opacity' )
+  .defineMethod( 'transform' , 'transform' )
+  .defineMethod( 'translate' , 'transform' )
+  .defineMethod( 'rotate' , 'transform' )
+  .defineMethod( 'rotateX' , 'transform' )
+  .defineMethod( 'rotateY' , 'transform' )
+  .defineMethod( 'rotateZ' , 'transform' )
+  .defineProperty({
+    name: 'opacity',
+    template: '${value}',
+    initial: 1
+  })
+  .defineProperty({
+    name: 'matrix',
+    template: 'matrix3d(${a1},${b1},${c1},${d1},${a2},${b2},${c2},${d2},${a3},${b3},${c3},${d3},${a4},${b4},${c4},${d4})',
+    initial: {
+      a1: 1, b1: 0, c1: 0, d1: 0,
+      a2: 0, b2: 1, c2: 0, d2: 0,
+      a3: 0, b3: 0, c3: 1, d3: 0,
+      a4: 0, b4: 0, c4: 0, d4: 1
+    }
+  })
+  .defineProperty({
+    name: 'matrix2d',
+    template: 'matrix(${a},${b},${c},${d},${x},${y})',
+    initial: { a: 1, b: 0, c: 0, d: 1, x: 0, y: 0 }
+  })
+  .defineProperty({
+    name: 'translate',
+    template: 'translate3d(${x}px,${y}px,${z}px)',
+    initial: { x: 0, y: 0, z: 0 }
+  })
+  .defineProperty({
+    name: 'translateX',
+    template: 'translateX(${value}px)',
+    initial: 0
+  })
+  .defineProperty({
+    name: 'translateY',
+    template: 'translateY(${value}px)',
+    initial: 0
+  })
+  .defineProperty({
+    name: 'translateZ',
+    template: 'translateZ(${value}px)',
+    initial: 0
+  })
+  .defineProperty({
+    name: 'translate2d',
+    template: 'translate(${x}px,${y}px)',
+    initial: { x: 0, y: 0 }
+  })
+  .defineProperty({
+    name: 'scale',
+    template: 'scale3d(${x},${y},${z})',
+    initial: { x: 1, y: 1, z: 1 }
+  })
+  .defineProperty({
+    name: 'scale2d',
+    template: 'scale(${x},${y})',
+    initial: { x: 1, y: 1 }
+  })
+  .defineProperty({
+    name: 'rotate',
+    template: 'rotate3d(${x},${y},${z},${a}deg)',
+    initial: { x: 0, y: 0, z: 0, a: 0 },
+    getters: [
+      [ 'x' , 'y' , 'z' , function( initial , eventual ){
+        return eventual;
+      }]
+    ]
+  })
+  .defineProperty({
+    name: 'rotateX',
+    template: 'rotateX(${value}deg)',
+    initial: 0
+  })
+  .defineProperty({
+    name: 'rotateY',
+    template: 'rotateY(${value}deg)',
+    initial: 0
+  })
+  .defineProperty({
+    name: 'rotateZ',
+    template: 'rotateZ(${value}deg)',
+    initial: 0
+  });
 
-$.hx.defineProperty({
-  name: 'opacity',
-  template: '${value}',
-  initial: { value: 1 }
-});
-
-$.hx.defineProperty({
-  name: 'matrix',
-  template: 'matrix3d(${a1},${b1},${c1},${d1},${a2},${b2},${c2},${d2},${a3},${b3},${c3},${d3},${a4},${b4},${c4},${d4})',
-  initial: {
-    a1: 1, b1: 0, c1: 0, d1: 0,
-    a2: 0, b2: 1, c2: 0, d2: 0,
-    a3: 0, b3: 0, c3: 1, d3: 0,
-    a4: 0, b4: 0, c4: 0, d4: 1
-  }
-});
-
-$.hx.defineProperty({
-  name: 'matrix2d',
-  template: 'matrix(${a},${b},${c},${d},${x},${y})',
-  initial: { a: 1, b: 0, c: 0, d: 1, x: 0, y: 0 }
-});
-
-$.hx.defineProperty({
-  name: 'translate',
-  template: 'translate3d(${x}px,${y}px,${z}px)',
-  initial: { x: 0, y: 0, z: 0 }
-});
-
-$.hx.defineProperty({
-  name: 'translateZ',
-  template: 'translateZ(${value}px)',
-  initial: { value: 0 }
-});

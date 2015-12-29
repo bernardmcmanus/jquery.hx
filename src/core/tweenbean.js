@@ -18,22 +18,24 @@ export default class Tweenbean extends Wee$ {
     that.pct = 0;
     that.fulfilled = false;
     that.duration = duration || 0;
+    that.tweenFn = tweenFn || $_void;
     that.easeFn = Easing.ease.get;
-    that.tweenFn = function( pct , elapsed ){
-      if (that.pct != pct && !that.fulfilled) {
-        that.pct = pct;
-        that.elapsed = elapsed;
-        that.$emit( 'tweenbean:tic' , function(){
-          tweenFn( pct );
-        });
-      }
-    };
     that.then(function(){
       that.fulfilled = true;
       that.$emit( 'tweenbean:end' , function(){
-        that.tweenFn( 1 , that.duration );
+        that._tic( 1 , that.duration );
       });
     });
+  }
+  _tic( pct , elapsed ){
+    var that = this;
+    if (that.pct != pct && !that.fulfilled) {
+      that.pct = pct;
+      that.elapsed = elapsed;
+      that.$emit( 'tweenbean:tic' , function(){
+        that.tweenFn( pct );
+      });
+    }
   }
   ease( fn ){
     var that = this;
@@ -43,7 +45,7 @@ export default class Tweenbean extends Wee$ {
   start( cb ){
     var that = this;
     if (!that.started) {
-      that.cb = $_ensure( cb , $_void );
+      that.cb = cb || $_void;
       timer.once(function( e , timestamp ){
         that.started = timestamp;
         setTimeout( that.resolve , that.duration );
@@ -59,7 +61,7 @@ export default class Tweenbean extends Wee$ {
       elapsed = $_limit( timestamp - that.started , 0 , duration ),
       pctLinear = $_ensure($_limit(( elapsed / duration ), 0 , 1 ), 1 ),
       pct = that.easeFn( pctLinear );
-    that.tweenFn( pct , elapsed );
+    that._tic( pct , elapsed );
     if (pctLinear >= 1) {
       timer.off( that );
       that.resolve();

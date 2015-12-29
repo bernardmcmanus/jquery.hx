@@ -51,7 +51,8 @@ module.exports = function( grunt ){
       },
       dist: {
         files: {
-          'tmp/<%= pkg.name %>.js': 'src/main.js'
+          'tmp/<%= pkg.name %>.js': 'src/main.js',
+          'tmp/jquery.<%= pkg.name %>.js': 'src/jquery/main.js'
         }
       },
       unit: {
@@ -68,7 +69,8 @@ module.exports = function( grunt ){
     exorcise: {
       dist: {
         files: {
-          'tmp/<%= pkg.name %>.js.map': 'tmp/<%= pkg.name %>.js'
+          'tmp/<%= pkg.name %>.js.map': 'tmp/<%= pkg.name %>.js',
+          'tmp/jquery.<%= pkg.name %>.js.map': 'tmp/jquery.<%= pkg.name %>.js'
         }
       },
       unit: {
@@ -85,26 +87,6 @@ module.exports = function( grunt ){
     wrap: {
       options: {
         args: (function(){
-          /*[
-            'window',
-            'document',
-            'navigator',
-            'Object',
-            'Array',
-            'Image',
-            'RegExp',
-            'XMLHttpRequest',
-            'Math',
-            'Date',
-            'Error',
-            'JSON',
-            'setTimeout',
-            'isNaN',
-            'parseFloat',
-            'encodeURIComponent',
-            'decodeURIComponent',
-            [ 'Promise' , 'ES6Promise.Promise' ]
-          ]*/
           var args = [
             'Object',
             'Array',
@@ -112,21 +94,18 @@ module.exports = function( grunt ){
             'Error',
             ['UNDEFINED']
           ];
-
           var leadingWrapArgs = args.map(function( arg ){
             return Array.isArray( arg ) ? arg.shift() : arg;
           })
           .filter(function( arg ){
             return !!arg;
           });
-
           var trailingWrapArgs = args.map(function( arg ){
             return Array.isArray( arg ) ? arg.pop() : arg;
           })
           .filter(function( arg ){
             return !!arg;
           });
-
           return {
             leading: leadingWrapArgs,
             trailing: trailingWrapArgs
@@ -139,7 +118,8 @@ module.exports = function( grunt ){
       },
       dist: {
         files: {
-          'tmp/<%= pkg.name %>.js': 'tmp/<%= pkg.name %>.js'
+          'tmp/<%= pkg.name %>.js': 'tmp/<%= pkg.name %>.js',
+          'tmp/jquery.<%= pkg.name %>.js': 'tmp/jquery.<%= pkg.name %>.js'
         }
       },
       unit: {
@@ -162,7 +142,8 @@ module.exports = function( grunt ){
       },
       dist: {
         files: {
-          'compiled/<%= pkg.name %>.js': 'tmp/<%= pkg.name %>.js'
+          'compiled/<%= pkg.name %>.js': 'tmp/<%= pkg.name %>.js',
+          'compiled/jquery.<%= pkg.name %>.js': 'tmp/jquery.<%= pkg.name %>.js'
         }
       }
     },
@@ -173,7 +154,8 @@ module.exports = function( grunt ){
       },
       dist: {
         files: {
-          'compiled/<%= pkg.name %>.min.js': 'compiled/<%= pkg.name %>.js'
+          'compiled/<%= pkg.name %>.min.js': 'compiled/<%= pkg.name %>.js',
+          'compiled/jquery.<%= pkg.name %>.min.js': 'compiled/jquery.<%= pkg.name %>.js'
         }
       }
     },
@@ -207,7 +189,8 @@ module.exports = function( grunt ){
     'release-describe': {
       dist: {
         files: {
-          'compiled/<%= pkg.name %>.min.js': 'compiled/<%= pkg.name %>.js'
+          'compiled/<%= pkg.name %>.min.js': 'compiled/<%= pkg.name %>.js',
+          'compiled/jquery.<%= pkg.name %>.min.js': 'compiled/jquery.<%= pkg.name %>.js'
         }
       }
     },
@@ -261,7 +244,7 @@ module.exports = function( grunt ){
   ]);
 
   grunt.registerTask( 'release' , [
-    'test',
+    // 'test',
     'build',
     'release-describe',
     'update_json',

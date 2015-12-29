@@ -11,13 +11,13 @@ import { $_each, $_map } from 'core/util';
 var Opacity = new Property({
   name: 'opacity',
   template: '${value}',
-  initial: { value: 1 }
+  initial: 1
 });
 
 var BackgroundColor = new Property({
   name: 'background-color',
   template: '${color}',
-  initial: { color: 'rgba(255,255,255,0)' },
+  initial: 'rgba(255,255,255,0)',
   precision: 0,
   getters: [
     [ 'color' , function( initial , eventual , pct , precision ){
@@ -57,19 +57,19 @@ var Translate = new Property({
 var TranslateX = new Property({
   name: 'translateX',
   template: 'translateX(${value}px)',
-  initial: { value: 0 }
+  initial: 0
 });
 
 var TranslateY = new Property({
   name: 'translateY',
   template: 'translateY(${value}px)',
-  initial: { value: 0 }
+  initial: 0
 });
 
 var TranslateZ = new Property({
   name: 'translateZ',
   template: 'translateZ(${value}px)',
-  initial: { value: 0 }
+  initial: 0
 });
 
 var Translate2d = new Property({
@@ -104,19 +104,19 @@ var Rotate = new Property({
 var RotateX = new Property({
   name: 'rotateX',
   template: 'rotateX(${value}deg)',
-  initial: { value: 0 }
+  initial: 0
 });
 
 var RotateY = new Property({
   name: 'rotateY',
   template: 'rotateY(${value}deg)',
-  initial: { value: 0 }
+  initial: 0
 });
 
 var RotateZ = new Property({
   name: 'rotateZ',
   template: 'rotateZ(${value}deg)',
-  initial: { value: 0 }
+  initial: 0
 });
 
 /*var Transform = new Collection( 'transform' , [
@@ -138,7 +138,7 @@ var RotateZ = new Property({
 var Blur = new Property({
   name: 'blur',
   template: 'blur(${value}px)',
-  initial: { value: 0 }
+  initial: 0
 });
 
 var Dropshadow = BackgroundColor.fork({
@@ -150,7 +150,7 @@ var Dropshadow = BackgroundColor.fork({
 var Opacity2 = new Property({
   name: 'opacity',
   template: 'opacity(${value}%)',
-  initial: { value: 100 }
+  initial: 100
 });
 
 /*var Filter = new Collection( 'filter' , [
@@ -266,7 +266,7 @@ suite( 'Tweenbean' , function(){
     return Promise.resolve().then(function(){
       var elements = $('.container > div').toArray().map(function( element ){
         var initial = $(element).css( 'background-color' );
-        var property = BackgroundColor.fork().from({ color: initial }).to({ color: 'gold' });
+        var property = BackgroundColor.fork().from( initial ).to( 'gold' );
         return $(element).data( 'property' , property );
       });
       var tweenbeans = elements.map(function( element ){
@@ -292,9 +292,9 @@ suite( 'Tweenbean' , function(){
     })
     .then(function(){
       var collection = new Collection( 'filter' , [
-        Blur.fork().to({ value: 2 }),
+        Blur.fork().to( 2 ),
         Dropshadow.fork().from({ color: 'orchid' }).to({ x: 20, y: 20, blur: 2, color: 'gold' }),
-        Opacity2.fork().to({ value: 30 })
+        Opacity2.fork().to( 30 )
       ]);
       return collection
         .tween( 800 )
@@ -355,7 +355,7 @@ suite( 'Aggregator' , function(){
         Scale.fork().to({ x: 2, y: 2 })
       ]),
       opacity = new Collection( 'opacity' , [
-        Opacity.fork().to({ value: 0.3 })
+        Opacity.fork().to( 0.3 )
       ]),
       aggregator = new Aggregator(function( css ){
         $('.container > div').css( css );

@@ -6,6 +6,7 @@ require.config({
     'chai': '/bower_components/chai/chai',
     'sinon': '/bower_components/sinon/index',
     'sinon-chai': '/bower_components/sinon-chai/lib/sinon-chai',
+    'stats': '/bower_components/stats.js/build/stats.min',
     'tests': 'tests.compiled'
   },
   shim: {
@@ -14,18 +15,43 @@ require.config({
     'chai': { exports: 'chai' },
     'sinon': { exports: 'sinon' },
     'sinon-chai': [ 'chai' , 'sinon' ],
+    'stats': { exports: 'Stats' },
     'once': [ 'jquery' ],
     'tests': [ 'mocha' , 'sinon-chai' , 'once' ]
   }
 });
-define( 'init' , [ 'jquery' , 'mocha' , 'chai' , 'sinon-chai' ], function( $ , mocha , chai , sinonChai ) {
+
+define( 'stats-init' , [ 'stats' , 'mocha' ], function( Stats , mocha ){
+  window.stats = new Stats();
+  // 0: fps, 1: ms
+  stats.setMode( 0 );
+  // Align top-left
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.right = '10px';
+  stats.domElement.style.bottom = '10px';
+  document.body.appendChild( stats.domElement );
+  return stats;
+});
+
+define( 'init' , [ 'jquery' , 'mocha' , 'chai' , 'sinon-chai' , 'stats-init' ], function( $ , mocha , chai , sinonChai , stats ){
   window.$ = $;
   window.mocha = mocha;
   window.expect = chai.expect;
   mocha.setup( 'tdd' );
   mocha.reporter( 'html' );
   chai.use( sinonChai );
+
+  var interval = setInterval(function(){
+    stats.begin();
+    // your code goes here
+    stats.end();
+  },Math.round( 1000 / 60 ));
+
+  suiteTeardown(function(){
+    clearInterval( interval );
+  });
 });
-require([ 'init' , 'tests' ], function() {
+
+require([ 'init' , 'tests' ], function(){
   mocha.run();
 });

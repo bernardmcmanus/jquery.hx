@@ -1,4 +1,5 @@
 import Tweenbean from 'core/tweenbean';
+import * as util from 'core/util';
 import {
   $_last,
   $_each,
@@ -13,11 +14,23 @@ export default class Property {
   static valueAt( initial , eventual , pct , precision ){
     return $_precision( initial + (eventual - initial) * pct , precision );
   }
+  static parseValue( value , initial ){
+    var result = value;
+    if (util.$_defined( value ) && !util.$_is( value , 'object' )) {
+      let initialKeys = Object.keys( initial );
+      result = {};
+      result[initialKeys[0]] = value;
+    }
+    return $_extend( {} , result );
+  }
   constructor( options ){
-    var that = this;
-    var ancestor = options.ancestor || {};
-    var initial = $_string.interpret( options.template , $_extend( ancestor.plain , options.initial ));
-    options = $_extend({ precision: 2, getters: [] }, options );
+    var that = this,
+      ancestor = options.ancestor || {},
+      initial = $_string.interpret( options.template );
+
+    initial = $_extend( ancestor.plain , Property.parseValue( options.initial , initial ));
+    options = $_extend({ precision: 2, getters: [], eventual: {} }, options );
+    options.initial = initial;
 
     (function( getters ){
       var arr, getter, i, key;
@@ -50,14 +63,17 @@ export default class Property {
   }
   _crunch( key , pct ){
     var that = this;
+    if (that[key] === that.eventual[key]) {
+      return that[key];
+    }
     return that.getters[key]( that.initial[key] , that.eventual[key] , pct , that.precision );
   }
-  from( initial ){
-    return $_extend( this , initial );
+  from( value ){
+    return $_extend( this , Property.parseValue( value , this.initial ));
   }
-  to( eventual ){
+  to( value ){
     var that = this;
-    $_defineValues( that , { eventual: $_extend( {} , eventual )});
+    $_extend( that.eventual , Property.parseValue( value , this.initial ));
     $_extend( that.initial , that.plain );
     return that;
   }
