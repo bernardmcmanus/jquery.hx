@@ -1,10 +1,10 @@
 import Tweenbean from 'core/tweenbean';
-import { $_defineValues } from 'core/util';
+import * as util from 'core/util';
 
 export default class Collection {
   constructor( name , properties ){
     var that = this;
-    $_defineValues( that , {
+    util.$_defineValues( that , {
       name: name,
       order: []
     });
@@ -33,11 +33,17 @@ export default class Collection {
       that[name] = that[name].ancestor.fork();
     }
   }
-  tween( duration ){
+  to( cb ){
+    return util.$_each( this , function( property , name ){
+      var value = cb( property );
+      property.to( value );
+    });
+  }
+  tween( cb ){
     var that = this;
-    return new Tweenbean( duration , function( pct ){
-      that.order.forEach(function( name ){
-        that[name].at( pct );
+    return new Tweenbean( cb ).subscribe(function( e , pct ){
+      util.$_each( that , function( property ){
+        property.at( pct );
       });
     });
   }

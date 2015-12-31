@@ -12,46 +12,17 @@ export function $_precision( subject , precision ){
 }
 
 export var $_reqAFrame = (function(){
-  return window.requestAnimationFrame;
-  /*return function( cb ){
+  return function( cb ){
+    return window.requestAnimationFrame( cb );
+  };
+  /*var called = 0;
+  return function( cb ){
     setTimeout(function(){
       cb( performance.now() );
     },Math.floor( 1000 / 60 ));
+    return called++;
   };*/
 }());
-
-export var $_string = {
-  /*get regexp(){
-    return /\$\{([^\$\{\}\:\"]+)\}/g;
-  },*/
-  regexp: function( modifiers ){
-    return new RegExp( '\\$\\{([^\\$\\{\\}\\:\\"]+)\\}' , modifiers );
-  },
-  compile: function( subject , context ){
-    return (subject || '').replace( $_string.regexp( 'g' ) , function( match , group ){
-      return context[group];
-    });
-  },
-  interpret: function( subject ){
-    var matches = subject.match($_string.regexp( 'g' )),
-      regexp = $_string.regexp(),
-      context = {};
-    $_each( matches , function( key ){
-      key = $_ensure( key.match( regexp ), [] )[1];
-      context[key] = undefined;
-    });
-    return context;
-  }
-  /*interpret: function( subject , context ){
-    var matches = subject.match($_string.regexp( 'g' ));
-    context = $_ensure( context , {} );
-    $_ensure( matches , [] ).forEach(function( key ){
-      key = $_ensure( key.match( $_string.regexp() ), [] )[1];
-      context[key] = $_defined( context[key] ) ? context[key] : '';
-    });
-    return context;
-  }*/
-};
 
 export function $_ensure( subject , rescuer ){
   if ($_is( rescuer , Array ) && $_defined( subject )) {
@@ -90,7 +61,7 @@ export function $_ensure( subject , rescuer ){
   var result;
   if (subject && $util.is( subject , 'object' )) {
     result = Array.isArray( subject ) ? [] : {};
-    Object.keys( subject ).forEach(function( key ) {
+    $_keys( subject ).forEach(function( key ) {
       result[key] = $_parsePrimitives( subject[key] );
     });
   }
@@ -117,7 +88,7 @@ export function $_toArray( subject ){
 }
 
 export function $_last( subject , getKey ){
-  var lastKey = Object.keys( subject ).slice( -1 );
+  var lastKey = $_keys( subject ).slice( -1 );
   return getKey ? lastKey : subject[lastKey];
 }
 
@@ -231,6 +202,12 @@ export function $_has( subject , property ){
   return subject.hasOwnProperty( property );
 }
 
+export function $_keys( subject ){
+  var keys = subject.order || subject.keys,
+    name = (keys == subject.order ? 'order' : 'keys');
+  return $_is( keys , Array ) && !$_has( subject , name ) ? keys : Object.keys( subject );
+}
+
 export function $_each( subject , cb ){
   if ($_is( subject , Array )) {
     for (var i = 0; i < subject.length; i++) {
@@ -238,20 +215,27 @@ export function $_each( subject , cb ){
     }
   }
   else if ($_is( subject , 'object' )) {
+    let keys = $_keys( subject );
+    $_each( keys , function( key ){
+      cb( subject[key] , key );
+    });
+  }
+  /*else if ($_is( subject , 'object' )) {
     for (var key in subject) {
       if ($_has( subject , key )){
         cb( subject[key] , key );
       }
     }
-  }
+  }*/
   else if (subject) {
     cb( subject , 0 );
   }
+  return subject;
 }
 
 export function $_map( subject , cb , seed ){
   seed = seed || ($_is( seed , Array ) ? [] : {});
-  return Object.keys( subject ).reduce(function( result , key , index ){
+  return $_keys( subject ).reduce(function( result , key , index ){
     result[key] = cb( subject[key] , key , index );
     return result;
   },seed);

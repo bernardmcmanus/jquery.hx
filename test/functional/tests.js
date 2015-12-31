@@ -17,14 +17,16 @@ suite( '$.fn.hx' , function(){
   test( 'should work' , function(){
     this.timeout( 5000 );
     var a = $('.container > div')
-      .translate({ x: 100, y: 100 }).tween( 500 )
-      .rotateZ( 180 ).tween( 500 )
-      .opacity( 0.3 ).tween( 500 )
+      .translate({ x: 100, y: 100 })
+      .tween( 500 )
+      .rotateZ( 180 )
+      .tween( 500 )
+      .opacity( 0.3 )
+      .tween( 500 )
       .opacity( 1 )
       .rotate({ z: 1, a: 180 })
       .transform({
         translate: { x: 0, y: 0 },
-        // rotate: { z: 1, a: 180 },
         rotateZ: 360
       })
       .tween( 1000 );

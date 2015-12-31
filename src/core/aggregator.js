@@ -1,13 +1,9 @@
 import Promise from 'wee-promise';
-import {
-  $_ensure,
-  $_void
-} from 'core/util';
+import * as util from 'core/util';
 
 export default class Aggregator {
   constructor( cb ){
-    this.cancel = $_void;
-    this.cb = $_ensure( cb , $_void );
+    this.cb = debounce( cb || $_void );
   }
   add( name , fn ){
     this[name] = fn;
@@ -15,19 +11,25 @@ export default class Aggregator {
   }
   fcall( name , args ){
     var that = this;
-    args = $_ensure( args , [] );
+    args = util.$_ensure( args , [] );
     that[name].apply( null , args );
-    that.debounce(function(){
-      that.cb.apply( null , args );
-    });
-  }
-  debounce( cb ){
-    this.cancel();
-    this.cancel = async( cb );
+    that.cb.apply( null , args );
   }
 }
 
-function async( cb ){
+export function debounce( cb ){
+  var cancel = util.$_void;
+  return function(){
+    var context = this,
+      args = util.$_toArray( arguments );
+    cancel();
+    cancel = asap(function(){
+      cb.apply( context , args );
+    });
+  };
+}
+
+function asap( cb ){
   var cancelled = false;
   Promise.async(function(){
     if (!cancelled) {

@@ -33,10 +33,11 @@ define( 'stats-init' , [ 'stats' , 'mocha' ], function( Stats , mocha ){
   return stats;
 });
 
-define( 'init' , [ 'jquery' , 'mocha' , 'chai' , 'sinon-chai' , 'stats-init' ], function( $ , mocha , chai , sinonChai , stats ){
+define( 'init' , [ 'jquery' , 'mocha' , 'chai' , 'sinon' , 'sinon-chai' , 'stats-init' ], function( $ , mocha , chai , sinon , sinonChai , stats ){
   window.$ = $;
   window.mocha = mocha;
   window.expect = chai.expect;
+  window.sinon = sinon;
   mocha.setup( 'tdd' );
   mocha.reporter( 'html' );
   chai.use( sinonChai );

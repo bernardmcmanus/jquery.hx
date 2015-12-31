@@ -1,5 +1,5 @@
 import E$ from 'emoney';
-import { $_reqAFrame } from 'core/util';
+import * as util from 'core/util';
 
 let instance = null,
   ticEvent = 'timer:tic',
@@ -7,6 +7,9 @@ let instance = null,
   inprog = false;
 
 export default class Timer extends E$ {
+  static get events(){
+    return { tic: ticEvent };
+  }
   constructor(){
     super();
     if (!instance) {
@@ -22,25 +25,25 @@ export default class Timer extends E$ {
     subscribers++;
     instance._start();
   }
-  on( handler ){
-    instance.$when( ticEvent , handler );
+  on( subscriber ){
+    instance.$when( ticEvent , subscriber );
     subscribers++;
     instance._start();
   }
-  off( handler ){
-    instance.$dispel( ticEvent , handler );
+  off( subscriber ){
+    instance.$dispel( ticEvent , subscriber );
     subscribers--;
   }
   _start(){
     if (!inprog) {
       inprog = true;
-      $_reqAFrame(function tic( timestamp ){
+      util.$_reqAFrame(function tic( timestamp ){
         instance.$emit( ticEvent , timestamp );
         if (!subscribers) {
           inprog = false;
         }
         if (inprog) {
-          $_reqAFrame( tic );
+          util.$_reqAFrame( tic );
         }
       });
     }

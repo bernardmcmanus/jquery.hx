@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "bezier-easing": "https://raw.githubusercontent.com/gre/bezier-easing/5479c4a1c3f1296ad1e2d86776a146b14c539ae3/index.js",
-    "emoney": "^1.0.0",
+    "emoney": "^1.0.2",
     "tinycolor": "~1.2.1",
     "wee-promise": "^1.0.2"
   },

@@ -3,8 +3,8 @@
   padding: 10px;
   margin-top: 80px;
   pointer-events: none;
-  -webkit-perspective: 1000px;
-  perspective: 1000px;
+  -webkit-perspective: 500px;
+  perspective: 500px;
   z-index: 1000;
 }
 
