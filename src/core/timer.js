@@ -6,46 +6,37 @@ let instance = null,
   subscribers = 0,
   inprog = false;
 
-export default class Timer extends E$ {
-  static get events(){
-    return { tic: ticEvent };
-  }
-  constructor(){
-    super();
-    if (!instance) {
-      instance = this;
-    }
-    return instance;
-  }
-  once( handler ){
+export default instance = E$({
+  events: Object.freeze({ tic: ticEvent }),
+  once: function( handler ){
     instance.$once( ticEvent , function once(){
       handler.apply( null , arguments );
       subscribers--;
     });
     subscribers++;
     instance._start();
-  }
-  on( subscriber ){
+  },
+  on: function( subscriber ){
     instance.$when( ticEvent , subscriber );
     subscribers++;
     instance._start();
-  }
-  off( subscriber ){
+  },
+  off: function( subscriber ){
     instance.$dispel( ticEvent , subscriber );
     subscribers--;
-  }
-  _start(){
+  },
+  _start: function(){
     if (!inprog) {
       inprog = true;
-      util.$_reqAFrame(function tic( timestamp ){
+      util.reqAFrame(function tic( timestamp ){
         instance.$emit( ticEvent , timestamp );
         if (!subscribers) {
           inprog = false;
         }
         if (inprog) {
-          util.$_reqAFrame( tic );
+          util.reqAFrame( tic );
         }
       });
     }
   }
-}
+});

@@ -4,7 +4,7 @@ import * as util from 'core/util';
 export default class Collection {
   constructor( name , properties ){
     var that = this;
-    util.$_defineValues( that , {
+    util.defineValues( that , {
       name: name,
       order: []
     });
@@ -34,7 +34,7 @@ export default class Collection {
     }
   }
   to( cb ){
-    return util.$_each( this , function( property , name ){
+    return util.each( this , function( property , name ){
       var value = cb( property );
       property.to( value );
     });
@@ -42,7 +42,7 @@ export default class Collection {
   tween( cb ){
     var that = this;
     return new Tweenbean( cb ).subscribe(function( e , pct ){
-      util.$_each( that , function( property ){
+      util.each( that , function( property ){
         property.at( pct );
       });
     });

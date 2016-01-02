@@ -1,46 +1,17 @@
-export default function Prefixer( obj ) {
-  prefixProperties.forEach(function( pname ) {
-    obj.$each(function( key , val ) {
-      key = prefix( pname , key );
-      val = prefix( pname , val );
-      obj[key] = val;
+import * as util from 'core/util';
+
+var prefixProperties = [ 'transform' , 'transition' , 'filter' ],
+  vendors = { webkit: /webkit/i, moz: /firefox/i, ms: /msie/i },
+  vendorPrefix = util.keys( vendors ).filter(function( prefix ){
+    return vendors[prefix].test( navigator.userAgent );
+  })[0];
+
+export function prefix( str ){
+  util.each( prefixProperties , function( name ){
+    var re = new RegExp( '(?:-[^-]+-)?((?:' + name + '))' , 'gi' );
+    str = str.replace( re , function( match , group ){
+      return (vendorPrefix ? '-' + vendorPrefix + '-' : '') + group;
     });
   });
+  return str;
 }
-
-function prefix( pname , str ) {
-  var re = new RegExp( '(?:-[^-]+-)?((?:' + pname + '))' , 'gi' );
-  return (str || '').replace( re , function( match , group ) {
-    return (vendorPrefix ? '-' + vendorPrefix + '-' : '') + group;
-  });
-}
-
-var prefixProperties = [ 'transform' , 'transition' ];
-
-var vendorPrefix = (function() {
-  var vendors = { webkit: /webkit/i, moz: /firefox/i, ms: /msie/i };
-  return vendors.$keys.filter(function( prefix ) {
-    var re = vendors[prefix];
-    return re.test( navigator.userAgent );
-  })
-  .pop();
-}());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

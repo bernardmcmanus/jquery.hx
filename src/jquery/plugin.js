@@ -2,26 +2,37 @@ import Promise from 'wee-promise';
 import * as util from 'core/util';
 import { debounce } from 'core/aggregator';
 import { Easing } from 'main';
+import { prefix } from 'jquery/prefixer';
+import Stack from 'core/stack';
 
-$.fn.hx = function( opts ){
+$.fn.hx = function( fn ){
   /* jshint -W103 */
   var that = this;
   // $.prototype.init.call( that , that.selector , that.context );
-  if (!util.$_is( that , $.fn.hx )) {
+  if (!util.is( that , $.fn.hx )) {
     that.__proto__ = $.fn.hx.prototype;
     // console.log(that);
   }
-  return that;
+  return fn ? that.each( fn ) : that;
 };
 
-function paint( $element ){
-  var paintFn = $element.data( 'paint' ) || debounce(function(){
-    var css = $element.data( 'css' );
-    $element.css( css );
-  });
-  $element.data( 'paint' , paintFn );
-  paintFn();
-}
+var paint = (function(){
+  // var gotCalls = 0;
+  var stack = new Stack(),
+    paintFn = debounce(function(){
+      // console.log($.extend({},stack));
+      stack.flush(function( $element ){
+        $element.css($element.data( 'css' ));
+        // console.log('gotCalls %s',gotCalls++);
+      });
+    });
+  return function( $element ){
+    if (stack.indexOf( $element ) < 0) {
+      stack.enqueue( $element );
+    }
+    paintFn();
+  };
+}());
 
 $.fn.hx.prototype = $.extend(Object.create( $.prototype ), {
   constructor: $.fn.hx,
@@ -30,8 +41,8 @@ $.fn.hx.prototype = $.extend(Object.create( $.prototype ), {
       ret = $(elems).hx(),
       intRe = /\d+/;
     ret.prevObject = that;
-    util.$_each( that , function( value , key ){
-      if (!util.$_defined( ret[key] ) && !intRe.test( key )) {
+    util.each( that , function( value , key ){
+      if (!util.defined( ret[key] ) && !intRe.test( key )) {
         ret[key] = value;
       }
     });
@@ -51,15 +62,15 @@ $.fn.hx.prototype = $.extend(Object.create( $.prototype ), {
   },
   tween: function( duration , easing ){
     var that = this;
-    that.each(function( i ){
+    return that.each(function( i ){
       var $element = that.eq( i );
       $element.enqueue(function( next ){
         var tweenables = $element.data( 'tweenables' ),
           css = $element.data( 'css' ) || {},
-          promises = util.$_ensure( tweenables , [] ).map(function( tweenable ){
+          promises = util.ensure( tweenables , [] ).map(function( tweenable ){
             return tweenable
               .tween(function(){
-                css[tweenable.name] = tweenable.toString();
+                css[prefix( tweenable.name )] = prefix( tweenable.toString() );
                 paint( $element );
               })
               // .ease( Easing[easing].get )
@@ -71,7 +82,6 @@ $.fn.hx.prototype = $.extend(Object.create( $.prototype ), {
         return Promise.all( promises ).then( next );
       });
     });
-    return that;
   }
 });
 
@@ -89,7 +99,7 @@ $.fn.hx.prototype = $.extend(Object.create( $.prototype ), {
       });
   if (values.length) {
     property = properties[( values.length == 6 ? 'matrix2d' : 'matrix' )].fork();
-    values = util.$_map( property.plain , function( value , key , i ){
+    values = util.map( property.plain , function( value , key , i ){
       return values[i];
     });
     property.from( values );

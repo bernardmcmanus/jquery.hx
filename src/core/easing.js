@@ -1,9 +1,7 @@
-/**
- * Derived from AliceJS easing definitions
- * http://blackberry.github.io/Alice
- */
+import Bezier from 'bezier-easing';
+import * as util from 'core/util';
 
-export default {
+export default util.map({
   linear: [ 0.25 , 0.25 , 0.75 , 0.75 ],
   ease: [ 0.25 , 0.1 , 0.25 , 1 ],
   easeIn: [ 0.42 , 0 , 1 , 1 ],
@@ -37,4 +35,6 @@ export default {
   easeMod1: [ 0.25 , 0.2 , 0.25 , 1 ],
   gravityUp: [ 0.05 , 0.6 , 0.3 , 1 ],
   gravityDown: [ 0.65 , 0.01 , 0.78 , 0.5 ]
-};
+},function( points ){
+  return new Bezier( points );
+});

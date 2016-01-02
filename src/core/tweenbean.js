@@ -3,8 +3,7 @@ import Timer from 'core/timer';
 import { Easing } from 'main';
 import * as util from 'core/util';
 
-let timer = new Timer(),
-  startEvent = 'tweenbean:start',
+let startEvent = 'tweenbean:start',
   updateEvent = 'tweenbean:update',
   endEvent = 'tweenbean:end';
 
@@ -24,10 +23,10 @@ export default class Tweenbean extends Wee$ {
     that.pct = -1;
     that.duration = 0;
     that.fulfilled = false;
-    that.tweenFn = tweenFn || util.$_void;
+    that.tweenFn = tweenFn || util.$void;
     that.easeFn = Easing.ease.get;
     that.then(function(){
-      timer.off( that );
+      Timer.off( that );
       that.$emit( endEvent , function(){
         that._tic( 1 , 1 , that.duration );
       });
@@ -54,7 +53,7 @@ export default class Tweenbean extends Wee$ {
     return that;
   }
   subscribe( subscriber ){
-    subscriber = util.$_ensure( subscriber , util.$_void );
+    subscriber = util.ensure( subscriber , util.$void );
     return this.$when( updateEvent , subscriber );
   }
   start( duration ){
@@ -62,11 +61,11 @@ export default class Tweenbean extends Wee$ {
     if (!that.started) {
       that.started = true;
       that.duration = duration || 0;
-      timer.once(function( e , timestamp ){
+      Timer.once(function( e , timestamp ){
         that.started = timestamp;
         setTimeout( that.resolve , that.duration );
       });
-      timer.on( that );
+      Timer.on( that );
       that.$emit( startEvent );
     }
     return that;
@@ -75,8 +74,8 @@ export default class Tweenbean extends Wee$ {
     if (e.type == Timer.events.tic) {
       var that = this,
         duration = that.duration,
-        elapsed = util.$_limit( timestamp - that.started , 0 , duration ),
-        pctLinear = util.$_ensure(util.$_limit(( elapsed / duration ), 0 , 1 ), 1 ),
+        elapsed = util.limit( timestamp - that.started , 0 , duration ),
+        pctLinear = util.ensure(util.limit(( elapsed / duration ), 0 , 1 ), 1 ),
         pctEased = that.easeFn( pctLinear );
       that._tic( pctEased , pctLinear , elapsed );
     }

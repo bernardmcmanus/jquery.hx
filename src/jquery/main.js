@@ -1,3 +1,4 @@
+import * as hx from 'main';
 import * as util from 'core/util';
 import {
   Properties,
@@ -6,10 +7,12 @@ import {
 import 'jquery/plugin';
 import 'jquery/namespace';
 
-util.$_each( Properties , function( opts ){
+util.each( Properties , function( opts ){
   $.hx.defineProperty( opts );
 });
 
-util.$_each( Methods , function( args ){
+util.each( Methods , function( args ){
   $.hx.defineMethod.apply( $.hx , args );
 });
+
+// console.log(hx);

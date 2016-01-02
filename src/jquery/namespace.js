@@ -25,14 +25,14 @@ $.hx = {
         }
         $element
           .enqueue(function( next ){
-            if (util.$_is( propOrCollection , Collection )) {
+            if (util.is( propOrCollection , Collection )) {
               function setPropertyValues( values , name ){
                 var property = propOrCollection[name] || properties[name].fork();
                 property.to( values );
                 propOrCollection.add( property );
               }
               if (name == collectionName) {
-                util.$_each( opts , setPropertyValues );
+                util.each( opts , setPropertyValues );
               }
               else {
                 setPropertyValues( opts , name );
@@ -41,7 +41,7 @@ $.hx = {
             else {
               propOrCollection.to( opts );
             }
-            var tweenables = util.$_ensure( $element.data( 'tweenables' ) , [] );
+            var tweenables = util.ensure( $element.data( 'tweenables' ) , [] );
             tweenables.push( propOrCollection );
             $element.data( 'tweenables' , tweenables );
             next();

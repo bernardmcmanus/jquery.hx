@@ -23,7 +23,7 @@ var BackgroundColor = new Property({
     [ 'color' , function( initial , eventual , pct , precision ){
       initial = tinycolor( initial ).toRgb();
       eventual = tinycolor( eventual ).toRgb();
-      var color = util.$_map( eventual , function( value , key ){
+      var color = util.map( eventual , function( value , key ){
         return Property.valueAt( initial[key] , value , pct , 2 );
       });
       return tinycolor( color ).toRgbString();

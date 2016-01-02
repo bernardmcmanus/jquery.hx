@@ -1,17 +1,31 @@
 export var Methods = [
-  [ 'opacity' ],
+  // [ 'opacity' ],
   [ 'transform' , 'transform' ],
+  [ 'filter' , 'filter' ],
+  [ 'opacity' , 'filter' ],
+  [ 'matrix' , 'transform' ],
+  [ 'matrix2d' , 'transform' ],
   [ 'translate' , 'transform' ],
+  [ 'translateX' , 'transform' ],
+  [ 'translateY' , 'transform' ],
+  [ 'translateZ' , 'transform' ],
+  [ 'translate2d' , 'transform' ],
+  [ 'scale' , 'transform' ],
+  [ 'scale2d' , 'transform' ],
   [ 'rotate' , 'transform' ],
   [ 'rotateX' , 'transform' ],
   [ 'rotateY' , 'transform' ],
   [ 'rotateZ' , 'transform' ]
 ];
 
-export var Properties = [{
+export var Properties = [/*{
   name: 'opacity',
   template: '${value}',
   initial: 1
+}*/{
+  name: 'opacity',
+  template: 'opacity(${value}%)',
+  initial: 100
 },{
   name: 'matrix',
   template: 'matrix3d(${a1},${b1},${c1},${d1},${a2},${b2},${c2},${d2},${a3},${b3},${c3},${d3},${a4},${b4},${c4},${d4})',

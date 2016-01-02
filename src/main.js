@@ -1,11 +1,9 @@
-import Bezier from 'bezier-easing';
-import * as util from 'core/util';
-import beziers from 'config/beziers';
-
-export { default as Property } from 'core/property';
-
-export { default as Collection } from 'core/collection';
-
-export var Easing = util.$_map( beziers , function( points ){
-  return new Bezier( points );
-});
+/* jshint ignore:start */
+export Property from 'core/property';
+export Collection from 'core/collection';
+export Easing from 'core/easing';
+export Aggregator from 'core/aggregator';
+export Tweenbean from 'core/tweenbean';
+export Timer from 'core/timer';
+export * as util from 'core/util';
+/* jshint ignore:end */

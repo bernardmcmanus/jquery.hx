@@ -17,16 +17,21 @@ suite( '$.fn.hx' , function(){
   test( 'should work' , function(){
     this.timeout( 5000 );
     var a = $('.container > div')
-      .translate({ x: 100, y: 100 })
+      .hx(function( i ){
+        $(this)
+          .translate({ x: (i + 1) * $(this).width(), y: 100 })
+          .scale({ x: 2, y: 2 });
+      })
       .tween( 500 )
       .rotateZ( 180 )
       .tween( 500 )
-      .opacity( 0.3 )
+      .opacity( 30 )
       .tween( 500 )
-      .opacity( 1 )
+      .opacity( 100 )
       .rotate({ z: 1, a: 180 })
       .transform({
-        translate: { x: 0, y: 0 },
+        translate: { x: 0, y: 0, z: 0 },
+        scale: { x: 1, y: 1 },
         rotateZ: 360
       })
       .tween( 1000 );

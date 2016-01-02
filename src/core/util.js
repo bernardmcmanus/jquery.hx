@@ -1,17 +1,17 @@
-export function $_void( input ){
+export function $void( input ){
   return input;
 }
 
-export function $_limit( subject , min , max ){
+export function limit( subject , min , max ){
   return Math.max(Math.min( subject , max ) , min );
 }
 
-export function $_precision( subject , precision ){
-  var multiplier = Math.pow( 10 , precision );
+export function precision( subject , digits ){
+  var multiplier = Math.pow( 10 , digits );
   return Math.round( subject * multiplier ) / multiplier;
 }
 
-export var $_reqAFrame = (function(){
+export var reqAFrame = (function(){
   return function( cb ){
     return window.requestAnimationFrame( cb );
   };
@@ -24,31 +24,31 @@ export var $_reqAFrame = (function(){
   };*/
 }());
 
-export function $_ensure( subject , rescuer ){
-  if ($_is( rescuer , Array ) && $_defined( subject )) {
+export function ensure( subject , rescuer ){
+  if (is( rescuer , Array ) && defined( subject )) {
     rescuer[0] = subject;
   }
-  else if ($_isFunction( rescuer ) && $_isFunction( subject )) {
+  else if (isFunction( rescuer ) && isFunction( subject )) {
     return subject;
   }
-  return $_is( subject , rescuer ) ? subject : rescuer;
+  return is( subject , rescuer ) ? subject : rescuer;
 }
 
-/*export function $_ensure( subject , rescuer ){
-  if ($_is( rescuer , Array )) {
-    // return $_is( subject , Array ) ? subject : ($_defined( subject ) ? [ subject ] : []);
-    if ($_defined( subject )) {
+/*export function ensure( subject , rescuer ){
+  if (is( rescuer , Array )) {
+    // return is( subject , Array ) ? subject : (defined( subject ) ? [ subject ] : []);
+    if (defined( subject )) {
       rescuer[0] = subject;
     }
-    return $_is( subject , Array ) ? subject : rescuer;
+    return is( subject , Array ) ? subject : rescuer;
   }
   return subject || rescuer;
 }*/
 
-/*export function $_sanitize( subject ){
-  return !subject ? subject : $_map( subject , function( value ){
-    if (value && $_is( value , 'object' )) {
-      return $_sanitize( value );
+/*export function sanitize( subject ){
+  return !subject ? subject : map( subject , function( value ){
+    if (value && is( value , 'object' )) {
+      return sanitize( value );
     }
     else {
       // strip null, undefined, and empty strings
@@ -57,12 +57,12 @@ export function $_ensure( subject , rescuer ){
   });
 }*/
 
-/*export function $_parsePrimitives( subject ) {
+/*export function parsePrimitives( subject ) {
   var result;
   if (subject && $util.is( subject , 'object' )) {
     result = Array.isArray( subject ) ? [] : {};
-    $_keys( subject ).forEach(function( key ) {
-      result[key] = $_parsePrimitives( subject[key] );
+    keys( subject ).forEach(function( key ) {
+      result[key] = parsePrimitives( subject[key] );
     });
   }
   else {
@@ -83,30 +83,30 @@ export function $_ensure( subject , rescuer ){
   return result;
 }*/
 
-export function $_toArray( subject ){
+export function toArray( subject ){
   return Array.prototype.slice.call( subject , 0 );
 }
 
-export function $_last( subject , getKey ){
-  var lastKey = $_keys( subject ).slice( -1 );
+export function last( subject , getKey ){
+  var lastKey = keys( subject ).slice( -1 );
   return getKey ? lastKey : subject[lastKey];
 }
 
-export function $_defineGetters( subject , getters ){
-  var descriptors = $_map( getters , function( getter ){
+export function defineGetters( subject , getters ){
+  var descriptors = map( getters , function( getter ){
     return { get: getter, configurable: true, enumerable: false };
   });
   Object.defineProperties( subject , descriptors );
 }
 
-export function $_defineValues( subject , getters ){
-  var descriptors = $_map( getters , function( value ){
+export function defineValues( subject , getters ){
+  var descriptors = map( getters , function( value ){
     return { value: value, configurable: true, writable: false, enumerable: false };
   });
   Object.defineProperties( subject , descriptors );
 }
 
-/*export var $_extend = (function(){
+/*export var extend = (function(){
   return function(){
     // adapted from jQuery.extend (2.0.3)
     var args = arguments,
@@ -120,12 +120,12 @@ export function $_defineValues( subject , getters ){
       i = 1,
       length = args.length,
       deep = false;
-    if ($_is( target , 'boolean' )) {
+    if (is( target , 'boolean' )) {
       deep = target;
       target = args[1] || {};
       i = 2;
     }
-    if (!$_is( target , 'object' ) && !$_is( target , 'function' )) {
+    if (!is( target , 'object' ) && !is( target , 'function' )) {
       target = {};
     }
     for (; i < length; i++) {
@@ -136,17 +136,17 @@ export function $_defineValues( subject , getters ){
           if (target === copy) {
             continue;
           }
-          if (deep && copy && (isPlainObject( copy ) || (copyIsArray = $_is( copy , Array )))) {
+          if (deep && copy && (isPlainObject( copy ) || (copyIsArray = is( copy , Array )))) {
             if (copyIsArray) {
               copyIsArray = false;
-              clone = src && $_is( src , Array ) ? src : [];
+              clone = src && is( src , Array ) ? src : [];
             }
             else {
               clone = src && isPlainObject( src ) ? src : {};
             }
-            target[name] = $_extend( deep , clone , copy );
+            target[name] = extend( deep , clone , copy );
           }
-          else if ($_defined( copy )) {
+          else if (defined( copy )) {
             target[name] = copy;
           }
         }
@@ -155,20 +155,20 @@ export function $_defineValues( subject , getters ){
     return target;
   };
   function isPlainObject( subject ){
-    return $_is( subject , 'object' ) && !$_is( subject , Array ) && !subject.nodeType && subject !== window;
+    return is( subject , 'object' ) && !is( subject , Array ) && !subject.nodeType && subject !== window;
   }
 }());*/
 
-export var $_extend = (function(){
+export var extend = (function(){
   function allKeys( obj ){
     if (!isObject( obj )) {
       return [];
     }
-    var keys = [];
+    var _keys = [];
     for (var key in obj) {
-      keys.push( key );
+      _keys.push( key );
     }
-    return keys;
+    return _keys;
   }
 
   function isObject( obj ){
@@ -181,14 +181,14 @@ export var $_extend = (function(){
       length = args.length;
     for (var index = 1; index < length; index++){
       var source = args[index],
-        keys = allKeys(source),
-        l = keys.length;
+        _keys = allKeys(source),
+        l = _keys.length;
       obj = obj || (source ? new source.constructor() : obj);
       if (obj) {
         var key, i;
         for (i = 0; i < l; i++){
-          key = keys[i];
-          if ($_defined( source[key] )) {
+          key = _keys[i];
+          if (defined( source[key] )) {
             obj[key] = source[key];
           }
         }
@@ -198,31 +198,30 @@ export var $_extend = (function(){
   };
 }());
 
-export function $_has( subject , property ){
+export function has( subject , property ){
   return subject.hasOwnProperty( property );
 }
 
-export function $_keys( subject ){
-  var keys = subject.order || subject.keys,
-    name = (keys == subject.order ? 'order' : 'keys');
-  return $_is( keys , Array ) && !$_has( subject , name ) ? keys : Object.keys( subject );
+export function keys( subject ){
+  var _keys = subject.order || subject.keys,
+    name = (_keys == subject.order ? 'order' : 'keys');
+  return is( _keys , Array ) && !has( subject , name ) ? _keys : Object.keys( subject );
 }
 
-export function $_each( subject , cb ){
-  if ($_is( subject , Array )) {
+export function each( subject , cb ){
+  if (is( subject , Array )) {
     for (var i = 0; i < subject.length; i++) {
       cb( subject[i] , i );
     }
   }
-  else if ($_is( subject , 'object' )) {
-    let keys = $_keys( subject );
-    $_each( keys , function( key ){
+  else if (is( subject , 'object' )) {
+    each(keys( subject ), function( key ){
       cb( subject[key] , key );
     });
   }
-  /*else if ($_is( subject , 'object' )) {
+  /*else if (is( subject , 'object' )) {
     for (var key in subject) {
-      if ($_has( subject , key )){
+      if (has( subject , key )){
         cb( subject[key] , key );
       }
     }
@@ -233,45 +232,45 @@ export function $_each( subject , cb ){
   return subject;
 }
 
-export function $_map( subject , cb , seed ){
-  seed = seed || ($_is( seed , Array ) ? [] : {});
-  return $_keys( subject ).reduce(function( result , key , index ){
+export function map( subject , cb , seed ){
+  seed = seed || (is( seed , Array ) ? [] : {});
+  return keys( subject ).reduce(function( result , key , index ){
     result[key] = cb( subject[key] , key , index );
     return result;
   },seed);
 }
 
-export function $_is( subject , test ){
+export function is( subject , test ){
   if (typeof test == 'string'){
     return typeof subject == test;
   }
   else if (test === Array){
     return Array.isArray( subject );
   }
-  else if ($_exists( subject ) && $_exists( test )) {
-    return subject.constructor === ($_isFunction( test ) ? test : test.constructor);
+  else if (exists( subject ) && exists( test )) {
+    return subject.constructor === (isFunction( test ) ? test : test.constructor);
   }
   return subject === test;
 }
 
-export function $_isFunction( subject ){
-  return $_is( subject , 'function' );
+export function isFunction( subject ){
+  return is( subject , 'function' );
 }
 
-export function $_defined( subject ){
-  return !$_is( subject , 'undefined' );
+export function defined( subject ){
+  return !is( subject , 'undefined' );
 }
 
-export function $_exists( subject ){
-  return $_defined( subject ) && subject !== null && (!$_is( subject , 'number' ) || !isNaN( subject ));
+export function exists( subject ){
+  return defined( subject ) && subject !== null && (!is( subject , 'number' ) || !isNaN( subject ));
 }
 
-export function $_numeric( subject ){
-  return $_exists( subject ) && /^(\d*\.)?\d+$/.test( subject.toString() );
+export function numeric( subject ){
+  return exists( subject ) && /^(\d*\.)?\d+$/.test( subject.toString() );
 }
 
-export function $_reportErr( err ){
-  if ($_is( err , Error )){
+export function reportErr( err ){
+  if (is( err , Error )){
     console.error( err.stack );
   }
   return err;

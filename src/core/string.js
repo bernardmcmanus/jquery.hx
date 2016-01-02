@@ -4,8 +4,8 @@ export function interpret( subject ){
   var matches = subject.match(getRegExp( 'g' )),
     regexp = getRegExp(),
     context = {};
-  util.$_each( matches , function( key ){
-    key = util.$_ensure( key.match( regexp ), [] )[1];
+  util.each( matches , function( key ){
+    key = util.ensure( key.match( regexp ), [] )[1];
     context[key] = context[key]; // undefined
   });
   return context;
