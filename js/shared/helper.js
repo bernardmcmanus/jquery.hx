@@ -156,26 +156,3 @@ hxManager.Helper = (function( Function , Object , Array , isNaN ) {
 
 
 }( Function , Object , Array , isNaN ));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

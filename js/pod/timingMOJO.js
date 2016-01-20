@@ -71,22 +71,3 @@ function(
     return TimingMOJO;
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

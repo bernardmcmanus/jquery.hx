@@ -55,22 +55,3 @@ hxManager.PromisePod = (function( Promise , $ , MOJO ) {
 
 
 }( WeePromise , jQuery , MOJO ));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

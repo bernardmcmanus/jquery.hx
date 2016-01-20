@@ -1,4 +1,3 @@
-/*jshint -W061 */
 hxManager.CSSProperty = hxManager.Inject(
 [   
     Array,
@@ -181,22 +180,3 @@ function(
     return CSSProperty;
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -75,22 +75,3 @@ function(
     return SubscriberMOJO;
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

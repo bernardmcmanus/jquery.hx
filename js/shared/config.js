@@ -46,22 +46,3 @@ function(
     return Config;
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

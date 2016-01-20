@@ -96,22 +96,3 @@ function(
     return StyleDefinition;
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

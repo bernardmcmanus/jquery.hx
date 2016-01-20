@@ -215,22 +215,3 @@ function(
     hxManager[ __ready ]();
     del( hxManager , __ready );
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

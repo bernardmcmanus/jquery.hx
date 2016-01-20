@@ -82,22 +82,3 @@ function(
     return Bezier;
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
