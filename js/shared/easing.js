@@ -1,30 +1,13 @@
-hxManager.Easing = hxManager.Inject(
-[
-    'Bezier',
-    'NULL',
-    'is'
-],
-function(
-    Bezier,
-    NULL,
-    is
-){
+var helper = require( 'shared/helper' );
+var Bezier = require( 'shared/bezier' );
 
-    function Easing( definition ) {
-
-        var out;
-
-        if (is( definition , 'string' )) {
-            out = Bezier.retrieve( definition );
-        }
-        else if (is( definition , 'object' )) {
-            out =  new Bezier( NULL , definition );
-        }
-
-        return out;
+module.exports = function Easing( definition ) {
+    var out;
+    if (helper.is( definition , 'string' )) {
+        out = Bezier.retrieve( definition );
     }
-
-
-    return Easing;
-
-});
+    else if (helper.is( definition , 'object' )) {
+        out =  new Bezier( null , definition );
+    }
+    return out;
+};

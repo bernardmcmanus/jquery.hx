@@ -1,20 +1,21 @@
 {
   "name": "jquery.hx",
-  "version": "1.0.5",
-  "homepage": "https://github.com/millennialmedia/jquery.hx.git",
+  "version": "1.1.0",
+  "homepage": "https://github.com/millennialmedia/jquery.hx",
   "authors": [
     "Bernard McManus"
   ],
   "description": "A hardware-accelerated animation library for mobile and desktop.",
-  "main": "dist/hx.min.js",
+  "main": "dist/hx.js",
   "keywords": [
     "jquery",
     "animation"
   ],
   "license": "MIT",
   "dependencies": {
-    "wee-promise": "~0.2.1",
-    "es6-promise": "https://es6-promises.s3.amazonaws.com/es6-promise-2.0.1.js"
+    "bezier-easing": "https://raw.githubusercontent.com/gre/bezier-easing/5479c4a1c3f1296ad1e2d86776a146b14c539ae3/index.js",
+    "mojo": "https://raw.githubusercontent.com/elnarddogg/MOJO/3ce79fcbb9804fa1e73cefb7433328dbb1cfaaba/mojo-0.1.6.min.js",
+    "wee-promise": "^1.0.4"
   },
   "devDependencies": {
     "requirejs": "http://requirejs.org/docs/release/2.1.16/comments/require.js",

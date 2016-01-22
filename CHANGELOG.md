@@ -1,3 +1,13 @@
+1.1.0
+=====
+- Added support for Browserify
+- Updated bezier-easing
+- Updated wee-promise
+
+1.0.5
+=====
+- Updated wee-promise
+
 1.0.4
 =====
 - Fixed [issue #5](https://github.com/millennialmedia/jquery.hx/issues/5)

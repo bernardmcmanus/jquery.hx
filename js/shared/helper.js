@@ -1,158 +1,140 @@
-hxManager.Helper = (function( Function , Object , Array , isNaN ) {
+function keys( subject ) {
+    return Object.keys( subject );
+}
 
+function each( subject , cb ){
+  if (isArr( subject )) {
+    for (var i = 0; i < length( subject ); i++) {
+      cb( subject[i] , i );
+    }
+  }
+  else if (is( subject , 'object' )) {
+    each(keys( subject ), function( key ){
+      cb( subject[key] , key );
+    });
+  }
+  else if (subject) {
+    cb( subject , 0 );
+  }
+  return subject;
+}
 
-    var UNDEFINED;
-    var NULL = null;
-    var PROTOTYPE = 'prototype';
-    var CALL = 'call';
-
-
-    function compareArray( subject , array ) {
-        
-        if (!subject || !array) {
-            return false;
-        }
-
-        if (length( subject ) != length( array )) {
-            return false;
-        }
-
-        for (var i = 0, l = length( subject ); i < l; i++) {
-            if (isArr( subject[i] ) && isArr( array[i] )) {
-                if (!compareArray( subject[i] , array[i] )) {
-                    return false;
-                }
-            }
-            else if (subject[i] !== array[i]) {
+function compareArray( subject , array ) {
+    if (!subject || !array) {
+        return false;
+    }
+    if (length( subject ) != length( array )) {
+        return false;
+    }
+    for (var i = 0, l = length( subject ); i < l; i++) {
+        if (isArr( subject[i] ) && isArr( array[i] )) {
+            if (!compareArray( subject[i] , array[i] )) {
                 return false;
             }
         }
-
-        return true;
-    }
-
-
-    function length( subject ) {
-        return subject.length;
-    }
-
-
-    function isArr( subject ) {
-        return instOf( subject , Array );
-    }
-
-
-    function instOf( subject , constructor ) {
-        return (subject instanceof constructor);
-    }
-
-
-    function is( subject , type ) {
-        return typeof subject === type;
-    }
-
-
-    function treeSearch( branch , find ) {
-        for (var key in branch) {
-            if (key === find) {
-                return branch[key];
-            }
-            else if (find in branch[key]) {
-                return treeSearch( branch[key] , find );
-            }
+        else if (subject[i] !== array[i]) {
+            return false;
         }
     }
+    return true;
+}
 
+function length( subject ) {
+    return subject.length;
+}
 
-    return {
+function isArr( subject ) {
+    return instOf( subject , Array );
+}
 
-        NULL: NULL,
+function instOf( subject , constructor ) {
+    return (subject instanceof constructor);
+}
 
-        PROTOTYPE: PROTOTYPE,
+function is( subject , type ) {
+    return typeof subject === type;
+}
 
-        compareArray: compareArray,
+function treeSearch( branch , find ) {
+    for (var key in branch) {
+        if (key === find) {
+            return branch[key];
+        }
+        else if (find in branch[key]) {
+            return treeSearch( branch[key] , find );
+        }
+    }
+}
 
-        ensureArray: function( subject ) {
-            return (isArr( subject ) ? subject : [ subject ]);
-        },
+module.exports.keys = keys;
+module.exports.each = each;
+module.exports.compareArray = compareArray;
+module.exports.length = length;
+module.exports.isArr = isArr;
+module.exports.instOf = instOf;
+module.exports.is = is;
+module.exports.treeSearch = treeSearch;
 
-        length: length,
+module.exports.ensureArray = function( subject ) {
+    return (isArr( subject ) ? subject : [ subject ]);
+};
 
-        shift: function( subject ) {
-            return Array[ PROTOTYPE ].shift[ CALL ]( subject );
-        },
+module.exports.shift = function( subject ) {
+    return Array.prototype.shift.call( subject );
+};
 
-        pop: function( subject ) {
-            return Array[ PROTOTYPE ].pop[ CALL ]( subject );
-        },
+module.exports.pop = function( subject ) {
+    return Array.prototype.pop.call( subject );
+};
 
-        descriptor: function( getter , setter ) {
-            return {
-                get: getter,
-                set: setter
-            };
-        },
+module.exports.descriptor = function( getter , setter ) {
+    return { get: getter, set: setter };
+};
 
-        indexOf: function( subject , search ) {
-            return subject.indexOf( search );
-        },
+module.exports.indexOf = function( subject , search ) {
+    return subject.indexOf( search );
+};
 
-        keys: function( subject ) {
-            return Object.keys( subject );
-        },
+module.exports.create = function( subject ) {
+    return Object.create( subject );
+};
 
-        create: function( subject ) {
-            return Object.create( subject );
-        },
+module.exports.defProp = function( subject , name , descriptor ) {
+    Object.defineProperty( subject , name , descriptor );
+};
 
-        defProp: function( subject , name , descriptor ) {
-            Object.defineProperty( subject , name , descriptor );
-        },
+module.exports.defProps = function( subject , props ) {
+    Object.defineProperties( subject , props );
+};
 
-        defProps: function( subject , props ) {
-            Object.defineProperties( subject , props );
-        },
+module.exports.has = function( subject , key ) {
+    return subject.hasOwnProperty( key );
+};
 
-        has: function( subject , key ) {
-            return subject.hasOwnProperty( key );
-        },
+module.exports.del = function( subject , key ) {
+    delete subject[key];
+};
 
-        is: is,
+module.exports.isFunc = function( subject ) {
+    return instOf( subject , Function );
+};
 
-        del: function( subject , key ) {
-            delete subject[key];
-        },
+module.exports.isObj = function( subject , strict ) {
+    return strict ? instOf( subject , Object ) : is( subject , 'object' );
+};
 
-        instOf: instOf,
+module.exports.isNum = function( subject ) {
+    return !isNaN( subject * 1 );
+};
 
-        isFunc: function( subject ) {
-            return instOf( subject , Function );
-        },
+module.exports.isNull = function( subject ) {
+    return subject === null;
+};
 
-        isObj: function( subject , strict ) {
-            return strict ? instOf( subject , Object ) : is( subject , 'object' );
-        },
+module.exports.isUndef = function( subject ) {
+    return is( subject , 'undefined' );
+};
 
-        isArr: isArr,
-
-        isNum: function( subject ) {
-            return !isNaN( subject * 1 );
-        },
-
-        isNull: function( subject ) {
-            return subject === NULL;
-        },
-
-        isUndef: function( subject ) {
-            return subject === UNDEFINED;
-        },
-
-        test: function( subject , testval ) {
-            return subject.test( testval );
-        },
-
-        treeSearch: treeSearch
-    };
-
-
-}( Function , Object , Array , isNaN ));
+module.exports.test = function( subject , testval ) {
+    return subject.test( testval );
+};

@@ -2,35 +2,37 @@
 
   'use strict';
 
-  describe('Jquery', function() {
+  describe('jQuery', function() {
     it('should have hx', function() {
       expect($).to.have.property('hx');
+    });
+    it( 'should play nice with ES2015 modules' , function(){
+      var $iframe = $('<iframe src="about:blank"></iframe>');
+      return new Promise(function( resolve ){
+        $iframe[0].onload = resolve;
+        $iframe
+          .css( 'display' , 'none' )
+          .appendTo( document.body );
+      })
+      .then(function(){
+        var
+          $window = $iframe[0].contentWindow,
+          $document = $window.document,
+          script = $document.createElement( 'script' );
+        return new Promise(function( resolve ){
+          script.onload = resolve;
+          script.src = 'http://localhost:9001/test/hx-module.compiled.js';
+          $document.head.appendChild( script );
+        })
+        .then(function(){
+          expect($window.$).to.have.property('hx');
+          $iframe.remove();
+        });
+      });
     });
   });
 
   var ALL_SELECTOR = '.tgt0,.tgt1,.tgt2';
-
-  var SKIP = [
-    // 'should call done',
-    // 'should execute in the right order',
-    // 'should reset transition',
-    // 'null transitions',
-    // 'persistent transforms',
-    // 'should reject',
-    // 'should throw an error',
-    // 'hx.start / hx.end',
-    // 'hx.pause / hx.resume',
-    // 'defineProperty',
-    // 'resolve',
-    // 'reject',
-    // 'aggregate',
-    // 'main',
-    // 'individual',
-    // 'array',
-    // 'paint all',
-    // 'should reset',
-    // 'should get'
-  ]
 
   var TEST_CASES = [
     {
@@ -153,6 +155,22 @@
   $('body').prepend(container);
 
 
+  describe( 'VendorPatch' , function(){
+    describe( '::prefix' , function(){
+      it( 'should handle an un-prefixed style string' , function(){
+        var original = 'transform: translate3d(0px,0px,0px); transition: transform 400ms ease;';
+        var expected = '-webkit-transform: translate3d(0px,0px,0px); -webkit-transition: -webkit-transform 400ms ease;';
+        var prefixed = hxManager.VendorPatch.prefix( original );
+        expect( prefixed ).to.equal( expected );
+      });
+      it( 'should handle an already-prefixed style string' , function(){
+        var original = '-webkit-transform: translate3d(0px,0px,0px); -webkit-transition: -webkit-transform 400ms ease;';
+        var prefixed = hxManager.VendorPatch.prefix( original );
+        expect( prefixed ).to.equal( original );
+      });
+    });
+  });
+
 // ================================================================================ //
 //                                          //
 //               PROMISE DIGESTION                  //
@@ -172,8 +190,6 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'should call done';
-      if (SKIP.indexOf(msg) != -1)
-        return;
 
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
@@ -201,8 +217,6 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'should execute in the right order';
-      if (SKIP.indexOf(msg) != -1)
-        return;
 
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
@@ -282,9 +296,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'should reset transition';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
         var method = params.method;
@@ -321,9 +333,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'null transitions';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
         var method = params.method;
@@ -366,9 +376,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'persistent transforms';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
         var method = params.method;
@@ -479,9 +487,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'should reject';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
         var method = params.method;
@@ -518,9 +524,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'should throw an error';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
         var method = params.method;
@@ -563,9 +567,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'hx.start / hx.end';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it (i+' '+msg, function ( done ) {
         var selector = params.selector;
         var method = params.method;
@@ -631,9 +633,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'hx.pause / hx.resume';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it ( i+' '+msg , function ( done ) {
         var selector = params.selector;
         var method = params.method;
@@ -708,9 +708,7 @@
     TEST_CASES.forEach(function( params, i ) {
 
       var msg = 'defineProperty';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it ( i+' '+msg , function () {
 
         var selector = params.selector;
@@ -772,9 +770,7 @@
       var easing = params.easing;
 
       var msg = 'resolve';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       var spy = sinon.spy();
 
       it ( i+' '+msg , function ( done ) {
@@ -803,9 +799,7 @@
       var easing = params.easing;
 
       var msg = 'reject';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       var spy = sinon.spy();
 
       it ( i+' '+msg , function ( done ) {
@@ -839,9 +833,7 @@
       var easing = params.easing;
 
       var msg = 'aggregate';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       var spy = sinon.spy();
 
       it ( i+' '+msg , function ( done ) {
@@ -959,9 +951,7 @@
       var easing = params.easing;
 
       var msg = 'main';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       beans.forEach(function( bean ) {
         it ( i+' '+msg , function ( done ) {
 
@@ -1038,9 +1028,7 @@
       var easing = params.easing;
 
       var msg = 'individual';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       beans.forEach(function( bean ) {
         it ( i+' '+msg , function () {
         
@@ -1072,9 +1060,7 @@
       var easing = params.easing;
 
       var msg = 'array';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       var types = [];
 
       it ( msg , function () {
@@ -1113,9 +1099,7 @@
       var easing = params.easing;
 
       var msg = 'paint all';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       var types = [];
       beans.forEach(function( bean ) {
         it (i+' '+ msg , function () {
@@ -1198,9 +1182,7 @@
       var easing = params.easing;
 
       var msg = 'should reset';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       beans.forEach(function( bean ) {
 
         var type = bean.type;
@@ -1261,9 +1243,7 @@
       var easing = params.easing;
 
       var msg = 'should get';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
+      
       it (i+' '+msg, function( done ) {
 
         var Expected = [];
@@ -1393,7 +1373,7 @@
 
   describe('#defer', function() {
 
-    this.timeout(0);
+    // this.timeout(0);
 
     // hard reset DOM
     beforeEach(beforeEachAndEvery);
@@ -1401,54 +1381,31 @@
 
 // ================================================================================ //
 
-     /* TEST_CASES.forEach(function( params, i ) {
+    TEST_CASES.forEach(function( params, i ) {
 
       var selector = params.selector;
       var method = params.method;
       var duration = params.duration;
       var easing = params.easing;
 
-      var msg = 'timed';
-      if (SKIP.indexOf(msg) != -1)
-        return;
-
-      if (!duration) {
-        it (i+" doesn't apply", function() {});
-        return;
-      }
-
-      it (i+' '+msg, function( done ) {
-
+      it(i+' timed', function( done ){
         $(selector).each(function( j ) {
-
-          //if (j > 0) {
-            //$(this).hx( 'defer' , ((j + 1) * duration) );
-          //}
-
+          var start = Date.now(),
+            delay = (j + 1) * duration + 1;
           $(this)
-          .hx()
-          .hx( 'defer' , ((j + 1) * duration) )
-          .then(function( resolve ) {
-            console.log(this[0].$hx.queue.length);
-            //expect( this[0].$hx.queue.length ).to.equal( 4 );
-            resolve();
-          })
-          [ method ]({
-            type: 'transform',
-            rotateZ: '+=360',
-            duration: duration,
-            easing: easing
-          })
-          .done(function() {
-            done();
-          });
-
-          console.log($(this)[0].$hx.queue.length);
+            .hx( 'defer' , delay )
+            .done(function(){
+              try {
+                expect( Date.now() - start ).to.be.at.least( delay );
+              }
+              catch( err ){
+                done( err );
+              }
+            });
         });
-
-      });
-    
-    });*/
+        $(selector).hx( 'done' , done );
+      });    
+    });
 
 // ================================================================================ //
 
@@ -1466,26 +1423,3 @@
   }
 
 }());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

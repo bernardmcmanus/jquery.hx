@@ -1,84 +1,47 @@
-hxManager.Bezier = hxManager.Inject(
-[
-    Array,
-    Error,
-    BezierEasing,
-    'VendorPatch',
-    'PROTOTYPE',
-    'create',
-    'defProps',
-    'descriptor',
-    'isUndef'
-],
-function(
-    Array,
-    Error,
-    BezierEasing,
-    VendorPatch,
-    PROTOTYPE,
-    create,
-    defProps,
-    descriptor,
-    isUndef
-){
+var helper = require( 'shared/helper' );
+var BezierEasing = require( 'bezier-easing' );
+var VendorPatch = require( 'shared/vendorPatch' );
 
+var UNCLAMPED = VendorPatch.unclamped();
 
-    var UNCLAMPED = VendorPatch.unclamped();
+module.exports = Bezier;
 
+function Bezier( name , points ) {
+    var that = this;
+    var bezier = new BezierEasing( points );
+    Array.call( that );
+    points.forEach(function( point ) {
+        that.push( UNCLAMPED ? point : clamp( point ));
+    });
+    helper.defProps( that , {
+        name: {value: name},
+        string: helper.descriptor(function() {
+            return 'cubic-bezier(' + that.join( ',' ) + ')';
+        }),
+        function: { value: bezier.get },
+    });
+}
 
-    function Bezier( name , points ) {
-
-        var that = this;
-        var easeFunction = BezierEasing.apply( null , points );
-
-        points.forEach(function( point ) {
-            that.push(
-                UNCLAMPED ? point : clamp( point )
-            );
-        });
-
-        defProps( that , {
-
-            name: {value: name},
-
-            string: descriptor(function() {
-                return 'cubic-bezier(' + that.join( ',' ) + ')';
-            }),
-
-            function: {value: easeFunction},
-        });
+Bezier.define = function( name , points ) {
+    if (!helper.isUndef( Definitions[name] )) {
+        throw new Error( name + ' is already defined' );
     }
+    Definitions[name] = new Bezier( name , points );
+    return Definitions[name];
+};
 
+Bezier.retrieve = function( name ) {
+    return Definitions[name] || Definitions[ Definitions.default ];
+};
 
-    Bezier.define = function( name , points ) {
+Bezier.prototype = helper.create( Array.prototype );
 
-        if (!isUndef( Definitions[name] )) {
-            throw new Error( name + ' is already defined' );
-        }
-        
-        Definitions[name] = new Bezier( name , points );
-        return Definitions[name];
-    };
+Bezier.prototype.constructor = Bezier;
 
+function clamp( point ) {
+    return (point < 0 ? 0 : (point > 1 ? 1 : point));
+}
 
-    Bezier.retrieve = function( name ) {
-        return Definitions[name] || Definitions[ Definitions.default ];
-    };
-
-
-    Bezier[PROTOTYPE] = create( Array[PROTOTYPE] );
-
-
-    function clamp( point ) {
-        return (point < 0 ? 0 : (point > 1 ? 1 : point));
-    }
-
-
-    var Definitions = {
-        default: 'ease'
-    };
-
-
-    return Bezier;
-
-});
+var Definitions = {
+    default: 'ease'
+};

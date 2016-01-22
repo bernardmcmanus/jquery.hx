@@ -1,7 +1,6 @@
-# packages #
-############
 node_modules
 bower_components
+test/*.compiled.js
 
 # OS generated files #
 ######################
