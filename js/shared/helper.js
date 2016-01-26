@@ -1,3 +1,5 @@
+var exports = module.exports;
+
 function keys( subject ) {
     return Object.keys( subject );
 }
@@ -66,75 +68,75 @@ function treeSearch( branch , find ) {
     }
 }
 
-module.exports.keys = keys;
-module.exports.each = each;
-module.exports.compareArray = compareArray;
-module.exports.length = length;
-module.exports.isArr = isArr;
-module.exports.instOf = instOf;
-module.exports.is = is;
-module.exports.treeSearch = treeSearch;
+exports.keys = keys;
+exports.each = each;
+exports.compareArray = compareArray;
+exports.length = length;
+exports.isArr = isArr;
+exports.instOf = instOf;
+exports.is = is;
+exports.treeSearch = treeSearch;
 
-module.exports.ensureArray = function( subject ) {
+exports.ensureArray = function( subject ) {
     return (isArr( subject ) ? subject : [ subject ]);
 };
 
-module.exports.shift = function( subject ) {
+exports.shift = function( subject ) {
     return Array.prototype.shift.call( subject );
 };
 
-module.exports.pop = function( subject ) {
+exports.pop = function( subject ) {
     return Array.prototype.pop.call( subject );
 };
 
-module.exports.descriptor = function( getter , setter ) {
+exports.descriptor = function( getter , setter ) {
     return { get: getter, set: setter };
 };
 
-module.exports.indexOf = function( subject , search ) {
+exports.indexOf = function( subject , search ) {
     return subject.indexOf( search );
 };
 
-module.exports.create = function( subject ) {
+exports.create = function( subject ) {
     return Object.create( subject );
 };
 
-module.exports.defProp = function( subject , name , descriptor ) {
+exports.defProp = function( subject , name , descriptor ) {
     Object.defineProperty( subject , name , descriptor );
 };
 
-module.exports.defProps = function( subject , props ) {
+exports.defProps = function( subject , props ) {
     Object.defineProperties( subject , props );
 };
 
-module.exports.has = function( subject , key ) {
+exports.has = function( subject , key ) {
     return subject.hasOwnProperty( key );
 };
 
-module.exports.del = function( subject , key ) {
+exports.del = function( subject , key ) {
     delete subject[key];
 };
 
-module.exports.isFunc = function( subject ) {
+exports.isFunc = function( subject ) {
     return instOf( subject , Function );
 };
 
-module.exports.isObj = function( subject , strict ) {
+exports.isObj = function( subject , strict ) {
     return strict ? instOf( subject , Object ) : is( subject , 'object' );
 };
 
-module.exports.isNum = function( subject ) {
+exports.isNum = function( subject ) {
     return !isNaN( subject * 1 );
 };
 
-module.exports.isNull = function( subject ) {
+exports.isNull = function( subject ) {
     return subject === null;
 };
 
-module.exports.isUndef = function( subject ) {
+exports.isUndef = function( subject ) {
     return is( subject , 'undefined' );
 };
 
-module.exports.test = function( subject , testval ) {
+exports.test = function( subject , testval ) {
     return subject.test( testval );
 };

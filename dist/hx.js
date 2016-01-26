@@ -1,5 +1,4 @@
-/*! jquery.hx - 1.1.0 - Bernard McManus - 20ef081 - 2016-01-25 */
-
+/*! jquery.hx - 1.1.0 - Bernard McManus - 5e3700d - 2016-01-26 */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.hxManager = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 /**
@@ -2448,6 +2447,8 @@ module.exports = function Easing( definition ) {
 };
 
 },{"shared/bezier":22,"shared/helper":25}],25:[function(_dereq_,module,exports){
+var exports = module.exports;
+
 function keys( subject ) {
     return Object.keys( subject );
 }
@@ -2516,76 +2517,76 @@ function treeSearch( branch , find ) {
     }
 }
 
-module.exports.keys = keys;
-module.exports.each = each;
-module.exports.compareArray = compareArray;
-module.exports.length = length;
-module.exports.isArr = isArr;
-module.exports.instOf = instOf;
-module.exports.is = is;
-module.exports.treeSearch = treeSearch;
+exports.keys = keys;
+exports.each = each;
+exports.compareArray = compareArray;
+exports.length = length;
+exports.isArr = isArr;
+exports.instOf = instOf;
+exports.is = is;
+exports.treeSearch = treeSearch;
 
-module.exports.ensureArray = function( subject ) {
+exports.ensureArray = function( subject ) {
     return (isArr( subject ) ? subject : [ subject ]);
 };
 
-module.exports.shift = function( subject ) {
+exports.shift = function( subject ) {
     return Array.prototype.shift.call( subject );
 };
 
-module.exports.pop = function( subject ) {
+exports.pop = function( subject ) {
     return Array.prototype.pop.call( subject );
 };
 
-module.exports.descriptor = function( getter , setter ) {
+exports.descriptor = function( getter , setter ) {
     return { get: getter, set: setter };
 };
 
-module.exports.indexOf = function( subject , search ) {
+exports.indexOf = function( subject , search ) {
     return subject.indexOf( search );
 };
 
-module.exports.create = function( subject ) {
+exports.create = function( subject ) {
     return Object.create( subject );
 };
 
-module.exports.defProp = function( subject , name , descriptor ) {
+exports.defProp = function( subject , name , descriptor ) {
     Object.defineProperty( subject , name , descriptor );
 };
 
-module.exports.defProps = function( subject , props ) {
+exports.defProps = function( subject , props ) {
     Object.defineProperties( subject , props );
 };
 
-module.exports.has = function( subject , key ) {
+exports.has = function( subject , key ) {
     return subject.hasOwnProperty( key );
 };
 
-module.exports.del = function( subject , key ) {
+exports.del = function( subject , key ) {
     delete subject[key];
 };
 
-module.exports.isFunc = function( subject ) {
+exports.isFunc = function( subject ) {
     return instOf( subject , Function );
 };
 
-module.exports.isObj = function( subject , strict ) {
+exports.isObj = function( subject , strict ) {
     return strict ? instOf( subject , Object ) : is( subject , 'object' );
 };
 
-module.exports.isNum = function( subject ) {
+exports.isNum = function( subject ) {
     return !isNaN( subject * 1 );
 };
 
-module.exports.isNull = function( subject ) {
+exports.isNull = function( subject ) {
     return subject === null;
 };
 
-module.exports.isUndef = function( subject ) {
+exports.isUndef = function( subject ) {
     return is( subject , 'undefined' );
 };
 
-module.exports.test = function( subject , testval ) {
+exports.test = function( subject , testval ) {
     return subject.test( testval );
 };
 

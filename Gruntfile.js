@@ -1,5 +1,4 @@
 module.exports = function( grunt ) {
-
   grunt.initConfig({
     pkg: grunt.file.readJSON( 'package.json' ),
     jshint: {
@@ -76,7 +75,10 @@ module.exports = function( grunt ) {
     },
     uglify: {
       options: {
-        banner: '<%= pkg.config.banner %>'
+        banner: '<%= pkg.config.banner %>',
+        sourceMap: true,
+        sourceMapIn: 'dist/hx.js.map',
+        screwIE8: true
       },
       release: {
         files: { 'dist/hx.min.js': 'dist/hx.js' }
