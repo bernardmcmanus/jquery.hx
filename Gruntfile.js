@@ -1,4 +1,6 @@
 module.exports = function( grunt ) {
+  var Router = require( 'urlrouter' );
+
   grunt.initConfig({
     pkg: grunt.file.readJSON( 'package.json' ),
     jshint: {
@@ -8,31 +10,13 @@ module.exports = function( grunt ) {
     clean: {
       dist: [ 'dist' ]
     },
-    update_json: {
-      options: {
-        src: 'package.json',
-        indent: 2
-      },
-      bower: {
-        dest: 'bower.json',
-        fields: [
-          'name',
-          'version',
-          'main',
-          'description',
-          'keywords',
-          'homepage',
-          'license'
-        ]
-      }
-    },
     browserify: {
       dist: {
         options: {
           banner: '<%= pkg.config.banner %>\n',
           plugin: [[ 'browserify-derequire' ]],
           browserifyOptions: {
-            paths: [ 'js' , 'bower_components' ],
+            paths: [ 'js' , 'node_modules' ],
             debug: 'debug',
             standalone: 'hxManager'
           }
@@ -42,11 +26,10 @@ module.exports = function( grunt ) {
       test: {
         options: {
           transform: [
-            [ 'babelify' , { stage: 0 }],
-            [ 'browserify-shim' ]
+            [ 'babelify' , { stage: 0 }]
           ],
           browserifyOptions: {
-            paths: [ 'dist' , 'bower_components' ]
+            paths: [ 'dist' , 'node_modules' ]
           }
         },
         files: { 'test/hx-module.compiled.js': 'test/hx-module.js' }
@@ -69,7 +52,18 @@ module.exports = function( grunt ) {
           port: 9001,
           base: '.',
           hostname: '0.0.0.0',
-          interrupt: true
+          interrupt: true,
+          middleware: function ( connect , options , middlewares ){
+            return [
+              Router(function( app ) {
+                app.get( '*' , function( req , res , next ){
+                  res.setHeader( 'access-control-allow-origin' , '*' );
+                  next();
+                });
+              })
+            ]
+            .concat( middlewares );
+          }
         }
       }
     },
@@ -105,7 +99,6 @@ module.exports = function( grunt ) {
     'grunt-contrib-uglify',
     'grunt-contrib-watch',
     'grunt-contrib-connect',
-    'grunt-update-json',
     'grunt-gitinfo',
     'grunt-browserify',
     'grunt-exorcise',
@@ -115,8 +108,8 @@ module.exports = function( grunt ) {
 
   grunt.registerTask( 'default' , [
     'build',
+    'test',
     'uglify',
-    'update_json',
     'release-describe'
   ]);
 

@@ -7,21 +7,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <title>jquery.hx tests</title>
     <!-- ============================================= -->
-    <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css" />
+    <link rel="stylesheet" type="text/css" href="/node_modules/mocha/mocha.css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
     <!-- ============================================= -->
     <script src="performance-polyfill.js"></script>
+    <script src="/node_modules/wee-promise/dist/wee-promise.min.js"></script>
     <!-- ============================================= -->
-    <script src="/bower_components/requirejs/index.js"></script>
+    <script src="/node_modules/requirejs/index.js"></script>
     <!-- ============================================= -->
     <script>
       require.config({
         paths: {
           'hx': '/dist/hx',
-          'jquery': '/bower_components/jquery/dist/jquery.min',
-          'mocha': '/bower_components/mocha/mocha',
-          'chai': '/bower_components/chai/chai',
-          'sinon': '/bower_components/sinon/index',
+          'jquery': '/node_modules/jquery/dist/jquery.min',
+          'mocha': '/node_modules/mocha/mocha',
+          'chai': '/node_modules/chai/chai',
+          'sinon': '/node_modules/sinon/index',
           'sinon-chai': '/node_modules/sinon-chai/lib/sinon-chai'
         },
         shim: {

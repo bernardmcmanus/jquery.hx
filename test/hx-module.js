@@ -1,2 +1,6 @@
-import 'jquery/dist/jquery';
-import 'hx';
+const $ = require('jquery');
+
+module.exports = function() {
+	window.jQuery = window.$ = $;
+	require('hx');
+};

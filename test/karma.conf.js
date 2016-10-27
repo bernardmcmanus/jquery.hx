@@ -8,7 +8,8 @@ module.exports = function(config) {
     files: [ 
       'test/performance-polyfill.js',
       'test/bind-polyfill.js',
-      'bower_components/jquery/dist/jquery.js',
+      'node_modules/jquery/dist/jquery.js',
+      'node_modules/wee-promise/dist/wee-promise.min.js',
       'dist/hx.js',
       'test/once.js',
       'test/tests.js'
@@ -25,7 +26,7 @@ module.exports = function(config) {
     // config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
     // optionally run in chrome as well as phantomjs... but why??
-    browsers: [ 
+    browsers: [
       'Chrome',
       //'PhantomJS'
     ]

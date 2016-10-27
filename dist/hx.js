@@ -1,452 +1,6 @@
-/*! jquery.hx - 1.1.0 - Bernard McManus - 5e3700d - 2016-01-26 */
+/*! jquery.hx - 1.1.0 - Bernard McManus - ede565f - 2016-10-27 */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.hxManager = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-/**
- * BezierEasing - use bezier curve for transition easing function
- * by Gaëtan Renaudeau 2014 - 2015 – MIT License
- *
- * Credits: is based on Firefox's nsSMILKeySpline.cpp
- * Usage:
- * var spline = BezierEasing([ 0.25, 0.1, 0.25, 1.0 ])
- * spline.get(x) => returns the easing value | x must be in [0, 1] range
- *
- */
-
-// These values are established by empiricism with tests (tradeoff: performance VS precision)
-var NEWTON_ITERATIONS = 4;
-var NEWTON_MIN_SLOPE = 0.001;
-var SUBDIVISION_PRECISION = 0.0000001;
-var SUBDIVISION_MAX_ITERATIONS = 10;
-
-var kSplineTableSize = 11;
-var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
-
-var float32ArraySupported = typeof Float32Array === "function";
-
-function A (aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }
-function B (aA1, aA2) { return 3.0 * aA2 - 6.0 * aA1; }
-function C (aA1)      { return 3.0 * aA1; }
-
-// Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
-function calcBezier (aT, aA1, aA2) {
-  return ((A(aA1, aA2)*aT + B(aA1, aA2))*aT + C(aA1))*aT;
-}
-
-// Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
-function getSlope (aT, aA1, aA2) {
-  return 3.0 * A(aA1, aA2)*aT*aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
-}
-
-function binarySubdivide (aX, aA, aB, mX1, mX2) {
-  var currentX, currentT, i = 0;
-  do {
-    currentT = aA + (aB - aA) / 2.0;
-    currentX = calcBezier(currentT, mX1, mX2) - aX;
-    if (currentX > 0.0) {
-      aB = currentT;
-    } else {
-      aA = currentT;
-    }
-  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
-  return currentT;
-}
-
-function newtonRaphsonIterate (aX, aGuessT, mX1, mX2) {
-  for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
-    var currentSlope = getSlope(aGuessT, mX1, mX2);
-    if (currentSlope === 0.0) return aGuessT;
-    var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
-    aGuessT -= currentX / currentSlope;
-  }
-  return aGuessT;
-}
-
-/**
- * points is an array of [ mX1, mY1, mX2, mY2 ]
- */
-function BezierEasing (points, b, c, d) {
-  if (arguments.length === 4) {
-    return new BezierEasing([ points, b, c, d ]);
-  }
-  if (!(this instanceof BezierEasing)) return new BezierEasing(points);
-
-  if (!points || points.length !== 4) {
-    throw new Error("BezierEasing: points must contains 4 values");
-  }
-  for (var i=0; i<4; ++i) {
-    if (typeof points[i] !== "number" || isNaN(points[i]) || !isFinite(points[i])) {
-      throw new Error("BezierEasing: points should be integers.");
-    }
-  }
-  if (points[0] < 0 || points[0] > 1 || points[2] < 0 || points[2] > 1) {
-    throw new Error("BezierEasing x values must be in [0, 1] range.");
-  }
-
-  this._str = "BezierEasing("+points+")";
-  this._css = "cubic-bezier("+points+")";
-  this._p = points;
-  this._mSampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
-  this._precomputed = false;
-
-  this.get = this.get.bind(this);
-}
-
-BezierEasing.prototype = {
-
-  get: function (x) {
-    var mX1 = this._p[0],
-      mY1 = this._p[1],
-      mX2 = this._p[2],
-      mY2 = this._p[3];
-    if (!this._precomputed) this._precompute();
-    if (mX1 === mY1 && mX2 === mY2) return x; // linear
-    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
-    if (x === 0) return 0;
-    if (x === 1) return 1;
-    return calcBezier(this._getTForX(x), mY1, mY2);
-  },
-
-  getPoints: function() {
-    return this._p;
-  },
-
-  toString: function () {
-    return this._str;
-  },
-
-  toCSS: function () {
-    return this._css;
-  },
-
-  // Private part
-
-  _precompute: function () {
-    var mX1 = this._p[0],
-      mY1 = this._p[1],
-      mX2 = this._p[2],
-      mY2 = this._p[3];
-    this._precomputed = true;
-    if (mX1 !== mY1 || mX2 !== mY2)
-      this._calcSampleValues();
-  },
-
-  _calcSampleValues: function () {
-    var mX1 = this._p[0],
-      mX2 = this._p[2];
-    for (var i = 0; i < kSplineTableSize; ++i) {
-      this._mSampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
-    }
-  },
-
-  /**
-   * getTForX chose the fastest heuristic to determine the percentage value precisely from a given X projection.
-   */
-  _getTForX: function (aX) {
-    var mX1 = this._p[0],
-      mX2 = this._p[2],
-      mSampleValues = this._mSampleValues;
-
-    var intervalStart = 0.0;
-    var currentSample = 1;
-    var lastSample = kSplineTableSize - 1;
-
-    for (; currentSample !== lastSample && mSampleValues[currentSample] <= aX; ++currentSample) {
-      intervalStart += kSampleStepSize;
-    }
-    --currentSample;
-
-    // Interpolate to provide an initial guess for t
-    var dist = (aX - mSampleValues[currentSample]) / (mSampleValues[currentSample+1] - mSampleValues[currentSample]);
-    var guessForT = intervalStart + dist * kSampleStepSize;
-
-    var initialSlope = getSlope(guessForT, mX1, mX2);
-    if (initialSlope >= NEWTON_MIN_SLOPE) {
-      return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
-    } else if (initialSlope === 0.0) {
-      return guessForT;
-    } else {
-      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
-    }
-  }
-};
-
-// CSS mapping
-BezierEasing.css = {
-  "ease":        BezierEasing.ease      = BezierEasing(0.25, 0.1, 0.25, 1.0),
-  "linear":      BezierEasing.linear    = BezierEasing(0.00, 0.0, 1.00, 1.0),
-  "ease-in":     BezierEasing.easeIn    = BezierEasing(0.42, 0.0, 1.00, 1.0),
-  "ease-out":    BezierEasing.easeOut   = BezierEasing(0.00, 0.0, 0.58, 1.0),
-  "ease-in-out": BezierEasing.easeInOut = BezierEasing(0.42, 0.0, 0.58, 1.0)
-};
-
-module.exports = BezierEasing;
-
-},{}],2:[function(_dereq_,module,exports){
-/*! mojo - 0.1.6 - Bernard McManus - strict-hotfix - g727d74 - 2014-10-16 */
-var _MOJO={},MOJO={};_MOJO.Shared=function(a,b){function c(a){return a.length}function d(b){return a.keys(b)}function e(a){return b.prototype.shift.call(a)}function f(a){return a instanceof b?a:a!==i?[a]:[]}function g(a,b){return{get:a,set:b,configurable:!0}}function h(a){return(a||{})[j]?a[j]:a}var i,j="handleMOJO";return{length:c,keys:d,shift:e,ensureArray:f,descriptor:g,getHandlerFunc:h}}(Object,Array),_MOJO.EventHandler=function(a){function b(a,b,c){var e=this;e.handler=a,e.context=b,e.active=!0,e.callback=function(){},e.args=d(c)}var c=a.Shared,d=c.ensureArray;return b.prototype={invoke:function(a,b){var c=this,e=c.handler;if(c.active&&!a.isBreak&&!a.shouldSkip(e)){var f=c.args.concat(d(b));f.unshift(a),e.apply(c.context,f),c.callback(a,e)}}},b}(_MOJO),_MOJO.Event=function(a,b){function c(b,c){var d=this;d.isBreak=e,d.cancelBubble=e,d.defaultPrevented=e,d.skipHandlers=[],d.target=b,d.type=c,d.timeStamp=a.now()}var d=!0,e=!1,f=b.Shared,g=f.ensureArray,h=f.getHandlerFunc;return c.prototype={skip:function(a){var b=this.skipHandlers;g(a).forEach(function(a){b.push(h(a))})},shouldSkip:function(a){return this.skipHandlers.indexOf(a)>=0},"break":function(){this.isBreak=d},preventDefault:function(){this.defaultPrevented=d},stopPropagation:function(){this.cancelBubble=d}},c}(Date,_MOJO),_MOJO.When=function(a,b,c){function d(a,b){return l(a).map(function(a){return a.handler}).indexOf(b)}function e(a,c){(a instanceof b?a:a.split(" ")).forEach(c)}function f(a,b){return a===b?null:a}var g=c.Shared,h=c.EventHandler,i=c.Event,j=g.keys,k=g.shift,l=g.ensureArray,m=g.length,n=g.getHandlerFunc,o={once:function(){var a=this,b=a._when(arguments);return b.forEach(function(a){a.callback=function(){this.active=!1}}),a},when:function(){var a=this;return a._when(arguments),a},_when:function(a){var b=this,c=k(a),d=m(a)>1?k(a):d,g=[],i=k(a),j=n(i),l=f(i,j);return e(c,function(a,c){g.push(new h(j,l,d)),b._addHandler(a,g[c])}),g},happen:function(a,b){var c=this;return a=c._ensureEType(a),e(a,function(a){var d=c._getHandlers(a,!0),e=new i(c,a);d.filter(function(a){return a.invoke(e,b),!a.active}).forEach(function(b){c._removeHandler(c._getHandlers(a),b.handler)})}),c},dispel:function(a,b){var c=this,d=c._getHandlers(),f=n(b);return a=c._ensureEType(a),e(a,function(a){f?c._removeHandler(d[a],f):delete d[a]}),c},_ensureEType:function(a){return a||j(this._getHandlers()).join(" ")},_getHandlers:function(b,c){var d=this,e=d.handlers=d.handlers||{},f=b?e[b]=e[b]||[]:e;return c?b?f.slice():a.create(f):f},_addHandler:function(a,b){var c=this;c._getHandlers(a).push(b)},_removeHandler:function(a,b){var c=d(a,b);c>=0&&a.splice(c,1)}};return o}(Object,Array,_MOJO),MOJO=function(a){function b(a){a=a||{};var c=this;b.Each(a,function(a,b){c[b]=a}),b.Construct(c)}var c=b.prototype=Object.create(a.When);return c.each=function(a){var c=this;return b.Each(c,a,c.keys),c},c.set=function(a,b){var c=this;return c[a]=b,c.happen("set",a),c},c.remove=function(a){var b=this;return delete b[a],b.happen("remove",a),b},b}(_MOJO),MOJO.Each=function(a){function b(a,b,c){(c||d(a)).forEach(function(c,d){b(a[c],c,d)})}var c=a.Shared,d=c.keys;return b}(_MOJO),MOJO.Create=function(a,b){function c(c){var d=a.create(b.prototype);return b.Each(c,function(a,b){d[b]=a}),d}return c}(Object,MOJO),MOJO.Construct=function(a,b){function c(b){var c={};a.defineProperties(b,{handlers:{get:function(){return c},set:function(a){c=a},configurable:!0},keys:f(function(){return e(b)}),length:f(function(){return g(b.keys)}),handleMOJO:{value:(b.handleMOJO||function(){}).bind(b),configurable:!0}})}var d=b.Shared,e=d.keys,f=d.descriptor,g=d.length;return c}(Object,_MOJO),function(a){"object"==typeof exports?module.exports=a:window.MOJO=a}(MOJO);
-},{}],3:[function(_dereq_,module,exports){
-(function (global){
-/*! wee-promise - 1.0.4 - Bernard McManus - 6ff0c68 - 2015-12-27 */
-
-(function(global,UNDEFINED){
-"use strict";
-
-function Stack(){
-  var that = this;
-  that.q = [];
-  that.i = 0;
-  that.len = 0;
-}
-
-Stack.prototype.put = function( element ){
-  var that = this;
-  that.q[that.len] = element;
-  that.len++;
-};
-
-Stack.prototype.get = function(){
-  var that = this,
-    element = that.q[that.i];
-  that.i++;
-  if (that.i >= that.len) {
-    that.q.length = that.i = that.len = 0;
-  }
-  return element;
-};
-
-var asyncProvider;
-
-if (global.setImmediate) {
-  asyncProvider = setImmediate;
-}
-else if (global.MessageChannel) {
-  asyncProvider = (function(){
-    var stack = new Stack(),
-      channel = new MessageChannel();
-    channel.port1.onmessage = function(){
-      /* jshint -W084 */
-      var fn;
-      while (fn = stack.get()) {
-        fn();
-      }
-    };
-    return function( cb ){
-      stack.put( cb );
-      channel.port2.postMessage( 0 );
-    };
-  }());
-}
-else {
-  asyncProvider = setTimeout;
-}
-
-WeePromise.async = function( cb ){
-  asyncProvider( cb );
-};
-
-
-var PENDING = 0,
-  RESOLVED = 1,
-  REJECTED = 2;
-
-function WeePromise( resolver ){
-  var that = this,
-    one = getSingleCallable(function( action , value ){
-      action( that , value );
-    });
-  that._state = PENDING;
-  that._stack = new Stack();
-  that.resolve = function( value ){
-    one( $resolve , value );
-    return that;
-  };
-  that.reject = function( reason ){
-    one( $reject , reason );
-    return that;
-  };
-  if (resolver) {
-    try {
-      resolver( that.resolve , that.reject );
-    }
-    catch( err ){
-      that.reject( err );
-    }
-  }
-}
-
-WeePromise.prototype.onresolved = function( value ){
-  return value;
-};
-
-WeePromise.prototype.onrejected = function( reason ){
-  throw reason;
-};
-
-WeePromise.prototype._flush = function(){
-  var that = this,
-    state = that._state;
-  if (state) {
-    WeePromise.async(function(){
-      (function flush(){
-        var promise = that._stack.get();
-        if (promise) {
-          var fn = (state == RESOLVED ? promise.onresolved : promise.onrejected);
-          try {
-            $resolve( promise , fn( that._value ));
-          }
-          catch( err ){
-            $reject( promise , err );
-          }
-          flush();
-        }
-      }());
-    });
-  }
-};
-
-WeePromise.prototype.then = function( onresolved , onrejected ){
-  var that = this,
-    promise = new WeePromise();
-  if (isFunction( onresolved )) {
-    promise.onresolved = onresolved;
-  }
-  if (isFunction( onrejected )) {
-    promise.onrejected = onrejected;
-  }
-  that._stack.put( promise );
-  that._flush();
-  return promise;
-};
-
-WeePromise.prototype.catch = function( onrejected ){
-  return this.then( UNDEFINED , onrejected );
-};
-
-WeePromise.resolve = function( result ){
-  return new WeePromise().resolve( result );
-};
-
-WeePromise.reject = function( reason ){
-  return new WeePromise().reject( reason );
-};
-
-WeePromise.all = function( collection ){
-  var promise = new WeePromise(),
-    result = [],
-    got = 0,
-    need = collection.length;
-  collection.forEach(function( child , i ){
-    unwrap( child , function( state , value ){
-      got++;
-      result[i] = value;
-      if (state == REJECTED) {
-        promise.reject( value );
-      }
-      else if (got == need) {
-        promise.resolve( result );
-      }
-    });
-  });
-  return promise;
-};
-
-WeePromise.race = function( collection ){
-  var promise = new WeePromise();
-  collection.forEach(function( child ){
-    unwrap( child , function( state , value ){
-      setState( promise , state , value );
-    });
-  });
-  return promise;
-};
-
-function $resolve( context , value ){
-  if (value === context) {
-    $reject( context , new TypeError( 'A promise cannot be resolved with itself.' ));
-  }
-  else {
-    unwrap( value , function( state , value ){
-      setState( context , state , value );
-    });
-  }
-}
-
-function $reject( context , reason ){
-  setState( context , REJECTED , reason );
-}
-
-function setState( context , state , value ){
-  if (context._state != state) {
-    context._value = value;
-    context._state = state;
-    context._flush();
-  }
-}
-
-function unwrap( value , cb ){
-  if (value instanceof WeePromise && value._state) {
-    // non-pending WeePromise instances
-    cb( value._state , value._value );
-  }
-  else if (isObject( value ) || isFunction( value )) {
-    // objects and functions
-    var then,
-      one = getSingleCallable(function( fn , args ){
-        fn.apply( UNDEFINED , args );
-      });
-    try {
-      then = value.then;
-      if (isFunction( then )) {
-        then.call( value,
-          function( _value ){
-            one( unwrap , [ _value , cb ]);
-          },
-          function( _reason ){
-            one( cb , [ REJECTED , _reason ]);
-          }
-        );
-      }
-      else {
-        one( cb , [ RESOLVED , value ]);
-      }
-    }
-    catch( err ){
-      one( cb , [ REJECTED , err ]);
-    }
-  }
-  else {
-    // all other values
-    cb( RESOLVED , value );
-  }
-}
-
-function getSingleCallable( cb ){
-  var called;
-  return function(){
-    if (!called) {
-      cb.apply( UNDEFINED , arguments );
-      called = true;
-    }
-  };
-}
-
-function isObject( subject ){
-  return subject && typeof subject == 'object';
-}
-
-function isFunction( subject ){
-  return typeof subject == 'function';
-}
-
-if (typeof exports == "object") {
-module.exports = WeePromise;
-} else {
-global.WeePromise = WeePromise;
-}
-}(typeof window=="object"?window:global));
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-
-},{}],4:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var StyleDefinition = _dereq_( 'domNode/styleDefinition' );
@@ -548,7 +102,7 @@ function getPropertyName( type , property ) {
     return (property === 'value' ? type : property);
 }
 
-},{"domNode/cssProperty":5,"domNode/styleDefinition":8,"mojo":2,"shared/helper":25}],5:[function(_dereq_,module,exports){
+},{"domNode/cssProperty":2,"domNode/styleDefinition":5,"mojo":25,"shared/helper":22}],2:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var StyleDefinition = _dereq_( 'domNode/styleDefinition' );
 
@@ -662,7 +216,7 @@ function parseExpression( exp ) {
     return out;
 }
 
-},{"domNode/styleDefinition":8,"shared/helper":25}],6:[function(_dereq_,module,exports){
+},{"domNode/styleDefinition":5,"shared/helper":22}],3:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var Queue = _dereq_( 'domNode/queue' );
@@ -889,7 +443,7 @@ function getBoundModule( module , context ) {
     return scope;
 }
 
-},{"domNode/componentMOJO":4,"domNode/cssProperty":5,"domNode/queue":7,"domNode/transitionMOJO":9,"mojo":2,"shared/config":23,"shared/helper":25,"shared/vendorPatch":26}],7:[function(_dereq_,module,exports){
+},{"domNode/componentMOJO":1,"domNode/cssProperty":2,"domNode/queue":4,"domNode/transitionMOJO":6,"mojo":25,"shared/config":20,"shared/helper":22,"shared/vendorPatch":23}],4:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 
 module.exports = Queue;
@@ -959,7 +513,7 @@ function length( subject ) {
     return subject.length;
 }
 
-},{"shared/helper":25}],8:[function(_dereq_,module,exports){
+},{"shared/helper":22}],5:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var PropertyMap = _dereq_( 'shared/config' ).properties;
 
@@ -1022,7 +576,7 @@ var Properties = {
     }
 };
 
-},{"shared/config":23,"shared/helper":25}],9:[function(_dereq_,module,exports){
+},{"shared/config":20,"shared/helper":22}],6:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
@@ -1071,7 +625,7 @@ function getTransitionString( type , duration , easing , delay ) {
     return (type + ' ' + duration + 'ms ' + easing + ' ' + delay + 'ms');
 }
 
-},{"mojo":2,"shared/easing":24,"shared/helper":25,"shared/vendorPatch":26}],10:[function(_dereq_,module,exports){
+},{"mojo":25,"shared/easing":21,"shared/helper":22,"shared/vendorPatch":23}],7:[function(_dereq_,module,exports){
 var hxManager = _dereq_( 'hxManager' );
 var helper = _dereq_( 'shared/helper' );
 
@@ -1095,7 +649,7 @@ module.exports = function() {
     return out;
 };
 
-},{"hxManager":11,"shared/helper":25}],11:[function(_dereq_,module,exports){
+},{"hxManager":8,"shared/helper":22}],8:[function(_dereq_,module,exports){
 var Promise = _dereq_( 'wee-promise' );
 var helper = _dereq_( 'shared/helper' );
 var DomNodeFactory = _dereq_( 'domNode/domNodeFactory' );
@@ -1331,7 +885,7 @@ function eachNode( hxm , callback ) {
     return hxm;
 }
 
-},{"domNode/domNodeFactory":6,"pod/PodFactory":14,"pod/bean":16,"pod/iteratorMOJO":17,"shared/helper":25,"wee-promise":3}],12:[function(_dereq_,module,exports){
+},{"domNode/domNodeFactory":3,"pod/PodFactory":11,"pod/bean":13,"pod/iteratorMOJO":14,"shared/helper":22,"wee-promise":26}],9:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
 var StyleDefinition = _dereq_( 'domNode/styleDefinition' );
@@ -1519,7 +1073,7 @@ helper.each( beziers , function( points , name ) {
 
 $(document).trigger( 'hx.ready' );
 
-},{"domNode/styleDefinition":8,"fn.hx":10,"hxManager":11,"pod/timingMOJO":21,"shared/bezier":22,"shared/easing":24,"shared/helper":25,"shared/vendorPatch":26}],13:[function(_dereq_,module,exports){
+},{"domNode/styleDefinition":5,"fn.hx":7,"hxManager":8,"pod/timingMOJO":18,"shared/bezier":19,"shared/easing":21,"shared/helper":22,"shared/vendorPatch":23}],10:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var SubscriberMOJO = _dereq_( 'pod/subscriberMOJO' );
@@ -1731,7 +1285,7 @@ AnimationPod.prototype = MOJO.Create({
     }
 });
 
-},{"mojo":2,"pod/subscriberMOJO":20,"shared/helper":25}],14:[function(_dereq_,module,exports){
+},{"mojo":25,"pod/subscriberMOJO":17,"shared/helper":22}],11:[function(_dereq_,module,exports){
 var AnimationPod = _dereq_( 'pod/AnimationPod' );
 var PrecisionPod = _dereq_( 'pod/precisionPod' );
 var PromisePod = _dereq_( 'pod/promisePod' );
@@ -1747,7 +1301,7 @@ module.exports = function PodFactory( node , type ) {
     }
 };
 
-},{"pod/AnimationPod":13,"pod/precisionPod":18,"pod/promisePod":19}],15:[function(_dereq_,module,exports){
+},{"pod/AnimationPod":10,"pod/precisionPod":15,"pod/promisePod":16}],12:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var TimingMOJO = _dereq_( 'pod/timingMOJO' );
@@ -1792,7 +1346,7 @@ SubscriberMOJO.prototype = MOJO.Create({
     }
 });
 
-},{"mojo":2,"pod/timingMOJO":21,"shared/helper":25}],16:[function(_dereq_,module,exports){
+},{"mojo":25,"pod/timingMOJO":18,"shared/helper":22}],13:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var Config = _dereq_( 'shared/config' );
@@ -1955,7 +1509,7 @@ function getCompiledData( seed , node , index ) {
     };
 }
 
-},{"mojo":2,"shared/config":23,"shared/helper":25}],17:[function(_dereq_,module,exports){
+},{"mojo":25,"shared/config":20,"shared/helper":22}],14:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var Easing = _dereq_( 'shared/easing' );
@@ -2106,7 +1660,7 @@ IteratorMOJO.prototype = MOJO.Create({
     }
 });
 
-},{"mojo":2,"pod/bean":16,"shared/easing":24,"shared/helper":25}],18:[function(_dereq_,module,exports){
+},{"mojo":25,"pod/bean":13,"shared/easing":21,"shared/helper":22}],15:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var SubscriberMOJO = _dereq_( 'pod/SubscriberMOJO' );
@@ -2273,7 +1827,7 @@ PrecisionPod.prototype = MOJO.Create({
     }
 });
 
-},{"mojo":2,"pod/SubscriberMOJO":15,"shared/helper":25}],19:[function(_dereq_,module,exports){
+},{"mojo":25,"pod/SubscriberMOJO":12,"shared/helper":22}],16:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var Promise = _dereq_( 'wee-promise' );
 var helper = _dereq_( 'shared/helper' );
@@ -2308,9 +1862,9 @@ PromisePod.prototype = MOJO.Create($.extend( {} , helper.create( Promise.prototy
     }
 }));
 
-},{"mojo":2,"shared/helper":25,"wee-promise":3}],20:[function(_dereq_,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15,"mojo":2,"pod/timingMOJO":21,"shared/helper":25}],21:[function(_dereq_,module,exports){
+},{"mojo":25,"shared/helper":22,"wee-promise":26}],17:[function(_dereq_,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12,"mojo":25,"pod/timingMOJO":18,"shared/helper":22}],18:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
@@ -2353,7 +1907,7 @@ function step( timestamp ) {
     }
 }
 
-},{"mojo":2,"shared/helper":25,"shared/vendorPatch":26}],22:[function(_dereq_,module,exports){
+},{"mojo":25,"shared/helper":22,"shared/vendorPatch":23}],19:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var BezierEasing = _dereq_( 'bezier-easing' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
@@ -2402,7 +1956,7 @@ var Definitions = {
     default: 'ease'
 };
 
-},{"bezier-easing":1,"shared/helper":25,"shared/vendorPatch":26}],23:[function(_dereq_,module,exports){
+},{"bezier-easing":24,"shared/helper":22,"shared/vendorPatch":23}],20:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 
 module.exports.buffer = ((1000 / 60) * 2);
@@ -2431,7 +1985,7 @@ module.exports.defaults = {
     done: function() {}
 };
 
-},{"shared/helper":25}],24:[function(_dereq_,module,exports){
+},{"shared/helper":22}],21:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var Bezier = _dereq_( 'shared/bezier' );
 
@@ -2446,7 +2000,7 @@ module.exports = function Easing( definition ) {
     return out;
 };
 
-},{"shared/bezier":22,"shared/helper":25}],25:[function(_dereq_,module,exports){
+},{"shared/bezier":19,"shared/helper":22}],22:[function(_dereq_,module,exports){
 var exports = module.exports;
 
 function keys( subject ) {
@@ -2590,7 +2144,7 @@ exports.test = function( subject , testval ) {
     return subject.test( testval );
 };
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 
 var OTHER = 'other';
@@ -2676,6 +2230,452 @@ function isAndroidNative( os ) {
     return (os === 'android' && !helper.test( /(chrome|firefox)/i , USER_AGENT ));
 }
 
-},{"shared/helper":25}]},{},[12])(12)
+},{"shared/helper":22}],24:[function(_dereq_,module,exports){
+/**
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ *
+ * Credits: is based on Firefox's nsSMILKeySpline.cpp
+ * Usage:
+ * var spline = BezierEasing([ 0.25, 0.1, 0.25, 1.0 ])
+ * spline.get(x) => returns the easing value | x must be in [0, 1] range
+ *
+ */
+
+// These values are established by empiricism with tests (tradeoff: performance VS precision)
+var NEWTON_ITERATIONS = 4;
+var NEWTON_MIN_SLOPE = 0.001;
+var SUBDIVISION_PRECISION = 0.0000001;
+var SUBDIVISION_MAX_ITERATIONS = 10;
+
+var kSplineTableSize = 11;
+var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+
+var float32ArraySupported = typeof Float32Array === "function";
+
+function A (aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }
+function B (aA1, aA2) { return 3.0 * aA2 - 6.0 * aA1; }
+function C (aA1)      { return 3.0 * aA1; }
+
+// Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+function calcBezier (aT, aA1, aA2) {
+  return ((A(aA1, aA2)*aT + B(aA1, aA2))*aT + C(aA1))*aT;
+}
+
+// Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+function getSlope (aT, aA1, aA2) {
+  return 3.0 * A(aA1, aA2)*aT*aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+}
+
+function binarySubdivide (aX, aA, aB, mX1, mX2) {
+  var currentX, currentT, i = 0;
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier(currentT, mX1, mX2) - aX;
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
+    }
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+  return currentT;
+}
+
+function newtonRaphsonIterate (aX, aGuessT, mX1, mX2) {
+  for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+    var currentSlope = getSlope(aGuessT, mX1, mX2);
+    if (currentSlope === 0.0) return aGuessT;
+    var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+    aGuessT -= currentX / currentSlope;
+  }
+  return aGuessT;
+}
+
+/**
+ * points is an array of [ mX1, mY1, mX2, mY2 ]
+ */
+function BezierEasing (points, b, c, d) {
+  if (arguments.length === 4) {
+    return new BezierEasing([ points, b, c, d ]);
+  }
+  if (!(this instanceof BezierEasing)) return new BezierEasing(points);
+
+  if (!points || points.length !== 4) {
+    throw new Error("BezierEasing: points must contains 4 values");
+  }
+  for (var i=0; i<4; ++i) {
+    if (typeof points[i] !== "number" || isNaN(points[i]) || !isFinite(points[i])) {
+      throw new Error("BezierEasing: points should be integers.");
+    }
+  }
+  if (points[0] < 0 || points[0] > 1 || points[2] < 0 || points[2] > 1) {
+    throw new Error("BezierEasing x values must be in [0, 1] range.");
+  }
+
+  this._str = "BezierEasing("+points+")";
+  this._css = "cubic-bezier("+points+")";
+  this._p = points;
+  this._mSampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+  this._precomputed = false;
+
+  this.get = this.get.bind(this);
+}
+
+BezierEasing.prototype = {
+
+  get: function (x) {
+    var mX1 = this._p[0],
+      mY1 = this._p[1],
+      mX2 = this._p[2],
+      mY2 = this._p[3];
+    if (!this._precomputed) this._precompute();
+    if (mX1 === mY1 && mX2 === mY2) return x; // linear
+    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+    if (x === 0) return 0;
+    if (x === 1) return 1;
+    return calcBezier(this._getTForX(x), mY1, mY2);
+  },
+
+  getPoints: function() {
+    return this._p;
+  },
+
+  toString: function () {
+    return this._str;
+  },
+
+  toCSS: function () {
+    return this._css;
+  },
+
+  // Private part
+
+  _precompute: function () {
+    var mX1 = this._p[0],
+      mY1 = this._p[1],
+      mX2 = this._p[2],
+      mY2 = this._p[3];
+    this._precomputed = true;
+    if (mX1 !== mY1 || mX2 !== mY2)
+      this._calcSampleValues();
+  },
+
+  _calcSampleValues: function () {
+    var mX1 = this._p[0],
+      mX2 = this._p[2];
+    for (var i = 0; i < kSplineTableSize; ++i) {
+      this._mSampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
+    }
+  },
+
+  /**
+   * getTForX chose the fastest heuristic to determine the percentage value precisely from a given X projection.
+   */
+  _getTForX: function (aX) {
+    var mX1 = this._p[0],
+      mX2 = this._p[2],
+      mSampleValues = this._mSampleValues;
+
+    var intervalStart = 0.0;
+    var currentSample = 1;
+    var lastSample = kSplineTableSize - 1;
+
+    for (; currentSample !== lastSample && mSampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+    --currentSample;
+
+    // Interpolate to provide an initial guess for t
+    var dist = (aX - mSampleValues[currentSample]) / (mSampleValues[currentSample+1] - mSampleValues[currentSample]);
+    var guessForT = intervalStart + dist * kSampleStepSize;
+
+    var initialSlope = getSlope(guessForT, mX1, mX2);
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    } else {
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
+    }
+  }
+};
+
+// CSS mapping
+BezierEasing.css = {
+  "ease":        BezierEasing.ease      = BezierEasing(0.25, 0.1, 0.25, 1.0),
+  "linear":      BezierEasing.linear    = BezierEasing(0.00, 0.0, 1.00, 1.0),
+  "ease-in":     BezierEasing.easeIn    = BezierEasing(0.42, 0.0, 1.00, 1.0),
+  "ease-out":    BezierEasing.easeOut   = BezierEasing(0.00, 0.0, 0.58, 1.0),
+  "ease-in-out": BezierEasing.easeInOut = BezierEasing(0.42, 0.0, 0.58, 1.0)
+};
+
+module.exports = BezierEasing;
+
+},{}],25:[function(_dereq_,module,exports){
+/*! mojo - 0.1.6 - Bernard McManus - strict-hotfix - g727d74 - 2014-10-16 */
+var _MOJO={},MOJO={};_MOJO.Shared=function(a,b){function c(a){return a.length}function d(b){return a.keys(b)}function e(a){return b.prototype.shift.call(a)}function f(a){return a instanceof b?a:a!==i?[a]:[]}function g(a,b){return{get:a,set:b,configurable:!0}}function h(a){return(a||{})[j]?a[j]:a}var i,j="handleMOJO";return{length:c,keys:d,shift:e,ensureArray:f,descriptor:g,getHandlerFunc:h}}(Object,Array),_MOJO.EventHandler=function(a){function b(a,b,c){var e=this;e.handler=a,e.context=b,e.active=!0,e.callback=function(){},e.args=d(c)}var c=a.Shared,d=c.ensureArray;return b.prototype={invoke:function(a,b){var c=this,e=c.handler;if(c.active&&!a.isBreak&&!a.shouldSkip(e)){var f=c.args.concat(d(b));f.unshift(a),e.apply(c.context,f),c.callback(a,e)}}},b}(_MOJO),_MOJO.Event=function(a,b){function c(b,c){var d=this;d.isBreak=e,d.cancelBubble=e,d.defaultPrevented=e,d.skipHandlers=[],d.target=b,d.type=c,d.timeStamp=a.now()}var d=!0,e=!1,f=b.Shared,g=f.ensureArray,h=f.getHandlerFunc;return c.prototype={skip:function(a){var b=this.skipHandlers;g(a).forEach(function(a){b.push(h(a))})},shouldSkip:function(a){return this.skipHandlers.indexOf(a)>=0},"break":function(){this.isBreak=d},preventDefault:function(){this.defaultPrevented=d},stopPropagation:function(){this.cancelBubble=d}},c}(Date,_MOJO),_MOJO.When=function(a,b,c){function d(a,b){return l(a).map(function(a){return a.handler}).indexOf(b)}function e(a,c){(a instanceof b?a:a.split(" ")).forEach(c)}function f(a,b){return a===b?null:a}var g=c.Shared,h=c.EventHandler,i=c.Event,j=g.keys,k=g.shift,l=g.ensureArray,m=g.length,n=g.getHandlerFunc,o={once:function(){var a=this,b=a._when(arguments);return b.forEach(function(a){a.callback=function(){this.active=!1}}),a},when:function(){var a=this;return a._when(arguments),a},_when:function(a){var b=this,c=k(a),d=m(a)>1?k(a):d,g=[],i=k(a),j=n(i),l=f(i,j);return e(c,function(a,c){g.push(new h(j,l,d)),b._addHandler(a,g[c])}),g},happen:function(a,b){var c=this;return a=c._ensureEType(a),e(a,function(a){var d=c._getHandlers(a,!0),e=new i(c,a);d.filter(function(a){return a.invoke(e,b),!a.active}).forEach(function(b){c._removeHandler(c._getHandlers(a),b.handler)})}),c},dispel:function(a,b){var c=this,d=c._getHandlers(),f=n(b);return a=c._ensureEType(a),e(a,function(a){f?c._removeHandler(d[a],f):delete d[a]}),c},_ensureEType:function(a){return a||j(this._getHandlers()).join(" ")},_getHandlers:function(b,c){var d=this,e=d.handlers=d.handlers||{},f=b?e[b]=e[b]||[]:e;return c?b?f.slice():a.create(f):f},_addHandler:function(a,b){var c=this;c._getHandlers(a).push(b)},_removeHandler:function(a,b){var c=d(a,b);c>=0&&a.splice(c,1)}};return o}(Object,Array,_MOJO),MOJO=function(a){function b(a){a=a||{};var c=this;b.Each(a,function(a,b){c[b]=a}),b.Construct(c)}var c=b.prototype=Object.create(a.When);return c.each=function(a){var c=this;return b.Each(c,a,c.keys),c},c.set=function(a,b){var c=this;return c[a]=b,c.happen("set",a),c},c.remove=function(a){var b=this;return delete b[a],b.happen("remove",a),b},b}(_MOJO),MOJO.Each=function(a){function b(a,b,c){(c||d(a)).forEach(function(c,d){b(a[c],c,d)})}var c=a.Shared,d=c.keys;return b}(_MOJO),MOJO.Create=function(a,b){function c(c){var d=a.create(b.prototype);return b.Each(c,function(a,b){d[b]=a}),d}return c}(Object,MOJO),MOJO.Construct=function(a,b){function c(b){var c={};a.defineProperties(b,{handlers:{get:function(){return c},set:function(a){c=a},configurable:!0},keys:f(function(){return e(b)}),length:f(function(){return g(b.keys)}),handleMOJO:{value:(b.handleMOJO||function(){}).bind(b),configurable:!0}})}var d=b.Shared,e=d.keys,f=d.descriptor,g=d.length;return c}(Object,_MOJO),function(a){"object"==typeof exports?module.exports=a:window.MOJO=a}(MOJO);
+},{}],26:[function(_dereq_,module,exports){
+(function (global){
+/*! wee-promise - 1.0.6 - Bernard McManus - 4a1cdaa - 2016-10-25 */
+
+(function(global,UNDEFINED) {
+"use strict";
+
+function Stack() {
+	var that = this;
+	that.q = [];
+	that.i = 0;
+	that.len = 0;
+}
+
+Stack.prototype.put = function(element) {
+	var that = this;
+	that.q[that.len] = element;
+	that.len++;
+};
+
+Stack.prototype.get = function() {
+	var that = this,
+		element = that.q[that.i];
+	that.i++;
+	if (that.i >= that.len) {
+		that.q.length = that.i = that.len = 0;
+	}
+	return element;
+};
+
+var asyncProvider;
+
+if (global.setImmediate) {
+	asyncProvider = setImmediate;
+} else if (global.MessageChannel) {
+	asyncProvider = (function() {
+		var stack = new Stack(),
+			channel = new MessageChannel();
+		channel.port1.onmessage = function() {
+			/* jshint -W084 */
+			var fn;
+			while (fn = stack.get()) {
+				fn();
+			}
+		};
+		return function(cb) {
+			stack.put(cb);
+			channel.port2.postMessage(0);
+		};
+	}());
+} else {
+	asyncProvider = setTimeout;
+}
+
+WeePromise.async = function(cb) {
+	asyncProvider(cb);
+};
+
+
+var PENDING = 0;
+var RESOLVED = 1;
+var REJECTED = 2;
+
+function WeePromise(resolver) {
+	var that = this;
+	var one = getSingleCallable(function(action, value) {
+		action(that, value);
+	});
+
+	that._state = PENDING;
+	that._stack = new Stack();
+	that.resolve = function(value) {
+		one($resolve, value);
+		return that;
+	};
+	that.reject = function(reason) {
+		one($reject, reason);
+		return that;
+	};
+
+	if (resolver) {
+		try {
+			resolver(that.resolve, that.reject);
+		}
+		catch(err) {
+			that.reject(err);
+		}
+	}
+}
+
+WeePromise.prototype.onresolved = function(value) {
+	return value;
+};
+
+WeePromise.prototype.onrejected = function(reason) {
+	throw reason;
+};
+
+WeePromise.prototype._flush = function() {
+	var that = this;
+	var state = that._state;
+
+	if (state) {
+		WeePromise.async(function() {
+			(function flush() {
+				var promise = that._stack.get();
+				if (promise) {
+					var fn = (state === RESOLVED ? promise.onresolved : promise.onrejected);
+					try {
+						$resolve(promise, fn(that._value));
+					}
+					catch(err) {
+						$reject(promise, err);
+					}
+					flush();
+				}
+			}());
+		});
+	}
+};
+
+WeePromise.prototype.then = function(onresolved, onrejected) {
+	var that = this;
+	var promise = new WeePromise();
+
+	if (isFunction(onresolved)) {
+		promise.onresolved = onresolved;
+	}
+	if (isFunction(onrejected)) {
+		promise.onrejected = onrejected;
+	}
+
+	that._stack.put(promise);
+	that._flush();
+	return promise;
+};
+
+WeePromise.prototype.catch = function(onrejected) {
+	return this.then(UNDEFINED, onrejected);
+};
+
+WeePromise.resolve = function(result) {
+	return new WeePromise().resolve(result);
+};
+
+WeePromise.reject = function(reason) {
+	return new WeePromise().reject(reason);
+};
+
+WeePromise.all = function(collection) {
+	var promise = new WeePromise();
+	var result = [];
+	var got = 0;
+	var need = collection.length;
+
+	collection.forEach(function(child, i) {
+		unwrap(child, function(state, value) {
+			got++;
+			result[i] = value;
+			if (state === REJECTED) {
+				promise.reject(value);
+			} else if (got === need) {
+				promise.resolve(result);
+			}
+		});
+	});
+
+	return promise;
+};
+
+WeePromise.race = function(collection) {
+	var promise = new WeePromise();
+	collection.forEach(function(child) {
+		unwrap(child, function(state, value) {
+			setState(promise, state, value);
+		});
+	});
+	return promise;
+};
+
+function $resolve(context, value) {
+	if (value === context) {
+		$reject(context, new TypeError('A promise cannot be resolved with itself.'));
+	} else {
+		unwrap(value, function(state, value) {
+			setState(context, state, value);
+		});
+	}
+}
+
+function $reject(context, reason) {
+	setState(context, REJECTED, reason);
+}
+
+function setState(context, state, value) {
+	if (context._state != state) {
+		context._value = value;
+		context._state = state;
+		context._flush();
+	}
+}
+
+function unwrap(value, cb) {
+	if (value instanceof WeePromise && value._state) {
+		// non-pending WeePromise instances
+		cb(value._state, value._value);
+	} else if (isObject(value) || isFunction(value)) {
+		// objects and functions
+		var then;
+		var one = getSingleCallable(function(fn, args) {
+			fn.apply(UNDEFINED, args);
+		});
+		try {
+			then = value.then;
+			if (isFunction(then)) {
+				then.call(value,
+					function(_value) {
+						one(unwrap, [_value, cb]);
+					},
+					function(_reason) {
+						one(cb, [REJECTED, _reason]);
+					}
+				);
+			} else {
+				one(cb, [RESOLVED, value]);
+			}
+		}
+		catch(err) {
+			one(cb, [REJECTED, err]);
+		}
+	} else {
+		// all other values
+		cb(RESOLVED, value);
+	}
+}
+
+function getSingleCallable(cb) {
+	var called;
+	return function() {
+		if (!called) {
+			cb.apply(UNDEFINED, arguments);
+			called = true;
+		}
+	};
+}
+
+function isObject(subject) {
+	return subject && typeof subject === 'object';
+}
+
+function isFunction(subject) {
+	return typeof subject === 'function';
+}
+
+if (typeof exports == "object") {
+module.exports = WeePromise;
+} else {
+global.WeePromise = WeePromise;
+}
+}(typeof window=="object"?window:global));
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+
+},{}]},{},[9])(9)
 });
 //# sourceMappingURL=hx.js.map

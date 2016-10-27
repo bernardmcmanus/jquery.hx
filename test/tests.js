@@ -2,32 +2,43 @@
 
   'use strict';
 
+  window.Promise = window.Promise || WeePromise;
+
   describe('jQuery', function() {
     it('should have hx', function() {
       expect($).to.have.property('hx');
     });
+
     it( 'should play nice with ES2015 modules' , function(){
-      var $iframe = $('<iframe src="about:blank"></iframe>');
-      return new Promise(function( resolve ){
+      var $iframe = $('<iframe sandbox="allow-same-origin allow-scripts"></iframe>');
+      return new Promise(function( resolve, reject ){
         $iframe[0].onload = resolve;
+        $iframe[0].onerror = reject;
         $iframe
           .css( 'display' , 'none' )
+          .attr( 'src' , 'about:blank' )
           .appendTo( document.body );
       })
       .then(function(){
-        var
-          $window = $iframe[0].contentWindow,
-          $document = $window.document,
-          script = $document.createElement( 'script' );
-        return new Promise(function( resolve ){
-          script.onload = resolve;
-          script.src = 'http://localhost:9001/test/hx-module.compiled.js';
-          $document.head.appendChild( script );
-        })
-        .then(function(){
-          expect($window.$).to.have.property('hx');
-          $iframe.remove();
-        });
+        return $.ajax({ url: 'http://localhost:9001/test/hx-module.compiled.js', dataType: 'text' })
+          .promise()
+          .fail(function() {
+            throw new Error('Failed to load hx-module.compiled.js');
+          });
+      })
+      .then(function(compiled){
+        var $window = $iframe[0].contentWindow;
+        var $document = $window.document;
+        var script = $document.createElement( 'script' );
+
+        // No idea why this is craziness is necessary, but essentially
+        // $window.hxModuleCompiled(3) returns the function exported by
+        // hx-module.js, when is then called to set window.$ and $.hx
+        $(script).text( 'window.hxModuleCompiled = ' + compiled );
+        $document.body.appendChild( script );
+        $window.hxModuleCompiled(3)();
+        expect($window.$).to.have.property('hx');
+        $iframe.remove();
       });
     });
   });

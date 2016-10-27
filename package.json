@@ -4,13 +4,19 @@
   "description": "A hardware-accelerated animation library for mobile and desktop.",
   "main": "dist/hx.js",
   "scripts": {
-    "postinstall": "bower install"
+    "build": "grunt",
+    "test": "grunt test"
   },
   "config": {
     "banner": "/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.data.gitinfo.local.branch.current.shortSHA %> - <%= grunt.template.today('yyyy-mm-dd') %> */"
   },
   "browserify-shim": {
-    "bower_components/jquery/dist/jquery.js": "$"
+    "node_modules/jquery/dist/jquery.js": "$"
+  },
+  "dependencies": {
+    "bezier-easing": "https://github.com/gre/bezier-easing/archive/5479c4a1c3f1296ad1e2d86776a146b14c539ae3.tar.gz",
+    "mojo": "https://github.com/elnarddogg/MOJO/archive/3ce79fcbb9804fa1e73cefb7433328dbb1cfaaba.tar.gz",
+    "wee-promise": "^1.0.8"
   },
   "devDependencies": {
     "babelify": "^6.3.0",
@@ -18,7 +24,7 @@
     "browserify": "^13.0.0",
     "browserify-derequire": "^0.9.4",
     "browserify-shim": "^3.8.12",
-    "chai": "^1.10.0",
+    "chai": "^2.3.0",
     "colors": "^1.1.2",
     "fs-extra": "0.9.1",
     "grunt": "~0.4.2",
@@ -31,7 +37,7 @@
     "grunt-exorcise": "^2.1.0",
     "grunt-gitinfo": "~0.1.7",
     "grunt-karma": "^0.10.1",
-    "grunt-update-json": "^0.2.2",
+    "jquery": "^2.2.4",
     "karma": "^0.12.31",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^0.1.7",
@@ -39,9 +45,13 @@
     "karma-mocha-reporter": "^0.3.2",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon-chai": "^0.3.0",
-    "mocha": "^2.1.0",
-    "sinon": "^1.12.2",
-    "sinon-chai": "^2.6.0"
+    "lodash": "^4.16.4",
+    "mocha": "^2.5.3",
+    "phantomjs": "^1.9.20",
+    "requirejs": "^2.3.2",
+    "sinon": "^1.17.6",
+    "sinon-chai": "^2.6.0",
+    "urlrouter": "^0.5.4"
   },
   "repository": {
     "type": "git",
