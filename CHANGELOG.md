@@ -1,3 +1,8 @@
+1.2.0
+=====
+- Removed bower support
+- Added CI
+
 1.1.0
 =====
 - Added support for Browserify
