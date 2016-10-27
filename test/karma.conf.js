@@ -1,6 +1,9 @@
 // Karma configuration
 // Generated on Tue Sep 02 2014 23:03:20 GMT+0200 (CEST)
 
+const minimist = require('minimist');
+const argv = minimist(process.argv);
+
 module.exports = function(config) {
   config.set({
     basePath: '../',
@@ -23,12 +26,9 @@ module.exports = function(config) {
     ],
     port: 9876,
     colors: true,
-    // config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
-    // optionally run in chrome as well as phantomjs... but why??
     browsers: [
-      'Chrome',
-      //'PhantomJS'
+      argv.chrome ? 'Chrome' : 'PhantomJS'
     ]
   });
 };

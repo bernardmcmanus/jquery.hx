@@ -1,6 +1,6 @@
-var helper = require( 'shared/helper' );
 var BezierEasing = require( 'bezier-easing' );
 var VendorPatch = require( 'shared/vendorPatch' );
+var helper = require( 'shared/helper' );
 
 var UNCLAMPED = VendorPatch.unclamped();
 

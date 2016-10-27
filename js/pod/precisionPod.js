@@ -1,6 +1,6 @@
 var MOJO = require( 'mojo' );
 var helper = require( 'shared/helper' );
-var SubscriberMOJO = require( 'pod/SubscriberMOJO' );
+var SubscriberMOJO = require( 'pod/subscriberMOJO' );
 
 var TIMING = 'timing';
 var TIMING_CALLBACK = 'timingCallback';

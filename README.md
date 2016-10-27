@@ -1,8 +1,6 @@
-# jquery.hx
+# jquery.hx [![travis-ci](https://travis-ci.org/bernardmcmanus/jquery.hx.svg)](https://travis-ci.org/bernardmcmanus/jquery.hx)
 
-#### A hardware-accelerated animation library for mobile and desktop.
-
-=====
+> A hardware-accelerated animation library for mobile and desktop.
 
 ## Overview
 

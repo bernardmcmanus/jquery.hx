@@ -1,4 +1,4 @@
-var AnimationPod = require( 'pod/AnimationPod' );
+var AnimationPod = require( 'pod/animationPod' );
 var PrecisionPod = require( 'pod/precisionPod' );
 var PromisePod = require( 'pod/promisePod' );
 

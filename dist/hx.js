@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /*! jquery.hx - 1.1.0 - Bernard McManus - ede565f - 2016-10-27 */
+=======
+/*! jquery.hx - 1.1.1 - Bernard McManus - f294d2d - 2016-10-27 */
+>>>>>>> 2880c1c... build / publish with travis
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.hxManager = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
@@ -102,7 +106,7 @@ function getPropertyName( type , property ) {
     return (property === 'value' ? type : property);
 }
 
-},{"domNode/cssProperty":2,"domNode/styleDefinition":5,"mojo":25,"shared/helper":22}],2:[function(_dereq_,module,exports){
+},{"domNode/cssProperty":2,"domNode/styleDefinition":5,"mojo":24,"shared/helper":21}],2:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var StyleDefinition = _dereq_( 'domNode/styleDefinition' );
 
@@ -216,7 +220,7 @@ function parseExpression( exp ) {
     return out;
 }
 
-},{"domNode/styleDefinition":5,"shared/helper":22}],3:[function(_dereq_,module,exports){
+},{"domNode/styleDefinition":5,"shared/helper":21}],3:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var Queue = _dereq_( 'domNode/queue' );
@@ -443,7 +447,7 @@ function getBoundModule( module , context ) {
     return scope;
 }
 
-},{"domNode/componentMOJO":1,"domNode/cssProperty":2,"domNode/queue":4,"domNode/transitionMOJO":6,"mojo":25,"shared/config":20,"shared/helper":22,"shared/vendorPatch":23}],4:[function(_dereq_,module,exports){
+},{"domNode/componentMOJO":1,"domNode/cssProperty":2,"domNode/queue":4,"domNode/transitionMOJO":6,"mojo":24,"shared/config":19,"shared/helper":21,"shared/vendorPatch":22}],4:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 
 module.exports = Queue;
@@ -513,7 +517,7 @@ function length( subject ) {
     return subject.length;
 }
 
-},{"shared/helper":22}],5:[function(_dereq_,module,exports){
+},{"shared/helper":21}],5:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var PropertyMap = _dereq_( 'shared/config' ).properties;
 
@@ -576,7 +580,7 @@ var Properties = {
     }
 };
 
-},{"shared/config":20,"shared/helper":22}],6:[function(_dereq_,module,exports){
+},{"shared/config":19,"shared/helper":21}],6:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
@@ -625,7 +629,7 @@ function getTransitionString( type , duration , easing , delay ) {
     return (type + ' ' + duration + 'ms ' + easing + ' ' + delay + 'ms');
 }
 
-},{"mojo":25,"shared/easing":21,"shared/helper":22,"shared/vendorPatch":23}],7:[function(_dereq_,module,exports){
+},{"mojo":24,"shared/easing":20,"shared/helper":21,"shared/vendorPatch":22}],7:[function(_dereq_,module,exports){
 var hxManager = _dereq_( 'hxManager' );
 var helper = _dereq_( 'shared/helper' );
 
@@ -649,11 +653,11 @@ module.exports = function() {
     return out;
 };
 
-},{"hxManager":8,"shared/helper":22}],8:[function(_dereq_,module,exports){
+},{"hxManager":8,"shared/helper":21}],8:[function(_dereq_,module,exports){
 var Promise = _dereq_( 'wee-promise' );
 var helper = _dereq_( 'shared/helper' );
 var DomNodeFactory = _dereq_( 'domNode/domNodeFactory' );
-var PodFactory = _dereq_( 'pod/PodFactory' );
+var PodFactory = _dereq_( 'pod/podFactory' );
 var Bean = _dereq_( 'pod/bean' );
 var IteratorMOJO = _dereq_( 'pod/iteratorMOJO' );
 
@@ -885,7 +889,7 @@ function eachNode( hxm , callback ) {
     return hxm;
 }
 
-},{"domNode/domNodeFactory":3,"pod/PodFactory":11,"pod/bean":13,"pod/iteratorMOJO":14,"shared/helper":22,"wee-promise":26}],9:[function(_dereq_,module,exports){
+},{"domNode/domNodeFactory":3,"pod/bean":11,"pod/iteratorMOJO":12,"pod/podFactory":13,"shared/helper":21,"wee-promise":25}],9:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
 var StyleDefinition = _dereq_( 'domNode/styleDefinition' );
@@ -1073,7 +1077,7 @@ helper.each( beziers , function( points , name ) {
 
 $(document).trigger( 'hx.ready' );
 
-},{"domNode/styleDefinition":5,"fn.hx":7,"hxManager":8,"pod/timingMOJO":18,"shared/bezier":19,"shared/easing":21,"shared/helper":22,"shared/vendorPatch":23}],10:[function(_dereq_,module,exports){
+},{"domNode/styleDefinition":5,"fn.hx":7,"hxManager":8,"pod/timingMOJO":17,"shared/bezier":18,"shared/easing":20,"shared/helper":21,"shared/vendorPatch":22}],10:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var SubscriberMOJO = _dereq_( 'pod/subscriberMOJO' );
@@ -1285,68 +1289,7 @@ AnimationPod.prototype = MOJO.Create({
     }
 });
 
-},{"mojo":25,"pod/subscriberMOJO":17,"shared/helper":22}],11:[function(_dereq_,module,exports){
-var AnimationPod = _dereq_( 'pod/AnimationPod' );
-var PrecisionPod = _dereq_( 'pod/precisionPod' );
-var PromisePod = _dereq_( 'pod/promisePod' );
-
-module.exports = function PodFactory( node , type ) {
-    switch (type) {
-        case AnimationPod.type:
-            return new AnimationPod( node );
-        case PrecisionPod.type:
-            return new PrecisionPod();
-        case PromisePod.type:
-            return new PromisePod();
-    }
-};
-
-},{"pod/AnimationPod":10,"pod/precisionPod":15,"pod/promisePod":16}],12:[function(_dereq_,module,exports){
-var MOJO = _dereq_( 'mojo' );
-var helper = _dereq_( 'shared/helper' );
-var TimingMOJO = _dereq_( 'pod/timingMOJO' );
-
-var TIMING = 'timing';
-
-module.exports = SubscriberMOJO;
-
-function SubscriberMOJO() {
-    var that = this;
-    that.time = null;
-    that.startTime = null;
-    MOJO.Construct( that );
-    helper.defProp( that , 'subscribers' , helper.descriptor(
-        function() {
-            return helper.length( that.handlers[ TIMING ] || [] );
-        }
-    ));
-    that[TIMING] = that[TIMING].bind( that );
-}
-
-SubscriberMOJO.prototype = MOJO.Create({
-    constructor: SubscriberMOJO,
-    timing: function( e , timestamp ) {
-        var that = this;
-        var diff = timestamp - (that.time || timestamp);
-        that.time = timestamp;
-        if (!that.startTime) {
-            that.startTime = timestamp;
-        }
-        var elapsed = timestamp - that.startTime;
-        that.happen( TIMING , [ elapsed , diff ]);
-        if (that.subscribers < 1) {
-            that.destroy();
-        }
-    },
-    subscribe: function() {
-        TimingMOJO.subscribe( this[TIMING] );
-    },
-    destroy: function() {
-        TimingMOJO.unsubscribe( this[TIMING] );
-    }
-});
-
-},{"mojo":25,"pod/timingMOJO":18,"shared/helper":22}],13:[function(_dereq_,module,exports){
+},{"mojo":24,"pod/subscriberMOJO":16,"shared/helper":21}],11:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var Config = _dereq_( 'shared/config' );
@@ -1509,7 +1452,7 @@ function getCompiledData( seed , node , index ) {
     };
 }
 
-},{"mojo":25,"shared/config":20,"shared/helper":22}],14:[function(_dereq_,module,exports){
+},{"mojo":24,"shared/config":19,"shared/helper":21}],12:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var Easing = _dereq_( 'shared/easing' );
@@ -1660,10 +1603,26 @@ IteratorMOJO.prototype = MOJO.Create({
     }
 });
 
-},{"mojo":25,"pod/bean":13,"shared/easing":21,"shared/helper":22}],15:[function(_dereq_,module,exports){
+},{"mojo":24,"pod/bean":11,"shared/easing":20,"shared/helper":21}],13:[function(_dereq_,module,exports){
+var AnimationPod = _dereq_( 'pod/animationPod' );
+var PrecisionPod = _dereq_( 'pod/precisionPod' );
+var PromisePod = _dereq_( 'pod/promisePod' );
+
+module.exports = function PodFactory( node , type ) {
+    switch (type) {
+        case AnimationPod.type:
+            return new AnimationPod( node );
+        case PrecisionPod.type:
+            return new PrecisionPod();
+        case PromisePod.type:
+            return new PromisePod();
+    }
+};
+
+},{"pod/animationPod":10,"pod/precisionPod":14,"pod/promisePod":15}],14:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
-var SubscriberMOJO = _dereq_( 'pod/SubscriberMOJO' );
+var SubscriberMOJO = _dereq_( 'pod/subscriberMOJO' );
 
 var TIMING = 'timing';
 var TIMING_CALLBACK = 'timingCallback';
@@ -1827,7 +1786,7 @@ PrecisionPod.prototype = MOJO.Create({
     }
 });
 
-},{"mojo":25,"pod/SubscriberMOJO":12,"shared/helper":22}],16:[function(_dereq_,module,exports){
+},{"mojo":24,"pod/subscriberMOJO":16,"shared/helper":21}],15:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var Promise = _dereq_( 'wee-promise' );
 var helper = _dereq_( 'shared/helper' );
@@ -1862,9 +1821,52 @@ PromisePod.prototype = MOJO.Create($.extend( {} , helper.create( Promise.prototy
     }
 }));
 
-},{"mojo":25,"shared/helper":22,"wee-promise":26}],17:[function(_dereq_,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12,"mojo":25,"pod/timingMOJO":18,"shared/helper":22}],18:[function(_dereq_,module,exports){
+},{"mojo":24,"shared/helper":21,"wee-promise":25}],16:[function(_dereq_,module,exports){
+var MOJO = _dereq_( 'mojo' );
+var helper = _dereq_( 'shared/helper' );
+var TimingMOJO = _dereq_( 'pod/timingMOJO' );
+
+var TIMING = 'timing';
+
+module.exports = SubscriberMOJO;
+
+function SubscriberMOJO() {
+    var that = this;
+    that.time = null;
+    that.startTime = null;
+    MOJO.Construct( that );
+    helper.defProp( that , 'subscribers' , helper.descriptor(
+        function() {
+            return helper.length( that.handlers[ TIMING ] || [] );
+        }
+    ));
+    that[TIMING] = that[TIMING].bind( that );
+}
+
+SubscriberMOJO.prototype = MOJO.Create({
+    constructor: SubscriberMOJO,
+    timing: function( e , timestamp ) {
+        var that = this;
+        var diff = timestamp - (that.time || timestamp);
+        that.time = timestamp;
+        if (!that.startTime) {
+            that.startTime = timestamp;
+        }
+        var elapsed = timestamp - that.startTime;
+        that.happen( TIMING , [ elapsed , diff ]);
+        if (that.subscribers < 1) {
+            that.destroy();
+        }
+    },
+    subscribe: function() {
+        TimingMOJO.subscribe( this[TIMING] );
+    },
+    destroy: function() {
+        TimingMOJO.unsubscribe( this[TIMING] );
+    }
+});
+
+},{"mojo":24,"pod/timingMOJO":17,"shared/helper":21}],17:[function(_dereq_,module,exports){
 var MOJO = _dereq_( 'mojo' );
 var helper = _dereq_( 'shared/helper' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
@@ -1907,10 +1909,10 @@ function step( timestamp ) {
     }
 }
 
-},{"mojo":25,"shared/helper":22,"shared/vendorPatch":23}],19:[function(_dereq_,module,exports){
-var helper = _dereq_( 'shared/helper' );
+},{"mojo":24,"shared/helper":21,"shared/vendorPatch":22}],18:[function(_dereq_,module,exports){
 var BezierEasing = _dereq_( 'bezier-easing' );
 var VendorPatch = _dereq_( 'shared/vendorPatch' );
+var helper = _dereq_( 'shared/helper' );
 
 var UNCLAMPED = VendorPatch.unclamped();
 
@@ -1956,7 +1958,7 @@ var Definitions = {
     default: 'ease'
 };
 
-},{"bezier-easing":24,"shared/helper":22,"shared/vendorPatch":23}],20:[function(_dereq_,module,exports){
+},{"bezier-easing":23,"shared/helper":21,"shared/vendorPatch":22}],19:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 
 module.exports.buffer = ((1000 / 60) * 2);
@@ -1985,7 +1987,7 @@ module.exports.defaults = {
     done: function() {}
 };
 
-},{"shared/helper":22}],21:[function(_dereq_,module,exports){
+},{"shared/helper":21}],20:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 var Bezier = _dereq_( 'shared/bezier' );
 
@@ -2000,7 +2002,7 @@ module.exports = function Easing( definition ) {
     return out;
 };
 
-},{"shared/bezier":19,"shared/helper":22}],22:[function(_dereq_,module,exports){
+},{"shared/bezier":18,"shared/helper":21}],21:[function(_dereq_,module,exports){
 var exports = module.exports;
 
 function keys( subject ) {
@@ -2144,7 +2146,7 @@ exports.test = function( subject , testval ) {
     return subject.test( testval );
 };
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 var helper = _dereq_( 'shared/helper' );
 
 var OTHER = 'other';
@@ -2230,7 +2232,7 @@ function isAndroidNative( os ) {
     return (os === 'android' && !helper.test( /(chrome|firefox)/i , USER_AGENT ));
 }
 
-},{"shared/helper":22}],24:[function(_dereq_,module,exports){
+},{"shared/helper":21}],23:[function(_dereq_,module,exports){
 /**
  * BezierEasing - use bezier curve for transition easing function
  * by Gaëtan Renaudeau 2014 - 2015 – MIT License
@@ -2411,10 +2413,10 @@ BezierEasing.css = {
 
 module.exports = BezierEasing;
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 /*! mojo - 0.1.6 - Bernard McManus - strict-hotfix - g727d74 - 2014-10-16 */
 var _MOJO={},MOJO={};_MOJO.Shared=function(a,b){function c(a){return a.length}function d(b){return a.keys(b)}function e(a){return b.prototype.shift.call(a)}function f(a){return a instanceof b?a:a!==i?[a]:[]}function g(a,b){return{get:a,set:b,configurable:!0}}function h(a){return(a||{})[j]?a[j]:a}var i,j="handleMOJO";return{length:c,keys:d,shift:e,ensureArray:f,descriptor:g,getHandlerFunc:h}}(Object,Array),_MOJO.EventHandler=function(a){function b(a,b,c){var e=this;e.handler=a,e.context=b,e.active=!0,e.callback=function(){},e.args=d(c)}var c=a.Shared,d=c.ensureArray;return b.prototype={invoke:function(a,b){var c=this,e=c.handler;if(c.active&&!a.isBreak&&!a.shouldSkip(e)){var f=c.args.concat(d(b));f.unshift(a),e.apply(c.context,f),c.callback(a,e)}}},b}(_MOJO),_MOJO.Event=function(a,b){function c(b,c){var d=this;d.isBreak=e,d.cancelBubble=e,d.defaultPrevented=e,d.skipHandlers=[],d.target=b,d.type=c,d.timeStamp=a.now()}var d=!0,e=!1,f=b.Shared,g=f.ensureArray,h=f.getHandlerFunc;return c.prototype={skip:function(a){var b=this.skipHandlers;g(a).forEach(function(a){b.push(h(a))})},shouldSkip:function(a){return this.skipHandlers.indexOf(a)>=0},"break":function(){this.isBreak=d},preventDefault:function(){this.defaultPrevented=d},stopPropagation:function(){this.cancelBubble=d}},c}(Date,_MOJO),_MOJO.When=function(a,b,c){function d(a,b){return l(a).map(function(a){return a.handler}).indexOf(b)}function e(a,c){(a instanceof b?a:a.split(" ")).forEach(c)}function f(a,b){return a===b?null:a}var g=c.Shared,h=c.EventHandler,i=c.Event,j=g.keys,k=g.shift,l=g.ensureArray,m=g.length,n=g.getHandlerFunc,o={once:function(){var a=this,b=a._when(arguments);return b.forEach(function(a){a.callback=function(){this.active=!1}}),a},when:function(){var a=this;return a._when(arguments),a},_when:function(a){var b=this,c=k(a),d=m(a)>1?k(a):d,g=[],i=k(a),j=n(i),l=f(i,j);return e(c,function(a,c){g.push(new h(j,l,d)),b._addHandler(a,g[c])}),g},happen:function(a,b){var c=this;return a=c._ensureEType(a),e(a,function(a){var d=c._getHandlers(a,!0),e=new i(c,a);d.filter(function(a){return a.invoke(e,b),!a.active}).forEach(function(b){c._removeHandler(c._getHandlers(a),b.handler)})}),c},dispel:function(a,b){var c=this,d=c._getHandlers(),f=n(b);return a=c._ensureEType(a),e(a,function(a){f?c._removeHandler(d[a],f):delete d[a]}),c},_ensureEType:function(a){return a||j(this._getHandlers()).join(" ")},_getHandlers:function(b,c){var d=this,e=d.handlers=d.handlers||{},f=b?e[b]=e[b]||[]:e;return c?b?f.slice():a.create(f):f},_addHandler:function(a,b){var c=this;c._getHandlers(a).push(b)},_removeHandler:function(a,b){var c=d(a,b);c>=0&&a.splice(c,1)}};return o}(Object,Array,_MOJO),MOJO=function(a){function b(a){a=a||{};var c=this;b.Each(a,function(a,b){c[b]=a}),b.Construct(c)}var c=b.prototype=Object.create(a.When);return c.each=function(a){var c=this;return b.Each(c,a,c.keys),c},c.set=function(a,b){var c=this;return c[a]=b,c.happen("set",a),c},c.remove=function(a){var b=this;return delete b[a],b.happen("remove",a),b},b}(_MOJO),MOJO.Each=function(a){function b(a,b,c){(c||d(a)).forEach(function(c,d){b(a[c],c,d)})}var c=a.Shared,d=c.keys;return b}(_MOJO),MOJO.Create=function(a,b){function c(c){var d=a.create(b.prototype);return b.Each(c,function(a,b){d[b]=a}),d}return c}(Object,MOJO),MOJO.Construct=function(a,b){function c(b){var c={};a.defineProperties(b,{handlers:{get:function(){return c},set:function(a){c=a},configurable:!0},keys:f(function(){return e(b)}),length:f(function(){return g(b.keys)}),handleMOJO:{value:(b.handleMOJO||function(){}).bind(b),configurable:!0}})}var d=b.Shared,e=d.keys,f=d.descriptor,g=d.length;return c}(Object,_MOJO),function(a){"object"==typeof exports?module.exports=a:window.MOJO=a}(MOJO);
-},{}],26:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 (function (global){
 /*! wee-promise - 1.0.6 - Bernard McManus - 4a1cdaa - 2016-10-25 */
 

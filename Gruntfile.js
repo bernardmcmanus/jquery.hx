@@ -1,6 +1,9 @@
 module.exports = function( grunt ) {
   var Router = require( 'urlrouter' );
 
+  // always print a stack trace if something goes wrong
+  grunt.option('stack', true);
+
   grunt.initConfig({
     pkg: grunt.file.readJSON( 'package.json' ),
     jshint: {
@@ -108,7 +111,6 @@ module.exports = function( grunt ) {
 
   grunt.registerTask( 'default' , [
     'build',
-    'test',
     'uglify',
     'release-describe'
   ]);

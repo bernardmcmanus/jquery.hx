@@ -1,7 +1,7 @@
 var Promise = require( 'wee-promise' );
 var helper = require( 'shared/helper' );
 var DomNodeFactory = require( 'domNode/domNodeFactory' );
-var PodFactory = require( 'pod/PodFactory' );
+var PodFactory = require( 'pod/podFactory' );
 var Bean = require( 'pod/bean' );
 var IteratorMOJO = require( 'pod/iteratorMOJO' );
 

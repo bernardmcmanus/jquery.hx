@@ -4,14 +4,15 @@
   "description": "A hardware-accelerated animation library for mobile and desktop.",
   "main": "dist/hx.js",
   "scripts": {
-    "build": "grunt",
+    "prepublish": "grunt",
     "test": "grunt test"
+  },
+  "engines": {
+    "npm": ">=2",
+    "node": ">=4 <7"
   },
   "config": {
     "banner": "/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.data.gitinfo.local.branch.current.shortSHA %> - <%= grunt.template.today('yyyy-mm-dd') %> */"
-  },
-  "browserify-shim": {
-    "node_modules/jquery/dist/jquery.js": "$"
   },
   "dependencies": {
     "bezier-easing": "https://github.com/gre/bezier-easing/archive/5479c4a1c3f1296ad1e2d86776a146b14c539ae3.tar.gz",
@@ -23,12 +24,12 @@
     "bluebird": "^3.1.4",
     "browserify": "^13.0.0",
     "browserify-derequire": "^0.9.4",
-    "browserify-shim": "^3.8.12",
     "chai": "^2.3.0",
     "colors": "^1.1.2",
     "fs-extra": "0.9.1",
     "grunt": "~0.4.2",
     "grunt-browserify": "^4.0.1",
+    "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": ">=0.4.1",
     "grunt-contrib-connect": "~0.9.0",
     "grunt-contrib-jshint": "~0.6.3",
@@ -46,8 +47,9 @@
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon-chai": "^0.3.0",
     "lodash": "^4.16.4",
+    "minimist": "^1.2.0",
     "mocha": "^2.5.3",
-    "phantomjs": "^1.9.20",
+    "phantomjs": "^2.1.1",
     "requirejs": "^2.3.2",
     "sinon": "^1.17.6",
     "sinon-chai": "^2.6.0",
@@ -64,7 +66,7 @@
   "author": {
     "name": "Bernard McManus",
     "email": "bernard.mcmanus.iv@gmail.com",
-    "url": "http://github.com/elnarddogg"
+    "url": "http://github.com/bernardmcmanus"
   },
   "license": "MIT",
   "bugs": {
